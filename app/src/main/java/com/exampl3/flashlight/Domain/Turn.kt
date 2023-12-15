@@ -1,5 +1,7 @@
 package com.exampl3.flashlight.Domain
 
 class Turn {
-    fun turn(){}
+    fun turn(){
+        TODO("Чтото надо сделать")
+    }
 }

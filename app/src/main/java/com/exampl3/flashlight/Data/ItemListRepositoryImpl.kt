@@ -4,19 +4,27 @@ import com.exampl3.flashlight.Domain.Item
 import com.exampl3.flashlight.Domain.ItemListRepository
 
 object ItemListRepositoryImpl: ItemListRepository {
+    private val list = mutableListOf<Item>()
     override fun addItem(item: Item) {
-        TODO("Not yet implemented")
+        list.add(item)
     }
 
-    override fun changeItem(id: Int): Item {
-        TODO("Not yet implemented")
+    override fun changeItem(item: Item){
+        val oldElem = getItemId(item.id)
+        deleteItem(oldElem)
+        addItem(item)
+
     }
 
     override fun deleteItem(item: Item) {
-        TODO("Not yet implemented")
+        list.remove(item)
     }
 
     override fun getItemList(): List<Item> {
-        TODO("Not yet implemented")
+        return list.toList()
+    }
+
+    override fun getItemId(id: Int): Item {
+        return list.find { it.id == id }!!
     }
 }
