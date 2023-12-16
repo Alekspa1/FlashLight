@@ -7,7 +7,7 @@ object ItemListRepositoryImpl: ItemListRepository {
     private val list = mutableListOf<Item>()
     private var count = 0
     init {
-        for (i in 0..10){
+        for (i in 0..5){
             addItem(Item("Номер $i", true))
         }
     }
