@@ -4,5 +4,5 @@ import com.exampl3.flashlight.Data.Const
 
 data class Item(
     val name: String,
-    val change: Boolean,
+    val change: Boolean = true,
     var id: Int = Const.UNDIFINE_ID)
