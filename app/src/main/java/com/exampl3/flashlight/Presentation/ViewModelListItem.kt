@@ -30,8 +30,6 @@ class ViewModelListItem: ViewModel() {
         deleteItemList.deleteItem(item)
     }
     fun changeItem(item: Item){
-//        val oldItem = getItemId(item.id)
-//        deleteItem(oldItem)
         val newItem = item.copy(change = !item.change)
         changeItemList.changeItem(newItem)
     }

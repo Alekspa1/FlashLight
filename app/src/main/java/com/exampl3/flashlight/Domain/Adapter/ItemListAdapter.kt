@@ -11,16 +11,21 @@ import com.exampl3.flashlight.Domain.Item
 import com.exampl3.flashlight.R
 import com.exampl3.flashlight.databinding.ItemBinding
 
-class ItemListAdapter(private val onLongClickListener: onLongClick): ListAdapter<Item, ItemListAdapter.ViewHolder>(DiffCallback()) {
+class ItemListAdapter(private val onLongClickListener: onLongClick,
+                      private val onClickListener: onClick
+): ListAdapter<Item, ItemListAdapter.ViewHolder>(DiffCallback()) {
     class ViewHolder(view: View): RecyclerView.ViewHolder(view) {
         private val binding = ItemBinding.bind(view)
        private val context = view.context
         @SuppressLint("ResourceAsColor")
-        fun bind(item: Item, onClickListener: onLongClick){
+        fun bind(item: Item, onClickListener: onLongClick, onClick: onClick){
             binding.textItem.text = item.name
             binding.root.setOnLongClickListener {
                 onClickListener.onLongClick(item)
                 true
+            }
+            binding.root.setOnClickListener {
+                onClick.onClick(item.id)
             }
             when(item.change){
                 true-> binding.cardView
@@ -40,9 +45,14 @@ class ItemListAdapter(private val onLongClickListener: onLongClick): ListAdapter
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(getItem(position), onLongClickListener)
+        holder.bind(getItem(position), onLongClickListener, onClickListener)
     }
     interface onLongClick {
         fun onLongClick(item: Item)
+
+    }
+    interface onClick {
+        fun onClick(id: Int)
+
     }
 }
