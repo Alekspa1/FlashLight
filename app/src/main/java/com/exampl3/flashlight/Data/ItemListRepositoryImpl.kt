@@ -11,7 +11,7 @@ object ItemListRepositoryImpl: ItemListRepository {
     private var count = 0
     init {
         for (i in 0..5){
-            addItem(Item("Номер $i", true))
+            addItem(Item("Номер $i"))
         }
     }
     override fun addItem(item: Item) {
