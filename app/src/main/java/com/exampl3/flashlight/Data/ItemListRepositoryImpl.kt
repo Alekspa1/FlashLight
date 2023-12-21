@@ -9,11 +9,7 @@ object ItemListRepositoryImpl: ItemListRepository {
     private val listLD = MutableLiveData<List<Item>>()
     private val list = sortedSetOf<Item>({ p0, p1 -> p0.id.compareTo(p1.id) })
     private var count = 0
-    init {
-        for (i in 0..5){
-            addItem(Item("Номер $i"))
-        }
-    }
+
     override fun addItem(item: Item) {
         if(item.id == Const.UNDIFINE_ID){
             item.id = count++

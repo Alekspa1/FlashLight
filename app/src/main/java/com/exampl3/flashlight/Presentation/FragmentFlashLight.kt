@@ -11,15 +11,14 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModel
 import com.exampl3.flashlight.databinding.FragmentBlankFlashLightBinding
 
 
 class FragmentFlashLight : Fragment() {
     private lateinit var binding: FragmentBlankFlashLightBinding
+    private lateinit var model: ViewModelFlashLight
     private var flag = false
-    private lateinit var camManager: CameraManager
-    private lateinit var vbManager: VibratorManager
-    private lateinit var cameraId: String
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -34,24 +33,18 @@ class FragmentFlashLight : Fragment() {
     @RequiresApi(Build.VERSION_CODES.S)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initFlashLight(view.context)
-        vbManager = view.context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-        val vibro = vbManager.defaultVibrator
+        model = ViewModelFlashLight()
+
         binding.toggleButton.setOnClickListener {
             flag = !flag
+            model.turnFlasLigh(view.context, flag)
+            model.turnVibro(view.context, 150)
 
-            camManager.setTorchMode(cameraId, flag)
-            vibro.vibrate(VibrationEffect.createOneShot(150, VibrationEffect.DEFAULT_AMPLITUDE))
         }
     }
 
     companion object {
-
         fun newInstance() = FragmentFlashLight()
-    }
-    private fun initFlashLight(con: Context){
-        camManager = (con.getSystemService(Context.CAMERA_SERVICE) as CameraManager?)!!
-        cameraId = camManager.cameraIdList[0]
     }
 
 }

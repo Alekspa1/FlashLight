@@ -76,7 +76,6 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
     }
 
     companion object {
-
         fun newInstance() = FragmentList()
     }
 
