@@ -6,19 +6,22 @@ import android.os.Build
 import android.os.Bundle
 import android.os.VibrationEffect
 import android.os.VibratorManager
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
+import com.exampl3.flashlight.R
 import com.exampl3.flashlight.databinding.FragmentBlankFlashLightBinding
 
 
 class FragmentFlashLight : Fragment() {
     private lateinit var binding: FragmentBlankFlashLightBinding
     private lateinit var model: ViewModelFlashLight
-    private var flag = false
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -35,11 +38,12 @@ class FragmentFlashLight : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         model = ViewModelFlashLight()
 
-        binding.toggleButton.setOnClickListener {
-            flag = !flag
-            model.turnFlasLigh(view.context, flag)
-            model.turnVibro(view.context, 150)
 
+        binding.toggleButton.setOnCheckedChangeListener { _, isChecked ->
+            model.turnFlasLigh(view.context, isChecked)
+            model.turnVibro(view.context, 150)
+            if (isChecked) binding.toggleButton.setButtonDrawable(R.drawable.turn_on)
+            else binding.toggleButton.setButtonDrawable(R.drawable.turn_of)
         }
     }
 
