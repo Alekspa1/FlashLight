@@ -32,15 +32,19 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val db = Room.databaseBuilder(
+            view.context,
+            AppDatabase::class.java, "database-name"
+        ).build()
+        for (i in 0..10){
+            db.userDao().insert(Item(i.toString()))
+        }
 
         viewModel = ViewModelListItem()
         adapter = ItemListAdapter(this, this)
         initRcView()
         setSwipe()
-        val db = Room.databaseBuilder(
-            view.context,
-            AppDatabase::class.java, "database-name"
-        ).build()
+
 
 //        viewModel.listItem.observe(viewLifecycleOwner) {
 //            adapter.submitList(it)
@@ -49,8 +53,8 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
             DialogItemList.AlertList(requireContext(), object : DialogItemList.Listener {
                 override fun onClick(name: String) {
                     //viewModel.addItem(Item(name))
-                    db.userDao().insert(Item(name))
-                   // adapter.submitList(db.userDao().getAllUsers())
+                    //db.userDao().insert(Item(name))
+                    adapter.submitList(db.userDao().getAllUsers())
 
 
                 }
