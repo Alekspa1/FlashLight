@@ -27,5 +27,6 @@
             android:text="Молоко"
             android:textColor="#000000"
             android:textSize="34sp" />
+
     </androidx.cardview.widget.CardView>
 </androidx.constraintlayout.widget.ConstraintLayout>

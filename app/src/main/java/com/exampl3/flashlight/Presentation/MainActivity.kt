@@ -2,12 +2,9 @@ package com.exampl3.flashlight.Presentation
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import androidx.room.Room
-import androidx.viewpager2.widget.ViewPager2
+
 import com.exampl3.flashlight.Domain.Adapter.VpAdapter
-import com.exampl3.flashlight.Domain.Room.AppDatabase
-import com.exampl3.flashlight.R
+
 import com.exampl3.flashlight.databinding.ActivityMainBinding
 import com.google.android.material.tabs.TabLayoutMediator
 

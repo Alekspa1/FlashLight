@@ -1,19 +1,23 @@
 package com.exampl3.flashlight.Presentation
 
-import android.content.Context
+
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
+
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
+import androidx.room.RoomDatabase
 import com.exampl3.flashlight.Domain.Adapter.ItemListAdapter
 import com.exampl3.flashlight.Domain.Item
-import com.exampl3.flashlight.Domain.Room.AppDatabase
+
+import com.exampl3.flashlight.Domain.Room.GfgDatabase
+
 import com.exampl3.flashlight.databinding.FragmentListBinding
 
 
@@ -34,16 +38,20 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
         super.onViewCreated(view, savedInstanceState)
         val db = Room.databaseBuilder(
             view.context,
-            AppDatabase::class.java, "database-name"
+            GfgDatabase::class.java, "db"
         ).build()
-        for (i in 0..10){
-            db.userDao().insert(Item(i.toString()))
-        }
+
+
+
+
 
         viewModel = ViewModelListItem()
         adapter = ItemListAdapter(this, this)
         initRcView()
         setSwipe()
+        db.CourseDao().getAll().asLiveData().observe(viewLifecycleOwner){
+            adapter.submitList(it)
+        }
 
 
 //        viewModel.listItem.observe(viewLifecycleOwner) {
@@ -53,8 +61,10 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
             DialogItemList.AlertList(requireContext(), object : DialogItemList.Listener {
                 override fun onClick(name: String) {
                     //viewModel.addItem(Item(name))
-                    //db.userDao().insert(Item(name))
-                    adapter.submitList(db.userDao().getAllUsers())
+                    Thread{
+                        (db).CourseDao().insertAll(Item(null,name))
+                    }.start()
+
 
 
                 }
@@ -64,6 +74,7 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
         }
 
     }
+
 
     private fun initRcView() {
         val rcView = binding.rcView

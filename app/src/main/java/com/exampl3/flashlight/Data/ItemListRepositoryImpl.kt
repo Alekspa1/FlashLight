@@ -7,19 +7,19 @@ import com.exampl3.flashlight.Domain.ItemListAction.ItemListRepository
 
 object ItemListRepositoryImpl: ItemListRepository {
     private val listLD = MutableLiveData<List<Item>>()
-    private val list = sortedSetOf<Item>({ p0, p1 -> p0.id.compareTo(p1.id) })
+    private val list = sortedSetOf<Item>({ p0, p1 -> p0.id!!.compareTo(p1.id!!) })
     private var count = 0
 
     override fun addItem(item: Item) {
         if(item.id == Const.UNDIFINE_ID){
             item.id = count++
         }
-        list.add(item)
+       // list.add(item)
         update()
     }
 
     override fun changeItem(item: Item){
-        val oldElem = getItemId(item.id)
+        val oldElem = getItemId(item.id!!)
         deleteItem(oldElem)
         addItem(item)
 

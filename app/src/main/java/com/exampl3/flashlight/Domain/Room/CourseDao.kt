@@ -4,19 +4,20 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
-import androidx.room.Update
 import com.exampl3.flashlight.Domain.Item
+import kotlinx.coroutines.flow.Flow
+
 
 @Dao
-interface UserDao {
+interface CourseDao {
+
+    @Query("SELECT * FROM Item")
+    fun getAll(): Flow<List<Item>>
+
     @Insert
-    fun insert(user: Item)
-    @Update
-     fun update(user: Item)
+     fun insertAll(Courses: Item)
 
     @Delete
-    fun delete(user: Item)
+    suspend fun delete(Course: Item)
 
-    @Query("SELECT * FROM item")
-    fun getAllUsers(): List<Item>
 }

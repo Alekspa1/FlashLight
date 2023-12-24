@@ -7,6 +7,7 @@ import com.exampl3.flashlight.Data.Const
 
 @Entity
 data class Item(
+    @PrimaryKey var id: Int?,
     @ColumnInfo(name = "name")val name: String,
     @ColumnInfo(name = "change")val change: Boolean = false,
-    @PrimaryKey var id: Int = Const.UNDIFINE_ID)
+    )
