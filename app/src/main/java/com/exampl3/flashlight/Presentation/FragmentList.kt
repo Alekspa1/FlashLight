@@ -1,5 +1,6 @@
 package com.exampl3.flashlight.Presentation
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,8 +10,10 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.room.Room
 import com.exampl3.flashlight.Domain.Adapter.ItemListAdapter
 import com.exampl3.flashlight.Domain.Item
+import com.exampl3.flashlight.Domain.Room.AppDatabase
 import com.exampl3.flashlight.databinding.FragmentListBinding
 
 
@@ -34,13 +37,22 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
         adapter = ItemListAdapter(this, this)
         initRcView()
         setSwipe()
-        viewModel.listItem.observe(viewLifecycleOwner) {
-            adapter.submitList(it)
-        }
+        val db = Room.databaseBuilder(
+            view.context,
+            AppDatabase::class.java, "database-name"
+        ).build()
+
+//        viewModel.listItem.observe(viewLifecycleOwner) {
+//            adapter.submitList(it)
+//        }
         binding.imButton.setOnClickListener {
             DialogItemList.AlertList(requireContext(), object : DialogItemList.Listener {
                 override fun onClick(name: String) {
-                    viewModel.addItem(Item(name))
+                    //viewModel.addItem(Item(name))
+                    db.userDao().insert(Item(name))
+                   // adapter.submitList(db.userDao().getAllUsers())
+
+
                 }
 
             }, null)
@@ -75,6 +87,8 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
         itemTouchHelper.attachToRecyclerView(binding.rcView)
     }
 
+
+
     companion object {
         fun newInstance() = FragmentList()
     }
@@ -91,4 +105,5 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
             }
         }, id)
     }
+
 }

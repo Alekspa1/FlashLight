@@ -11,6 +11,8 @@ import com.exampl3.flashlight.Domain.ItemListAction.DeleteItemList
 import com.exampl3.flashlight.Domain.ItemListAction.GetItemId
 import com.exampl3.flashlight.Domain.ItemListAction.GetItemList
 import com.exampl3.flashlight.Domain.ItemListAction.ItemListRepository
+import com.exampl3.flashlight.Domain.Room.AppDatabase
+import com.exampl3.flashlight.Domain.Room.UserDao
 
 class ViewModelListItem: ViewModel() {
     private val repository = ItemListRepositoryImpl
@@ -20,7 +22,9 @@ class ViewModelListItem: ViewModel() {
     private val changeItemList = ChangeItemList(repository)
     private val getItemId = GetItemId(repository)
 
+
     val listItem = getItemList.getItemList()
+
 
 
     fun addItem(item: Item){
