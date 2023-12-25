@@ -25,7 +25,7 @@ class ItemListAdapter(private val onLongClickListener: onLongClick,
                 true
             }
             binding.root.setOnClickListener {
-                onClick.onClick(item.id!!)
+                onClick.onClick(item)
             }
             when(item.change){
                 true-> binding.cardView
@@ -52,7 +52,7 @@ class ItemListAdapter(private val onLongClickListener: onLongClick,
 
     }
     interface onClick {
-        fun onClick(id: Int)
+        fun onClick(item: Item)
 
     }
 }
