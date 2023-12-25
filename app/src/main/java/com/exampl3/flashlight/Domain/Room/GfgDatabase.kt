@@ -10,13 +10,6 @@ import com.exampl3.flashlight.Domain.Item
 @Database(entities = [Item::class], version = 1)
 abstract class GfgDatabase : RoomDatabase() {
    abstract fun CourseDao(): CourseDao
-   companion object{
-      fun initDb(context: Context) : GfgDatabase{
-         return Room.databaseBuilder(
-            context,
-            GfgDatabase::class.java, "db"
-         ).build()
-      }
-   }
+
 }
 

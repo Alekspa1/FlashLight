@@ -17,8 +17,6 @@ import com.exampl3.flashlight.databinding.FragmentBlankFlashLightBinding
 class FragmentFlashLight : Fragment() {
     private lateinit var binding: FragmentBlankFlashLightBinding
     private lateinit var model: ViewModelFlashLight
-
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -28,7 +26,6 @@ class FragmentFlashLight : Fragment() {
 
     }
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         model = ViewModelFlashLight()
@@ -37,8 +34,8 @@ class FragmentFlashLight : Fragment() {
         binding.toggleButton.setOnCheckedChangeListener { _, isChecked ->
             model.turnFlasLigh(view.context, isChecked)
             model.turnVibro(view.context, 150)
-            if (isChecked) binding.toggleButton.setButtonDrawable(R.drawable.turn_on)
-            else binding.toggleButton.setButtonDrawable(R.drawable.turn_of)
+            if (isChecked) binding.toggleButton.setButtonDrawable(R.drawable.ic_on)
+            else binding.toggleButton.setButtonDrawable(R.drawable.ic_of)
         }
     }
 

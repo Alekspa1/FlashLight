@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="black">#FF000000</color>
+    <color name="green">#628C00</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="Active">#B595FF1D</color>
-    <color name="NoActive">#D7EF4646</color>
+    <color name="Active">#6623BD00</color>
+    <color name="NoActive">#6DF30404</color>
+    <color name="vPager">#9904C3F3</color>
+    <color name="Background">#FBCFAE</color>
 </resources>

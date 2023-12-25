@@ -1,6 +1,7 @@
 package com.exampl3.flashlight.Presentation
 
 
+import android.content.Context
 import android.os.Bundle
 
 import android.view.LayoutInflater
@@ -11,6 +12,7 @@ import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.room.Room
 import com.exampl3.flashlight.Domain.Adapter.ItemListAdapter
 import com.exampl3.flashlight.Domain.Item
 import com.exampl3.flashlight.Domain.Room.GfgDatabase
@@ -33,14 +35,11 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        db = GfgDatabase.initDb(view.context)
         modelFlashLight = ViewModelFlashLight()
-        adapter = ItemListAdapter(this, this)
+        initDb(view.context)
         initRcView()
         setSwipe()
-        db.CourseDao().getAll().asLiveData().observe(viewLifecycleOwner) {
-            adapter.submitList(it)
-        }
+
         binding.imButton.setOnClickListener {
             DialogItemList.AlertList(requireContext(), object : DialogItemList.Listener {
                 override fun onClick(name: String) {
@@ -53,12 +52,21 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
         }
 
     }
-
-
+    private fun initDb(context: Context) {
+        db = Room.databaseBuilder(
+            context,
+            GfgDatabase::class.java, "db"
+        ).build()
+    }
     private fun initRcView() {
+        adapter = ItemListAdapter(this, this)
         val rcView = binding.rcView
         rcView.layoutManager = LinearLayoutManager(requireContext())
         rcView.adapter = adapter
+        db.CourseDao().getAll().asLiveData().observe(viewLifecycleOwner) {
+            adapter.submitList(it)
+        }
+
     }
 
     private fun setSwipe() {
@@ -83,19 +91,12 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
         val itemTouchHelper = ItemTouchHelper(itemTouchHelperCallback)
         itemTouchHelper.attachToRecyclerView(binding.rcView)
     }
-
-    companion object {
-        fun newInstance() = FragmentList()
-    }
-
     override fun onLongClick(item: Item) {
-
         Thread {
             view?.let { modelFlashLight.turnVibro(it.context, 100) }
             db.CourseDao().update(item.copy(change = !item.change))
         }.start()
     }
-
     override fun onClick(item: Item) {
         DialogItemList.AlertList(requireContext(), object : DialogItemList.Listener {
             override fun onClick(name: String) {
@@ -104,6 +105,9 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
                 }.start()
             }
         }, item.name)
+    }
+    companion object {
+        fun newInstance() = FragmentList()
     }
 
 }
