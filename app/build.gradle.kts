@@ -43,7 +43,7 @@ android {
 }
 
 dependencies {
-
+    implementation("com.yandex.android:mobileads:6.3.0")
 
     implementation ("androidx.room:room-runtime:2.6.1")
     kapt ("androidx.room:room-compiler:2.6.1")
