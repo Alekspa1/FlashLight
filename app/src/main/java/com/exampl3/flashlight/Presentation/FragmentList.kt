@@ -1,26 +1,19 @@
 package com.exampl3.flashlight.Presentation
 
 
-
 import android.os.Bundle
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-
-
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.room.Room
-import androidx.room.RoomDatabase
 import com.exampl3.flashlight.Domain.Adapter.ItemListAdapter
 import com.exampl3.flashlight.Domain.Item
-
 import com.exampl3.flashlight.Domain.Room.GfgDatabase
-
 import com.exampl3.flashlight.databinding.FragmentListBinding
 
 
@@ -28,6 +21,7 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
     private lateinit var binding: FragmentListBinding
     private lateinit var adapter: ItemListAdapter
     private lateinit var db: GfgDatabase
+    private lateinit var modelFlashLight: ViewModelFlashLight
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -36,27 +30,24 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
         binding = FragmentListBinding.inflate(inflater, container, false)
         return binding.root
     }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        db = Room.databaseBuilder(
-            view.context,
-            GfgDatabase::class.java, "db"
-        ).build()
+        db = GfgDatabase.initDb(view.context)
+        modelFlashLight = ViewModelFlashLight()
         adapter = ItemListAdapter(this, this)
         initRcView()
         setSwipe()
-        db.CourseDao().getAll().asLiveData().observe(viewLifecycleOwner){
+        db.CourseDao().getAll().asLiveData().observe(viewLifecycleOwner) {
             adapter.submitList(it)
         }
-
         binding.imButton.setOnClickListener {
             DialogItemList.AlertList(requireContext(), object : DialogItemList.Listener {
                 override fun onClick(name: String) {
-                    Thread{
-                        db.CourseDao().insertAll(Item(null,name))
+                    Thread {
+                        db.CourseDao().insertAll(Item(null, name))
                     }.start()
                 }
-
             }, null)
 
         }
@@ -64,12 +55,12 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
     }
 
 
-
     private fun initRcView() {
         val rcView = binding.rcView
         rcView.layoutManager = LinearLayoutManager(requireContext())
         rcView.adapter = adapter
     }
+
     private fun setSwipe() {
         val itemTouchHelperCallback =
             object :
@@ -81,9 +72,10 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
                 ): Boolean {
                     return false
                 }
+
                 override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                    Thread{
-                    val item = adapter.currentList[viewHolder.adapterPosition]
+                    Thread {
+                        val item = adapter.currentList[viewHolder.adapterPosition]
                         db.CourseDao().delete(item)
                     }.start()
                 }
@@ -97,15 +89,17 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
     }
 
     override fun onLongClick(item: Item) {
-       Thread{
-           db.CourseDao().update(item.copy(change = !item.change))
-       }.start()
+
+        Thread {
+            view?.let { modelFlashLight.turnVibro(it.context, 100) }
+            db.CourseDao().update(item.copy(change = !item.change))
+        }.start()
     }
 
     override fun onClick(item: Item) {
         DialogItemList.AlertList(requireContext(), object : DialogItemList.Listener {
             override fun onClick(name: String) {
-                Thread{
+                Thread {
                     db.CourseDao().update(item.copy(name = name))
                 }.start()
             }
