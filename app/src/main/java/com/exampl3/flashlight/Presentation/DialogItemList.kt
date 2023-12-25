@@ -2,7 +2,6 @@ package com.exampl3.flashlight.Presentation
 
 import android.app.AlertDialog
 import android.content.Context
-import android.util.Log
 import android.widget.EditText
 import android.widget.Toast
 
