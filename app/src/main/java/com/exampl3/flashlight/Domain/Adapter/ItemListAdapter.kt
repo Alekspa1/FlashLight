@@ -1,6 +1,6 @@
 package com.exampl3.flashlight.Domain.Adapter
 
-import android.annotation.SuppressLint
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,23 +15,32 @@ class ItemListAdapter(private val onLongClickListener: onLongClick,
                       private val onClickListener: onClick
 ): ListAdapter<Item, ItemListAdapter.ViewHolder>(DiffCallback()) {
     class ViewHolder(view: View): RecyclerView.ViewHolder(view) {
+
+
         private val binding = ItemBinding.bind(view)
        private val context = view.context
-        @SuppressLint("ResourceAsColor")
         fun bind(item: Item, onClickListener: onLongClick, onClick: onClick){
             binding.textItem.text = item.name
-            binding.root.setOnLongClickListener {
+            fun background(con: Context, id: Int){
+                binding.cardView
+                    .setCardBackgroundColor(ContextCompat.getColor(con, id))
+            }
+
+            binding.itemCheck.setOnClickListener {
                 onClickListener.onLongClick(item)
-                true
             }
             binding.root.setOnClickListener {
                 onClick.onClick(item)
             }
             when(item.change){
-                true-> binding.cardView
-                    .setCardBackgroundColor(ContextCompat.getColor(context, R.color.Active))
-                false-> binding.cardView
-                    .setCardBackgroundColor(ContextCompat.getColor(context, R.color.NoActive))
+                true-> {
+                    background(context, R.color.Active)
+                    binding.itemCheck.setBackgroundResource(R.drawable.ic_chekbox_of)
+                }
+                false-> {
+                    background(context, R.color.NoActive)
+                    binding.itemCheck.setBackgroundResource(R.drawable.ic_chekbox_on)
+                }
             }
 
 
@@ -55,4 +64,5 @@ class ItemListAdapter(private val onLongClickListener: onLongClick,
         fun onClick(item: Item)
 
     }
+
 }

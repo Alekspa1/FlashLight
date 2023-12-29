@@ -83,7 +83,7 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
 
                 override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                     Thread {
-                        val item = adapter.currentList[viewHolder.adapterPosition]
+                        val item = adapter.currentList[viewHolder.position]
                         db.CourseDao().delete(item)
                     }.start()
                 }
@@ -93,7 +93,7 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
     }
     override fun onLongClick(item: Item) {
         Thread {
-            view?.let { modelFlashLight.turnVibro(it.context, 100) }
+           view?.let { modelFlashLight.turnVibro(it.context, 100) }
             db.CourseDao().update(item.copy(change = !item.change))
         }.start()
     }

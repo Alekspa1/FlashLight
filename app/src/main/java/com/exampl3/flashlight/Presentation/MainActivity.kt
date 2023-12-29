@@ -3,6 +3,7 @@ package com.exampl3.flashlight.Presentation
 import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 
 import com.exampl3.flashlight.Data.Const
 import com.exampl3.flashlight.Domain.Adapter.VpAdapter
@@ -16,6 +17,8 @@ class MainActivity : AppCompatActivity() {
     private var bannerAd: BannerAdView? = null
     private lateinit var binding: ActivityMainBinding
     private lateinit var vpAdapter: VpAdapter
+
+
     private val listFrag = listOf(
         FragmentList.newInstance(),
         FragmentFlashLight.newInstance()
@@ -33,6 +36,9 @@ class MainActivity : AppCompatActivity() {
 
         initYaBaner(this)
         initVp()
+       
+
+
     }
     fun initVp(){
         vpAdapter = VpAdapter(this, listFrag)
@@ -50,4 +56,7 @@ class MainActivity : AppCompatActivity() {
         binding.yaBaner.loadAd(adRequest)
 
     } // Инициализирую Яндекс Рекламу
+
+
+
 }
