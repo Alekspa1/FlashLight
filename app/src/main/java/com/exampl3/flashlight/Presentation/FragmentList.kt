@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
 import com.exampl3.flashlight.Domain.Adapter.ItemListAdapter
-import com.exampl3.flashlight.Domain.Item
+import com.exampl3.flashlight.Domain.Room.Item
 import com.exampl3.flashlight.Domain.Room.GfgDatabase
 import com.exampl3.flashlight.databinding.FragmentListBinding
 
@@ -83,7 +83,7 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
 
                 override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                     Thread {
-                        val item = adapter.currentList[viewHolder.adapterPosition]
+                        val item = adapter.currentList[viewHolder.layoutPosition]
                         db.CourseDao().delete(item)
                     }.start()
                 }
