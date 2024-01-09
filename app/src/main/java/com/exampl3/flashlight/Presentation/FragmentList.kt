@@ -9,10 +9,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.asLiveData
-import androidx.recyclerview.widget.ItemTouchHelper
+
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+
 import androidx.room.Room
+import com.exampl3.flashlight.Data.Const
 import com.exampl3.flashlight.Domain.Adapter.ItemListAdapter
 import com.exampl3.flashlight.Domain.Room.Item
 import com.exampl3.flashlight.Domain.Room.GfgDatabase
@@ -38,7 +39,6 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
         modelFlashLight = ViewModelFlashLight()
         initDb(view.context)
         initRcView()
-        setSwipe()
 
         binding.imButton.setOnClickListener {
             DialogItemList.AlertList(requireContext(), object : DialogItemList.Listener {
@@ -69,43 +69,48 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
 
     }
 
-    private fun setSwipe() {
-        val itemTouchHelperCallback =
-            object :
-                ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
-                override fun onMove(
-                    recyclerView: RecyclerView,
-                    viewHolder: RecyclerView.ViewHolder,
-                    target: RecyclerView.ViewHolder
-                ): Boolean {
-                    return false
-                }
 
-                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                    Thread {
-                        val item = adapter.currentList[viewHolder.layoutPosition]
-                        db.CourseDao().delete(item)
-                    }.start()
-                }
-            }
-        val itemTouchHelper = ItemTouchHelper(itemTouchHelperCallback)
-        itemTouchHelper.attachToRecyclerView(binding.rcView)
-    }
     override fun onLongClick(item: Item) {
-        Thread {
-            view?.let { modelFlashLight.turnVibro(it.context, 100) }
-            db.CourseDao().update(item.copy(change = !item.change))
-        }.start()
-    }
-    override fun onClick(item: Item) {
-        DialogItemList.AlertList(requireContext(), object : DialogItemList.Listener {
+                DialogItemList.AlertList(requireContext(), object : DialogItemList.Listener {
             override fun onClick(name: String) {
                 Thread {
                     db.CourseDao().update(item.copy(name = name))
                 }.start()
             }
         }, item.name)
+
     }
+    override fun onClick(item: Item, action: Int) {
+        if (action == Const.change){
+            Thread {
+                view?.let { modelFlashLight.turnVibro(it.context, 100) }
+                db.CourseDao().update(item.copy(change = !item.change))
+            }.start()
+        } else {
+            if (item.change) {
+                Thread {
+                    view?.let { modelFlashLight.turnVibro(it.context, 100) }
+                    db.CourseDao().delete(item)
+                }.start()
+            } else{ delete(requireContext(), item)
+
+            }
+        }
+
+
+    }
+    private fun delete(context: Context, item: Item){
+        DialogItemList.AlertDelete(context, object : DialogItemList.Delete{
+            override fun onClick(flag: Boolean) {
+                if (flag) {
+                    Thread {
+                        view?.let { modelFlashLight.turnVibro(it.context, 100) }
+                        db.CourseDao().delete(item)
+                    }.start()
+                }
+            }
+        })
+    } // удаляю заметки
     companion object {
         fun newInstance() = FragmentList()
     }

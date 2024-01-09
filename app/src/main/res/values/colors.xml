@@ -4,7 +4,8 @@
     <color name="green">#628C00</color>
     <color name="white">#FFFFFFFF</color>
     <color name="Active">#6623BD00</color>
-    <color name="NoActive">#6DF30404</color>
+    <color name="NoActive">#80F30404</color>
     <color name="vPager">#9904C3F3</color>
     <color name="Background">#FBCFAE</color>
+    <color name="Yellow">#FFEB3B</color>
 </resources>

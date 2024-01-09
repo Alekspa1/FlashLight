@@ -17,10 +17,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var vpAdapter: VpAdapter
     private val listFrag = listOf(
+        FragmentNotebook.newInstance(),
         FragmentList.newInstance(),
         FragmentFlashLight.newInstance()
     )
     private val listName = listOf(
+        "Блокнот",
         "Список дел",
         "Фонарик"
     )
