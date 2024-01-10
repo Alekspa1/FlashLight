@@ -13,8 +13,8 @@ android {
         applicationId = "com.exampl3.flashlight"
         minSdk = 24
         targetSdk = 34
-        versionCode = 2
-        versionName = "2.0"
+        versionCode = 5
+        versionName = "4.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         kapt {
             arguments {arg("room.schemaLocation", "$projectDir/schemas")}

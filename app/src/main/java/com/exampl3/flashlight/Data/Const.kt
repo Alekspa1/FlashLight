@@ -1,8 +1,8 @@
 package com.exampl3.flashlight.Data
 
 object Const {
-    const val baner = "demo-banner-yandex"
-    const val mezstr = "demo-interstitial-yandex"
+    const val baner = "R-M-4702196-1"
+    const val mezstr = "R-M-4702196-2"
     const val keyNoteBook = "key"
     const val keyNoteBookSize = "size"
     const val delete = 0
