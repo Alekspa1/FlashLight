@@ -1,13 +1,17 @@
 package com.exampl3.flashlight.Presentation
-
+import android.app.Activity.RESULT_OK
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.util.Log
+import android.speech.RecognizerIntent
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import com.exampl3.flashlight.Data.Const
 import com.exampl3.flashlight.databinding.FragmentNotebookBinding
 
@@ -30,17 +34,34 @@ class FragmentNotebook : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val launcher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
+            result: ActivityResult ->
+            if (result.resultCode == RESULT_OK){
+                val oldText = binding.edotebook.text.toString()
+                val newText = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+                val finish = "$oldText \n${newText?.get(0)}"
+                binding.edotebook.setText(finish)
+            }
+
+        }
+        val voiceIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+        voiceIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
         model = ViewModelNoteBook()
         pref = this.requireActivity().getSharedPreferences("TABLE", Context.MODE_PRIVATE)
         initNoteBook()
-
-
         binding.imDelete.setOnClickListener {
             delete(view.context)
         }
         binding.imSetting.setOnClickListener {
             binding.edotebook.textSize = model.sizeNoteBook(binding.edotebook.textSize)
-            Log.d("MyLog", "Отправляю Шрифт ${model.sizeNoteBook(binding.edotebook.textSize)}")
+        }
+        binding.imageView2.setOnClickListener {
+            try {
+                launcher.launch(voiceIntent)
+            }
+            catch (e: Exception){
+                Toast.makeText(view.context, "Голосовой ввод пока недоступен для вашего устройства", Toast.LENGTH_SHORT).show()
+            }
         }
     }
     override fun onStop() {
@@ -50,7 +71,6 @@ class FragmentNotebook : Fragment() {
         val edit = pref.edit()
         edit.putString(Const.keyNoteBook, notebook.toString())
         edit.putFloat(Const.keyNoteBookSize,size)
-
         edit.apply()
     }
 
@@ -63,7 +83,7 @@ class FragmentNotebook : Fragment() {
         })
     } // удаляю заметки
     private fun initNoteBook(){
-        binding.edotebook.setText(pref.getString(Const.keyNoteBook, ""))
+        binding.edotebook.setText(pref.getString(Const.keyNoteBook,""))
         binding.edotebook.textSize = pref.getFloat(Const.keyNoteBookSize, 75F)/3
     } // Заполнение из бд
 

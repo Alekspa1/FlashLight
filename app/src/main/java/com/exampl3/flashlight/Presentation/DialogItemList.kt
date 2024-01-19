@@ -11,6 +11,7 @@ object DialogItemList {
         val builred = AlertDialog.Builder(context)
         val edName = EditText(context)
         edName.setText(name)
+        edName.inputType
         builred.setView(edName)
         val dialog = builred.create()
         dialog.setTitle("Введите название дела")

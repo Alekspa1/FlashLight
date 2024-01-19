@@ -1,7 +1,7 @@
 package com.exampl3.flashlight.Presentation
 
 import androidx.lifecycle.ViewModel
-import com.exampl3.flashlight.Domain.NoteBook.DeleteAndSizeNoteBookImpl
+import com.exampl3.flashlight.Data.DeleteAndSizeNoteBookImpl
 import com.exampl3.flashlight.Domain.NoteBook.SizeNoteBook
 
 class ViewModelNoteBook: ViewModel() {

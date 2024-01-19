@@ -1,7 +1,6 @@
-package com.exampl3.flashlight.Domain.NoteBook
+package com.exampl3.flashlight.Data
 
-
-
+import com.exampl3.flashlight.Domain.NoteBook.DeleteAndSizeNoteBook
 
 
 object DeleteAndSizeNoteBookImpl: DeleteAndSizeNoteBook {

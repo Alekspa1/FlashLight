@@ -1,21 +1,30 @@
 package com.exampl3.flashlight.Presentation
 
+
+import android.app.AlarmManager
 import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-
+import androidx.room.Room
 import com.exampl3.flashlight.Data.Const
 import com.exampl3.flashlight.Domain.Adapter.VpAdapter
+import com.exampl3.flashlight.Domain.Room.GfgDatabase
 import com.exampl3.flashlight.databinding.ActivityMainBinding
 import com.google.android.material.tabs.TabLayoutMediator
 import com.yandex.mobile.ads.banner.BannerAdSize
 import com.yandex.mobile.ads.banner.BannerAdView
 import com.yandex.mobile.ads.common.AdRequest
+import java.util.Calendar
+
 
 class MainActivity : AppCompatActivity() {
     private var bannerAd: BannerAdView? = null
+    private lateinit var db: GfgDatabase
     private lateinit var binding: ActivityMainBinding
     private lateinit var vpAdapter: VpAdapter
+    private lateinit var calendarZero: Calendar
+    private lateinit var modelFlashLight: ViewModelFlashLight
+    private lateinit var alarmManager: AlarmManager
     private val listFrag = listOf(
         FragmentNotebook.newInstance(),
         FragmentList.newInstance(),
@@ -31,11 +40,18 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         binding = ActivityMainBinding.inflate(layoutInflater)
         super.onCreate(savedInstanceState)
+        calendarZero = Calendar.getInstance()
+        modelFlashLight = ViewModelFlashLight()
+        alarmManager = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         setContentView(binding.root)
-
-        initYaBaner(this)
         initVp()
+        initDb()
+        initYaBaner()
+
+
     }
+
+
     fun initVp(){
         vpAdapter = VpAdapter(this, listFrag)
         binding.placeHolder.adapter = vpAdapter
@@ -44,12 +60,20 @@ class MainActivity : AppCompatActivity() {
             tab.text = listName[pos]
         }.attach()
     } // инициализирую ViewPager
-    private fun initYaBaner(contex: Context){
-        bannerAd = BannerAdView(contex)
-        binding.yaBaner.setAdUnitId(Const.baner)
-        binding.yaBaner.setAdSize(BannerAdSize.stickySize(contex, 350))
+    private fun initDb() {
+        db = Room.databaseBuilder(
+            this,
+            GfgDatabase::class.java, "db"
+        ).build()
+    } // инициализирую БД
+    private fun initYaBaner(){
+        bannerAd = BannerAdView(this)
+        binding.yaBaner.setAdUnitId(Const.BANER)
+        binding.yaBaner.setAdSize(BannerAdSize.stickySize(this, 350))
         val adRequest = AdRequest.Builder().build()
         binding.yaBaner.loadAd(adRequest)
 
     } // Инициализирую Яндекс Рекламу
+
+
 }
