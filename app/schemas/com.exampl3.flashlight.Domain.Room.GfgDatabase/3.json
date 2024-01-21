@@ -1,0 +1,67 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 3,
+    "identityHash": "75122a3ed83c2d7db55e9afa015b514f",
+    "entities": [
+      {
+        "tableName": "Item",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER, `name` TEXT NOT NULL, `change` INTEGER NOT NULL, `alarmText` TEXT NOT NULL DEFAULT '1.0', `alarmTime` INTEGER NOT NULL DEFAULT 1.0, `changeAlarm` INTEGER NOT NULL DEFAULT 1.0, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "change",
+            "columnName": "change",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "alarmText",
+            "columnName": "alarmText",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'1.0'"
+          },
+          {
+            "fieldPath": "alarmTime",
+            "columnName": "alarmTime",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "1.0"
+          },
+          {
+            "fieldPath": "changeAlarm",
+            "columnName": "changeAlarm",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "1.0"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '75122a3ed83c2d7db55e9afa015b514f')"
+    ]
+  }
+}

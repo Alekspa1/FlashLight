@@ -11,6 +11,7 @@ object DialogItemList {
         val builred = AlertDialog.Builder(context)
         val edName = EditText(context)
         edName.setText(name)
+        edName.inputType
         builred.setView(edName)
         val dialog = builred.create()
         dialog.setTitle("Введите название дела")
@@ -37,7 +38,25 @@ object DialogItemList {
         dialog.show()
 
     }
+    fun AlertDelete(context: Context, delete: Delete) {
+        val builred = AlertDialog.Builder(context)
+        val dialog = builred.create()
+        dialog.setTitle("Вы уверены что хотите это удалить?")
+        dialog.setButton(AlertDialog.BUTTON_POSITIVE, "Да"){ _, _->
+            delete.onClick(true)
+        }
+        dialog.setButton(AlertDialog.BUTTON_NEGATIVE, "Нет"){_,_->
+            delete.onClick(false)
+        }
+        dialog.show()
+
+    }
     interface Listener{
         fun onClick(name: String)
     }
+    interface Delete{
+        fun onClick(flag: Boolean)
+    }
+
+
 }

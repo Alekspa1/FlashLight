@@ -78,7 +78,7 @@ class FragmentFlashLight : Fragment()  {
     }
 
     private fun loadInterstitialAd() {
-        val adRequestConfiguration = AdRequestConfiguration.Builder(Const.mezstr).build()
+        val adRequestConfiguration = AdRequestConfiguration.Builder(Const.MEZSTR).build()
         interstitialAdLoader?.loadAd(adRequestConfiguration)
     }
     private fun showAd() {

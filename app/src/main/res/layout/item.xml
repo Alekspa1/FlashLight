@@ -11,31 +11,79 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="5dp"
+        android:layout_marginEnd="8dp"
         app:cardCornerRadius="15dp"
         app:cardElevation="0dp"
         app:cardMaxElevation="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/imDeleteList"
+        app:layout_constraintStart_toEndOf="@+id/imAlarm"
         app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-            android:id="@+id/textItem"
-            android:layout_width="332dp"
-            android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:text="Молоко"
-            android:textColor="#000000"
-            android:textSize="34sp" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="3dp">
 
-        <ImageView
+            <TextView
+                android:id="@+id/textItem"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:text="Молоко"
+                android:textColor="#000000"
+                android:textSize="25sp"
+                app:layout_constraintEnd_toStartOf="@+id/imStatus"
+                app:layout_constraintHorizontal_bias="0.2"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-            android:id="@+id/item_check"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:layout_gravity="center_vertical|end"
-            android:layout_marginRight="10dp"
-            android:src="@drawable/ic_chekbox_on" />
+            <TextView
+                android:id="@+id/tvAlarm"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:text="TextView"
+                android:textColor="@color/white"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="@+id/textItem"
+                app:layout_constraintStart_toStartOf="@+id/textItem"
+                app:layout_constraintTop_toBottomOf="@+id/textItem"
+                tools:visibility="visible" />
+
+            <ImageView
+                android:id="@+id/imStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_item_false" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.cardview.widget.CardView>
+
+    <ImageView
+        android:id="@+id/imDeleteList"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_del" />
+
+    <ImageView
+        android:id="@+id/imAlarm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_alarm_off" />
 </androidx.constraintlayout.widget.ConstraintLayout>
