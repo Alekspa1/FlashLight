@@ -47,6 +47,7 @@ class MainActivity : AppCompatActivity() {
         initVp()
         initDb()
         initYaBaner()
+        updateAlarm()
 
 
     }
@@ -75,5 +76,14 @@ class MainActivity : AppCompatActivity() {
 
     } // Инициализирую Яндекс Рекламу
 
+    private fun updateAlarm(){
+        Thread {
+            db.CourseDao().getAllList().forEach { item ->
+                if (item.changeAlarm && item.alarmTime > calendarZero.timeInMillis) {
+                    modelFlashLight.alarmInsert(item, item.alarmTime, this, alarmManager)
+                }
+            }
+        }.start()
+    }
 
 }

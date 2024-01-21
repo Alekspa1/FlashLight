@@ -20,7 +20,7 @@ import com.exampl3.flashlight.databinding.FragmentNotebookBinding
 class FragmentNotebook : Fragment() {
     private lateinit var binding: FragmentNotebookBinding
     private lateinit var pref: SharedPreferences
-    private lateinit var model: ViewModelNoteBook
+    private lateinit var greetings: String
 
 
 
@@ -34,6 +34,10 @@ class FragmentNotebook : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        greetings = "Дорогие пользователи! \nВвиду особенности некоторых моделей телефонов," +
+                " установленные напоминания перестают работать после перезагрузки устройства," +
+                " если вы столкнулись с такой проблемой, вам необходимо в настройках приложения," +
+                " включить автозапуск приложения или повторно войти в приложение, чтобы напоминания обновились"
         val launcher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
             result: ActivityResult ->
             if (result.resultCode == RESULT_OK){
@@ -46,14 +50,10 @@ class FragmentNotebook : Fragment() {
         }
         val voiceIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
         voiceIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-        model = ViewModelNoteBook()
         pref = this.requireActivity().getSharedPreferences("TABLE", Context.MODE_PRIVATE)
         initNoteBook()
         binding.imDelete.setOnClickListener {
             delete(view.context)
-        }
-        binding.imSetting.setOnClickListener {
-            binding.edotebook.textSize = model.sizeNoteBook(binding.edotebook.textSize)
         }
         binding.imageView2.setOnClickListener {
             try {
@@ -67,10 +67,8 @@ class FragmentNotebook : Fragment() {
     override fun onStop() {
         super.onStop()
         val notebook = binding.edotebook.text.trim()
-        val size = binding.edotebook.textSize
         val edit = pref.edit()
         edit.putString(Const.keyNoteBook, notebook.toString())
-        edit.putFloat(Const.keyNoteBookSize,size)
         edit.apply()
     }
 
@@ -83,9 +81,9 @@ class FragmentNotebook : Fragment() {
         })
     } // удаляю заметки
     private fun initNoteBook(){
-        binding.edotebook.setText(pref.getString(Const.keyNoteBook,""))
-        binding.edotebook.textSize = pref.getFloat(Const.keyNoteBookSize, 75F)/3
+        binding.edotebook.setText(pref.getString(Const.keyNoteBook,greetings))
     } // Заполнение из бд
+
 
 
     companion object {
