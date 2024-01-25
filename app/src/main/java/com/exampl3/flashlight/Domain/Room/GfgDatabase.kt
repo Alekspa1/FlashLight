@@ -11,6 +11,7 @@ import androidx.room.RoomDatabase
         AutoMigration (from = 1, to = 2),
         AutoMigration (from = 2, to = 3)
                      ]
+
 )
 abstract class GfgDatabase : RoomDatabase()
 {
