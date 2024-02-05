@@ -1,14 +1,17 @@
 package com.exampl3.flashlight.Data
 
+import android.app.AlarmManager
 import android.content.Context
 import android.content.pm.PackageManager
+import android.icu.util.Calendar
 import androidx.core.content.ContextCompat
 
 object Const {
+    private val calendar: Calendar = Calendar.getInstance()
+    private val dayInMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
     const val BANER = "R-M-4702196-1"
     const val MEZSTR = "R-M-4702196-2"
     const val keyNoteBook = "key"
-    const val keyNoteBookSize = "size"
     const val delete = 0
     const val change = 1
     const val changeItem = 2
@@ -20,6 +23,13 @@ object Const {
     const val keyIntentCallBackReady = "keyIntentCallBackready"
     const val keyIntentCallBackPostpone = "keyIntentCallpostpone"
     const val reboot = "android.intent.action.BOOT_COMPLETED"
+    const val alarmOne = 0
+    const val alarmDay = 1
+    const val alarmWeek = 2
+    const val alarmMonth = 3
+    const val deleteAlarmRepeat = 4
+    const val alarmRepeat = 5
+    var MONTH = AlarmManager.INTERVAL_DAY*dayInMonth
     fun isPermissionGranted(con: Context, p: String): Boolean {
         return ContextCompat.checkSelfPermission(con, p) == PackageManager.PERMISSION_GRANTED
     }

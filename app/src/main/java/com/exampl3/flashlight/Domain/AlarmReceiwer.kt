@@ -47,18 +47,36 @@ class AlarmReceiwer : BroadcastReceiver() {
             Const.keyIntentAlarm -> {
                 val item = intent.getSerializableExtra(Const.keyIntent) as Item
                 alarmPush(context).notify(item.id!!, notificationBuilder(context, item).build())
-                context.let { modelFlashLight.turnVibro(context, 300) }
-                Thread {
-                    db.CourseDao().update(item.copy(changeAlarm = !item.changeAlarm))
-                }.start()
+                when(item.interval){
+                    Const.alarmOne->{
+                        Thread {
+                            db.CourseDao().update(item.copy(changeAlarm = !item.changeAlarm))
+                        }.start()
+                    }
+                    
+                    Const.alarmDay-> {
+                        insertAlarm(item,context, AlarmManager.INTERVAL_DAY,"и через день")
+                    }
+                    Const.alarmWeek-> {
+                        insertAlarm(item,context,AlarmManager.INTERVAL_DAY*7,"и через неделю")
+                    }
+                    Const.alarmMonth-> {
+                        insertAlarm(item,context,Const.MONTH,"и через месяц")
+                    }
+                }
+
             }
 
             Const.keyIntentCallBackReady -> {
                 val item = intent.getSerializableExtra(Const.keyIntentCallBackReady) as Item
-                Thread {
-                    db.CourseDao()
-                        .update(item.copy(change = !item.change, changeAlarm = !item.changeAlarm))
-                }.start()
+                when(item.interval){
+                    Const.alarmOne->{
+                        Thread {
+                            db.CourseDao()
+                                .update(item.copy(change = !item.change, changeAlarm = !item.changeAlarm))
+                        }.start()
+                    }
+                }
                 alarmPush(context).cancel(item.id!!)
 
             }
@@ -73,11 +91,19 @@ class AlarmReceiwer : BroadcastReceiver() {
                 val resultDate = dateFormate.format(time)
                 val resutTime = timeFormate.format(time)
                 val result = "Напомнит: $resultDate в $resutTime"
-                val newItem = item.copy(alarmTime = time, alarmText = result)
-                Thread {
-                    db.CourseDao().update(newItem)
-                }.start()
-                modelFlashLight.alarmInsert(newItem, time, context, alarmManager)
+
+                when(item.interval){
+                    Const.alarmOne->{
+                        val newItem = item.copy(alarmTime = time, alarmText = result)
+                        Thread {
+                            db.CourseDao().update(newItem)
+                        }.start()
+                        modelFlashLight.alarmInsert(newItem, time, context, alarmManager, Const.alarmOne)
+                    } else->{
+                        val newItemFals = item.copy(id = item.id?.plus(100), interval = Const.alarmRepeat)
+                    modelFlashLight.alarmInsert(newItemFals, time, context, alarmManager, Const.alarmOne)
+                    }
+                }
                 Toast.makeText(context, "Отложено на 10 минут", Toast.LENGTH_SHORT).show()
                 alarmPush(context).cancel(item.id!!)
             }
@@ -86,14 +112,33 @@ class AlarmReceiwer : BroadcastReceiver() {
                 Thread {
                     db.CourseDao().getAllList().forEach { item ->
                         if (item.changeAlarm && item.alarmTime > calendarZero.timeInMillis) {
-                            modelFlashLight.alarmInsert(item, item.alarmTime, context, alarmManager)
+                            modelFlashLight.alarmInsert(item, item.alarmTime, context, alarmManager, item.interval)
                         }
                         if (item.changeAlarm && item.alarmTime < calendarZero.timeInMillis) {
                             alarmPushPassed(context).notify(
                                 item.id!!,
                                 notificationBuilderPassed(context, item).build()
                             )
-                            db.CourseDao().update(item.copy(changeAlarm = !item.changeAlarm, name = "${item.name} (Пропущено)"))
+                            when(item.interval){
+                                Const.alarmOne-> {
+                                    db.CourseDao().update(
+                                        item.copy(
+                                            changeAlarm = !item.changeAlarm,
+                                            name = "${item.name} (Пропущено)"
+                                        )
+                                    )
+                                }
+                                Const.alarmDay-> {
+                                    insertAlarm(item,context, AlarmManager.INTERVAL_DAY,"и через день")
+                                }
+                                Const.alarmWeek-> {
+                                    insertAlarm(item,context,AlarmManager.INTERVAL_DAY*7,"и через неделю")
+                                }
+                                Const.alarmMonth-> {
+                                    insertAlarm(item,context,Const.MONTH,"и через месяц")
+                                }
+                            }
+
                         }
                     }
                 }.start()
@@ -217,5 +262,21 @@ class AlarmReceiwer : BroadcastReceiver() {
                 .setContentIntent(contentIntent)
                 .setAutoCancel(true)
         }
+    }
+    private fun insertAlarm(item: Item, context: Context,intervalTime: Long, intervalString:String){
+        val time = item.alarmTime + intervalTime
+        val dateFormat = "dd.MM"
+        val timeFormat = "HH:mm"
+        val dateFormate = SimpleDateFormat(dateFormat, Locale.US)
+        val timeFormate = SimpleDateFormat(timeFormat, Locale.US)
+        val resultDate = dateFormate.format(time)
+        val resutTime = timeFormate.format(time)
+        val result = "Напомнит: $resultDate в $resutTime $intervalString"
+        val newItem = item.copy(alarmTime = time, alarmText = result)
+        Thread {
+            db.CourseDao().update(newItem)
+        }.start()
+        modelFlashLight.alarmInsert(newItem, time, context, alarmManager, item.interval)
+
     }
 }

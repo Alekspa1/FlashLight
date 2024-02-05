@@ -6,6 +6,7 @@ import android.widget.EditText
 import android.widget.Toast
 
 object DialogItemList {
+    private val insertAlarmList = arrayOf("Один раз","Каждый день","Каждую неделю","Каждый месяц")
 
     fun AlertList(context: Context, listener: Listener, name: String?){
         val builred = AlertDialog.Builder(context)
@@ -51,12 +52,43 @@ object DialogItemList {
         dialog.show()
 
     }
+    fun insertAlarm(context: Context, insertAlarm: InsertAlarm) {
+        var result = 0
+
+        val builred = AlertDialog.Builder(context)
+
+        builred.setTitle("Как часто повторять?")
+        builred.setSingleChoiceItems(
+            insertAlarmList, 0
+        ) { _, id ->
+            result = id
+
+        }
+            .setPositiveButton("OK"
+            ) { window, _ ->
+                insertAlarm.onClick(result)
+               window.dismiss()
+            }
+            .setNegativeButton("Отмена") { window, _ ->
+                window.cancel()
+            }
+        builred.create()
+
+        val dialog = builred.create()
+        dialog.show()
+
+    }
+
     interface Listener{
         fun onClick(name: String)
     }
     interface Delete{
         fun onClick(flag: Boolean)
     }
+    interface InsertAlarm{
+        fun onClick(result: Int)
+    }
+
 
 
 }
