@@ -15,7 +15,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
@@ -27,7 +26,6 @@ import com.exampl3.flashlight.Domain.Adapter.ItemListAdapter
 import com.exampl3.flashlight.Domain.Room.GfgDatabase
 import com.exampl3.flashlight.Domain.Room.Item
 import com.exampl3.flashlight.databinding.FragmentListBinding
-
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -58,11 +56,17 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
         calendarZero = Calendar.getInstance()
         modelFlashLight = ViewModelFlashLight()
         alarmManager = view.context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        initDb(view.context)
+        initRcView()
+        db.CourseDao().getAll().asLiveData().observe(viewLifecycleOwner) { list ->
+            adapter.submitList(list)
+        }
+        pLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
 
         val launcher =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
-                if (result.resultCode == Activity.RESULT_OK) {
-                    val text = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+                if (it.resultCode == Activity.RESULT_OK) {
+                    val text = it.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
                     Thread {
                         if (text != null) {
                             db.CourseDao().insertAll(Item(null, text[0]))
@@ -72,16 +76,7 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
                 }
 
             }
-        val voiceIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
-        voiceIntent.putExtra(
-            RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
-        )
 
-
-        initDb(view.context)
-        initRcView()
-        pLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
         binding.imButton.setOnClickListener {
             DialogItemList.AlertList(requireContext(), object : DialogItemList.Listener {
                 override fun onClick(name: String) {
@@ -92,9 +87,10 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
             }, null)
 
         }
+
         binding.imageView.setOnClickListener {
             try {
-                launcher.launch(voiceIntent)
+                launcher.launch(initVoiceIntent())
             } catch (e: Exception) {
                 Toast.makeText(
                     view.context,
@@ -108,10 +104,14 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
     }
 
 
-    override fun onResume() {
-        super.onResume()
-        updateRcView()
-    }
+    private fun initVoiceIntent(): Intent {
+        val voiceIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+        voiceIntent.putExtra(
+            RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+        )
+        return voiceIntent
+    } // Функция для создания интента голосового ввода
 
     private fun initRcView() {
         adapter = ItemListAdapter(this, this)
@@ -128,72 +128,30 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
         ).build()
     } // инициализировал БД
 
-    private fun updateRcView() {
-        db.CourseDao().getAll().asLiveData().observe(viewLifecycleOwner) { list ->
-            adapter.submitList(list)
-        }
-    } // Обновил список в ресайклере
-
-    private fun delete(context: Context, item: Item) {
+    private fun deleteAlertDialog(context: Context, item: Item) {
         DialogItemList.AlertDelete(context, object : DialogItemList.Delete {
             override fun onClick(flag: Boolean) {
                 if (flag) {
                     Thread {
-                        modelFlashLight.alarmInsert(
-                            item,
-                            item.alarmTime,
-                            requireContext(),
-                            alarmManager,
-                            Const.deleteAlarmRepeat
-                        )
+                        changeAlarmItem(item, Const.deleteAlarmRepeat)
                         db.CourseDao().delete(item)
                     }.start()
 
                 }
             }
         })
-    } // удаляю заметки
+    } // Подтверждение на удаление
 
-    private fun timePickerDialog(item: Item) {
-        timePickerDialog = TimePickerDialog(
+    private fun changeAlarmItem(item: Item, action: Int) {
+        modelFlashLight.alarmInsert(
+            item,
+            item.alarmTime,
             requireContext(),
-            { _, hour, minute ->
-                calendar.set(Calendar.HOUR_OF_DAY, hour)
-                calendar.set(Calendar.MINUTE, minute)
-                DialogItemList.insertAlarm(
-                    requireView().context,
-                    object : DialogItemList.InsertAlarm {
-                        override fun onClick(result: Int) {
-                            if (calendar.timeInMillis >= calendarZero.timeInMillis) {
-                                when (result) {
-                                    Const.alarmOne -> {
-                                        insertAlarm(item,result,"")
-                                    }
-                                    Const.alarmDay -> {
-                                        insertAlarm(item,result,"и через день")
-                                    }
-                                    Const.alarmWeek -> {
-                                        insertAlarm(item,result,"и через неделю")
-                                    }
-                                    Const.alarmMonth -> {
-                                        insertAlarm(item,result,"и через месяц")
-                                    }
-                                }
-                            } else Toast.makeText(
-                                view?.context,
-                                "Вы выбрали время которое уже прошло",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    })
-
-            },
-            calendarZero.get(Calendar.HOUR_OF_DAY),
-            calendarZero.get(Calendar.MINUTE),
-            true
+            alarmManager,
+            action
         )
-        timePickerDialog.show()
-    }
+
+    } // Удаление заметки
 
     private fun datePickerDialog(item: Item) {
 
@@ -210,73 +168,106 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
             calendarZero.get(Calendar.DAY_OF_MONTH)
         )
         datePickerDialog.show()
-    }
+    } // Установрка даты
+
+    private fun timePickerDialog(item: Item) {
+        timePickerDialog = TimePickerDialog(
+            requireContext(),
+            { _, hour, minute ->
+                calendar.set(Calendar.HOUR_OF_DAY, hour)
+                calendar.set(Calendar.MINUTE, minute)
+                DialogItemList.insertAlarm(
+                    requireView().context,
+                    object : DialogItemList.InsertAlarm {
+                        override fun onClick(result: Int) {
+                            if (calendar.timeInMillis >= calendarZero.timeInMillis) {
+                                when (result) {
+                                    Const.alarmOne -> {
+                                        insertAlarm(item, result, "")
+                                    }
+
+                                    Const.alarmDay -> {
+                                        insertAlarm(item, result, "и через день")
+                                    }
+
+                                    Const.alarmWeek -> {
+                                        insertAlarm(item, result, "и через неделю")
+                                    }
+
+                                    Const.alarmMonth -> {
+                                        insertAlarm(item, result, "и через месяц")
+                                    }
+                                }
+                            } else Toast.makeText(
+                                view?.context,
+                                "Вы выбрали время которое уже прошло",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    })
+
+            },
+            calendarZero.get(Calendar.HOUR_OF_DAY),
+            calendarZero.get(Calendar.MINUTE),
+            true
+        )
+        timePickerDialog.show()
+    } // Установрка времени
 
     override fun onLongClick(item: Item) {
         Thread {
             db.CourseDao().update(item.copy(changeAlarm = !item.changeAlarm))
         }.start()
         if (item.changeAlarm) {
-            modelFlashLight.alarmInsert(
-                item,
-                item.alarmTime,
-                requireContext(),
-                alarmManager,
-                Const.deleteAlarmRepeat
-            )
+            changeAlarmItem(item, Const.deleteAlarmRepeat)
         }
         if (!item.changeAlarm && item.alarmTime > calendarZero.timeInMillis) {
-            modelFlashLight.alarmInsert(
-                item,
-                item.alarmTime,
-                requireContext(),
-                alarmManager,
-                item.interval
-            )
+            changeAlarmItem(item, item.interval)
         }
+        if (!item.changeAlarm && item.alarmTime < calendarZero.timeInMillis) {
+            when (item.interval) {
+                Const.alarmDay -> {
+                    insertAlarmRepeat(item, AlarmManager.INTERVAL_DAY, "и через день")
+                }
+                Const.alarmWeek -> {
+                    insertAlarmRepeat(item, AlarmManager.INTERVAL_DAY * 7, "и через неделю")
+                }
+                Const.alarmMonth -> {
+                    insertAlarmRepeat(item, Const.MONTH, "и через месяц")
+                }
+            }
+        }
+
+
     }
 
     override fun onClick(item: Item, action: Int) {
+        view?.let { modelFlashLight.turnVibro(it.context, 100) }
         when (action) {
             Const.change -> {
                 Thread {
-                    view?.let { modelFlashLight.turnVibro(it.context, 100) }
                     db.CourseDao().update(item.copy(change = !item.change))
                     if (item.changeAlarm) {
                         db.CourseDao().update(item.copy(changeAlarm = false, change = !item.change))
                     }
-                    modelFlashLight.alarmInsert(
-                        item,
-                        item.alarmTime,
-                        requireContext(),
-                        alarmManager,
-                        Const.deleteAlarmRepeat
-                    )
+                    changeAlarmItem(item, Const.deleteAlarmRepeat)
                 }.start()
-            }
+            } // Изменение состояния элемента(активный/неактивный)
 
             Const.delete -> {
-                view?.let { modelFlashLight.turnVibro(it.context, 100) }
                 if (item.change) {
                     Thread {
                         db.CourseDao().delete(item)
                     }.start()
-                    modelFlashLight.alarmInsert(
-                        item,
-                        item.alarmTime,
-                        requireContext(),
-                        alarmManager,
-                        Const.deleteAlarmRepeat
-                    )
+                    changeAlarmItem(item, Const.deleteAlarmRepeat)
                 } else {
-                    delete(requireContext(), item)
+                    deleteAlertDialog(requireContext(), item)
                 }
 
-            }
+            } // Удаления элемента
 
             Const.alarm -> {
                 calendar = Calendar.getInstance()
-                view?.let { modelFlashLight.turnVibro(it.context, 100) }
                 if (view?.let {
                         Const.isPermissionGranted(
                             it.context,
@@ -289,29 +280,24 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
                         pLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                     }
                 }
-            }
+            } // Установка будильника
 
             Const.changeItem -> {
                 DialogItemList.AlertList(requireContext(), object : DialogItemList.Listener {
                     override fun onClick(name: String) {
                         Thread {
                             val newitem = item.copy(name = name)
-                            if (item.changeAlarm) modelFlashLight.alarmInsert(
-                                newitem,
-                                newitem.alarmTime,
-                                requireContext(),
-                                alarmManager,
-                                item.interval
-                            )
+                            if (item.changeAlarm) changeAlarmItem(newitem, newitem.interval)
                             db.CourseDao().update(newitem)
                         }.start()
                     }
                 }, item.name)
-            }
+            } // Изменение имени элемента
         }
 
     }
-    private fun insertAlarm(item: Item, result: Int,intervalText: String){
+
+    private fun insertAlarm(item: Item, result: Int, intervalText: String) {
         val dateFormat = "dd.MM"
         val timeFormat = "HH:mm"
         val date = SimpleDateFormat(dateFormat, Locale.US)
@@ -330,15 +316,26 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
         Thread {
             db.CourseDao().update(newitem)
         }.start()
-        modelFlashLight.alarmInsert(
-            newitem,
-            calendar.timeInMillis,
-            requireView().context,
-            alarmManager, result
-        )
+        changeAlarmItem(newitem, result)
 
     } // установка будильника
 
+    private fun insertAlarmRepeat(item: Item, intervalTime: Long, intervalString: String) {
+        val time = item.alarmTime + intervalTime
+        val dateFormat = "dd.MM"
+        val timeFormat = "HH:mm"
+        val dateFormate = SimpleDateFormat(dateFormat, Locale.US)
+        val timeFormate = SimpleDateFormat(timeFormat, Locale.US)
+        val resultDate = dateFormate.format(time)
+        val resutTime = timeFormate.format(time)
+        val result = "Напомнит: $resultDate в $resutTime $intervalString"
+        val newItem = item.copy(alarmTime = time, alarmText = result,changeAlarm = !item.changeAlarm)
+        Thread {
+            db.CourseDao().update(newItem)
+        }.start()
+        changeAlarmItem(newItem, newItem.interval)
+
+    } // установка повторяющегося будильника
 
 
     companion object {
