@@ -5,6 +5,8 @@ import android.app.AlarmManager
 import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.core.view.GravityCompat
 import androidx.room.Room
 import com.exampl3.flashlight.Data.Const
@@ -20,7 +22,7 @@ import com.yandex.mobile.ads.common.AdRequest
 import java.util.Calendar
 
 
-class MainActivity : AppCompatActivity(), ItemListAdapter.onLongClick, ItemListAdapter.onClick {
+class MainActivity : AppCompatActivity() {
     private var bannerAd: BannerAdView? = null
     private lateinit var db: GfgDatabase
     private lateinit var binding: ActivityMainBinding
@@ -28,7 +30,6 @@ class MainActivity : AppCompatActivity(), ItemListAdapter.onLongClick, ItemListA
     private lateinit var calendarZero: Calendar
     private lateinit var modelFlashLight: ViewModelFlashLight
     private lateinit var alarmManager: AlarmManager
-    private lateinit var adapter: ItemListAdapter
     private val listFrag = listOf(
         FragmentNotebook.newInstance(),
         FragmentList.newInstance(),
@@ -54,6 +55,16 @@ class MainActivity : AppCompatActivity(), ItemListAdapter.onLongClick, ItemListA
         updateAlarm()
         binding.imMenu.setOnClickListener {
             binding.drawer.openDrawer(GravityCompat.START)
+        }
+        binding.button6.setOnClickListener {
+            Const.premium = true
+            Toast.makeText(this, "Поздравляю! Теперь вам доступны премиум функции", Toast.LENGTH_SHORT).show()
+            binding.drawer.closeDrawer(GravityCompat.START)
+
+        }
+        binding.button.setOnClickListener {
+            Const.premium = false
+            binding.drawer.closeDrawer(GravityCompat.START)
         }
 
 
@@ -94,12 +105,5 @@ class MainActivity : AppCompatActivity(), ItemListAdapter.onLongClick, ItemListA
         }.start()
     } // обновляю будильники
 
-    override fun onLongClick(item: Item) {
-        TODO("Not yet implemented")
-    }
-
-    override fun onClick(item: Item, action: Int) {
-        TODO("Not yet implemented")
-    }
 
 }

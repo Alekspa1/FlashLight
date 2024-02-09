@@ -11,6 +11,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.speech.RecognizerIntent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,7 +20,9 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.asLiveData
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
 import com.exampl3.flashlight.Data.Const
 import com.exampl3.flashlight.Domain.Adapter.ItemListAdapter
@@ -28,6 +31,7 @@ import com.exampl3.flashlight.Domain.Room.Item
 import com.exampl3.flashlight.databinding.FragmentListBinding
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Collections
 import java.util.Locale
 
 
@@ -114,8 +118,8 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
     } // Функция для создания интента голосового ввода
 
     private fun initRcView() {
-        adapter = ItemListAdapter(this, this)
         val rcView = binding.rcView
+        adapter = ItemListAdapter(this, this)
         rcView.layoutManager = LinearLayoutManager(requireContext())
         rcView.adapter = adapter
 
@@ -181,24 +185,9 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
                     object : DialogItemList.InsertAlarm {
                         override fun onClick(result: Int) {
                             if (calendar.timeInMillis >= calendarZero.timeInMillis) {
-                                when (result) {
-                                    Const.alarmOne -> {
-                                        insertAlarm(item, result, "")
-                                    }
-
-                                    Const.alarmDay -> {
-                                        insertAlarm(item, result, "и через день")
-                                    }
-
-                                    Const.alarmWeek -> {
-                                        insertAlarm(item, result, "и через неделю")
-                                    }
-
-                                    Const.alarmMonth -> {
-                                        insertAlarm(item, result, "и через месяц")
-                                    }
-                                }
-                            } else Toast.makeText(
+                                proverkaFree(item, result)
+                            }
+                            else Toast.makeText(
                                 view?.context,
                                 "Вы выбрали время которое уже прошло",
                                 Toast.LENGTH_SHORT
@@ -212,7 +201,7 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
             true
         )
         timePickerDialog.show()
-    } // Установрка времени
+    } // Установка времени
 
     override fun onLongClick(item: Item) {
         Thread {
@@ -242,6 +231,7 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
     }
 
     override fun onClick(item: Item, action: Int) {
+
         view?.let { modelFlashLight.turnVibro(it.context, 100) }
         when (action) {
             Const.change -> {
@@ -336,6 +326,27 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
         changeAlarmItem(newItem, newItem.interval)
 
     } // установка повторяющегося будильника
+    private fun proverkaFree(item: Item, result: Int){
+        if (result == Const.alarmOne) insertAlarm(item, result, "")
+        else if(Const.premium){
+            when(result){
+                Const.alarmDay -> {
+                    insertAlarm(item, result, "и через день")
+                }
+
+                Const.alarmWeek -> {
+                    insertAlarm(item, result, "и через неделю")
+                }
+
+                Const.alarmMonth -> {
+                    insertAlarm(item, result, "и через месяц")
+                }
+
+
+            }
+        }else Toast.makeText(view?.context, "Повторяющиеся напоминания доступны в PRO версии", Toast.LENGTH_SHORT).show()
+
+    }
 
 
     companion object {
