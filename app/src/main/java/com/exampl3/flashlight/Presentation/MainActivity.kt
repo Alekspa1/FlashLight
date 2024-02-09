@@ -5,10 +5,13 @@ import android.app.AlarmManager
 import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.core.view.GravityCompat
 import androidx.room.Room
 import com.exampl3.flashlight.Data.Const
+import com.exampl3.flashlight.Domain.Adapter.ItemListAdapter
 import com.exampl3.flashlight.Domain.Adapter.VpAdapter
 import com.exampl3.flashlight.Domain.Room.GfgDatabase
+import com.exampl3.flashlight.Domain.Room.Item
 import com.exampl3.flashlight.databinding.ActivityMainBinding
 import com.google.android.material.tabs.TabLayoutMediator
 import com.yandex.mobile.ads.banner.BannerAdSize
@@ -17,7 +20,7 @@ import com.yandex.mobile.ads.common.AdRequest
 import java.util.Calendar
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), ItemListAdapter.onLongClick, ItemListAdapter.onClick {
     private var bannerAd: BannerAdView? = null
     private lateinit var db: GfgDatabase
     private lateinit var binding: ActivityMainBinding
@@ -25,6 +28,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var calendarZero: Calendar
     private lateinit var modelFlashLight: ViewModelFlashLight
     private lateinit var alarmManager: AlarmManager
+    private lateinit var adapter: ItemListAdapter
     private val listFrag = listOf(
         FragmentNotebook.newInstance(),
         FragmentList.newInstance(),
@@ -48,6 +52,9 @@ class MainActivity : AppCompatActivity() {
         initDb()
         initYaBaner()
         updateAlarm()
+        binding.imMenu.setOnClickListener {
+            binding.drawer.openDrawer(GravityCompat.START)
+        }
 
 
     }
@@ -80,10 +87,19 @@ class MainActivity : AppCompatActivity() {
         Thread {
             db.CourseDao().getAllList().forEach { item ->
                 if (item.changeAlarm && item.alarmTime > calendarZero.timeInMillis) {
-                    modelFlashLight.alarmInsert(item, item.alarmTime, this, alarmManager)
+                    modelFlashLight.alarmInsert(item, item.alarmTime, this, alarmManager, item.interval)
                 }
+
             }
         }.start()
+    } // обновляю будильники
+
+    override fun onLongClick(item: Item) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onClick(item: Item, action: Int) {
+        TODO("Not yet implemented")
     }
 
 }

@@ -5,7 +5,7 @@ import android.content.Context
 import com.exampl3.flashlight.Domain.Room.Item
 
 class AlarmManagerInsert(private val alarmManagerRepository: AlarmManagerRepository) {
-    fun alarmManagerInsert(item: Item, time: Long, context: Context,alarmManager: AlarmManager){
-        alarmManagerRepository.alarmManagerInsert(item, time, context,alarmManager)
+    fun alarmManagerInsert(item: Item, time: Long, context: Context,alarmManager: AlarmManager, action: Int){
+        alarmManagerRepository.alarmManagerInsert(item, time, context,alarmManager, action)
     }
 }

@@ -35,9 +35,10 @@ class FragmentNotebook : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         greetings = "Дорогие пользователи! \nВвиду особенности некоторых моделей телефонов," +
-                " установленные напоминания перестают работать после перезагрузки устройства," +
+                " установленные напоминания сбиваются после перезагрузки устройства," +
                 " если вы столкнулись с такой проблемой, вам необходимо в настройках приложения," +
-                " включить автозапуск приложения или повторно войти в приложение, чтобы напоминания обновились"
+                " включить автозапуск приложения или разрешить приложению работать в фоновом режиме. " +
+                "Либо повторно входить в приложение после перезагрузки, чтобы напоминания обновились."
         val launcher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
             result: ActivityResult ->
             if (result.resultCode == RESULT_OK){

@@ -59,21 +59,24 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
         modelFlashLight = ViewModelFlashLight()
         alarmManager = view.context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-        val launcher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
-                result: ActivityResult ->
-            if (result.resultCode == Activity.RESULT_OK){
-                val text = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
-                Thread {
-                    if (text != null) {
-                        db.CourseDao().insertAll(Item(null, text[0]))
-                    }
-                }.start()
+        val launcher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
+                if (result.resultCode == Activity.RESULT_OK) {
+                    val text = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+                    Thread {
+                        if (text != null) {
+                            db.CourseDao().insertAll(Item(null, text[0]))
+                        }
+                    }.start()
+
+                }
 
             }
-
-        }
         val voiceIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
-        voiceIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+        voiceIntent.putExtra(
+            RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+        )
 
 
         initDb(view.context)
@@ -92,9 +95,12 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
         binding.imageView.setOnClickListener {
             try {
                 launcher.launch(voiceIntent)
-            }
-            catch (e: Exception){
-                Toast.makeText(view.context, "Голосовой ввод пока недоступен для вашего устройства", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Toast.makeText(
+                    view.context,
+                    "Голосовой ввод пока недоступен для вашего устройства",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
 
         }
@@ -106,6 +112,7 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
         super.onResume()
         updateRcView()
     }
+
     private fun initRcView() {
         adapter = ItemListAdapter(this, this)
         val rcView = binding.rcView
@@ -113,24 +120,32 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
         rcView.adapter = adapter
 
     } // инициализировал ресайклер
+
     private fun initDb(context: Context) {
         db = Room.databaseBuilder(
             context,
             GfgDatabase::class.java, "db"
         ).build()
     } // инициализировал БД
-    private fun updateRcView(){
-        db.CourseDao().getAll().asLiveData().observe(viewLifecycleOwner) {list->
+
+    private fun updateRcView() {
+        db.CourseDao().getAll().asLiveData().observe(viewLifecycleOwner) { list ->
             adapter.submitList(list)
         }
     } // Обновил список в ресайклере
 
-    private fun delete(context: Context, item: Item){
-        DialogItemList.AlertDelete(context, object : DialogItemList.Delete{
+    private fun delete(context: Context, item: Item) {
+        DialogItemList.AlertDelete(context, object : DialogItemList.Delete {
             override fun onClick(flag: Boolean) {
                 if (flag) {
                     Thread {
-                        modelFlashLight.alarmDelete(item.id!!, view!!.context, alarmManager)
+                        modelFlashLight.alarmInsert(
+                            item,
+                            item.alarmTime,
+                            requireContext(),
+                            alarmManager,
+                            Const.deleteAlarmRepeat
+                        )
                         db.CourseDao().delete(item)
                     }.start()
 
@@ -139,36 +154,51 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
         })
     } // удаляю заметки
 
-    private fun timePickerDialog(item: Item){
-        timePickerDialog = TimePickerDialog(requireContext(),
+    private fun timePickerDialog(item: Item) {
+        timePickerDialog = TimePickerDialog(
+            requireContext(),
             { _, hour, minute ->
                 calendar.set(Calendar.HOUR_OF_DAY, hour)
                 calendar.set(Calendar.MINUTE, minute)
-                val dateFormat = "dd.MM"
-                val timeFormat = "HH:mm"
-                val date = SimpleDateFormat(dateFormat, Locale.US)
-                val time = SimpleDateFormat(timeFormat, Locale.US)
-                val resultDate = date.format(calendar.time)
-                val resutTime = time.format(calendar.time)
-                val result = "Напомнит: $resultDate в $resutTime"
-                if(calendar.timeInMillis >= calendarZero.timeInMillis ) {
-                    val newitem = item.copy(changeAlarm = true,alarmText = result, alarmTime = calendar.timeInMillis, change = false, name = item.name)
-                    Thread {
-                        db.CourseDao().update(newitem)
-                    }.start()
-                    modelFlashLight.alarmInsert(newitem, calendar.timeInMillis, requireView().context, alarmManager)
-                }
-                else Toast.makeText(view?.context, "Вы выбрали время которое уже прошло", Toast.LENGTH_SHORT).show()
+                DialogItemList.insertAlarm(
+                    requireView().context,
+                    object : DialogItemList.InsertAlarm {
+                        override fun onClick(result: Int) {
+                            if (calendar.timeInMillis >= calendarZero.timeInMillis) {
+                                when (result) {
+                                    Const.alarmOne -> {
+                                        insertAlarm(item,result,"")
+                                    }
+                                    Const.alarmDay -> {
+                                        insertAlarm(item,result,"и через день")
+                                    }
+                                    Const.alarmWeek -> {
+                                        insertAlarm(item,result,"и через неделю")
+                                    }
+                                    Const.alarmMonth -> {
+                                        insertAlarm(item,result,"и через месяц")
+                                    }
+                                }
+                            } else Toast.makeText(
+                                view?.context,
+                                "Вы выбрали время которое уже прошло",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    })
 
             },
             calendarZero.get(Calendar.HOUR_OF_DAY),
             calendarZero.get(Calendar.MINUTE),
-            true )
+            true
+        )
         timePickerDialog.show()
     }
-    private fun datePickerDialog(item: Item){
 
-        datePickerDialog = DatePickerDialog(requireContext(),
+    private fun datePickerDialog(item: Item) {
+
+        datePickerDialog = DatePickerDialog(
+            requireContext(),
             { _, year, month, day ->
                 calendar.set(Calendar.YEAR, year)
                 calendar.set(Calendar.MONTH, month)
@@ -177,44 +207,82 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
             },
             calendarZero.get(Calendar.YEAR),
             calendarZero.get(Calendar.MONTH),
-            calendarZero.get(Calendar.DAY_OF_MONTH))
-         datePickerDialog.show()
+            calendarZero.get(Calendar.DAY_OF_MONTH)
+        )
+        datePickerDialog.show()
     }
+
     override fun onLongClick(item: Item) {
         Thread {
             db.CourseDao().update(item.copy(changeAlarm = !item.changeAlarm))
         }.start()
-        if(item.changeAlarm) modelFlashLight.alarmDelete(item.id!!, requireContext(), alarmManager)
-       if (!item.changeAlarm && item.alarmTime > calendarZero.timeInMillis) modelFlashLight.alarmInsert(item, item.alarmTime, requireContext(), alarmManager)
+        if (item.changeAlarm) {
+            modelFlashLight.alarmInsert(
+                item,
+                item.alarmTime,
+                requireContext(),
+                alarmManager,
+                Const.deleteAlarmRepeat
+            )
+        }
+        if (!item.changeAlarm && item.alarmTime > calendarZero.timeInMillis) {
+            modelFlashLight.alarmInsert(
+                item,
+                item.alarmTime,
+                requireContext(),
+                alarmManager,
+                item.interval
+            )
+        }
     }
 
     override fun onClick(item: Item, action: Int) {
-        when(action){
-            Const.change-> {
+        when (action) {
+            Const.change -> {
                 Thread {
                     view?.let { modelFlashLight.turnVibro(it.context, 100) }
                     db.CourseDao().update(item.copy(change = !item.change))
                     if (item.changeAlarm) {
-                        db.CourseDao().update(item.copy(changeAlarm = false,change = !item.change ))
+                        db.CourseDao().update(item.copy(changeAlarm = false, change = !item.change))
                     }
-                    modelFlashLight.alarmDelete(item.id!!, requireContext(), alarmManager)
+                    modelFlashLight.alarmInsert(
+                        item,
+                        item.alarmTime,
+                        requireContext(),
+                        alarmManager,
+                        Const.deleteAlarmRepeat
+                    )
                 }.start()
             }
-            Const.delete-> {
+
+            Const.delete -> {
                 view?.let { modelFlashLight.turnVibro(it.context, 100) }
                 if (item.change) {
                     Thread {
                         db.CourseDao().delete(item)
                     }.start()
-                    modelFlashLight.alarmDelete(item.id!!, requireContext(), alarmManager)
-                } else{ delete(requireContext(), item)
+                    modelFlashLight.alarmInsert(
+                        item,
+                        item.alarmTime,
+                        requireContext(),
+                        alarmManager,
+                        Const.deleteAlarmRepeat
+                    )
+                } else {
+                    delete(requireContext(), item)
                 }
 
             }
+
             Const.alarm -> {
                 calendar = Calendar.getInstance()
                 view?.let { modelFlashLight.turnVibro(it.context, 100) }
-                if (view?.let { Const.isPermissionGranted(it.context, Manifest.permission.POST_NOTIFICATIONS) } == true) {
+                if (view?.let {
+                        Const.isPermissionGranted(
+                            it.context,
+                            Manifest.permission.POST_NOTIFICATIONS
+                        )
+                    } == true) {
                     datePickerDialog(item)
                 } else {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -222,12 +290,19 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
                     }
                 }
             }
+
             Const.changeItem -> {
                 DialogItemList.AlertList(requireContext(), object : DialogItemList.Listener {
                     override fun onClick(name: String) {
                         Thread {
                             val newitem = item.copy(name = name)
-                            if(item.changeAlarm) modelFlashLight.alarmInsert(newitem, newitem.alarmTime, requireContext(), alarmManager)
+                            if (item.changeAlarm) modelFlashLight.alarmInsert(
+                                newitem,
+                                newitem.alarmTime,
+                                requireContext(),
+                                alarmManager,
+                                item.interval
+                            )
                             db.CourseDao().update(newitem)
                         }.start()
                     }
@@ -236,6 +311,34 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
         }
 
     }
+    private fun insertAlarm(item: Item, result: Int,intervalText: String){
+        val dateFormat = "dd.MM"
+        val timeFormat = "HH:mm"
+        val date = SimpleDateFormat(dateFormat, Locale.US)
+        val time = SimpleDateFormat(timeFormat, Locale.US)
+        val resultDate = date.format(calendar.time)
+        val resutTime = time.format(calendar.time)
+        val newAlarmText = "Напомнит: $resultDate в $resutTime"
+        val newitem = item.copy(
+            changeAlarm = true,
+            alarmText = "$newAlarmText $intervalText",
+            alarmTime = calendar.timeInMillis,
+            change = false,
+            name = item.name,
+            interval = result
+        )
+        Thread {
+            db.CourseDao().update(newitem)
+        }.start()
+        modelFlashLight.alarmInsert(
+            newitem,
+            calendar.timeInMillis,
+            requireView().context,
+            alarmManager, result
+        )
+
+    } // установка будильника
+
 
 
     companion object {
