@@ -3,6 +3,7 @@ package com.exampl3.flashlight.Presentation
 
 import android.app.AlarmManager
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -30,6 +31,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var calendarZero: Calendar
     private lateinit var modelFlashLight: ViewModelFlashLight
     private lateinit var alarmManager: AlarmManager
+    private lateinit var pref: SharedPreferences
     private val listFrag = listOf(
         FragmentNotebook.newInstance(),
         FragmentList.newInstance(),
@@ -48,16 +50,24 @@ class MainActivity : AppCompatActivity() {
         calendarZero = Calendar.getInstance()
         modelFlashLight = ViewModelFlashLight()
         alarmManager = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        pref = this.getSharedPreferences("PREMIUM", Context.MODE_PRIVATE)
         setContentView(binding.root)
         initVp()
         initDb()
         initYaBaner()
         updateAlarm()
+        Const.premium = pref.getBoolean("premium", false)
+        Toast.makeText(this, "${Const.premium}", Toast.LENGTH_SHORT).show()
         binding.imMenu.setOnClickListener {
             binding.drawer.openDrawer(GravityCompat.START)
+            val edit = pref.edit()
+            edit.putBoolean("premium", false)
+            edit.apply()
         }
         binding.button6.setOnClickListener {
-            Const.premium = true
+            val edit = pref.edit()
+            edit.putBoolean("premium", true)
+            edit.apply()
             Toast.makeText(this, "Поздравляю! Теперь вам доступны премиум функции", Toast.LENGTH_SHORT).show()
             binding.drawer.closeDrawer(GravityCompat.START)
 
