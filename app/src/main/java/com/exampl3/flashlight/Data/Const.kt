@@ -12,10 +12,10 @@ object Const {
     const val BANER = "R-M-4702196-1"
     const val MEZSTR = "R-M-4702196-2"
     const val keyNoteBook = "key"
-    const val delete = 0
-    const val change = 1
-    const val changeItem = 2
-    const val alarm = 3
+    const val delete = 10
+    const val change = 11
+    const val changeItem = 12
+    const val alarm = 13
     const val CHANNEL_ID = "channelID"
     const val CHANNEL_ID_PASSED = "CHANNEL_ID_PASSED"
     const val keyIntent = "keyId"
