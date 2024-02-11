@@ -56,7 +56,10 @@ class MainActivity : AppCompatActivity() {
         "Список дел",
         "Фонарик"
     )
+
     private lateinit var billingClient: RuStoreBillingClient
+    private lateinit var productsUseCase: ProductsUseCase
+    private lateinit var purchasesUseCase: PurchasesUseCase
 
 
 
@@ -79,33 +82,22 @@ class MainActivity : AppCompatActivity() {
         billingClient = RuStoreBillingClientFactory.create(
             context = this,
             consoleApplicationId = "2063541058",
-            deeplinkScheme = "https://apps.rustore.ru/app/com.exampl3.flashlight",
-            // Опциональные параметры
-            themeProvider = null,
-            debugLogs  = false,
-            externalPaymentLoggerFactory = null,
+            deeplinkScheme = "https://apps.rustore.ru/app/com.exampl3.flashlight"
         )
         proverka(this)
-        val productsUseCase: ProductsUseCase = billingClient.products
-        val purchasesUseCase: PurchasesUseCase = billingClient.purchases
 
-
-        productsUseCase.getProducts(productIds = listOf("premium_version_flash_light"))
-
-            .addOnSuccessListener { products: List<Product> ->
-                Log.d("MyLog", "Success productsUseCase: $products")
-            }
-            .addOnFailureListener { throwable: Throwable ->
-                Log.d("MyLog", "error productsUseCase: $throwable")
+        productsUseCase = billingClient.products
+        purchasesUseCase = billingClient.purchases
+        purchasesUseCase.confirmPurchase(purchaseId = "premium_version_flash_light", developerPayload = null)
+            .addOnSuccessListener {
+               Log.d("MyLog", "Проверка покупки: да")
+            }.addOnFailureListener { throwable: Throwable ->
+                Log.d("MyLog", "Проверка покупки: $throwable")
             }
 
-        purchasesUseCase.getPurchases()
-            .addOnSuccessListener { purchases: List<Purchase> ->
-                Log.d("MyLog", "Success purchasesUseCase: $purchases")
-            }
-            .addOnFailureListener { throwable: Throwable ->
-                Log.d("MyLog", "error purchasesUseCase: $throwable")
-            }
+
+
+
 
 
 
@@ -148,15 +140,18 @@ class MainActivity : AppCompatActivity() {
 //            edit.apply()
             purchasesUseCase.purchaseProduct(
                 productId = "premium_version_flash_light",
+                orderId = UUID.randomUUID().toString(),
+                quantity = 1,
+                developerPayload = null,
             ).addOnSuccessListener { paymentResult: PaymentResult ->
                 when (paymentResult) {
                     // Process PaymentResult
                     else -> {}
                 }
             }.addOnFailureListener { throwable: Throwable ->
-                Log.d("MyLog", "Ошибка покупки: $throwable")
-
+                Log.d("MyLog", "Нажал на кнопку: $throwable")
             }
+
 
 
         }
@@ -185,24 +180,15 @@ class MainActivity : AppCompatActivity() {
             .addOnSuccessListener { result ->
                 when (result) {
                     FeatureAvailabilityResult.Available -> {
-                        Log.d("MyLog", "proverka ok")
                     }
 
                     is FeatureAvailabilityResult.Unavailable -> {
-                        Log.d("MyLog", "proverka недоступно")
                     }
                 }
             }.addOnFailureListener { throwable ->
-                Log.d("MyLog", "proverka ploxo")
+                Log.d("MyLog", "Проверка возможной покупки: $throwable")
             }
     }
-
-
-
-
-
-
-
 
 
 
