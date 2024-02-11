@@ -3,6 +3,7 @@ package com.exampl3.flashlight.Presentation
 
 import android.app.AlarmManager
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -20,7 +21,20 @@ import com.google.android.material.tabs.TabLayoutMediator
 import com.yandex.mobile.ads.banner.BannerAdSize
 import com.yandex.mobile.ads.banner.BannerAdView
 import com.yandex.mobile.ads.common.AdRequest
+import ru.rustore.sdk.billingclient.RuStoreBillingClient
+
+import ru.rustore.sdk.billingclient.RuStoreBillingClientFactory
+import ru.rustore.sdk.billingclient.model.product.Product
+import ru.rustore.sdk.billingclient.model.purchase.PaymentResult
+import ru.rustore.sdk.billingclient.model.purchase.Purchase
+import ru.rustore.sdk.billingclient.model.purchase.PurchaseState
+import ru.rustore.sdk.billingclient.usecase.ProductsUseCase
+import ru.rustore.sdk.billingclient.usecase.PurchasesUseCase
+import ru.rustore.sdk.billingclient.utils.pub.checkPurchasesAvailability
+import ru.rustore.sdk.core.feature.model.FeatureAvailabilityResult
+
 import java.util.Calendar
+import java.util.UUID
 
 
 class MainActivity : AppCompatActivity() {
@@ -42,34 +56,121 @@ class MainActivity : AppCompatActivity() {
         "Список дел",
         "Фонарик"
     )
+    private lateinit var billingClient: RuStoreBillingClient
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         binding = ActivityMainBinding.inflate(layoutInflater)
         super.onCreate(savedInstanceState)
+        billingClient = RuStoreBillingClientFactory.create(
+            context = this,
+            consoleApplicationId = "2063541058",
+            deeplinkScheme = "https://apps.rustore.ru/app/com.exampl3.flashlight",
+            // Опциональные параметры
+            themeProvider = null,
+            debugLogs  = false,
+            externalPaymentLoggerFactory = null,
+        )
+        proverka(this)
+        val productsUseCase: ProductsUseCase = billingClient.products
+        val purchasesUseCase: PurchasesUseCase = billingClient.purchases
+
+
+        productsUseCase.getProducts(productIds = listOf("premium_version_flash_light"))
+
+            .addOnSuccessListener { products: List<Product> ->
+                Log.d("MyLog", "Success productsUseCase: $products")
+            }
+            .addOnFailureListener { throwable: Throwable ->
+                Log.d("MyLog", "error productsUseCase: $throwable")
+            }
+
+        purchasesUseCase.getPurchases()
+            .addOnSuccessListener { purchases: List<Purchase> ->
+                Log.d("MyLog", "Success purchasesUseCase: $purchases")
+            }
+            .addOnFailureListener { throwable: Throwable ->
+                Log.d("MyLog", "error purchasesUseCase: $throwable")
+            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         calendarZero = Calendar.getInstance()
         modelFlashLight = ViewModelFlashLight()
         alarmManager = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         pref = this.getSharedPreferences("PREMIUM", Context.MODE_PRIVATE)
         setContentView(binding.root)
+
         initVp()
         initDb()
         initYaBaner()
+
         updateAlarm()
         Const.premium = pref.getBoolean("premium", false)
         Toast.makeText(this, "${Const.premium}", Toast.LENGTH_SHORT).show()
+
+
         binding.imMenu.setOnClickListener {
-            binding.drawer.openDrawer(GravityCompat.START)
-            val edit = pref.edit()
-            edit.putBoolean("premium", false)
-            edit.apply()
+//            binding.drawer.openDrawer(GravityCompat.START)
+//            val edit = pref.edit()
+//            edit.putBoolean("premium", false)
+//            edit.apply()
+            purchasesUseCase.purchaseProduct(
+                productId = "premium_version_flash_light",
+            ).addOnSuccessListener { paymentResult: PaymentResult ->
+                when (paymentResult) {
+                    // Process PaymentResult
+                    else -> {}
+                }
+            }.addOnFailureListener { throwable: Throwable ->
+                Log.d("MyLog", "Ошибка покупки: $throwable")
+
+            }
+
+
         }
         binding.button6.setOnClickListener {
             val edit = pref.edit()
             edit.putBoolean("premium", true)
             edit.apply()
-            Toast.makeText(this, "Поздравляю! Теперь вам доступны премиум функции", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                this,
+                "Поздравляю! Теперь вам доступны премиум функции",
+                Toast.LENGTH_SHORT
+            ).show()
             binding.drawer.closeDrawer(GravityCompat.START)
+
 
         }
         binding.button.setOnClickListener {
@@ -77,8 +178,37 @@ class MainActivity : AppCompatActivity() {
             binding.drawer.closeDrawer(GravityCompat.START)
         }
 
-
     }
+
+    private fun proverka(context: Context){
+        RuStoreBillingClient.checkPurchasesAvailability(context)
+            .addOnSuccessListener { result ->
+                when (result) {
+                    FeatureAvailabilityResult.Available -> {
+                        Log.d("MyLog", "proverka ok")
+                    }
+
+                    is FeatureAvailabilityResult.Unavailable -> {
+                        Log.d("MyLog", "proverka недоступно")
+                    }
+                }
+            }.addOnFailureListener { throwable ->
+                Log.d("MyLog", "proverka ploxo")
+            }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     fun initVp(){
