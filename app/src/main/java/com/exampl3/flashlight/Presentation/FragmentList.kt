@@ -11,7 +11,6 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.speech.RecognizerIntent
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,9 +19,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.asLiveData
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
 import com.exampl3.flashlight.Data.Const
 import com.exampl3.flashlight.Domain.Adapter.ItemListAdapter
@@ -31,7 +28,6 @@ import com.exampl3.flashlight.Domain.Room.Item
 import com.exampl3.flashlight.databinding.FragmentListBinding
 import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Collections
 import java.util.Locale
 
 
@@ -344,7 +340,7 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
 
 
             }
-        }else Toast.makeText(view?.context, "Повторяющиеся напоминания доступны в PRO версии", Toast.LENGTH_SHORT).show()
+        }else Toast.makeText(view?.context, "Повторяющиеся напоминания доступны в PREMIUM версии", Toast.LENGTH_SHORT).show()
 
     }
 

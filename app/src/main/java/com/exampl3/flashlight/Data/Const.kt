@@ -7,6 +7,8 @@ import android.icu.util.Calendar
 import androidx.core.content.ContextCompat
 
 object Const {
+    var premium = false
+    var premium_KEY = "premium_KEY"
     private val calendar: Calendar = Calendar.getInstance()
     private val dayInMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
     const val BANER = "R-M-4702196-1"
@@ -30,7 +32,7 @@ object Const {
     const val deleteAlarmRepeat = 4
     const val alarmRepeat = 5
     var MONTH = AlarmManager.INTERVAL_DAY*dayInMonth
-    var premium = false
+
     fun isPermissionGranted(con: Context, p: String): Boolean {
         return ContextCompat.checkSelfPermission(con, p) == PackageManager.PERMISSION_GRANTED
     }

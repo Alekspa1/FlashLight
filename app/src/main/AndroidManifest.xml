@@ -41,6 +41,7 @@
         </receiver>
 
         <activity
+            android:launchMode="singleTask"
             android:name=".Presentation.MainActivity"
             android:exported="true"
             android:screenOrientation="portrait">
@@ -48,12 +49,11 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https://apps.rustore.ru/app/com.exampl3.flashlight" />
+                <data android:scheme="yourappscheme" />
             </intent-filter>
         </activity>
     </application>
