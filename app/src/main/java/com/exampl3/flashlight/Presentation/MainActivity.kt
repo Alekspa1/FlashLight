@@ -9,10 +9,13 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.room.Room
 import com.exampl3.flashlight.Data.Const
+import com.exampl3.flashlight.Domain.Adapter.ItemListAdapter
 import com.exampl3.flashlight.Domain.Adapter.VpAdapter
 import com.exampl3.flashlight.Domain.Room.GfgDatabase
+import com.exampl3.flashlight.Domain.Room.Item
 import com.exampl3.flashlight.databinding.ActivityMainBinding
 import com.google.android.material.tabs.TabLayoutMediator
 import com.yandex.mobile.ads.banner.BannerAdSize
@@ -31,7 +34,7 @@ import java.util.Calendar
 import java.util.UUID
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), ItemListAdapter.onClick, ItemListAdapter.onLongClick {
     private var bannerAd: BannerAdView? = null
     private lateinit var db: GfgDatabase
     private lateinit var binding: ActivityMainBinding
@@ -41,6 +44,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var alarmManager: AlarmManager
     private lateinit var pref: SharedPreferences
     private lateinit var edit: SharedPreferences.Editor
+    private lateinit var adapter: ItemListAdapter
     private val listFrag = listOf(
         FragmentNotebook.newInstance(),
         FragmentList.newInstance(),
@@ -50,6 +54,24 @@ class MainActivity : AppCompatActivity() {
         "Блокнот",
         "Список дел",
         "Фонарик"
+    )
+    private val shopingList = listOf(
+        Item(null,"Дом"),
+        Item(null,"Работа"),
+        Item(null,"Машина"),
+        Item(null,"Повседневные"),
+        Item(null,"Дом"),
+        Item(null,"Работа"),
+        Item(null,"Машина"),
+        Item(null,"Повседневные"),
+        Item(null,"Дом"),
+        Item(null,"Работа"),
+        Item(null,"Машина"),
+        Item(null,"Повседневные"),
+        Item(null,"Дом"),
+        Item(null,"Работа"),
+        Item(null,"Машина"),
+        Item(null,"Повседневные"),
     )
 
     private lateinit var billingClient: RuStoreBillingClient
@@ -79,7 +101,9 @@ class MainActivity : AppCompatActivity() {
         initVp()
         initDb()
         updateAlarm()
+        initRcView()
         if (!Const.premium) initYaBaner()
+
 
 
 
@@ -186,6 +210,14 @@ class MainActivity : AppCompatActivity() {
             tab.text = listName[pos]
         }.attach()
     } // инициализирую ViewPager
+    private fun initRcView() {
+        val rcView = binding.rcView
+        adapter = ItemListAdapter(this, this)
+        rcView.layoutManager = LinearLayoutManager(this)
+        rcView.adapter = adapter
+        adapter.submitList(shopingList)
+
+    }
 
     private fun initDb() {
         db = Room.databaseBuilder(
@@ -243,6 +275,14 @@ class MainActivity : AppCompatActivity() {
             }
         }.start()
     } // обновляю будильники
+
+    override fun onLongClick(item: Item) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onClick(item: Item, action: Int) {
+        Toast.makeText(this, item.name, Toast.LENGTH_SHORT).show()
+    }
 
 
 }
