@@ -78,8 +78,9 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         initVp()
         initDb()
-        if (!Const.premium) initYaBaner()
         updateAlarm()
+        if (!Const.premium) initYaBaner()
+
 
 
         binding.imMenu.setOnClickListener {
@@ -98,6 +99,7 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         shopingList()
         Const.premium = pref.getBoolean(Const.premium_KEY, false)
+
 
     }
 
@@ -158,7 +160,7 @@ class MainActivity : AppCompatActivity() {
     private fun shopingList() {
         purchasesUseCase.getPurchases()
             .addOnSuccessListener { purchases: List<Purchase> ->
-                if (purchases.isEmpty() && Const.premium){
+                if (purchases.isEmpty() && Const.premium) {
                     edit.putBoolean(Const.premium_KEY, false)
                     edit.apply()
                 }
@@ -205,13 +207,38 @@ class MainActivity : AppCompatActivity() {
         Thread {
             db.CourseDao().getAllList().forEach { item ->
                 if (item.changeAlarm && item.alarmTime > calendarZero.timeInMillis) {
-                    modelFlashLight.alarmInsert(
-                        item,
-                        item.alarmTime,
-                        this,
-                        alarmManager,
-                        item.interval
-                    )
+                    when (item.interval) {
+                        Const.alarmOne -> {
+                            modelFlashLight.alarmInsert(
+                                item,
+                                item.alarmTime,
+                                this,
+                                alarmManager,
+                                Const.alarmOne
+                            )
+                        }
+
+                        else -> {
+                            if (!Const.premium) {
+                                modelFlashLight.alarmInsert(
+                                    item,
+                                    item.alarmTime,
+                                    this,
+                                    alarmManager,
+                                    Const.deleteAlarmRepeat
+                                )
+                                db.CourseDao().update(item.copy(changeAlarm = !item.changeAlarm))
+                            } else {
+                                modelFlashLight.alarmInsert(
+                                    item,
+                                    item.alarmTime,
+                                    this,
+                                    alarmManager,
+                                    item.interval
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }.start()
