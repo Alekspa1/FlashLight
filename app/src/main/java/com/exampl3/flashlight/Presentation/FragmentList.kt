@@ -114,8 +114,8 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
     } // Функция для создания интента голосового ввода
 
     private fun initRcView() {
-        adapter = ItemListAdapter(this, this)
         val rcView = binding.rcView
+        adapter = ItemListAdapter(this, this)
         rcView.layoutManager = LinearLayoutManager(requireContext())
         rcView.adapter = adapter
 
@@ -181,24 +181,9 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
                     object : DialogItemList.InsertAlarm {
                         override fun onClick(result: Int) {
                             if (calendar.timeInMillis >= calendarZero.timeInMillis) {
-                                when (result) {
-                                    Const.alarmOne -> {
-                                        insertAlarm(item, result, "")
-                                    }
-
-                                    Const.alarmDay -> {
-                                        insertAlarm(item, result, "и через день")
-                                    }
-
-                                    Const.alarmWeek -> {
-                                        insertAlarm(item, result, "и через неделю")
-                                    }
-
-                                    Const.alarmMonth -> {
-                                        insertAlarm(item, result, "и через месяц")
-                                    }
-                                }
-                            } else Toast.makeText(
+                                proverkaFree(item, result)
+                            }
+                            else Toast.makeText(
                                 view?.context,
                                 "Вы выбрали время которое уже прошло",
                                 Toast.LENGTH_SHORT
@@ -212,7 +197,7 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
             true
         )
         timePickerDialog.show()
-    } // Установрка времени
+    } // Установка времени
 
     override fun onLongClick(item: Item) {
         Thread {
@@ -242,6 +227,7 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
     }
 
     override fun onClick(item: Item, action: Int) {
+
         view?.let { modelFlashLight.turnVibro(it.context, 100) }
         when (action) {
             Const.change -> {
@@ -336,6 +322,27 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
         changeAlarmItem(newItem, newItem.interval)
 
     } // установка повторяющегося будильника
+    private fun proverkaFree(item: Item, result: Int){
+        if (result == Const.alarmOne) insertAlarm(item, result, "")
+        else if(Const.premium){
+            when(result){
+                Const.alarmDay -> {
+                    insertAlarm(item, result, "и через день")
+                }
+
+                Const.alarmWeek -> {
+                    insertAlarm(item, result, "и через неделю")
+                }
+
+                Const.alarmMonth -> {
+                    insertAlarm(item, result, "и через месяц")
+                }
+
+
+            }
+        }else Toast.makeText(view?.context, "Повторяющиеся напоминания доступны в PREMIUM версии", Toast.LENGTH_SHORT).show()
+
+    }
 
 
     companion object {

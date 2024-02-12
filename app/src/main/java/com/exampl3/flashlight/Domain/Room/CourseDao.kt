@@ -14,6 +14,7 @@ interface CourseDao {
     @Query("SELECT * FROM Item")
     fun getAll(): Flow<List<Item>>
 
+
     @Query("SELECT * FROM Item")
     fun getAllList(): List<Item>
 
