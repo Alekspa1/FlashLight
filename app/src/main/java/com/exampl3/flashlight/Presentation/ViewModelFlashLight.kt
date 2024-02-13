@@ -2,7 +2,9 @@ package com.exampl3.flashlight.Presentation
 
 import android.app.AlarmManager
 import android.content.Context
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.liveData
 import com.exampl3.flashlight.Data.AlarmManagerImp
 import com.exampl3.flashlight.Data.TurnFlashLightImpl
 import com.exampl3.flashlight.Domain.Alarm.AlarmManagerInsert
@@ -16,6 +18,8 @@ class ViewModelFlashLight: ViewModel() {
     private val turnFlashLight = TurnFlashLight(repository)
     private val turnVibro = TurnVibro(repository)
     private val alarmInsert = AlarmManagerInsert(repositoryAlarm)
+
+    var premium = MutableLiveData<Boolean>()
 
 
 

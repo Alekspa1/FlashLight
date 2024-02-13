@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
@@ -73,16 +74,18 @@ class MainActivity : AppCompatActivity(), ItemMenuListAdapter.onClick {
         initDb()
         initRcView()
         updateAlarm()
+        modelFlashLight.premium.value = pref.getBoolean(Const.premium_KEY, false)
+        modelFlashLight.premium.observe(this){
+            Const.premium = it
+        }
         if (!Const.premium) initYaBaner()
         if (savedInstanceState == null) {
             billingClient.onNewIntent(intent)
         }
 
-
-
         with(binding) {
-            modelFlashLight.turnVibro(this@MainActivity, 50)
             imMenu.setOnClickListener {
+                modelFlashLight.turnVibro(this@MainActivity, 50)
                 drawer.openDrawer(GravityCompat.START)
             } //  Меню
             bBuyPremium.setOnClickListener {
@@ -112,15 +115,11 @@ class MainActivity : AppCompatActivity(), ItemMenuListAdapter.onClick {
 
             } // Добавить категори.
         }
-
-
-
     }
 
     override fun onResume() {
         super.onResume()
         shopingList()
-
 
     }
 
@@ -158,6 +157,7 @@ class MainActivity : AppCompatActivity(), ItemMenuListAdapter.onClick {
                 is PaymentResult.Success -> {
                     edit.putBoolean(Const.premium_KEY, true)
                     edit.apply()
+                    modelFlashLight.premium.value = true
                     Toast.makeText(
                         this,
                         "Поздравляю! Теперь вам доступны премиум функции",
@@ -182,16 +182,16 @@ class MainActivity : AppCompatActivity(), ItemMenuListAdapter.onClick {
             .addOnSuccessListener { purchases: List<Purchase> ->
                 if (purchases.isEmpty() && Const.premium) {
                     edit.putBoolean(Const.premium_KEY, false)
-                    Const.premium = pref.getBoolean(Const.premium_KEY, false)
                     edit.apply()
+                    modelFlashLight.premium.value = false
                 }
                 purchases.forEach {
                     if (it.productId == "premium_version_flash_light" &&
                         (it.purchaseState == PurchaseState.PAID || it.purchaseState == PurchaseState.CONFIRMED) && !Const.premium
                     ) {
                         edit.putBoolean(Const.premium_KEY, true)
-                        Const.premium = pref.getBoolean(Const.premium_KEY, false)
                         edit.apply()
+                        modelFlashLight.premium.value = true
                     }
                 }
 
