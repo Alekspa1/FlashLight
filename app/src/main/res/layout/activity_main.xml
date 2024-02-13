@@ -6,10 +6,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="start"
-    tools:openDrawer="start"
     android:background="@drawable/img"
+    tools:context=".Presentation.MainActivity"
 
-    tools:context=".Presentation.MainActivity">
+    tools:openDrawer="start">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/content"
@@ -73,26 +73,42 @@
     <com.google.android.material.navigation.NavigationView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="start">
+        android:layout_gravity="start"
+        android:background="@drawable/img">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+            <ImageButton
+                android:id="@+id/imBAddMenu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="-24dp"
+                android:layout_marginBottom="8dp"
+                android:background="@null"
+                android:src="@android:drawable/btn_plus"
+                app:layout_constraintBottom_toTopOf="@+id/drawerL"
+                app:layout_constraintEnd_toEndOf="parent" />
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rcView"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="8dp"
-                android:layout_marginBottom="8dp"
-                app:layout_constraintBottom_toTopOf="@+id/drawerL"
+                app:layout_constraintBottom_toTopOf="@+id/imVoiceMenu"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+                app:layout_constraintTop_toTopOf="parent" />
 
-            </androidx.recyclerview.widget.RecyclerView>
+            <ImageView
+                android:id="@+id/imVoiceMenu"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginBottom="8dp"
+                android:src="@drawable/ic_micro"
+                app:layout_constraintBottom_toTopOf="@+id/drawerL"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
 
             <LinearLayout
                 android:id="@+id/drawerL"
@@ -101,7 +117,6 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="8dp"
                 android:layout_marginBottom="8dp"
-                android:background="@color/white"
                 android:orientation="vertical"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -115,25 +130,25 @@
                 </androidx.cardview.widget.CardView>
 
                 <Button
-                    android:id="@+id/button5"
+                    android:id="@+id/bSettings"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Настройки" />
 
                 <Button
-                    android:id="@+id/button6"
+                    android:id="@+id/bBuyPremium"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Купить Premium версию" />
 
                 <Button
-                    android:id="@+id/button7"
+                    android:id="@+id/bCallback"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Обратная связь" />
 
                 <Button
-                    android:id="@+id/button8"
+                    android:id="@+id/bUpdate"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Проверить обновления" />

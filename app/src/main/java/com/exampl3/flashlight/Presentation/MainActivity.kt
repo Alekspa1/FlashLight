@@ -2,9 +2,11 @@ package com.exampl3.flashlight.Presentation
 
 
 import android.app.AlarmManager
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -16,6 +18,7 @@ import com.exampl3.flashlight.Domain.Adapter.ItemListAdapter
 import com.exampl3.flashlight.Domain.Adapter.VpAdapter
 import com.exampl3.flashlight.Domain.Room.GfgDatabase
 import com.exampl3.flashlight.Domain.Room.Item
+import com.exampl3.flashlight.R
 import com.exampl3.flashlight.databinding.ActivityMainBinding
 import com.google.android.material.tabs.TabLayoutMediator
 import com.yandex.mobile.ads.banner.BannerAdSize
@@ -55,23 +58,9 @@ class MainActivity : AppCompatActivity(), ItemListAdapter.onClick, ItemListAdapt
         "Список дел",
         "Фонарик"
     )
-    private val shopingList = listOf(
+    private val shopingList = arrayListOf(
         Item(null,"Дом"),
         Item(null,"Работа"),
-        Item(null,"Машина"),
-        Item(null,"Повседневные"),
-        Item(null,"Дом"),
-        Item(null,"Работа"),
-        Item(null,"Машина"),
-        Item(null,"Повседневные"),
-        Item(null,"Дом"),
-        Item(null,"Работа"),
-        Item(null,"Машина"),
-        Item(null,"Повседневные"),
-        Item(null,"Дом"),
-        Item(null,"Работа"),
-        Item(null,"Машина"),
-        Item(null,"Повседневные"),
     )
 
     private lateinit var billingClient: RuStoreBillingClient
@@ -80,23 +69,11 @@ class MainActivity : AppCompatActivity(), ItemListAdapter.onClick, ItemListAdapt
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        binding = ActivityMainBinding.inflate(layoutInflater)
         super.onCreate(savedInstanceState)
-        billingClient = RuStoreBillingClientFactory.create(
-            context = this,
-            consoleApplicationId = "2063541058",
-            deeplinkScheme = "yourappscheme"
-        )
+        initAll()
         if (savedInstanceState == null) {
             billingClient.onNewIntent(intent)
         }
-        productsUseCase = billingClient.products
-        purchasesUseCase = billingClient.purchases
-        calendarZero = Calendar.getInstance()
-        modelFlashLight = ViewModelFlashLight()
-        alarmManager = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        pref = this.getSharedPreferences("PREMIUM", Context.MODE_PRIVATE)
-        edit = pref.edit()
         setContentView(binding.root)
         initVp()
         initDb()
@@ -105,15 +82,35 @@ class MainActivity : AppCompatActivity(), ItemListAdapter.onClick, ItemListAdapt
         if (!Const.premium) initYaBaner()
 
 
-
-
         binding.imMenu.setOnClickListener {
+            modelFlashLight.turnVibro(it.context, 50)
             binding.drawer.openDrawer(GravityCompat.START)
-
         }
-        binding.button6.setOnClickListener {
+        binding.bBuyPremium.setOnClickListener {
             proverkaVozmoznoyOplaty(this)
             binding.drawer.closeDrawer(GravityCompat.START)
+        }
+        binding.bUpdate.setOnClickListener {
+            try {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse( "https://apps.rustore.ru/app/com.exampl3.flashlight" )))
+            }  catch (e: Exception) {
+                Toast.makeText(this, "Ошибка", Toast.LENGTH_SHORT).show()
+            }
+        }
+        binding.bCallback.setOnClickListener {
+            try {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse( "mailto:apereverzev47@gmail.com" )))
+            }  catch (e: Exception) {
+                Toast.makeText(this, "Ошибка", Toast.LENGTH_SHORT).show()
+            }
+        }
+        binding.imBAddMenu.setOnClickListener {
+            DialogItemList.AlertList(this, object : DialogItemList.Listener {
+                override fun onClick(name: String) {
+                    shopingList.add(Item(null, name))
+                }
+            }, null)
+
         }
 
 
@@ -201,6 +198,7 @@ class MainActivity : AppCompatActivity(), ItemListAdapter.onClick, ItemListAdapt
             .addOnFailureListener {
                 // Process error
             }
+
     } // Запрос ранее совершенных покупок
 
     fun initVp() {
@@ -210,7 +208,7 @@ class MainActivity : AppCompatActivity(), ItemListAdapter.onClick, ItemListAdapt
             tab.text = listName[pos]
         }.attach()
     } // инициализирую ViewPager
-    private fun initRcView() {
+   private fun initRcView() {
         val rcView = binding.rcView
         adapter = ItemListAdapter(this, this)
         rcView.layoutManager = LinearLayoutManager(this)
@@ -275,13 +273,29 @@ class MainActivity : AppCompatActivity(), ItemListAdapter.onClick, ItemListAdapt
             }
         }.start()
     } // обновляю будильники
+    private fun initAll(){
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        billingClient = RuStoreBillingClientFactory.create(
+            context = this,
+            consoleApplicationId = "2063541058",
+            deeplinkScheme = "yourappscheme"
+        )
+        productsUseCase = billingClient.products
+        purchasesUseCase = billingClient.purchases
+        calendarZero = Calendar.getInstance()
+        modelFlashLight = ViewModelFlashLight()
+        alarmManager = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        pref = this.getSharedPreferences("PREMIUM", Context.MODE_PRIVATE)
+        edit = pref.edit()
+
+    }
 
     override fun onLongClick(item: Item) {
         TODO("Not yet implemented")
     }
 
     override fun onClick(item: Item, action: Int) {
-        Toast.makeText(this, item.name, Toast.LENGTH_SHORT).show()
+        TODO("Not yet implemented")
     }
 
 

@@ -1,11 +1,9 @@
 package com.exampl3.flashlight.Domain.Adapter
 
 
-import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -20,8 +18,6 @@ class ItemListAdapter(private val onLongClickListener: onLongClick,
     class ViewHolder(view: View): RecyclerView.ViewHolder(view) {
         private val binding = ItemBinding.bind(view)
         private val context = view.context
-
-
         fun bind(item: Item, onLongClickListener: onLongClick, onClick: onClick) {
 
             with(binding) {
@@ -75,7 +71,6 @@ class ItemListAdapter(private val onLongClickListener: onLongClick,
         return ViewHolder(view)
     }
 
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(getItem(position), onLongClickListener, onClickListener)
     }
