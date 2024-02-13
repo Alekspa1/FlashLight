@@ -71,12 +71,10 @@ class FragmentFlashLight : Fragment()  {
         interstitialAdLoader = null
         destroyInterstitialAd()
     }
-
     private fun destroyInterstitialAd() {
         interstitialAd?.setAdEventListener(null)
         interstitialAd = null
     }
-
     private fun loadInterstitialAd() {
         val adRequestConfiguration = AdRequestConfiguration.Builder(Const.MEZSTR).build()
         interstitialAdLoader?.loadAd(adRequestConfiguration)

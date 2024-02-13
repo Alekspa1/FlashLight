@@ -1,12 +1,14 @@
 package com.exampl3.flashlight.Presentation
 
 
+import android.Manifest
 import android.app.AlarmManager
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -58,10 +60,7 @@ class MainActivity : AppCompatActivity(), ItemListAdapter.onClick, ItemListAdapt
         "Список дел",
         "Фонарик"
     )
-    private val shopingList = arrayListOf(
-        Item(null,"Дом"),
-        Item(null,"Работа"),
-    )
+    private val shopingList = arrayListOf<Item>()
 
     private lateinit var billingClient: RuStoreBillingClient
     private lateinit var productsUseCase: ProductsUseCase
@@ -71,47 +70,51 @@ class MainActivity : AppCompatActivity(), ItemListAdapter.onClick, ItemListAdapt
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initAll()
-        if (savedInstanceState == null) {
-            billingClient.onNewIntent(intent)
-        }
         setContentView(binding.root)
         initVp()
         initDb()
-        updateAlarm()
         initRcView()
+        updateAlarm()
         if (!Const.premium) initYaBaner()
+        if (savedInstanceState == null) {
+            billingClient.onNewIntent(intent)
+        }
 
 
-        binding.imMenu.setOnClickListener {
-            modelFlashLight.turnVibro(it.context, 50)
-            binding.drawer.openDrawer(GravityCompat.START)
-        }
-        binding.bBuyPremium.setOnClickListener {
-            proverkaVozmoznoyOplaty(this)
-            binding.drawer.closeDrawer(GravityCompat.START)
-        }
-        binding.bUpdate.setOnClickListener {
-            try {
-                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse( "https://apps.rustore.ru/app/com.exampl3.flashlight" )))
-            }  catch (e: Exception) {
-                Toast.makeText(this, "Ошибка", Toast.LENGTH_SHORT).show()
-            }
-        }
-        binding.bCallback.setOnClickListener {
-            try {
-                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse( "mailto:apereverzev47@gmail.com" )))
-            }  catch (e: Exception) {
-                Toast.makeText(this, "Ошибка", Toast.LENGTH_SHORT).show()
-            }
-        }
-        binding.imBAddMenu.setOnClickListener {
-            DialogItemList.AlertList(this, object : DialogItemList.Listener {
-                override fun onClick(name: String) {
-                    shopingList.add(Item(null, name))
+
+        with(binding) {
+            imMenu.setOnClickListener {
+                modelFlashLight.turnVibro(it.context, 50)
+                drawer.openDrawer(GravityCompat.START)
+            } //  Меню
+            bBuyPremium.setOnClickListener {
+                proverkaVozmoznoyOplaty(this@MainActivity)
+                drawer.closeDrawer(GravityCompat.START)
+            } // ПРЕМИУМ
+            bUpdate.setOnClickListener {
+                try {
+                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse( "https://apps.rustore.ru/app/com.exampl3.flashlight" )))
+                }  catch (e: Exception) {
+                    Toast.makeText(this@MainActivity, "Ошибка", Toast.LENGTH_SHORT).show()
                 }
-            }, null)
+            } // Проверить обновления
+            bCallback.setOnClickListener {
+                try {
+                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse( "mailto:apereverzev47@gmail.com" )))
+                }  catch (e: Exception) {
+                    Toast.makeText(this@MainActivity, "Ошибка", Toast.LENGTH_SHORT).show()
+                }
+            } // Обратная связь
+            imBAddMenu.setOnClickListener {
+                DialogItemList.AlertList(this@MainActivity, object : DialogItemList.Listener {
+                    override fun onClick(name: String) {
+                        shopingList.add(Item(null, name))
+                    }
+                }, null)
 
+            } // Добавить категори.
         }
+
 
 
     }
@@ -137,7 +140,6 @@ class MainActivity : AppCompatActivity(), ItemListAdapter.onClick, ItemListAdapt
                     FeatureAvailabilityResult.Available -> {
                         pokupka()
                     }
-
                     is FeatureAvailabilityResult.Unavailable -> {
                         Toast.makeText(context, "Оплата временно недоступна", Toast.LENGTH_SHORT)
                             .show()
@@ -288,14 +290,35 @@ class MainActivity : AppCompatActivity(), ItemListAdapter.onClick, ItemListAdapt
         pref = this.getSharedPreferences("PREMIUM", Context.MODE_PRIVATE)
         edit = pref.edit()
 
-    }
+    } // Инициализирую все
 
     override fun onLongClick(item: Item) {
         TODO("Not yet implemented")
     }
 
     override fun onClick(item: Item, action: Int) {
-        TODO("Not yet implemented")
+        modelFlashLight.turnVibro(this, 100)
+        when (action) {
+            Const.change -> {
+                Toast.makeText(this, "Изменить состояние", Toast.LENGTH_SHORT).show()
+
+            } // Изменение состояния элемента(активный/неактивный)
+
+            Const.delete -> {
+                shopingList.remove(item)
+                Toast.makeText(this, "Удалить", Toast.LENGTH_SHORT).show()
+                adapter.submitList(shopingList)
+
+            } // Удаления элемента
+
+            Const.alarm -> {
+                Toast.makeText(this, "Установка будильника", Toast.LENGTH_SHORT).show()
+            } // Установка будильника
+
+            Const.changeItem -> {
+                Toast.makeText(this, "Изменить имя", Toast.LENGTH_SHORT).show()
+            } // Изменение имени элемента
+        }
     }
 
 
