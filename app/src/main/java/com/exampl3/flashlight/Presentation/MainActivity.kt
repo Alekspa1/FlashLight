@@ -14,9 +14,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.room.Room
 import com.exampl3.flashlight.Data.Const
 import com.exampl3.flashlight.Domain.Adapter.ItemListAdapter
+import com.exampl3.flashlight.Domain.Adapter.ItemMenuListAdapter
 import com.exampl3.flashlight.Domain.Adapter.VpAdapter
 import com.exampl3.flashlight.Domain.Room.GfgDatabase
 import com.exampl3.flashlight.Domain.Room.Item
+import com.exampl3.flashlight.Domain.Room.ItemMenu
 import com.exampl3.flashlight.databinding.ActivityMainBinding
 import com.google.android.material.tabs.TabLayoutMediator
 import com.yandex.mobile.ads.banner.BannerAdSize
@@ -35,7 +37,7 @@ import java.util.Calendar
 import java.util.UUID
 
 
-class MainActivity : AppCompatActivity(), ItemListAdapter.onClick, ItemListAdapter.onLongClick {
+class MainActivity : AppCompatActivity(), ItemMenuListAdapter.onClick {
     private var bannerAd: BannerAdView? = null
     private lateinit var db: GfgDatabase
     private lateinit var binding: ActivityMainBinding
@@ -45,7 +47,7 @@ class MainActivity : AppCompatActivity(), ItemListAdapter.onClick, ItemListAdapt
     private lateinit var alarmManager: AlarmManager
     private lateinit var pref: SharedPreferences
     private lateinit var edit: SharedPreferences.Editor
-    private lateinit var adapter: ItemListAdapter
+    private lateinit var adapter: ItemMenuListAdapter
     private val listFrag = listOf(
         FragmentNotebook.newInstance(),
         FragmentList.newInstance(),
@@ -56,7 +58,7 @@ class MainActivity : AppCompatActivity(), ItemListAdapter.onClick, ItemListAdapt
         "Список дел",
         "Фонарик"
     )
-    private val shopingList = arrayListOf<Item>()
+    private val shopingList = arrayListOf<ItemMenu>()
 
     private lateinit var billingClient: RuStoreBillingClient
     private lateinit var productsUseCase: ProductsUseCase
@@ -79,8 +81,8 @@ class MainActivity : AppCompatActivity(), ItemListAdapter.onClick, ItemListAdapt
 
 
         with(binding) {
+            modelFlashLight.turnVibro(this@MainActivity, 50)
             imMenu.setOnClickListener {
-                modelFlashLight.turnVibro(it.context, 50)
                 drawer.openDrawer(GravityCompat.START)
             } //  Меню
             bBuyPremium.setOnClickListener {
@@ -104,7 +106,7 @@ class MainActivity : AppCompatActivity(), ItemListAdapter.onClick, ItemListAdapt
             imBAddMenu.setOnClickListener {
                 DialogItemList.AlertList(this@MainActivity, object : DialogItemList.Listener {
                     override fun onClick(name: String) {
-                        shopingList.add(Item(null, name))
+                        shopingList.add(ItemMenu(null, name))
                     }
                 }, null)
 
@@ -209,7 +211,7 @@ class MainActivity : AppCompatActivity(), ItemListAdapter.onClick, ItemListAdapt
     } // инициализирую ViewPager
    private fun initRcView() {
         val rcView = binding.rcView
-        adapter = ItemListAdapter(this, this)
+        adapter = ItemMenuListAdapter(this)
         rcView.layoutManager = LinearLayoutManager(this)
         rcView.adapter = adapter
         adapter.submitList(shopingList)
@@ -289,33 +291,25 @@ class MainActivity : AppCompatActivity(), ItemListAdapter.onClick, ItemListAdapt
 
     } // Инициализирую все
 
-    override fun onLongClick(item: Item) {
-        TODO("Not yet implemented")
-    }
+    override fun onClick(item: ItemMenu, action: Int) {
 
-    override fun onClick(item: Item, action: Int) {
-        modelFlashLight.turnVibro(this, 100)
-        when (action) {
-            Const.change -> {
-                Toast.makeText(this, "Изменить состояние", Toast.LENGTH_SHORT).show()
-
-            } // Изменение состояния элемента(активный/неактивный)
-
-            Const.delete -> {
+        when(action){
+            Const.change-> {
                 shopingList.remove(item)
-                Toast.makeText(this, "Удалить", Toast.LENGTH_SHORT).show()
+                DialogItemList.AlertList(this@MainActivity, object : DialogItemList.Listener {
+                    override fun onClick(name: String) {
+                        shopingList.add(ItemMenu(null, name))
+                        adapter.submitList(shopingList)
+                    }
+                }, null)
+            }
+            Const.delete-> {
+                shopingList.remove(item)
                 adapter.submitList(shopingList)
-
-            } // Удаления элемента
-
-            Const.alarm -> {
-                Toast.makeText(this, "Установка будильника", Toast.LENGTH_SHORT).show()
-            } // Установка будильника
-
-            Const.changeItem -> {
-                Toast.makeText(this, "Изменить имя", Toast.LENGTH_SHORT).show()
-            } // Изменение имени элемента
+            }
         }
+
+
     }
 
 
