@@ -1,14 +1,11 @@
 package com.exampl3.flashlight.Presentation
 
 
-import android.Manifest
 import android.app.AlarmManager
-import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -20,7 +17,6 @@ import com.exampl3.flashlight.Domain.Adapter.ItemListAdapter
 import com.exampl3.flashlight.Domain.Adapter.VpAdapter
 import com.exampl3.flashlight.Domain.Room.GfgDatabase
 import com.exampl3.flashlight.Domain.Room.Item
-import com.exampl3.flashlight.R
 import com.exampl3.flashlight.databinding.ActivityMainBinding
 import com.google.android.material.tabs.TabLayoutMediator
 import com.yandex.mobile.ads.banner.BannerAdSize
@@ -122,7 +118,6 @@ class MainActivity : AppCompatActivity(), ItemListAdapter.onClick, ItemListAdapt
     override fun onResume() {
         super.onResume()
         shopingList()
-        Const.premium = pref.getBoolean(Const.premium_KEY, false)
 
 
     }
@@ -185,6 +180,7 @@ class MainActivity : AppCompatActivity(), ItemListAdapter.onClick, ItemListAdapt
             .addOnSuccessListener { purchases: List<Purchase> ->
                 if (purchases.isEmpty() && Const.premium) {
                     edit.putBoolean(Const.premium_KEY, false)
+                    Const.premium = pref.getBoolean(Const.premium_KEY, false)
                     edit.apply()
                 }
                 purchases.forEach {
@@ -192,6 +188,7 @@ class MainActivity : AppCompatActivity(), ItemListAdapter.onClick, ItemListAdapt
                         (it.purchaseState == PurchaseState.PAID || it.purchaseState == PurchaseState.CONFIRMED) && !Const.premium
                     ) {
                         edit.putBoolean(Const.premium_KEY, true)
+                        Const.premium = pref.getBoolean(Const.premium_KEY, false)
                         edit.apply()
                     }
                 }
