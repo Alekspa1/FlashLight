@@ -5,14 +5,18 @@ import android.app.AlarmManager
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.room.Room
 import com.exampl3.flashlight.Data.Const
+import com.exampl3.flashlight.Domain.Adapter.ItemListAdapter
 import com.exampl3.flashlight.Domain.Adapter.VpAdapter
 import com.exampl3.flashlight.Domain.Room.GfgDatabase
+import com.exampl3.flashlight.Domain.Room.Item
 import com.exampl3.flashlight.databinding.ActivityMainBinding
 import com.google.android.material.tabs.TabLayoutMediator
 import com.yandex.mobile.ads.banner.BannerAdSize
@@ -31,7 +35,7 @@ import java.util.Calendar
 import java.util.UUID
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), ItemListAdapter.onClick, ItemListAdapter.onLongClick {
     private var bannerAd: BannerAdView? = null
     private lateinit var db: GfgDatabase
     private lateinit var binding: ActivityMainBinding
@@ -41,6 +45,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var alarmManager: AlarmManager
     private lateinit var pref: SharedPreferences
     private lateinit var edit: SharedPreferences.Editor
+    private lateinit var adapter: ItemListAdapter
     private val listFrag = listOf(
         FragmentNotebook.newInstance(),
         FragmentList.newInstance(),
@@ -51,6 +56,7 @@ class MainActivity : AppCompatActivity() {
         "Список дел",
         "Фонарик"
     )
+    private val shopingList = arrayListOf<Item>()
 
     private lateinit var billingClient: RuStoreBillingClient
     private lateinit var productsUseCase: ProductsUseCase
@@ -58,39 +64,53 @@ class MainActivity : AppCompatActivity() {
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        binding = ActivityMainBinding.inflate(layoutInflater)
         super.onCreate(savedInstanceState)
-        billingClient = RuStoreBillingClientFactory.create(
-            context = this,
-            consoleApplicationId = "2063541058",
-            deeplinkScheme = "yourappscheme"
-        )
-        if (savedInstanceState == null) {
-            billingClient.onNewIntent(intent)
-        }
-        productsUseCase = billingClient.products
-        purchasesUseCase = billingClient.purchases
-        calendarZero = Calendar.getInstance()
-        modelFlashLight = ViewModelFlashLight()
-        alarmManager = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        pref = this.getSharedPreferences("PREMIUM", Context.MODE_PRIVATE)
-        edit = pref.edit()
+        initAll()
         setContentView(binding.root)
         initVp()
         initDb()
+        initRcView()
         updateAlarm()
         if (!Const.premium) initYaBaner()
-
-
-
-        binding.imMenu.setOnClickListener {
-            binding.drawer.openDrawer(GravityCompat.START)
-
+        if (savedInstanceState == null) {
+            billingClient.onNewIntent(intent)
         }
-        binding.button6.setOnClickListener {
-            proverkaVozmoznoyOplaty(this)
-            binding.drawer.closeDrawer(GravityCompat.START)
+
+
+
+        with(binding) {
+            imMenu.setOnClickListener {
+                modelFlashLight.turnVibro(it.context, 50)
+                drawer.openDrawer(GravityCompat.START)
+            } //  Меню
+            bBuyPremium.setOnClickListener {
+                proverkaVozmoznoyOplaty(this@MainActivity)
+                drawer.closeDrawer(GravityCompat.START)
+            } // ПРЕМИУМ
+            bUpdate.setOnClickListener {
+                try {
+                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse( "https://apps.rustore.ru/app/com.exampl3.flashlight" )))
+                }  catch (e: Exception) {
+                    Toast.makeText(this@MainActivity, "Ошибка", Toast.LENGTH_SHORT).show()
+                }
+            } // Проверить обновления
+            bCallback.setOnClickListener {
+                try {
+                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse( "mailto:apereverzev47@gmail.com" )))
+                }  catch (e: Exception) {
+                    Toast.makeText(this@MainActivity, "Ошибка", Toast.LENGTH_SHORT).show()
+                }
+            } // Обратная связь
+            imBAddMenu.setOnClickListener {
+                DialogItemList.AlertList(this@MainActivity, object : DialogItemList.Listener {
+                    override fun onClick(name: String) {
+                        shopingList.add(Item(null, name))
+                    }
+                }, null)
+
+            } // Добавить категори.
         }
+
 
 
     }
@@ -98,7 +118,6 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         shopingList()
-        Const.premium = pref.getBoolean(Const.premium_KEY, false)
 
 
     }
@@ -116,7 +135,6 @@ class MainActivity : AppCompatActivity() {
                     FeatureAvailabilityResult.Available -> {
                         pokupka()
                     }
-
                     is FeatureAvailabilityResult.Unavailable -> {
                         Toast.makeText(context, "Оплата временно недоступна", Toast.LENGTH_SHORT)
                             .show()
@@ -162,6 +180,7 @@ class MainActivity : AppCompatActivity() {
             .addOnSuccessListener { purchases: List<Purchase> ->
                 if (purchases.isEmpty() && Const.premium) {
                     edit.putBoolean(Const.premium_KEY, false)
+                    Const.premium = pref.getBoolean(Const.premium_KEY, false)
                     edit.apply()
                 }
                 purchases.forEach {
@@ -169,6 +188,7 @@ class MainActivity : AppCompatActivity() {
                         (it.purchaseState == PurchaseState.PAID || it.purchaseState == PurchaseState.CONFIRMED) && !Const.premium
                     ) {
                         edit.putBoolean(Const.premium_KEY, true)
+                        Const.premium = pref.getBoolean(Const.premium_KEY, false)
                         edit.apply()
                     }
                 }
@@ -177,6 +197,7 @@ class MainActivity : AppCompatActivity() {
             .addOnFailureListener {
                 // Process error
             }
+
     } // Запрос ранее совершенных покупок
 
     fun initVp() {
@@ -186,6 +207,14 @@ class MainActivity : AppCompatActivity() {
             tab.text = listName[pos]
         }.attach()
     } // инициализирую ViewPager
+   private fun initRcView() {
+        val rcView = binding.rcView
+        adapter = ItemListAdapter(this, this)
+        rcView.layoutManager = LinearLayoutManager(this)
+        rcView.adapter = adapter
+        adapter.submitList(shopingList)
+
+    }
 
     private fun initDb() {
         db = Room.databaseBuilder(
@@ -243,6 +272,51 @@ class MainActivity : AppCompatActivity() {
             }
         }.start()
     } // обновляю будильники
+    private fun initAll(){
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        billingClient = RuStoreBillingClientFactory.create(
+            context = this,
+            consoleApplicationId = "2063541058",
+            deeplinkScheme = "yourappscheme"
+        )
+        productsUseCase = billingClient.products
+        purchasesUseCase = billingClient.purchases
+        calendarZero = Calendar.getInstance()
+        modelFlashLight = ViewModelFlashLight()
+        alarmManager = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        pref = this.getSharedPreferences("PREMIUM", Context.MODE_PRIVATE)
+        edit = pref.edit()
+
+    } // Инициализирую все
+
+    override fun onLongClick(item: Item) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onClick(item: Item, action: Int) {
+        modelFlashLight.turnVibro(this, 100)
+        when (action) {
+            Const.change -> {
+                Toast.makeText(this, "Изменить состояние", Toast.LENGTH_SHORT).show()
+
+            } // Изменение состояния элемента(активный/неактивный)
+
+            Const.delete -> {
+                shopingList.remove(item)
+                Toast.makeText(this, "Удалить", Toast.LENGTH_SHORT).show()
+                adapter.submitList(shopingList)
+
+            } // Удаления элемента
+
+            Const.alarm -> {
+                Toast.makeText(this, "Установка будильника", Toast.LENGTH_SHORT).show()
+            } // Установка будильника
+
+            Const.changeItem -> {
+                Toast.makeText(this, "Изменить имя", Toast.LENGTH_SHORT).show()
+            } // Изменение имени элемента
+        }
+    }
 
 
 }

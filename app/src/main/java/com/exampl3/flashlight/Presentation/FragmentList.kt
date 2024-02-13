@@ -77,7 +77,7 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
 
             }
 
-        binding.imButton.setOnClickListener {
+        binding.imBAddFrag.setOnClickListener {
             DialogItemList.AlertList(requireContext(), object : DialogItemList.Listener {
                 override fun onClick(name: String) {
                     Thread {
@@ -88,7 +88,7 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
 
         }
 
-        binding.imageView.setOnClickListener {
+        binding.imVoiceFrag.setOnClickListener {
             try {
                 launcher.launch(initVoiceIntent())
             } catch (e: Exception) {

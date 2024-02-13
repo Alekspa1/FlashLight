@@ -3,10 +3,13 @@
     <color name="black">#FF000000</color>
     <color name="green">#628C00</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="ActiveNew">#CCEAEAEA</color>
+    <color name="NoActiveNew">#CC595959</color>
     <color name="Active">#6623BD00</color>
     <color name="NoActive">#80F30404</color>
+
     <color name="vPager">#9900BCD4</color>
-    <color name="Background">#FBCFAE</color>
+    <color name="Background">#5E5E5E</color>
     <color name="Yellow">#FFEB3B</color>
     <color name="Grey">#6C6C6C</color>
 </resources>
