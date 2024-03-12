@@ -42,7 +42,6 @@ class FragmentFlashLight : Fragment()  {
 
         binding.toggleButton.setOnCheckedChangeListener { _, isChecked ->
             model.turnFlasLigh(view.context, isChecked)
-            model.turnVibro(view.context, 150)
             if (isChecked) binding.toggleButton.setButtonDrawable(R.drawable.ic_on)
             else {
                 binding.toggleButton.setButtonDrawable(R.drawable.ic_of)

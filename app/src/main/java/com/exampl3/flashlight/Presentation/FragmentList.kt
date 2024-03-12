@@ -192,7 +192,6 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
         when(action){
             Const.change-> {
                 Thread {
-                    view?.let { modelFlashLight.turnVibro(it.context, 100) }
                     db.CourseDao().update(item.copy(change = !item.change))
                     if (item.changeAlarm) {
                         db.CourseDao().update(item.copy(changeAlarm = false,change = !item.change ))
@@ -201,7 +200,6 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
                 }.start()
             }
             Const.delete-> {
-                view?.let { modelFlashLight.turnVibro(it.context, 100) }
                 if (item.change) {
                     Thread {
                         db.CourseDao().delete(item)
@@ -213,7 +211,6 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
             }
             Const.alarm -> {
                 calendar = Calendar.getInstance()
-                view?.let { modelFlashLight.turnVibro(it.context, 100) }
                 if (view?.let { Const.isPermissionGranted(it.context, Manifest.permission.POST_NOTIFICATIONS) } == true) {
                     datePickerDialog(item)
                 } else {

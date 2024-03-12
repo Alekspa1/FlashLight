@@ -47,7 +47,6 @@ class AlarmReceiwer : BroadcastReceiver() {
             Const.keyIntentAlarm -> {
                 val item = intent.getSerializableExtra(Const.keyIntent) as Item
                 alarmPush(context).notify(item.id!!, notificationBuilder(context, item).build())
-                context.let { modelFlashLight.turnVibro(context, 300) }
                 Thread {
                     db.CourseDao().update(item.copy(changeAlarm = !item.changeAlarm))
                 }.start()
