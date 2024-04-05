@@ -85,7 +85,6 @@ class MainActivity : AppCompatActivity(), ItemMenuListAdapter.onClick {
 
         with(binding) {
             imMenu.setOnClickListener {
-                modelFlashLight.turnVibro(this@MainActivity, 50)
                 drawer.openDrawer(GravityCompat.START)
             } //  Меню
             bBuyPremium.setOnClickListener {

@@ -227,8 +227,6 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
     }
 
     override fun onClick(item: Item, action: Int) {
-
-        view?.let { modelFlashLight.turnVibro(it.context, 100) }
         when (action) {
             Const.change -> {
                 Thread {
