@@ -29,7 +29,7 @@ object Const {
     const val alarmDay = 1
     const val alarmWeek = 2
     const val alarmMonth = 3
-    const val deleteAlarmRepeat = 4
+    const val deleteAlarm = 4
     const val alarmRepeat = 5
     var MONTH = AlarmManager.INTERVAL_DAY*dayInMonth
 

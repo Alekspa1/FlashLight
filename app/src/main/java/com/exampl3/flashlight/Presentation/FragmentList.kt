@@ -133,7 +133,7 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
             override fun onClick(flag: Boolean) {
                 if (flag) {
                     Thread {
-                        changeAlarmItem(item, Const.deleteAlarmRepeat)
+                        changeAlarmItem(item, Const.deleteAlarm)
                         db.CourseDao().delete(item)
                     }.start()
 
@@ -151,7 +151,7 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
             action
         )
 
-    } // Удаление заметки
+    } // Изменение заметки
 
     private fun datePickerDialog(item: Item) {
 
@@ -204,7 +204,7 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
             db.CourseDao().update(item.copy(changeAlarm = !item.changeAlarm))
         }.start()
         if (item.changeAlarm) {
-            changeAlarmItem(item, Const.deleteAlarmRepeat)
+            changeAlarmItem(item, Const.deleteAlarm)
         }
         if (!item.changeAlarm && item.alarmTime > calendarZero.timeInMillis) {
             changeAlarmItem(item, item.interval)
@@ -234,7 +234,7 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
                     if (item.changeAlarm) {
                         db.CourseDao().update(item.copy(changeAlarm = false, change = !item.change))
                     }
-                    changeAlarmItem(item, Const.deleteAlarmRepeat)
+                    changeAlarmItem(item, Const.deleteAlarm)
                 }.start()
             } // Изменение состояния элемента(активный/неактивный)
 
@@ -243,7 +243,7 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
                     Thread {
                         db.CourseDao().delete(item)
                     }.start()
-                    changeAlarmItem(item, Const.deleteAlarmRepeat)
+                    changeAlarmItem(item, Const.deleteAlarm)
                 } else {
                     deleteAlertDialog(requireContext(), item)
                 }
@@ -271,7 +271,7 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
                     override fun onClick(name: String) {
                         Thread {
                             val newitem = item.copy(name = name)
-                            if (item.changeAlarm) changeAlarmItem(newitem, newitem.interval)
+                            if (item.changeAlarm) changeAlarmItem(newitem, newitem.interval) // если у item был установлен будильник то, тут мы перезаписываем будильник
                             db.CourseDao().update(newitem)
                         }.start()
                     }

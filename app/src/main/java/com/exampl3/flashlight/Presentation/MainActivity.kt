@@ -7,18 +7,15 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.room.Room
 import com.exampl3.flashlight.Data.Const
-import com.exampl3.flashlight.Domain.Adapter.ItemListAdapter
 import com.exampl3.flashlight.Domain.Adapter.ItemMenuListAdapter
 import com.exampl3.flashlight.Domain.Adapter.VpAdapter
 import com.exampl3.flashlight.Domain.Room.GfgDatabase
-import com.exampl3.flashlight.Domain.Room.Item
 import com.exampl3.flashlight.Domain.Room.ItemMenu
 import com.exampl3.flashlight.databinding.ActivityMainBinding
 import com.google.android.material.tabs.TabLayoutMediator
@@ -255,7 +252,7 @@ class MainActivity : AppCompatActivity(), ItemMenuListAdapter.onClick {
                                     item.alarmTime,
                                     this,
                                     alarmManager,
-                                    Const.deleteAlarmRepeat
+                                    Const.deleteAlarm
                                 )
                                 db.CourseDao().update(item.copy(changeAlarm = !item.changeAlarm))
                             } else {
