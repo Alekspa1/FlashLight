@@ -11,6 +11,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.speech.RecognizerIntent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -203,12 +204,19 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
         Thread {
             db.CourseDao().update(item.copy(changeAlarm = !item.changeAlarm))
         }.start()
+
         if (item.changeAlarm) {
             changeAlarmItem(item, Const.deleteAlarm)
         }
-        if (!item.changeAlarm && item.alarmTime > calendarZero.timeInMillis) {
-            changeAlarmItem(item, item.interval)
+        if ((item.change || !item.changeAlarm) && item.alarmTime > calendarZero.timeInMillis) {
+            changeAlarmItem(item.copy(change = false,changeAlarm = !item.changeAlarm ), item.interval)
+            Thread {
+                db.CourseDao().update(item.copy(change = false, changeAlarm = !item.changeAlarm ))
+            }.start()
         }
+//        if (!item.changeAlarm && item.alarmTime > calendarZero.timeInMillis) {
+//            changeAlarmItem(item, item.interval)
+//        }
         if (!item.changeAlarm && item.alarmTime < calendarZero.timeInMillis) {
             when (item.interval) {
                 Const.alarmDay -> {

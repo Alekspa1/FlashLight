@@ -12,6 +12,7 @@ import android.media.AudioAttributes
 import android.media.Ringtone
 import android.media.RingtoneManager
 import android.os.Build
+import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.room.Room
@@ -49,6 +50,7 @@ class AlarmReceiwer : BroadcastReceiver() {
                 alarmPush(context).notify(item.id!!, notificationBuilder(context, item).build())
                 when(item.interval){
                     Const.alarmOne->{
+                        Log.d("MyLog", item.changeAlarm.toString())
                         Thread {
                             db.CourseDao().update(item.copy(changeAlarm = !item.changeAlarm))
                         }.start()
