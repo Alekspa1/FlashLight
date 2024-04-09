@@ -13,8 +13,8 @@ android {
         applicationId = "com.exampl3.flashlight"
         minSdk = 24
         targetSdk = 34
-        versionCode = 7
-        versionName = "5.1"
+        versionCode = 8
+        versionName = "5.2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         kapt {
             arguments {arg("room.schemaLocation", "$projectDir/schemas")}
@@ -43,9 +43,9 @@ android {
 }
 
 dependencies {
-    implementation("com.yandex.android:mobileads:6.4.0")
-    implementation("com.yandex.ads.mediation:mobileads-mytarget:5.20.0.0")
-    implementation("ru.rustore.sdk:billingclient:3.2.0")
+    implementation("com.yandex.android:mobileads:7.0.0")
+
+    implementation("ru.rustore.sdk:billingclient:5.0.0")
 
     implementation ("androidx.room:room-runtime:2.6.1")
     kapt ("androidx.room:room-compiler:2.6.1")

@@ -22,6 +22,9 @@ import com.exampl3.flashlight.Domain.Room.Item
 import com.exampl3.flashlight.Presentation.MainActivity
 import com.exampl3.flashlight.Presentation.ViewModelFlashLight
 import com.exampl3.flashlight.R
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -49,25 +52,27 @@ class AlarmReceiwer : BroadcastReceiver() {
                 val item = intent.getSerializableExtra(Const.keyIntent) as Item
                 alarmPush(context).notify(item.id!!, notificationBuilder(context, item).build())
                 when(item.interval){
+
                     Const.alarmOne->{
-                        Log.d("MyLog", item.changeAlarm.toString())
                         Thread {
-                            db.CourseDao().update(item.copy(changeAlarm = !item.changeAlarm))
+                            db.CourseDao().update(item.copy(changeAlarm = false))
                         }.start()
                     }
-                    
+
                     Const.alarmDay-> {
                         insertAlarm(item,context, AlarmManager.INTERVAL_DAY,"и через день")
                     }
+
                     Const.alarmWeek-> {
                         insertAlarm(item,context,AlarmManager.INTERVAL_DAY*7,"и через неделю")
                     }
+
                     Const.alarmMonth-> {
                         insertAlarm(item,context,Const.MONTH,"и через месяц")
                     }
                 }
 
-            }
+            } // Приход будильника
 
             Const.keyIntentCallBackReady -> {
                 val item = intent.getSerializableExtra(Const.keyIntentCallBackReady) as Item
@@ -75,13 +80,13 @@ class AlarmReceiwer : BroadcastReceiver() {
                     Const.alarmOne->{
                         Thread {
                             db.CourseDao()
-                                .update(item.copy(change = !item.change, changeAlarm = !item.changeAlarm))
+                                .update(item.copy(change = true, changeAlarm = false))
                         }.start()
                     }
                 }
                 alarmPush(context).cancel(item.id!!)
 
-            }
+            } // Когда нажал кнопку готово
 
             Const.keyIntentCallBackPostpone -> {
                 val time = calendarZero.timeInMillis + 600000
@@ -108,7 +113,7 @@ class AlarmReceiwer : BroadcastReceiver() {
                 }
                 Toast.makeText(context, "Отложено на 10 минут", Toast.LENGTH_SHORT).show()
                 alarmPush(context).cancel(item.id!!)
-            }
+            } // Когда нажал кнопку отложить
 
             Const.reboot -> {
                 Thread {
@@ -125,7 +130,7 @@ class AlarmReceiwer : BroadcastReceiver() {
                                 Const.alarmOne-> {
                                     db.CourseDao().update(
                                         item.copy(
-                                            changeAlarm = !item.changeAlarm,
+                                            changeAlarm = false,
                                             name = "${item.name} (Пропущено)"
                                         )
                                     )
@@ -144,7 +149,7 @@ class AlarmReceiwer : BroadcastReceiver() {
                         }
                     }
                 }.start()
-            }
+            } // После перезагрузки
         }
     }
 
