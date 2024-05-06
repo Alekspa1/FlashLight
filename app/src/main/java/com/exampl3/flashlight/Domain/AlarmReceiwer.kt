@@ -45,8 +45,8 @@ class AlarmReceiwer : BroadcastReceiver() {
         calendarZero = Calendar.getInstance()
         modelFlashLight = ViewModelFlashLight()
         alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
         initDb(context)
+
         when (intent.action) {
             Const.keyIntentAlarm -> {
                 val item = intent.getSerializableExtra(Const.keyIntent) as Item
@@ -89,7 +89,8 @@ class AlarmReceiwer : BroadcastReceiver() {
             } // Когда нажал кнопку готово
 
             Const.keyIntentCallBackPostpone -> {
-                val time = calendarZero.timeInMillis + 600000
+                //val time = calendarZero.timeInMillis + 600000
+                val time = calendarZero.timeInMillis + 60000
                 val item = intent.getSerializableExtra(Const.keyIntentCallBackPostpone) as Item
                 val dateFormat = "dd.MM"
                 val timeFormat = "HH:mm"
@@ -98,6 +99,9 @@ class AlarmReceiwer : BroadcastReceiver() {
                 val resultDate = dateFormate.format(time)
                 val resutTime = timeFormate.format(time)
                 val result = "Напомнит: $resultDate в $resutTime"
+                CoroutineScope(Dispatchers.IO).launch {db.CourseDao().getAllList().forEach{
+                    Log.d("MyLog", "List: $it")
+                }  }
 
                 when(item.interval){
                     Const.alarmOne->{
@@ -107,7 +111,7 @@ class AlarmReceiwer : BroadcastReceiver() {
                         }.start()
                         modelFlashLight.alarmInsert(newItem, time, context, alarmManager, Const.alarmOne)
                     } else->{
-                        val newItemFals = item.copy(id = item.id?.plus(100), interval = Const.alarmRepeat)
+                        val newItemFals = item.copy(id = item.id?.plus(1000), interval = Const.alarmRepeat)
                     modelFlashLight.alarmInsert(newItemFals, time, context, alarmManager, Const.alarmOne)
                     }
                 }
