@@ -46,6 +46,9 @@ class AlarmReceiwer : BroadcastReceiver() {
         modelFlashLight = ViewModelFlashLight()
         alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         initDb(context)
+        CoroutineScope(Dispatchers.IO).launch {db.CourseDao().getAllList().forEach{
+            Log.d("MyLog", "Id:${it.id} ${it.name} ${it.changeAlarm}")
+        }  }
 
         when (intent.action) {
             Const.keyIntentAlarm -> {
@@ -99,9 +102,6 @@ class AlarmReceiwer : BroadcastReceiver() {
                 val resultDate = dateFormate.format(time)
                 val resutTime = timeFormate.format(time)
                 val result = "Напомнит: $resultDate в $resutTime"
-                CoroutineScope(Dispatchers.IO).launch {db.CourseDao().getAllList().forEach{
-                    Log.d("MyLog", "List: $it")
-                }  }
 
                 when(item.interval){
                     Const.alarmOne->{
