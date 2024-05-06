@@ -71,7 +71,7 @@ class MainActivity : AppCompatActivity(), ItemMenuListAdapter.onClick {
         initDb()
         initRcView()
         updateAlarm()
-        modelFlashLight.premium.value = pref.getBoolean(Const.premium_KEY, false)
+        modelFlashLight.premium.value = pref.getBoolean(Const.premium_KEY, true)
         modelFlashLight.premium.observe(this){
             Const.premium = it
         }
@@ -254,8 +254,9 @@ class MainActivity : AppCompatActivity(), ItemMenuListAdapter.onClick {
                                     alarmManager,
                                     Const.deleteAlarm
                                 )
-                                db.CourseDao().update(item.copy(changeAlarm = !item.changeAlarm))
-                            } else {
+                                db.CourseDao().update(item.copy(changeAlarm = false))
+                            }
+                            else {
                                 modelFlashLight.alarmInsert(
                                     item,
                                     item.alarmTime,

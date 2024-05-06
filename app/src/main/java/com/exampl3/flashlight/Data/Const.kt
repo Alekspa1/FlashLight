@@ -7,7 +7,7 @@ import android.icu.util.Calendar
 import androidx.core.content.ContextCompat
 
 object Const {
-    var premium = false
+    var premium = true
     var premium_KEY = "premium_KEY"
     private val calendar: Calendar = Calendar.getInstance()
     private val dayInMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
