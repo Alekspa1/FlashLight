@@ -1,11 +1,11 @@
-package com.exampl3.flashlight.model.alarmReceiwer
+package com.exampl3.flashlight.model
 
 import android.app.AlarmManager
 import android.app.Application
 import android.app.PendingIntent
 import android.content.Intent
 import com.exampl3.flashlight.Data.Const
-import com.exampl3.flashlight.Domain.AlarmReceiwer
+import com.exampl3.flashlight.model.alarmReceiwer.AlarmReceiwer
 import com.exampl3.flashlight.Domain.Room.Item
 import javax.inject.Inject
 import javax.inject.Singleton

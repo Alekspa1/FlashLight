@@ -4,16 +4,16 @@ package com.exampl3.flashlight.Presentation
 import android.app.AlarmManager
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import com.exampl3.flashlight.Data.Const
-import com.exampl3.flashlight.Presentation.Adapter.VpAdapter
+import com.exampl3.flashlight.Presentation.adapters.VpAdapter
 import com.exampl3.flashlight.Domain.Room.GfgDatabase
 import com.exampl3.flashlight.R
 import com.exampl3.flashlight.databinding.ActivityMainBinding
@@ -30,6 +30,9 @@ import com.yandex.mobile.ads.interstitial.InterstitialAdEventListener
 import com.yandex.mobile.ads.interstitial.InterstitialAdLoadListener
 import com.yandex.mobile.ads.interstitial.InterstitialAdLoader
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import ru.rustore.sdk.billingclient.RuStoreBillingClient
 import ru.rustore.sdk.billingclient.RuStoreBillingClientFactory
 import ru.rustore.sdk.billingclient.model.purchase.PaymentResult
@@ -56,10 +59,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var calendarZero: Calendar
     private val modelFlashLight: ViewModelFlashLight by viewModels()
     private lateinit var alarmManager: AlarmManager
-    private lateinit var pref: SharedPreferences
-    private lateinit var edit: SharedPreferences.Editor
-
-
     private lateinit var billingClient: RuStoreBillingClient
     private lateinit var productsUseCase: ProductsUseCase
     private lateinit var purchasesUseCase: PurchasesUseCase
@@ -71,7 +70,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         initVp()
         updateAlarm()
-        if (!Const.premium) initYaBaner()
+        if (!modelFlashLight.getSP()) initYaBaner()
         if (savedInstanceState == null) {
             billingClient.onNewIntent(intent)
         }
@@ -93,9 +92,7 @@ class MainActivity : AppCompatActivity() {
         loadInterstitialAd()
         with(binding) {
             imMenu.setOnClickListener {
-                //drawer.openDrawer(GravityCompat.START)
-                modelFlashLight.saveSP(true)
-                Toast.makeText(this@MainActivity, "Раздел пока не готов", Toast.LENGTH_SHORT).show()
+                drawer.openDrawer(GravityCompat.START)
             } //  Меню
             bBuyPremium.setOnClickListener {
                 proverkaVozmoznoyOplaty(this@MainActivity)
@@ -115,6 +112,10 @@ class MainActivity : AppCompatActivity() {
                     Toast.makeText(this@MainActivity, "Ошибка", Toast.LENGTH_SHORT).show()
                 }
             } // Обратная связь
+
+            imBAddMenu.setOnClickListener {
+                Toast.makeText(this@MainActivity, "Категории появятся в следующих обновлениях", Toast.LENGTH_SHORT).show()
+            }
         }
     }
     private fun destroyInterstitialAd() {
@@ -209,12 +210,12 @@ class MainActivity : AppCompatActivity() {
     private fun shopingList() {
         purchasesUseCase.getPurchases()
             .addOnSuccessListener { purchases: List<Purchase> ->
-                if (purchases.isEmpty() && Const.premium) {
+                if (purchases.isEmpty() && modelFlashLight.getSP()) {
                     modelFlashLight.saveSP(false)
                 }
                 purchases.forEach {
                     if (it.productId == "premium_version_flash_light" &&
-                        (it.purchaseState == PurchaseState.PAID || it.purchaseState == PurchaseState.CONFIRMED) && !Const.premium
+                        (it.purchaseState == PurchaseState.PAID || it.purchaseState == PurchaseState.CONFIRMED) && !modelFlashLight.getSP()
                     ) {
                         modelFlashLight.saveSP(true)
                     }
@@ -245,45 +246,34 @@ class MainActivity : AppCompatActivity() {
     } // Инициализирую Яндекс Рекламу
 
     private fun updateAlarm() {
-        Thread {
-            db.CourseDao().getAllList().forEach { item ->
-                if (item.changeAlarm && item.alarmTime > calendarZero.timeInMillis) {
-                    when (item.interval) {
-                        Const.alarmOne -> {
+        CoroutineScope(Dispatchers.IO).launch { db.CourseDao().getAllList().forEach { item ->
+            if (item.changeAlarm && item.alarmTime > calendarZero.timeInMillis) {
+                when (item.interval) {
+                    Const.alarmOne -> {
+                        modelFlashLight.alarmInsert(
+                            item,
+                            Const.alarmOne
+                        )
+                    }
+                    else -> {
+                        if (!modelFlashLight.getSP()) {
                             modelFlashLight.alarmInsert(
                                 item,
-                                item.alarmTime,
-                                this,
-                                alarmManager,
-                                Const.alarmOne
+                                Const.deleteAlarm
                             )
+                            db.CourseDao().update(item.copy(changeAlarm = false))
                         }
-
-                        else -> {
-                            if (!Const.premium) {
-                                modelFlashLight.alarmInsert(
-                                    item,
-                                    item.alarmTime,
-                                    this,
-                                    alarmManager,
-                                    Const.deleteAlarm
-                                )
-                                db.CourseDao().update(item.copy(changeAlarm = false))
-                            }
-                            else {
-                                modelFlashLight.alarmInsert(
-                                    item,
-                                    item.alarmTime,
-                                    this,
-                                    alarmManager,
-                                    item.interval
-                                )
-                            }
+                        else {
+                            modelFlashLight.alarmInsert(
+                                item,
+                                item.interval
+                            )
                         }
                     }
                 }
             }
-        }.start()
+        } }
+
     } // обновляю будильники
     private fun initAll(){
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -296,8 +286,6 @@ class MainActivity : AppCompatActivity() {
         purchasesUseCase = billingClient.purchases
         calendarZero = Calendar.getInstance()
         alarmManager = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        pref = this.getSharedPreferences("PREMIUM", Context.MODE_PRIVATE)
-        edit = pref.edit()
 
     } // Инициализирую все
 
@@ -305,7 +293,7 @@ class MainActivity : AppCompatActivity() {
         //Override функции
     override fun onResume() {
         super.onResume()
-        //shopingList()
+        shopingList()
 
     }
     override fun onDestroy() {

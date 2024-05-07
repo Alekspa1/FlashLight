@@ -11,7 +11,6 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.speech.RecognizerIntent
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,24 +23,25 @@ import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.room.Room
 import com.exampl3.flashlight.Data.Const
-import com.exampl3.flashlight.Presentation.Adapter.ItemListAdapter
+import com.exampl3.flashlight.Presentation.adapters.ItemListAdapter
 import com.exampl3.flashlight.Domain.Room.GfgDatabase
 import com.exampl3.flashlight.Domain.Room.Item
 import com.exampl3.flashlight.databinding.FragmentListBinding
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import javax.inject.Inject
 
 
 class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.onClick {
     private lateinit var binding: FragmentListBinding
     private lateinit var adapter: ItemListAdapter
-    private lateinit var db: GfgDatabase
+    @Inject
+    lateinit var db: GfgDatabase
     private val modelFlashLight: ViewModelFlashLight by activityViewModels()
     private lateinit var pLauncher: ActivityResultLauncher<String>
     private lateinit var timePickerDialog: TimePickerDialog
     private lateinit var datePickerDialog: DatePickerDialog
-    private lateinit var alarmManager: AlarmManager
     private lateinit var calendar: Calendar
     private lateinit var calendarZero: Calendar
 
@@ -56,7 +56,7 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         calendarZero = Calendar.getInstance()
-        alarmManager = view.context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        //alarmManager = view.context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         initDb(view.context)
         initRcView()
         db.CourseDao().getAll().asLiveData().observe(viewLifecycleOwner) { list ->
@@ -146,9 +146,6 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
     private fun changeAlarmItem(item: Item, action: Int) {
         modelFlashLight.alarmInsert(
             item,
-            item.alarmTime,
-            requireContext(),
-            alarmManager,
             action
         )
 
@@ -329,9 +326,12 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
 
     } // установка повторяющегося будильника
     private fun proverkaFree(item: Item, result: Int){
-        if (result == Const.alarmOne) insertAlarm(item, result, "")
-        else if(Const.premium){
+        if (!modelFlashLight.getSP()) (activity as MainActivity).showAd()
             when(result){
+                Const.alarmOne -> {
+                    insertAlarm(item, result, "")
+                }
+
                 Const.alarmDay -> {
                     insertAlarm(item, result, "и через день")
                 }
@@ -343,10 +343,9 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
                 Const.alarmMonth -> {
                     insertAlarm(item, result, "и через месяц")
                 }
-
-
             }
-        }else Toast.makeText(view?.context, "Повторяющиеся напоминания доступны в PREMIUM версии", Toast.LENGTH_SHORT).show()
+
+    //Toast.makeText(view?.context, "Повторяющиеся напоминания доступны в PREMIUM версии", Toast.LENGTH_SHORT).show()
 
     }
 

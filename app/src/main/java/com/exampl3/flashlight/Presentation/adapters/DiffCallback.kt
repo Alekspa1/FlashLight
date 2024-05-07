@@ -1,4 +1,4 @@
-package com.exampl3.flashlight.Presentation.Adapter
+package com.exampl3.flashlight.Presentation.adapters
 
 import androidx.recyclerview.widget.DiffUtil
 import com.exampl3.flashlight.Domain.Room.Item

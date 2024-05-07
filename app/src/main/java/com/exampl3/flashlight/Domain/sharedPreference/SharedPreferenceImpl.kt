@@ -4,13 +4,13 @@ import android.content.SharedPreferences
 import com.exampl3.flashlight.Data.Const
 import javax.inject.Inject
 
-class SharedPreferenceImpl @Inject constructor(private val pref: SharedPreferences) : SharedPreferenceRepository {
+class SharedPreferenceImpl @Inject constructor(private val pref: SharedPreferences) {
 
     private val edit: SharedPreferences.Editor = pref.edit()
-    override fun getSP(): Boolean {
+     fun getSP(): Boolean {
         return pref.getBoolean(Const.premium_KEY, false)
     }
-    override fun saveSP(flag: Boolean) {
+     fun saveSP(flag: Boolean) {
         edit.putBoolean(Const.premium_KEY, flag)
         edit.apply()
     }

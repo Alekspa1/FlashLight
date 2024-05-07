@@ -22,13 +22,6 @@ object ModuleAlarmManager {
         return context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
     }
 
-    @Provides
-    @Singleton
-    fun providesRingtoneManage(context: Application): Ringtone {
-        return RingtoneManager.getRingtone(
-            context,
-            RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM))
-    }
 
     @Provides
     @Singleton

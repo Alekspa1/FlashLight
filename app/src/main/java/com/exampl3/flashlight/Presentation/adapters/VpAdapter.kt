@@ -1,4 +1,4 @@
-package com.exampl3.flashlight.Presentation.Adapter
+package com.exampl3.flashlight.Presentation.adapters
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
