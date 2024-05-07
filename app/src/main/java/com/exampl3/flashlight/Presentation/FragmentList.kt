@@ -19,11 +19,12 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.room.Room
 import com.exampl3.flashlight.Data.Const
-import com.exampl3.flashlight.Domain.Adapter.ItemListAdapter
+import com.exampl3.flashlight.Presentation.Adapter.ItemListAdapter
 import com.exampl3.flashlight.Domain.Room.GfgDatabase
 import com.exampl3.flashlight.Domain.Room.Item
 import com.exampl3.flashlight.databinding.FragmentListBinding
@@ -36,7 +37,7 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
     private lateinit var binding: FragmentListBinding
     private lateinit var adapter: ItemListAdapter
     private lateinit var db: GfgDatabase
-    private lateinit var modelFlashLight: ViewModelFlashLight
+    private val modelFlashLight: ViewModelFlashLight by activityViewModels()
     private lateinit var pLauncher: ActivityResultLauncher<String>
     private lateinit var timePickerDialog: TimePickerDialog
     private lateinit var datePickerDialog: DatePickerDialog
@@ -55,7 +56,6 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         calendarZero = Calendar.getInstance()
-        modelFlashLight = ViewModelFlashLight()
         alarmManager = view.context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         initDb(view.context)
         initRcView()

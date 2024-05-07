@@ -1,16 +1,22 @@
-package com.exampl3.flashlight.Data
+package com.exampl3.flashlight.model.alarmReceiwer
 
 import android.app.AlarmManager
+import android.app.Application
 import android.app.PendingIntent
-import android.content.Context
 import android.content.Intent
-import com.exampl3.flashlight.Domain.Alarm.AlarmManagerRepository
+import com.exampl3.flashlight.Data.Const
 import com.exampl3.flashlight.Domain.AlarmReceiwer
 import com.exampl3.flashlight.Domain.Room.Item
+import javax.inject.Inject
+import javax.inject.Singleton
 
-object AlarmManagerImp: AlarmManagerRepository {
+@Singleton
+class AlarmManagerImp @Inject constructor(
+    private val context: Application,
+    private val alarmManager: AlarmManager
+    ) {
 
-    override fun alarmManagerInsert(item: Item, time: Long,context: Context,alarmManager: AlarmManager, action: Int) {
+    fun alarmInsert(item: Item, action: Int) {
         val alarmtIntent = Intent(context, AlarmReceiwer::class.java).let { intent ->
             intent.putExtra(Const.keyIntent, item)
             intent.setAction(Const.keyIntentAlarm)
@@ -18,10 +24,11 @@ object AlarmManagerImp: AlarmManagerRepository {
         }
         when(action){
             Const.deleteAlarm -> alarmManager.cancel(alarmtIntent)
-            else -> alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time, alarmtIntent)
+            else -> alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, item.alarmTime, alarmtIntent)
 
         }
 
     }
+
 
 }

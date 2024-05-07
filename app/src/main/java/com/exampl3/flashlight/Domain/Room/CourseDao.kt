@@ -10,17 +10,13 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface CourseDao {
-
     @Query("SELECT * FROM Item")
     fun getAll(): Flow<List<Item>>
 
-
     @Query("SELECT * FROM Item")
     fun getAllList(): List<Item>
-
     @Insert
      fun insertAll(Courses: Item)
-
     @Delete
     fun delete(Course: Item)
     @Update

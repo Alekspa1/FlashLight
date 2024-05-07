@@ -3,6 +3,7 @@ package com.exampl3.flashlight.Domain.Room
 import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import javax.inject.Inject
 
 
 @Database(entities = [Item::class],
@@ -14,7 +15,7 @@ import androidx.room.RoomDatabase
                      ]
 
 )
-abstract class GfgDatabase : RoomDatabase()
+abstract class GfgDatabase: RoomDatabase()
 {
 
    abstract fun CourseDao(): CourseDao

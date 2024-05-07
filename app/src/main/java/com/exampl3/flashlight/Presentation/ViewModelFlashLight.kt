@@ -1,32 +1,51 @@
 package com.exampl3.flashlight.Presentation
 
 import android.app.AlarmManager
+import android.app.Application
 import android.content.Context
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import com.exampl3.flashlight.Data.AlarmManagerImp
-import com.exampl3.flashlight.Data.TurnFlashLightImpl
-import com.exampl3.flashlight.Domain.Alarm.AlarmManagerInsert
+import com.exampl3.flashlight.model.alarmReceiwer.AlarmManagerImp
+import com.exampl3.flashlight.model.TurnFlashLightImpl
 import com.exampl3.flashlight.Domain.Room.Item
-import com.exampl3.flashlight.Domain.TurnFlashLightAndVibro.TurnFlashLight
+import com.exampl3.flashlight.Domain.sharedPreference.SharedPreferenceImpl
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class ViewModelFlashLight: ViewModel() {
-    private val repository = TurnFlashLightImpl
-    private val repositoryAlarm = AlarmManagerImp
-    private val turnFlashLight = TurnFlashLight(repository)
-    private val alarmInsert = AlarmManagerInsert(repositoryAlarm)
+@HiltViewModel
+class ViewModelFlashLight @Inject constructor(
+    private val pref: SharedPreferenceImpl,
+    private val alarmInsert: AlarmManagerImp,
+    private val turnFlashLight: TurnFlashLightImpl,
+    private val application: Application
+): AndroidViewModel(application) {
+    //private val repository = TurnFlashLightImpl
+   // private val turnFlashLight = TurnFlashLight(repository)
+    private val _premium = MutableLiveData<Boolean>()
+    var premium: LiveData<Boolean> = _premium
 
-    var premium = MutableLiveData<Boolean>()
-
-
-
-
-    fun turnFlasLigh(con: Context, flag: Boolean){
-            turnFlashLight.turnFlashLight(con, flag)
+    fun saveSP(flag: Boolean) {
+        pref.saveSP(flag)
+        _premium.value = flag
     }
-    fun alarmInsert(item: Item, time: Long, context: Context,alarmManager: AlarmManager, action: Int){
-        alarmInsert.alarmManagerInsert(item, time, context,alarmManager, action)
+    private fun getSP() = pref.getSP()
+
+    init {
+       _premium.postValue(getSP())
     }
+
+
+
+    fun turnFlasLigh(flag: Boolean){
+            turnFlashLight.turnFlashLight(application, flag)
+    }
+//    fun alarmInsert(item: Item, time: Long, context: Context,alarmManager: AlarmManager, action: Int){
+//        alarmInsert.alarmManagerInsert(item, time, context,alarmManager, action)
+//    }
+fun alarmInsert(item: Item, time: Long, context: Context,alarmManager: AlarmManager, action: Int){
+    alarmInsert.alarmInsert(item, action)
+}
 
 
 }
