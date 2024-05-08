@@ -1,4 +1,4 @@
-package com.exampl3.flashlight.Domain.Adapter
+package com.exampl3.flashlight.Presentation.adapters
 
 
 import android.view.LayoutInflater

@@ -4,24 +4,34 @@ package com.exampl3.flashlight.Presentation
 import android.app.AlarmManager
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
+
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.room.Room
 import com.exampl3.flashlight.Data.Const
-import com.exampl3.flashlight.Domain.Adapter.ItemListAdapter
-import com.exampl3.flashlight.Domain.Adapter.VpAdapter
+import com.exampl3.flashlight.Presentation.adapters.VpAdapter
 import com.exampl3.flashlight.Domain.Room.GfgDatabase
-import com.exampl3.flashlight.Domain.Room.Item
+import com.exampl3.flashlight.R
 import com.exampl3.flashlight.databinding.ActivityMainBinding
 import com.google.android.material.tabs.TabLayoutMediator
 import com.yandex.mobile.ads.banner.BannerAdSize
 import com.yandex.mobile.ads.banner.BannerAdView
+import com.yandex.mobile.ads.common.AdError
 import com.yandex.mobile.ads.common.AdRequest
+import com.yandex.mobile.ads.common.AdRequestConfiguration
+import com.yandex.mobile.ads.common.AdRequestError
+import com.yandex.mobile.ads.common.ImpressionData
+import com.yandex.mobile.ads.interstitial.InterstitialAd
+import com.yandex.mobile.ads.interstitial.InterstitialAdEventListener
+import com.yandex.mobile.ads.interstitial.InterstitialAdLoadListener
+import com.yandex.mobile.ads.interstitial.InterstitialAdLoader
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import ru.rustore.sdk.billingclient.RuStoreBillingClient
 import ru.rustore.sdk.billingclient.RuStoreBillingClientFactory
 import ru.rustore.sdk.billingclient.model.purchase.PaymentResult
@@ -33,31 +43,21 @@ import ru.rustore.sdk.billingclient.utils.pub.checkPurchasesAvailability
 import ru.rustore.sdk.core.feature.model.FeatureAvailabilityResult
 import java.util.Calendar
 import java.util.UUID
+import javax.inject.Inject
 
+@AndroidEntryPoint
+class MainActivity : AppCompatActivity() {
 
-class MainActivity : AppCompatActivity(), ItemListAdapter.onClick, ItemListAdapter.onLongClick {
-    private var bannerAd: BannerAdView? = null
-    private lateinit var db: GfgDatabase
+    private var interstitialAdLoader: InterstitialAdLoader? = null
+    private var interstitialAd: InterstitialAd? = null
+        private var bannerAd: BannerAdView? = null
+    @Inject
+    lateinit var db: GfgDatabase
     private lateinit var binding: ActivityMainBinding
     private lateinit var vpAdapter: VpAdapter
     private lateinit var calendarZero: Calendar
-    private lateinit var modelFlashLight: ViewModelFlashLight
+    private val modelFlashLight: ViewModelFlashLight by viewModels()
     private lateinit var alarmManager: AlarmManager
-    private lateinit var pref: SharedPreferences
-    private lateinit var edit: SharedPreferences.Editor
-    private lateinit var adapter: ItemListAdapter
-    private val listFrag = listOf(
-        FragmentNotebook.newInstance(),
-        FragmentList.newInstance(),
-        FragmentFlashLight.newInstance()
-    )
-    private val listName = listOf(
-        "Блокнот",
-        "Список дел",
-        "Фонарик"
-    )
-    private val shopingList = arrayListOf<Item>()
-
     private lateinit var billingClient: RuStoreBillingClient
     private lateinit var productsUseCase: ProductsUseCase
     private lateinit var purchasesUseCase: PurchasesUseCase
@@ -68,19 +68,29 @@ class MainActivity : AppCompatActivity(), ItemListAdapter.onClick, ItemListAdapt
         initAll()
         setContentView(binding.root)
         initVp()
-        initDb()
-        initRcView()
         updateAlarm()
-        if (!Const.premium) initYaBaner()
+        if (!modelFlashLight.getPremium()) initYaBaner()
         if (savedInstanceState == null) {
             billingClient.onNewIntent(intent)
         }
 
 
+        interstitialAdLoader = InterstitialAdLoader(this).apply {
+            setAdLoadListener(object : InterstitialAdLoadListener {
+                override fun onAdLoaded(interstitialAd: InterstitialAd) {
+                    this@MainActivity.interstitialAd = interstitialAd
+                    // The ad was loaded successfully. Now you can show loaded ad.
+                }
 
+                override fun onAdFailedToLoad(error: AdRequestError) {
+                    // Ad failed to load with AdRequestError.
+                    // Attempting to load a new ad from the onAdFailedToLoad() method is strongly discouraged.
+                }
+            })
+        }
+        loadInterstitialAd()
         with(binding) {
             imMenu.setOnClickListener {
-                modelFlashLight.turnVibro(it.context, 50)
                 drawer.openDrawer(GravityCompat.START)
             } //  Меню
             bBuyPremium.setOnClickListener {
@@ -101,32 +111,54 @@ class MainActivity : AppCompatActivity(), ItemListAdapter.onClick, ItemListAdapt
                     Toast.makeText(this@MainActivity, "Ошибка", Toast.LENGTH_SHORT).show()
                 }
             } // Обратная связь
+
             imBAddMenu.setOnClickListener {
-                DialogItemList.AlertList(this@MainActivity, object : DialogItemList.Listener {
-                    override fun onClick(name: String) {
-                        shopingList.add(Item(null, name))
-                    }
-                }, null)
-
-            } // Добавить категори.
+                Toast.makeText(this@MainActivity, "Категории появятся в следующих обновлениях", Toast.LENGTH_SHORT).show()
+            }
         }
-
-
-
     }
-
-    override fun onResume() {
-        super.onResume()
-        shopingList()
-
-
+    private fun destroyInterstitialAd() {
+        interstitialAd?.setAdEventListener(null)
+        interstitialAd = null
     }
-
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-        billingClient.onNewIntent(intent)
+    private fun loadInterstitialAd() {
+        val adRequestConfiguration = AdRequestConfiguration.Builder(Const.MEZSTR).build()
+        interstitialAdLoader?.loadAd(adRequestConfiguration)
     }
+     fun showAd() {
+        interstitialAd?.apply {
+            setAdEventListener(object : InterstitialAdEventListener {
+                override fun onAdShown() {
+                    // Called when ad is shown.
+                }
+                override fun onAdFailedToShow(adError: AdError) {
+                    // Called when an InterstitialAd failed to show.
+                    // Clean resources after Ad dismissed
+                    interstitialAd?.setAdEventListener(null)
+                    interstitialAd = null
 
+                    // Now you can preload the next interstitial ad.
+                    loadInterstitialAd()
+                }
+                override fun onAdDismissed() {
+                    // Called when ad is dismissed.
+                    // Clean resources after Ad dismissed
+                    interstitialAd?.setAdEventListener(null)
+                    interstitialAd = null
+
+                    // Now you can preload the next interstitial ad.
+                    loadInterstitialAd()
+                }
+                override fun onAdClicked() {
+                    // Called when a click is recorded for an ad.
+                }
+                override fun onAdImpression(impressionData: ImpressionData?) {
+                    // Called when an impression is recorded for an ad.
+                }
+            })
+            show(this@MainActivity)
+        }
+    }
 
     private fun proverkaVozmoznoyOplaty(context: Context) {
         RuStoreBillingClient.checkPurchasesAvailability(context)
@@ -154,8 +186,7 @@ class MainActivity : AppCompatActivity(), ItemListAdapter.onClick, ItemListAdapt
         ).addOnSuccessListener { paymentResult: PaymentResult ->
             when (paymentResult) {
                 is PaymentResult.Success -> {
-                    edit.putBoolean(Const.premium_KEY, true)
-                    edit.apply()
+                    modelFlashLight.savePremium(true)
                     Toast.makeText(
                         this,
                         "Поздравляю! Теперь вам доступны премиум функции",
@@ -178,18 +209,16 @@ class MainActivity : AppCompatActivity(), ItemListAdapter.onClick, ItemListAdapt
     private fun shopingList() {
         purchasesUseCase.getPurchases()
             .addOnSuccessListener { purchases: List<Purchase> ->
-                if (purchases.isEmpty() && Const.premium) {
-                    edit.putBoolean(Const.premium_KEY, false)
-                    Const.premium = pref.getBoolean(Const.premium_KEY, false)
-                    edit.apply()
+                if (purchases.isEmpty() && modelFlashLight.getPremium()) {
+                    modelFlashLight.savePremium(false)
+                    Toast.makeText(this, "Премиум версия была отключена", Toast.LENGTH_SHORT).show()
                 }
                 purchases.forEach {
                     if (it.productId == "premium_version_flash_light" &&
-                        (it.purchaseState == PurchaseState.PAID || it.purchaseState == PurchaseState.CONFIRMED) && !Const.premium
+                        (it.purchaseState == PurchaseState.PAID || it.purchaseState == PurchaseState.CONFIRMED) && !modelFlashLight.getPremium()
                     ) {
-                        edit.putBoolean(Const.premium_KEY, true)
-                        Const.premium = pref.getBoolean(Const.premium_KEY, false)
-                        edit.apply()
+                        modelFlashLight.savePremium(true)
+                        Toast.makeText(this, "Премиум версия была восстановлена", Toast.LENGTH_SHORT).show()
                     }
                 }
 
@@ -200,28 +229,13 @@ class MainActivity : AppCompatActivity(), ItemListAdapter.onClick, ItemListAdapt
 
     } // Запрос ранее совершенных покупок
 
-    fun initVp() {
-        vpAdapter = VpAdapter(this, listFrag)
+    private fun initVp() {
+        vpAdapter = VpAdapter(this)
         binding.placeHolder.adapter = vpAdapter
         TabLayoutMediator(binding.tabLayout, binding.placeHolder) { tab, pos ->
-            tab.text = listName[pos]
+            tab.text = resources.getStringArray(R.array.vp_title_main)[pos]
         }.attach()
     } // инициализирую ViewPager
-   private fun initRcView() {
-        val rcView = binding.rcView
-        adapter = ItemListAdapter(this, this)
-        rcView.layoutManager = LinearLayoutManager(this)
-        rcView.adapter = adapter
-        adapter.submitList(shopingList)
-
-    }
-
-    private fun initDb() {
-        db = Room.databaseBuilder(
-            this,
-            GfgDatabase::class.java, "db"
-        ).build()
-    } // инициализирую БД
 
     private fun initYaBaner() {
         bannerAd = BannerAdView(this)
@@ -232,45 +246,44 @@ class MainActivity : AppCompatActivity(), ItemListAdapter.onClick, ItemListAdapt
 
     } // Инициализирую Яндекс Рекламу
 
-    private fun updateAlarm() {
-        Thread {
-            db.CourseDao().getAllList().forEach { item ->
-                if (item.changeAlarm && item.alarmTime > calendarZero.timeInMillis) {
-                    when (item.interval) {
-                        Const.alarmOne -> {
-                            modelFlashLight.alarmInsert(
-                                item,
-                                item.alarmTime,
-                                this,
-                                alarmManager,
-                                Const.alarmOne
-                            )
-                        }
+//    private fun updateAlarm() {
+//        CoroutineScope(Dispatchers.IO).launch { db.CourseDao().getAllList().forEach { item ->
+//            if (item.changeAlarm && item.alarmTime > calendarZero.timeInMillis) {
+//                when (item.interval) {
+//                    Const.alarmOne -> {
+//                        modelFlashLight.alarmInsert(
+//                            item,
+//                            Const.alarmOne
+//                        )
+//                    }
+//                    else -> {
+//                        if (!modelFlashLight.getSP()) {
+//                            modelFlashLight.alarmInsert(
+//                                item,
+//                                Const.deleteAlarm
+//                            )
+//                            db.CourseDao().update(item.copy(changeAlarm = false))
+//                        }
+//                        else {
+//                            modelFlashLight.alarmInsert(
+//                                item,
+//                                item.interval
+//                            )
+//                        }
+//                    }
+//                }
+//            }
+//        } }
+//
+//    } // обновляю будильники вернуть потом как было
 
-                        else -> {
-                            if (!Const.premium) {
-                                modelFlashLight.alarmInsert(
-                                    item,
-                                    item.alarmTime,
-                                    this,
-                                    alarmManager,
-                                    Const.deleteAlarmRepeat
-                                )
-                                db.CourseDao().update(item.copy(changeAlarm = !item.changeAlarm))
-                            } else {
-                                modelFlashLight.alarmInsert(
-                                    item,
-                                    item.alarmTime,
-                                    this,
-                                    alarmManager,
-                                    item.interval
-                                )
-                            }
-                        }
-                    }
-                }
+    private fun updateAlarm() {
+        CoroutineScope(Dispatchers.IO).launch { db.CourseDao().getAllList().forEach { item ->
+            if (item.changeAlarm && item.alarmTime > calendarZero.timeInMillis) {
+                modelFlashLight.alarmInsert(item, item.interval)
             }
-        }.start()
+        } }
+
     } // обновляю будильники
     private fun initAll(){
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -282,41 +295,30 @@ class MainActivity : AppCompatActivity(), ItemListAdapter.onClick, ItemListAdapt
         productsUseCase = billingClient.products
         purchasesUseCase = billingClient.purchases
         calendarZero = Calendar.getInstance()
-        modelFlashLight = ViewModelFlashLight()
         alarmManager = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        pref = this.getSharedPreferences("PREMIUM", Context.MODE_PRIVATE)
-        edit = pref.edit()
 
     } // Инициализирую все
 
-    override fun onLongClick(item: Item) {
-        TODO("Not yet implemented")
-    }
 
-    override fun onClick(item: Item, action: Int) {
-        modelFlashLight.turnVibro(this, 100)
-        when (action) {
-            Const.change -> {
-                Toast.makeText(this, "Изменить состояние", Toast.LENGTH_SHORT).show()
+        //Override функции
 
-            } // Изменение состояния элемента(активный/неактивный)
-
-            Const.delete -> {
-                shopingList.remove(item)
-                Toast.makeText(this, "Удалить", Toast.LENGTH_SHORT).show()
-                adapter.submitList(shopingList)
-
-            } // Удаления элемента
-
-            Const.alarm -> {
-                Toast.makeText(this, "Установка будильника", Toast.LENGTH_SHORT).show()
-            } // Установка будильника
-
-            Const.changeItem -> {
-                Toast.makeText(this, "Изменить имя", Toast.LENGTH_SHORT).show()
-            } // Изменение имени элемента
+    override fun onResume() {
+        super.onResume()
+        CoroutineScope(Dispatchers.IO).launch {
+            shopingList()
         }
     }
+    override fun onDestroy() {
+        super.onDestroy()
+        interstitialAdLoader?.setAdLoadListener(null)
+        interstitialAdLoader = null
+        destroyInterstitialAd()
+    }
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        billingClient.onNewIntent(intent)
+    }
+
 
 
 }

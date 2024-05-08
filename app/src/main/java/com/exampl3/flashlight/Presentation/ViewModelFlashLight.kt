@@ -1,34 +1,37 @@
 package com.exampl3.flashlight.Presentation
 
-import android.app.AlarmManager
-import android.content.Context
+
 import androidx.lifecycle.ViewModel
-import com.exampl3.flashlight.Data.AlarmManagerImp
-import com.exampl3.flashlight.Data.TurnFlashLightImpl
-import com.exampl3.flashlight.Domain.Alarm.AlarmManagerInsert
+import com.exampl3.flashlight.model.AlarmManagerImp
+import com.exampl3.flashlight.model.TurnFlashLightImpl
 import com.exampl3.flashlight.Domain.Room.Item
-import com.exampl3.flashlight.Domain.TurnFlashLightAndVibro.TurnFlashLight
-import com.exampl3.flashlight.Domain.TurnFlashLightAndVibro.TurnVibro
+import com.exampl3.flashlight.Domain.sharedPreference.SharedPreferenceImpl
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class ViewModelFlashLight: ViewModel() {
-    private val repository = TurnFlashLightImpl
-    private val repositoryAlarm = AlarmManagerImp
-    private val turnFlashLight = TurnFlashLight(repository)
-    private val turnVibro = TurnVibro(repository)
-    private val alarmInsert = AlarmManagerInsert(repositoryAlarm)
+@HiltViewModel
+class ViewModelFlashLight @Inject constructor(
+    private val pref: SharedPreferenceImpl,
+    private val alarmInsert: AlarmManagerImp,
+    private val turnFlashLight: TurnFlashLightImpl
+): ViewModel() {
+
+
+    fun savePremium(flag: Boolean) = pref.savePremium(flag)
+    fun getPremium() = pref.getPremium()
+
+    fun saveNoteBook(value: String) = pref.saveStringNoteBook(value)
+    fun getNotebook() = pref.getStringNoteBook()
 
 
 
 
-    fun turnFlasLigh(con: Context, flag: Boolean){
-            turnFlashLight.turnFlashLight(con, flag)
+    fun turnFlasLigh(flag: Boolean){
+            turnFlashLight.turnFlashLight(flag)
     }
-    fun turnVibro(con: Context, time: Long){
-            turnVibro.turnVibro(con, time)
-    }
-    fun alarmInsert(item: Item, time: Long, context: Context,alarmManager: AlarmManager, action: Int){
-        alarmInsert.alarmManagerInsert(item, time, context,alarmManager, action)
-    }
+fun alarmInsert(item: Item, action: Int){
+    alarmInsert.alarmInsert(item, action)
+}
 
 
 }
