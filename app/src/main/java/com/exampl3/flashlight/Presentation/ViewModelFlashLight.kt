@@ -20,10 +20,11 @@ class ViewModelFlashLight @Inject constructor(
 //    private val _premium = MutableLiveData<Boolean>()
 //    var premium: LiveData<Boolean> = _premium
 
-    fun saveSP(flag: Boolean) = pref.saveSP(flag)
+    fun savePremium(flag: Boolean) = pref.savePremium(flag)
+    fun getPremium() = pref.getPremium()
 
-
-    fun getSP() = pref.getSP()
+    fun saveNoteBook(value: String) = pref.saveStringNoteBook(value)
+    fun getNotebook() = pref.getStringNoteBook()
 
 
 

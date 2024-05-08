@@ -21,25 +21,34 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.room.Room
 import com.exampl3.flashlight.Data.Const
 import com.exampl3.flashlight.Presentation.adapters.ItemListAdapter
 import com.exampl3.flashlight.Domain.Room.GfgDatabase
 import com.exampl3.flashlight.Domain.Room.Item
 import com.exampl3.flashlight.databinding.FragmentListBinding
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import javax.inject.Inject
 
-
+@AndroidEntryPoint
 class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.onClick {
     private lateinit var binding: FragmentListBinding
     private lateinit var adapter: ItemListAdapter
+
     @Inject
     lateinit var db: GfgDatabase
+
+    @Inject
+    lateinit var voiceIntent: Intent
     private val modelFlashLight: ViewModelFlashLight by activityViewModels()
+
     private lateinit var pLauncher: ActivityResultLauncher<String>
+
     private lateinit var timePickerDialog: TimePickerDialog
     private lateinit var datePickerDialog: DatePickerDialog
     private lateinit var calendar: Calendar
@@ -56,8 +65,6 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         calendarZero = Calendar.getInstance()
-        //alarmManager = view.context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        initDb(view.context)
         initRcView()
         db.CourseDao().getAll().asLiveData().observe(viewLifecycleOwner) { list ->
             adapter.submitList(list)
@@ -68,11 +75,11 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
                 if (it.resultCode == Activity.RESULT_OK) {
                     val text = it.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
-                    Thread {
+                    CoroutineScope(Dispatchers.IO).launch {
                         if (text != null) {
                             db.CourseDao().insertAll(Item(null, text[0]))
                         }
-                    }.start()
+                    }
 
                 }
 
@@ -81,9 +88,9 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
         binding.imBAddFrag.setOnClickListener {
             DialogItemList.AlertList(requireContext(), object : DialogItemList.Listener {
                 override fun onClick(name: String) {
-                    Thread {
+                    CoroutineScope(Dispatchers.IO).launch {
                         db.CourseDao().insertAll(Item(null, name))
-                    }.start()
+                    }
                 }
             }, null)
 
@@ -91,7 +98,7 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
 
         binding.imVoiceFrag.setOnClickListener {
             try {
-                launcher.launch(initVoiceIntent())
+                launcher.launch(voiceIntent)
             } catch (e: Exception) {
                 Toast.makeText(
                     view.context,
@@ -105,14 +112,14 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
     }
 
 
-    private fun initVoiceIntent(): Intent {
-        val voiceIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
-        voiceIntent.putExtra(
-            RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
-        )
-        return voiceIntent
-    } // Функция для создания интента голосового ввода
+//    private fun initVoiceIntent(): Intent {
+//        val voiceIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+//        voiceIntent.putExtra(
+//            RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+//            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+//        )
+//        return voiceIntent
+//    } // Функция для создания интента голосового ввода
 
     private fun initRcView() {
         val rcView = binding.rcView
@@ -122,21 +129,17 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
 
     } // инициализировал ресайклер
 
-    private fun initDb(context: Context) {
-        db = Room.databaseBuilder(
-            context,
-            GfgDatabase::class.java, "db"
-        ).build()
-    } // инициализировал БД
-
     private fun deleteAlertDialog(context: Context, item: Item) {
         DialogItemList.AlertDelete(context, object : DialogItemList.Delete {
             override fun onClick(flag: Boolean) {
                 if (flag) {
-                    Thread {
+                    CoroutineScope(
+                        Dispatchers
+                            .IO
+                    ).launch {
                         changeAlarmItem(item, Const.deleteAlarm)
                         db.CourseDao().delete(item)
-                    }.start()
+                    }
 
                 }
             }
@@ -180,8 +183,7 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
                         override fun onClick(result: Int) {
                             if (calendar.timeInMillis >= calendarZero.timeInMillis) {
                                 proverkaFree(item, result)
-                            }
-                            else Toast.makeText(
+                            } else Toast.makeText(
                                 view?.context,
                                 "Вы выбрали время которое уже прошло",
                                 Toast.LENGTH_SHORT
@@ -198,24 +200,32 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
     } // Установка времени
 
     override fun onLongClick(item: Item) {
-        Thread {
+        CoroutineScope(Dispatchers.IO).launch {
             db.CourseDao().update(item.copy(changeAlarm = !item.changeAlarm))
-        }.start()
-
+        }
         if (item.changeAlarm) {
             changeAlarmItem(item, Const.deleteAlarm)
         }
         if ((item.change || !item.changeAlarm) && item.alarmTime > calendarZero.timeInMillis) {
-            changeAlarmItem(item.copy(change = false,changeAlarm = !item.changeAlarm ), item.interval)
-            Thread {
-                db.CourseDao().update(item.copy(change = false, changeAlarm = !item.changeAlarm ))
-            }.start()
+            changeAlarmItem(
+                item.copy(change = false, changeAlarm = !item.changeAlarm),
+                item.interval
+            )
+            CoroutineScope(Dispatchers.IO).launch {
+                db.CourseDao().update(item.copy(change = false, changeAlarm = !item.changeAlarm))
+            }
         }
 //        if (!item.changeAlarm && item.alarmTime > calendarZero.timeInMillis) {
 //            changeAlarmItem(item, item.interval)
 //        }
         if (!item.changeAlarm && item.alarmTime < calendarZero.timeInMillis) {
             when (item.interval) {
+                Const.alarmOne -> {
+                    Toast.makeText(requireContext(), "Вы выбрали время которое уже прошло", Toast.LENGTH_SHORT).show()
+                    CoroutineScope(Dispatchers.IO).launch {
+                        db.CourseDao().update(item.copy(changeAlarm = false))
+                    }
+                }
                 Const.alarmDay -> {
                     insertAlarmRepeat(item, AlarmManager.INTERVAL_DAY, "и через день")
                 }
@@ -234,20 +244,17 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
     override fun onClick(item: Item, action: Int) {
         when (action) {
             Const.change -> {
-                Thread {
+                CoroutineScope(Dispatchers.IO).launch {
                     db.CourseDao().update(item.copy(change = !item.change))
                     if (item.changeAlarm) {
                         db.CourseDao().update(item.copy(changeAlarm = false, change = !item.change))
                     }
-                    changeAlarmItem(item, Const.deleteAlarm)
-                }.start()
+                    changeAlarmItem(item, Const.deleteAlarm)  }
             } // Изменение состояния элемента(активный/неактивный)
 
             Const.delete -> {
                 if (item.change) {
-                    Thread {
-                        db.CourseDao().delete(item)
-                    }.start()
+                    CoroutineScope(Dispatchers.IO).launch {db.CourseDao().delete(item)  }
                     changeAlarmItem(item, Const.deleteAlarm)
                 } else {
                     deleteAlertDialog(requireContext(), item)
@@ -274,11 +281,12 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
             Const.changeItem -> {
                 DialogItemList.AlertList(requireContext(), object : DialogItemList.Listener {
                     override fun onClick(name: String) {
-                        Thread {
-                            val newitem = item.copy(name = name)
-                            if (item.changeAlarm) changeAlarmItem(newitem, newitem.interval) // если у item был установлен будильник то, тут мы перезаписываем будильник
-                            db.CourseDao().update(newitem)
-                        }.start()
+                        CoroutineScope(Dispatchers.IO).launch {val newitem = item.copy(name = name)
+                            if (item.changeAlarm) changeAlarmItem(
+                                newitem,
+                                newitem.interval
+                            ) // если у item был установлен будильник то, тут мы перезаписываем будильник
+                            db.CourseDao().update(newitem)  }
                     }
                 }, item.name)
             } // Изменение имени элемента
@@ -318,34 +326,36 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
         val resultDate = dateFormate.format(time)
         val resutTime = timeFormate.format(time)
         val result = "Напомнит: $resultDate в $resutTime $intervalString"
-        val newItem = item.copy(alarmTime = time, alarmText = result,changeAlarm = !item.changeAlarm)
+        val newItem =
+            item.copy(alarmTime = time, alarmText = result, changeAlarm = !item.changeAlarm)
         Thread {
             db.CourseDao().update(newItem)
         }.start()
         changeAlarmItem(newItem, newItem.interval)
 
     } // установка повторяющегося будильника
-    private fun proverkaFree(item: Item, result: Int){
-        if (!modelFlashLight.getSP()) (activity as MainActivity).showAd()
-            when(result){
-                Const.alarmOne -> {
-                    insertAlarm(item, result, "")
-                }
 
-                Const.alarmDay -> {
-                    insertAlarm(item, result, "и через день")
-                }
-
-                Const.alarmWeek -> {
-                    insertAlarm(item, result, "и через неделю")
-                }
-
-                Const.alarmMonth -> {
-                    insertAlarm(item, result, "и через месяц")
-                }
+    private fun proverkaFree(item: Item, result: Int) {
+        if (!modelFlashLight.getPremium()) (activity as MainActivity).showAd()
+        when (result) {
+            Const.alarmOne -> {
+                insertAlarm(item, result, "")
             }
 
-    //Toast.makeText(view?.context, "Повторяющиеся напоминания доступны в PREMIUM версии", Toast.LENGTH_SHORT).show()
+            Const.alarmDay -> {
+                insertAlarm(item, result, "и через день")
+            }
+
+            Const.alarmWeek -> {
+                insertAlarm(item, result, "и через неделю")
+            }
+
+            Const.alarmMonth -> {
+                insertAlarm(item, result, "и через месяц")
+            }
+        }
+
+        //Toast.makeText(view?.context, "Повторяющиеся напоминания доступны в PREMIUM версии", Toast.LENGTH_SHORT).show()
 
     }
 

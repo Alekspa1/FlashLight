@@ -32,7 +32,7 @@ class FragmentFlashLight : Fragment()  {
             if (isChecked) binding.toggleButton.setButtonDrawable(R.drawable.ic_on)
             else {
                 binding.toggleButton.setButtonDrawable(R.drawable.ic_of)
-                if(!model.getSP()) (activity as MainActivity).showAd()
+                if(!model.getPremium()) (activity as MainActivity).showAd()
             }
         }
 

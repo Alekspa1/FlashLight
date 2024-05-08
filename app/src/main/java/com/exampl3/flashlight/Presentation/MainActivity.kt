@@ -69,7 +69,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         initVp()
         updateAlarm()
-        if (!modelFlashLight.getSP()) initYaBaner()
+        if (!modelFlashLight.getPremium()) initYaBaner()
         if (savedInstanceState == null) {
             billingClient.onNewIntent(intent)
         }
@@ -186,7 +186,7 @@ class MainActivity : AppCompatActivity() {
         ).addOnSuccessListener { paymentResult: PaymentResult ->
             when (paymentResult) {
                 is PaymentResult.Success -> {
-                    modelFlashLight.saveSP(true)
+                    modelFlashLight.savePremium(true)
                     Toast.makeText(
                         this,
                         "Поздравляю! Теперь вам доступны премиум функции",
@@ -209,15 +209,15 @@ class MainActivity : AppCompatActivity() {
     private fun shopingList() {
         purchasesUseCase.getPurchases()
             .addOnSuccessListener { purchases: List<Purchase> ->
-                if (purchases.isEmpty() && modelFlashLight.getSP()) {
-                    modelFlashLight.saveSP(false)
+                if (purchases.isEmpty() && modelFlashLight.getPremium()) {
+                    modelFlashLight.savePremium(false)
                     Toast.makeText(this, "Премиум версия была отключена", Toast.LENGTH_SHORT).show()
                 }
                 purchases.forEach {
                     if (it.productId == "premium_version_flash_light" &&
-                        (it.purchaseState == PurchaseState.PAID || it.purchaseState == PurchaseState.CONFIRMED) && !modelFlashLight.getSP()
+                        (it.purchaseState == PurchaseState.PAID || it.purchaseState == PurchaseState.CONFIRMED) && !modelFlashLight.getPremium()
                     ) {
-                        modelFlashLight.saveSP(true)
+                        modelFlashLight.savePremium(true)
                         Toast.makeText(this, "Премиум версия была восстановлена", Toast.LENGTH_SHORT).show()
                     }
                 }

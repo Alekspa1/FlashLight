@@ -12,15 +12,21 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.fragment.app.activityViewModels
 import com.exampl3.flashlight.Data.Const
 import com.exampl3.flashlight.databinding.FragmentNotebookBinding
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 
-
+@AndroidEntryPoint
 class FragmentNotebook : Fragment() {
     private lateinit var binding: FragmentNotebookBinding
-    private lateinit var pref: SharedPreferences
-    private lateinit var greetings: String
+    private val modelFlashLight: ViewModelFlashLight by activityViewModels()
+//    private lateinit var pref: SharedPreferences
+//    private lateinit var greetings: String
+    @Inject
+    lateinit var voiceIntent: Intent
 
 
 
@@ -34,11 +40,11 @@ class FragmentNotebook : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        greetings = "Дорогие пользователи! \nВвиду особенности некоторых моделей телефонов," +
-                " установленные напоминания сбиваются после перезагрузки устройства," +
-                " если вы столкнулись с такой проблемой, вам необходимо в настройках приложения," +
-                " включить автозапуск приложения или разрешить приложению работать в фоновом режиме. " +
-                "Либо повторно входить в приложение после перезагрузки, чтобы напоминания обновились."
+//        greetings = "Дорогие пользователи! \nВвиду особенности некоторых моделей телефонов," +
+//                " установленные напоминания сбиваются после перезагрузки устройства," +
+//                " если вы столкнулись с такой проблемой, вам необходимо в настройках приложения," +
+//                " включить автозапуск приложения или разрешить приложению работать в фоновом режиме. " +
+//                "Либо повторно входить в приложение после перезагрузки, чтобы напоминания обновились."
         val launcher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
             result: ActivityResult ->
             if (result.resultCode == RESULT_OK){
@@ -49,9 +55,7 @@ class FragmentNotebook : Fragment() {
             }
 
         }
-        val voiceIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
-        voiceIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-        pref = this.requireActivity().getSharedPreferences("TABLE", Context.MODE_PRIVATE)
+//        pref = this.requireActivity().getSharedPreferences("TABLE", Context.MODE_PRIVATE)
         initNoteBook()
         binding.imDelete.setOnClickListener {
             delete(view.context)
@@ -68,9 +72,10 @@ class FragmentNotebook : Fragment() {
     override fun onStop() {
         super.onStop()
         val notebook = binding.edotebook.text.trim()
-        val edit = pref.edit()
-        edit.putString(Const.keyNoteBook, notebook.toString())
-        edit.apply()
+        modelFlashLight.saveNoteBook(notebook.toString())
+//        val edit = pref.edit()
+//        edit.putString(Const.keyNoteBook, notebook.toString())
+//        edit.apply()
     }
 
 
@@ -82,7 +87,8 @@ class FragmentNotebook : Fragment() {
         })
     } // удаляю заметки
     private fun initNoteBook(){
-        binding.edotebook.setText(pref.getString(Const.keyNoteBook,greetings))
+       // binding.edotebook.setText(pref.getString(Const.keyNoteBook,greetings))
+        binding.edotebook.setText(modelFlashLight.getNotebook())
     } // Заполнение из бд
 
 

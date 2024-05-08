@@ -103,7 +103,7 @@ class AlarmReceiwer: BroadcastReceiver() {
 //                        alarmManager.alarmInsert(newItem, Const.alarmOne)
                         insertAlarm(item, time,"")
                     } else->{
-                        val newItemFals = item.copy(id = item.id?.plus(1000), interval = Const.alarmRepeat)
+                        val newItemFals = item.copy(id = item.id?.plus(1000), interval = Const.alarmRepeat, alarmTime = time)
                     alarmManager.alarmInsert(newItemFals, Const.alarmOne)
                     }
                 }
