@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -212,12 +211,14 @@ class MainActivity : AppCompatActivity() {
             .addOnSuccessListener { purchases: List<Purchase> ->
                 if (purchases.isEmpty() && modelFlashLight.getSP()) {
                     modelFlashLight.saveSP(false)
+                    Toast.makeText(this, "Премиум версия была отключена", Toast.LENGTH_SHORT).show()
                 }
                 purchases.forEach {
                     if (it.productId == "premium_version_flash_light" &&
                         (it.purchaseState == PurchaseState.PAID || it.purchaseState == PurchaseState.CONFIRMED) && !modelFlashLight.getSP()
                     ) {
                         modelFlashLight.saveSP(true)
+                        Toast.makeText(this, "Премиум версия была восстановлена", Toast.LENGTH_SHORT).show()
                     }
                 }
 
@@ -228,7 +229,7 @@ class MainActivity : AppCompatActivity() {
 
     } // Запрос ранее совершенных покупок
 
-    fun initVp() {
+    private fun initVp() {
         vpAdapter = VpAdapter(this)
         binding.placeHolder.adapter = vpAdapter
         TabLayoutMediator(binding.tabLayout, binding.placeHolder) { tab, pos ->
@@ -245,32 +246,41 @@ class MainActivity : AppCompatActivity() {
 
     } // Инициализирую Яндекс Рекламу
 
+//    private fun updateAlarm() {
+//        CoroutineScope(Dispatchers.IO).launch { db.CourseDao().getAllList().forEach { item ->
+//            if (item.changeAlarm && item.alarmTime > calendarZero.timeInMillis) {
+//                when (item.interval) {
+//                    Const.alarmOne -> {
+//                        modelFlashLight.alarmInsert(
+//                            item,
+//                            Const.alarmOne
+//                        )
+//                    }
+//                    else -> {
+//                        if (!modelFlashLight.getSP()) {
+//                            modelFlashLight.alarmInsert(
+//                                item,
+//                                Const.deleteAlarm
+//                            )
+//                            db.CourseDao().update(item.copy(changeAlarm = false))
+//                        }
+//                        else {
+//                            modelFlashLight.alarmInsert(
+//                                item,
+//                                item.interval
+//                            )
+//                        }
+//                    }
+//                }
+//            }
+//        } }
+//
+//    } // обновляю будильники вернуть потом как было
+
     private fun updateAlarm() {
         CoroutineScope(Dispatchers.IO).launch { db.CourseDao().getAllList().forEach { item ->
             if (item.changeAlarm && item.alarmTime > calendarZero.timeInMillis) {
-                when (item.interval) {
-                    Const.alarmOne -> {
-                        modelFlashLight.alarmInsert(
-                            item,
-                            Const.alarmOne
-                        )
-                    }
-                    else -> {
-                        if (!modelFlashLight.getSP()) {
-                            modelFlashLight.alarmInsert(
-                                item,
-                                Const.deleteAlarm
-                            )
-                            db.CourseDao().update(item.copy(changeAlarm = false))
-                        }
-                        else {
-                            modelFlashLight.alarmInsert(
-                                item,
-                                item.interval
-                            )
-                        }
-                    }
-                }
+                modelFlashLight.alarmInsert(item, item.interval)
             }
         } }
 
@@ -291,10 +301,12 @@ class MainActivity : AppCompatActivity() {
 
 
         //Override функции
+
     override fun onResume() {
         super.onResume()
-        shopingList()
-
+        CoroutineScope(Dispatchers.IO).launch {
+            shopingList()
+        }
     }
     override fun onDestroy() {
         super.onDestroy()

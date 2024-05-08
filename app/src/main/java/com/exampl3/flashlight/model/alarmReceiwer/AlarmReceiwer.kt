@@ -5,6 +5,7 @@ import android.app.AlarmManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.widget.Toast
 import com.exampl3.flashlight.model.AlarmManagerImp
 import com.exampl3.flashlight.Data.Const
@@ -83,8 +84,7 @@ class AlarmReceiwer: BroadcastReceiver() {
             } // Когда нажал кнопку готово
 
             Const.keyIntentCallBackPostpone -> {
-               // val time = calendarZero.timeInMillis + 600000
-                val time = calendarZero.timeInMillis + 60000
+                val time = calendarZero.timeInMillis + 600000
                 val item = intent.getSerializableExtra(Const.keyIntentCallBackPostpone) as Item
 //                val dateFormat = "dd.MM"
 //                val timeFormat = "HH:mm"
