@@ -23,8 +23,6 @@ import javax.inject.Inject
 class FragmentNotebook : Fragment() {
     private lateinit var binding: FragmentNotebookBinding
     private val modelFlashLight: ViewModelFlashLight by activityViewModels()
-//    private lateinit var pref: SharedPreferences
-//    private lateinit var greetings: String
     @Inject
     lateinit var voiceIntent: Intent
 
@@ -40,11 +38,6 @@ class FragmentNotebook : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-//        greetings = "Дорогие пользователи! \nВвиду особенности некоторых моделей телефонов," +
-//                " установленные напоминания сбиваются после перезагрузки устройства," +
-//                " если вы столкнулись с такой проблемой, вам необходимо в настройках приложения," +
-//                " включить автозапуск приложения или разрешить приложению работать в фоновом режиме. " +
-//                "Либо повторно входить в приложение после перезагрузки, чтобы напоминания обновились."
         val launcher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
             result: ActivityResult ->
             if (result.resultCode == RESULT_OK){
@@ -55,7 +48,6 @@ class FragmentNotebook : Fragment() {
             }
 
         }
-//        pref = this.requireActivity().getSharedPreferences("TABLE", Context.MODE_PRIVATE)
         initNoteBook()
         binding.imDelete.setOnClickListener {
             delete(view.context)
@@ -73,9 +65,6 @@ class FragmentNotebook : Fragment() {
         super.onStop()
         val notebook = binding.edotebook.text.trim()
         modelFlashLight.saveNoteBook(notebook.toString())
-//        val edit = pref.edit()
-//        edit.putString(Const.keyNoteBook, notebook.toString())
-//        edit.apply()
     }
 
 
@@ -87,7 +76,6 @@ class FragmentNotebook : Fragment() {
         })
     } // удаляю заметки
     private fun initNoteBook(){
-       // binding.edotebook.setText(pref.getString(Const.keyNoteBook,greetings))
         binding.edotebook.setText(modelFlashLight.getNotebook())
     } // Заполнение из бд
 

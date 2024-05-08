@@ -15,10 +15,7 @@ class ViewModelFlashLight @Inject constructor(
     private val alarmInsert: AlarmManagerImp,
     private val turnFlashLight: TurnFlashLightImpl
 ): ViewModel() {
-    //private val repository = TurnFlashLightImpl
-   // private val turnFlashLight = TurnFlashLight(repository)
-//    private val _premium = MutableLiveData<Boolean>()
-//    var premium: LiveData<Boolean> = _premium
+
 
     fun savePremium(flag: Boolean) = pref.savePremium(flag)
     fun getPremium() = pref.getPremium()
@@ -32,9 +29,6 @@ class ViewModelFlashLight @Inject constructor(
     fun turnFlasLigh(flag: Boolean){
             turnFlashLight.turnFlashLight(flag)
     }
-//    fun alarmInsert(item: Item, time: Long, context: Context,alarmManager: AlarmManager, action: Int){
-//        alarmInsert.alarmManagerInsert(item, time, context,alarmManager, action)
-//    }
 fun alarmInsert(item: Item, action: Int){
     alarmInsert.alarmInsert(item, action)
 }

@@ -111,16 +111,6 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
 
     }
 
-
-//    private fun initVoiceIntent(): Intent {
-//        val voiceIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
-//        voiceIntent.putExtra(
-//            RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-//            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
-//        )
-//        return voiceIntent
-//    } // Функция для создания интента голосового ввода
-
     private fun initRcView() {
         val rcView = binding.rcView
         adapter = ItemListAdapter(this, this)
@@ -215,9 +205,6 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
                 db.CourseDao().update(item.copy(change = false, changeAlarm = !item.changeAlarm))
             }
         }
-//        if (!item.changeAlarm && item.alarmTime > calendarZero.timeInMillis) {
-//            changeAlarmItem(item, item.interval)
-//        }
         if (!item.changeAlarm && item.alarmTime < calendarZero.timeInMillis) {
             when (item.interval) {
                 Const.alarmOne -> {
@@ -336,26 +323,29 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
     } // установка повторяющегося будильника
 
     private fun proverkaFree(item: Item, result: Int) {
-        if (!modelFlashLight.getPremium()) (activity as MainActivity).showAd()
         when (result) {
             Const.alarmOne -> {
                 insertAlarm(item, result, "")
             }
-
             Const.alarmDay -> {
                 insertAlarm(item, result, "и через день")
+                if (!modelFlashLight.getPremium()) (activity as MainActivity).showAd()
+
             }
 
             Const.alarmWeek -> {
                 insertAlarm(item, result, "и через неделю")
+                if (!modelFlashLight.getPremium()) (activity as MainActivity).showAd()
+
             }
 
             Const.alarmMonth -> {
                 insertAlarm(item, result, "и через месяц")
+                if (!modelFlashLight.getPremium()) (activity as MainActivity).showAd()
+
             }
         }
 
-        //Toast.makeText(view?.context, "Повторяющиеся напоминания доступны в PREMIUM версии", Toast.LENGTH_SHORT).show()
 
     }
 
