@@ -7,6 +7,8 @@ import android.icu.util.Calendar
 import androidx.core.content.ContextCompat
 
 object Const {
+    const val RUSTORE = "https://apps.rustore.ru/app/com.exampl3.flashlight"
+    const val APP_GALERY = "https://flashlightandtodolist.drru.agconnect.link/d6zW"
     var premium_KEY = "premium_KEY"
     private val calendar: Calendar = Calendar.getInstance()
     private val dayInMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
