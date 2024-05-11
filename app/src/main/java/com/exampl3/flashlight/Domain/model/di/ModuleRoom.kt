@@ -1,4 +1,4 @@
-package com.exampl3.flashlight.Domain.di
+package com.exampl3.flashlight.Domain.model.di
 
 import android.app.Application
 import androidx.room.Room
@@ -15,7 +15,7 @@ object ModuleRoom {
 
     @Provides
     @Singleton
-    fun provadeDB(context: Application): GfgDatabase{
+    fun provadeDB(context: Application): GfgDatabase {
     return Room.databaseBuilder(
         context,
         GfgDatabase::class.java, "db"

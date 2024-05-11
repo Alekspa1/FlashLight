@@ -1,9 +1,9 @@
-package com.exampl3.flashlight.Domain.sharedPreference
+package com.exampl3.flashlight.Domain.model.sharedPreference
 
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
-import com.exampl3.flashlight.Data.Const
+import com.exampl3.flashlight.Const
 import javax.inject.Inject
 import javax.inject.Singleton
 

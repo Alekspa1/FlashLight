@@ -1,4 +1,4 @@
-package com.exampl3.flashlight.Data
+package com.exampl3.flashlight
 
 import android.app.AlarmManager
 import android.content.Context
@@ -30,7 +30,7 @@ object Const {
     const val alarmMonth = 3
     const val deleteAlarm = 4
     const val alarmRepeat = 5
-    var MONTH = AlarmManager.INTERVAL_DAY*dayInMonth
+    var MONTH = AlarmManager.INTERVAL_DAY* dayInMonth
 
     fun isPermissionGranted(con: Context, p: String): Boolean {
         return ContextCompat.checkSelfPermission(con, p) == PackageManager.PERMISSION_GRANTED

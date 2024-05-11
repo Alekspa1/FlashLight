@@ -1,4 +1,4 @@
-package com.exampl3.flashlight.model.alarmReceiwer
+package com.exampl3.flashlight.Domain.model.alarmReceiwer
 
 import android.app.Application
 import android.app.NotificationChannel
@@ -10,12 +10,11 @@ import android.media.AudioAttributes
 import android.media.RingtoneManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import com.exampl3.flashlight.Data.Const
+import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Domain.Room.Item
 import com.exampl3.flashlight.Presentation.MainActivity
 import com.exampl3.flashlight.R
 import javax.inject.Inject
-import javax.inject.Singleton
 
 
 class NotificationBuilderPassed @Inject constructor(private val context: Application) {

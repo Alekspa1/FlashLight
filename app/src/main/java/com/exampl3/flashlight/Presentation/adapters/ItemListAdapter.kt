@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.exampl3.flashlight.Data.Const
+import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Domain.Room.Item
 import com.exampl3.flashlight.R
 import com.exampl3.flashlight.databinding.ItemBinding

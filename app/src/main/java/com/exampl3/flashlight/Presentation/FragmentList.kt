@@ -6,7 +6,6 @@ import android.app.Activity
 import android.app.AlarmManager
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
-import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -21,20 +20,17 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.exampl3.flashlight.Data.Const
+import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Presentation.adapters.ItemListAdapter
 import com.exampl3.flashlight.Domain.Room.GfgDatabase
 import com.exampl3.flashlight.Domain.Room.Item
 import com.exampl3.flashlight.databinding.FragmentListBinding
-import com.exampl3.flashlight.model.InsertTime
-import com.sdkit.paylib.paylibnative.ui.screens.mobileconfirm.f
+import com.exampl3.flashlight.Domain.model.InsertTime
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Locale
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -44,18 +40,14 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
 
     @Inject
     lateinit var db: GfgDatabase
-
     @Inject
     lateinit var voiceIntent: Intent
-    val modelFlashLight: ViewModelFlashLight by activityViewModels()
     @Inject
     lateinit var insertTime: InsertTime
-
+    private val modelFlashLight: ViewModelFlashLight by activityViewModels()
     private lateinit var pLauncher: ActivityResultLauncher<String>
-
     private lateinit var timePickerDialog: TimePickerDialog
     private lateinit var datePickerDialog: DatePickerDialog
-
     lateinit var calendar: Calendar
     private lateinit var calendarZero: Calendar
 
@@ -69,7 +61,6 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        calendarZero = Calendar.getInstance()
         initRcView()
         db.CourseDao().getAll().asLiveData().observe(viewLifecycleOwner) { list ->
             adapter.submitList(list.sortedWith { o1, o2 ->
@@ -131,34 +122,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
         rcView.adapter = adapter
 
     } // инициализировал ресайклер
-
-//    private fun deleteAlertDialog(context: Context, item: Item) {
-//        DialogItemList.AlertDelete(context, object : DialogItemList.Delete {
-//            override fun onClick(flag: Boolean) {
-//                if (flag) {
-//                    CoroutineScope(
-//                        Dispatchers
-//                            .IO
-//                    ).launch {
-//                        changeAlarmItem(item, Const.deleteAlarm)
-//                        db.CourseDao().delete(item)
-//                    }
-//
-//                }
-//            }
-//        })
-//    } // Подтверждение на удаление
-//
-//    private fun changeAlarmItem(item: Item, action: Int) {
-//        modelFlashLight.alarmInsert(
-//            item,
-//            action
-//        )
-//
-//    } // Изменение заметки
-//
     private fun datePickerDialog(item: Item) {
-
         datePickerDialog = DatePickerDialog(
             requireContext(),
             { _, year, month, day ->
@@ -230,22 +194,21 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
                 }
                 Const.alarmDay -> {
                     insertTime.
-                    insertAlarmRepeat(item, AlarmManager.INTERVAL_DAY, "и через день")
+                    insertAlarm(item, item.interval, "и через день", item.alarmTime+AlarmManager.INTERVAL_DAY)
                 }
                 Const.alarmWeek -> {
                     insertTime.
-                    insertAlarmRepeat(item, AlarmManager.INTERVAL_DAY * 7, "и через неделю")
+                    insertAlarm(item,item.interval, "и через неделю", item.alarmTime+AlarmManager.INTERVAL_DAY * 7)
                 }
                 Const.alarmMonth -> {
                     insertTime.
-                    insertAlarmRepeat(item, Const.MONTH, "и через месяц")
+                    insertAlarm(item,item.interval, "и через месяц", item.alarmTime+ Const.MONTH)
                 }
             }
         }
 
 
     }
-
     override fun onClick(item: Item, action: Int) {
         when (action) {
             Const.change -> {
@@ -301,48 +264,6 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
         }
 
     }
-
-//    private fun insertAlarm(item: Item, result: Int, intervalText: String) {
-//        val dateFormat = "dd.MM"
-//        val timeFormat = "HH:mm"
-//        val date = SimpleDateFormat(dateFormat, Locale.US)
-//        val time = SimpleDateFormat(timeFormat, Locale.US)
-//        val resultDate = date.format(calendar.time)
-//        val resutTime = time.format(calendar.time)
-//        val newAlarmText = "Напомнит: $resultDate в $resutTime"
-//        val newitem = item.copy(
-//            changeAlarm = true,
-//            alarmText = "$newAlarmText $intervalText",
-//            alarmTime = calendar.timeInMillis,
-//            change = false,
-//            name = item.name,
-//            interval = result
-//        )
-//        Thread {
-//            db.CourseDao().update(newitem)
-//        }.start()
-//        changeAlarmItem(newitem, result)
-//
-//    } // установка будильника
-//
-//    private fun insertAlarmRepeat(item: Item, intervalTime: Long, intervalString: String) {
-//        val time = item.alarmTime + intervalTime
-//        val dateFormat = "dd.MM"
-//        val timeFormat = "HH:mm"
-//        val dateFormate = SimpleDateFormat(dateFormat, Locale.US)
-//        val timeFormate = SimpleDateFormat(timeFormat, Locale.US)
-//        val resultDate = dateFormate.format(time)
-//        val resutTime = timeFormate.format(time)
-//        val result = "Напомнит: $resultDate в $resutTime $intervalString"
-//        val newItem =
-//            item.copy(alarmTime = time, alarmText = result, changeAlarm = !item.changeAlarm)
-//        Thread {
-//            db.CourseDao().update(newItem)
-//        }.start()
-//        changeAlarmItem(newItem, newItem.interval)
-//
-//    } // установка повторяющегося будильника
-//
     private fun proverkaFree(item: Item, result: Int, timeCal: Long) {
         when (result) {
             Const.alarmOne -> {
@@ -365,6 +286,11 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
         }
 
 
+    }
+
+    override fun onResume() {
+        super.onResume()
+        calendarZero = Calendar.getInstance()
     }
 
 
