@@ -26,6 +26,8 @@ import com.exampl3.flashlight.Presentation.adapters.ItemListAdapter
 import com.exampl3.flashlight.Domain.Room.GfgDatabase
 import com.exampl3.flashlight.Domain.Room.Item
 import com.exampl3.flashlight.databinding.FragmentListBinding
+import com.exampl3.flashlight.model.InsertTime
+import com.sdkit.paylib.paylibnative.ui.screens.mobileconfirm.f
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -36,7 +38,7 @@ import java.util.Locale
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.onClick {
+open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.onClick {
     private lateinit var binding: FragmentListBinding
     private lateinit var adapter: ItemListAdapter
 
@@ -45,13 +47,16 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
 
     @Inject
     lateinit var voiceIntent: Intent
-    private val modelFlashLight: ViewModelFlashLight by activityViewModels()
+    val modelFlashLight: ViewModelFlashLight by activityViewModels()
+    @Inject
+    lateinit var insertTime: InsertTime
 
     private lateinit var pLauncher: ActivityResultLauncher<String>
 
     private lateinit var timePickerDialog: TimePickerDialog
     private lateinit var datePickerDialog: DatePickerDialog
-    private lateinit var calendar: Calendar
+
+    lateinit var calendar: Calendar
     private lateinit var calendarZero: Calendar
 
     override fun onCreateView(
@@ -67,7 +72,15 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
         calendarZero = Calendar.getInstance()
         initRcView()
         db.CourseDao().getAll().asLiveData().observe(viewLifecycleOwner) { list ->
-            adapter.submitList(list)
+            adapter.submitList(list.sortedWith { o1, o2 ->
+                o2.changeAlarm.compareTo(true) - o1.changeAlarm.compareTo(
+                    true
+                )
+            }.sortedWith { o1, o2 ->
+                o1.change.compareTo(true) - o2.change.compareTo(
+                    true
+                )
+            })
         }
         pLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
 
@@ -119,31 +132,31 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
 
     } // инициализировал ресайклер
 
-    private fun deleteAlertDialog(context: Context, item: Item) {
-        DialogItemList.AlertDelete(context, object : DialogItemList.Delete {
-            override fun onClick(flag: Boolean) {
-                if (flag) {
-                    CoroutineScope(
-                        Dispatchers
-                            .IO
-                    ).launch {
-                        changeAlarmItem(item, Const.deleteAlarm)
-                        db.CourseDao().delete(item)
-                    }
-
-                }
-            }
-        })
-    } // Подтверждение на удаление
-
-    private fun changeAlarmItem(item: Item, action: Int) {
-        modelFlashLight.alarmInsert(
-            item,
-            action
-        )
-
-    } // Изменение заметки
-
+//    private fun deleteAlertDialog(context: Context, item: Item) {
+//        DialogItemList.AlertDelete(context, object : DialogItemList.Delete {
+//            override fun onClick(flag: Boolean) {
+//                if (flag) {
+//                    CoroutineScope(
+//                        Dispatchers
+//                            .IO
+//                    ).launch {
+//                        changeAlarmItem(item, Const.deleteAlarm)
+//                        db.CourseDao().delete(item)
+//                    }
+//
+//                }
+//            }
+//        })
+//    } // Подтверждение на удаление
+//
+//    private fun changeAlarmItem(item: Item, action: Int) {
+//        modelFlashLight.alarmInsert(
+//            item,
+//            action
+//        )
+//
+//    } // Изменение заметки
+//
     private fun datePickerDialog(item: Item) {
 
         datePickerDialog = DatePickerDialog(
@@ -172,7 +185,7 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
                     object : DialogItemList.InsertAlarm {
                         override fun onClick(result: Int) {
                             if (calendar.timeInMillis >= calendarZero.timeInMillis) {
-                                proverkaFree(item, result)
+                                proverkaFree(item, result, calendar.timeInMillis)
                             } else Toast.makeText(
                                 view?.context,
                                 "Вы выбрали время которое уже прошло",
@@ -194,9 +207,11 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
             db.CourseDao().update(item.copy(changeAlarm = !item.changeAlarm))
         }
         if (item.changeAlarm) {
+            insertTime.
             changeAlarmItem(item, Const.deleteAlarm)
         }
         if ((item.change || !item.changeAlarm) && item.alarmTime > calendarZero.timeInMillis) {
+            insertTime.
             changeAlarmItem(
                 item.copy(change = false, changeAlarm = !item.changeAlarm),
                 item.interval
@@ -214,12 +229,15 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
                     }
                 }
                 Const.alarmDay -> {
+                    insertTime.
                     insertAlarmRepeat(item, AlarmManager.INTERVAL_DAY, "и через день")
                 }
                 Const.alarmWeek -> {
+                    insertTime.
                     insertAlarmRepeat(item, AlarmManager.INTERVAL_DAY * 7, "и через неделю")
                 }
                 Const.alarmMonth -> {
+                    insertTime.
                     insertAlarmRepeat(item, Const.MONTH, "и через месяц")
                 }
             }
@@ -236,14 +254,17 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
                     if (item.changeAlarm) {
                         db.CourseDao().update(item.copy(changeAlarm = false, change = !item.change))
                     }
+                    insertTime.
                     changeAlarmItem(item, Const.deleteAlarm)  }
             } // Изменение состояния элемента(активный/неактивный)
 
             Const.delete -> {
                 if (item.change) {
                     CoroutineScope(Dispatchers.IO).launch {db.CourseDao().delete(item)  }
+                    insertTime.
                     changeAlarmItem(item, Const.deleteAlarm)
                 } else {
+                    insertTime.
                     deleteAlertDialog(requireContext(), item)
                 }
 
@@ -269,7 +290,7 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
                 DialogItemList.AlertList(requireContext(), object : DialogItemList.Listener {
                     override fun onClick(name: String) {
                         CoroutineScope(Dispatchers.IO).launch {val newitem = item.copy(name = name)
-                            if (item.changeAlarm) changeAlarmItem(
+                            if (item.changeAlarm) insertTime.changeAlarmItem(
                                 newitem,
                                 newitem.interval
                             ) // если у item был установлен будильник то, тут мы перезаписываем будильник
@@ -281,68 +302,65 @@ class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.on
 
     }
 
-    private fun insertAlarm(item: Item, result: Int, intervalText: String) {
-        val dateFormat = "dd.MM"
-        val timeFormat = "HH:mm"
-        val date = SimpleDateFormat(dateFormat, Locale.US)
-        val time = SimpleDateFormat(timeFormat, Locale.US)
-        val resultDate = date.format(calendar.time)
-        val resutTime = time.format(calendar.time)
-        val newAlarmText = "Напомнит: $resultDate в $resutTime"
-        val newitem = item.copy(
-            changeAlarm = true,
-            alarmText = "$newAlarmText $intervalText",
-            alarmTime = calendar.timeInMillis,
-            change = false,
-            name = item.name,
-            interval = result
-        )
-        Thread {
-            db.CourseDao().update(newitem)
-        }.start()
-        changeAlarmItem(newitem, result)
-
-    } // установка будильника
-
-    private fun insertAlarmRepeat(item: Item, intervalTime: Long, intervalString: String) {
-        val time = item.alarmTime + intervalTime
-        val dateFormat = "dd.MM"
-        val timeFormat = "HH:mm"
-        val dateFormate = SimpleDateFormat(dateFormat, Locale.US)
-        val timeFormate = SimpleDateFormat(timeFormat, Locale.US)
-        val resultDate = dateFormate.format(time)
-        val resutTime = timeFormate.format(time)
-        val result = "Напомнит: $resultDate в $resutTime $intervalString"
-        val newItem =
-            item.copy(alarmTime = time, alarmText = result, changeAlarm = !item.changeAlarm)
-        Thread {
-            db.CourseDao().update(newItem)
-        }.start()
-        changeAlarmItem(newItem, newItem.interval)
-
-    } // установка повторяющегося будильника
-
-    private fun proverkaFree(item: Item, result: Int) {
+//    private fun insertAlarm(item: Item, result: Int, intervalText: String) {
+//        val dateFormat = "dd.MM"
+//        val timeFormat = "HH:mm"
+//        val date = SimpleDateFormat(dateFormat, Locale.US)
+//        val time = SimpleDateFormat(timeFormat, Locale.US)
+//        val resultDate = date.format(calendar.time)
+//        val resutTime = time.format(calendar.time)
+//        val newAlarmText = "Напомнит: $resultDate в $resutTime"
+//        val newitem = item.copy(
+//            changeAlarm = true,
+//            alarmText = "$newAlarmText $intervalText",
+//            alarmTime = calendar.timeInMillis,
+//            change = false,
+//            name = item.name,
+//            interval = result
+//        )
+//        Thread {
+//            db.CourseDao().update(newitem)
+//        }.start()
+//        changeAlarmItem(newitem, result)
+//
+//    } // установка будильника
+//
+//    private fun insertAlarmRepeat(item: Item, intervalTime: Long, intervalString: String) {
+//        val time = item.alarmTime + intervalTime
+//        val dateFormat = "dd.MM"
+//        val timeFormat = "HH:mm"
+//        val dateFormate = SimpleDateFormat(dateFormat, Locale.US)
+//        val timeFormate = SimpleDateFormat(timeFormat, Locale.US)
+//        val resultDate = dateFormate.format(time)
+//        val resutTime = timeFormate.format(time)
+//        val result = "Напомнит: $resultDate в $resutTime $intervalString"
+//        val newItem =
+//            item.copy(alarmTime = time, alarmText = result, changeAlarm = !item.changeAlarm)
+//        Thread {
+//            db.CourseDao().update(newItem)
+//        }.start()
+//        changeAlarmItem(newItem, newItem.interval)
+//
+//    } // установка повторяющегося будильника
+//
+    private fun proverkaFree(item: Item, result: Int, timeCal: Long) {
         when (result) {
             Const.alarmOne -> {
-                insertAlarm(item, result, "")
+                insertTime.insertAlarm(item, result, "", timeCal)
             }
             Const.alarmDay -> {
-                insertAlarm(item, result, "и через день")
+                insertTime.insertAlarm(item, result, "и через день", timeCal)
                 if (!modelFlashLight.getPremium()) (activity as MainActivity).showAd()
 
             }
 
             Const.alarmWeek -> {
-                insertAlarm(item, result, "и через неделю")
+                insertTime.insertAlarm(item, result, "и через неделю", timeCal)
                 if (!modelFlashLight.getPremium()) (activity as MainActivity).showAd()
-
             }
-
             Const.alarmMonth -> {
-                insertAlarm(item, result, "и через месяц")
+                insertTime.insertAlarm(item, result, "и через месяц", timeCal)
                 if (!modelFlashLight.getPremium()) (activity as MainActivity).showAd()
-
             }
         }
 

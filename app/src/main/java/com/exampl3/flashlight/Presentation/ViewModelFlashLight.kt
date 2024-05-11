@@ -16,7 +16,6 @@ class ViewModelFlashLight @Inject constructor(
     private val turnFlashLight: TurnFlashLightImpl
 ): ViewModel() {
 
-
     fun savePremium(flag: Boolean) = pref.savePremium(flag)
     fun getPremium() = pref.getPremium()
 

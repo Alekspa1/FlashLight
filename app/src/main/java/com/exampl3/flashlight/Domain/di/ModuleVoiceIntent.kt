@@ -12,6 +12,8 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object ModuleVoiceIntent {
 
+
+
     @Provides
     @Singleton
     fun providesVoiceIntent(): Intent {
