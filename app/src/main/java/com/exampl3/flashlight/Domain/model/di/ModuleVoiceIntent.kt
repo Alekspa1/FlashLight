@@ -1,4 +1,4 @@
-package com.exampl3.flashlight.Domain.di
+package com.exampl3.flashlight.Domain.model.di
 
 import android.content.Intent
 import android.speech.RecognizerIntent
@@ -11,6 +11,8 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object ModuleVoiceIntent {
+
+
 
     @Provides
     @Singleton

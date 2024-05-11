@@ -11,7 +11,7 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
-import com.exampl3.flashlight.Data.Const
+import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Presentation.adapters.VpAdapter
 import com.exampl3.flashlight.Domain.Room.GfgDatabase
 import com.exampl3.flashlight.R
@@ -46,7 +46,7 @@ import java.util.UUID
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity() {
+open class MainActivity : AppCompatActivity() {
 
     private var interstitialAdLoader: InterstitialAdLoader? = null
     private var interstitialAd: InterstitialAd? = null
@@ -56,7 +56,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var vpAdapter: VpAdapter
     private lateinit var calendarZero: Calendar
-    private val modelFlashLight: ViewModelFlashLight by viewModels()
+    val modelFlashLight: ViewModelFlashLight by viewModels()
     private lateinit var alarmManager: AlarmManager
     private lateinit var billingClient: RuStoreBillingClient
     private lateinit var productsUseCase: ProductsUseCase

@@ -2,10 +2,10 @@ package com.exampl3.flashlight.Presentation
 
 
 import androidx.lifecycle.ViewModel
-import com.exampl3.flashlight.model.AlarmManagerImp
-import com.exampl3.flashlight.model.TurnFlashLightImpl
+import com.exampl3.flashlight.Domain.model.AlarmManagerImp
+import com.exampl3.flashlight.Domain.model.TurnFlashLightImpl
 import com.exampl3.flashlight.Domain.Room.Item
-import com.exampl3.flashlight.Domain.sharedPreference.SharedPreferenceImpl
+import com.exampl3.flashlight.Domain.model.sharedPreference.SharedPreferenceImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -15,7 +15,6 @@ class ViewModelFlashLight @Inject constructor(
     private val alarmInsert: AlarmManagerImp,
     private val turnFlashLight: TurnFlashLightImpl
 ): ViewModel() {
-
 
     fun savePremium(flag: Boolean) = pref.savePremium(flag)
     fun getPremium() = pref.getPremium()

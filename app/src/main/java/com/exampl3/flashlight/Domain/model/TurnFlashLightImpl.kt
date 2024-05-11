@@ -1,4 +1,4 @@
-package com.exampl3.flashlight.model
+package com.exampl3.flashlight.Domain.model
 
 import android.app.Application
 import android.content.Context

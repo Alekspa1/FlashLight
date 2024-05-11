@@ -1,4 +1,4 @@
-package com.exampl3.flashlight.model.alarmReceiwer
+package com.exampl3.flashlight.Domain.model.alarmReceiwer
 
 import android.app.AlarmManager
 
@@ -6,17 +6,16 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
-import com.exampl3.flashlight.model.AlarmManagerImp
-import com.exampl3.flashlight.Data.Const
+import com.exampl3.flashlight.Domain.model.AlarmManagerImp
+import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Domain.Room.GfgDatabase
 import com.exampl3.flashlight.Domain.Room.Item
+import com.exampl3.flashlight.Domain.model.InsertTime
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Locale
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -29,6 +28,8 @@ class AlarmReceiwer: BroadcastReceiver() {
     lateinit var notificationBuilder: NotificationBuilder
     @Inject
     lateinit var notificationBuilderPassed: NotificationBuilderPassed
+    @Inject
+    lateinit var insertTime: InsertTime
 
     private lateinit var calendarZero: Calendar
 
@@ -63,7 +64,7 @@ class AlarmReceiwer: BroadcastReceiver() {
                 val item = intent.getSerializableExtra(Const.keyIntentCallBackPostpone) as Item
                 when(item.interval){
                     Const.alarmOne->{
-                        insertAlarm(item, time,"")
+                       insertTime.insertAlarm(item, Const.alarmOne,"", time)
                     } else->{
                         val newItemFals = item.copy(id = item.id?.plus(1000), interval = Const.alarmRepeat, alarmTime = time)
                     alarmManager.alarmInsert(newItemFals, Const.alarmOne)
@@ -89,19 +90,6 @@ class AlarmReceiwer: BroadcastReceiver() {
             } // После перезагрузки
         }
     }
-    private fun insertAlarm(item: Item,time: Long, intervalString:String){
-        val dateFormat = "dd.MM"
-        val timeFormat = "HH:mm"
-        val dateFormate = SimpleDateFormat(dateFormat, Locale.US)
-        val timeFormate = SimpleDateFormat(timeFormat, Locale.US)
-        val resultDate = dateFormate.format(time)
-        val resutTime = timeFormate.format(time)
-        val result = "Напомнит: $resultDate в $resutTime $intervalString".trim()
-        val newItem = item.copy(alarmTime = time, alarmText = result)
-        CoroutineScope(Dispatchers.IO).launch {db.CourseDao().update(newItem)  }
-        alarmManager.alarmInsert(newItem, item.interval)
-
-    }
 
     private fun repeatAlarm(item: Item, name: String){
         when(item.interval){
@@ -114,16 +102,15 @@ class AlarmReceiwer: BroadcastReceiver() {
                         )
                     )
                 }
-
             }
             Const.alarmDay-> {
-                insertAlarm(item, item.alarmTime+AlarmManager.INTERVAL_DAY,"и через день")
+                insertTime.insertAlarm(item,item.interval,"и через день",  item.alarmTime+AlarmManager.INTERVAL_DAY)
             }
             Const.alarmWeek-> {
-                insertAlarm(item,item.alarmTime+AlarmManager.INTERVAL_DAY*7,"и через неделю")
+                insertTime.insertAlarm(item,item.interval,"и через неделю", item.alarmTime+AlarmManager.INTERVAL_DAY*7)
             }
             Const.alarmMonth-> {
-                insertAlarm(item,item.alarmTime+Const.MONTH,"и через месяц")
+                insertTime.insertAlarm(item,item.interval,"и через месяц", item.alarmTime+ Const.MONTH)
             }
         }
     }

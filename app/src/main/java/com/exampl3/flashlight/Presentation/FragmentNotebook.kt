@@ -2,7 +2,6 @@ package com.exampl3.flashlight.Presentation
 import android.app.Activity.RESULT_OK
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.speech.RecognizerIntent
 import androidx.fragment.app.Fragment
@@ -13,7 +12,6 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.activityViewModels
-import com.exampl3.flashlight.Data.Const
 import com.exampl3.flashlight.databinding.FragmentNotebookBinding
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
