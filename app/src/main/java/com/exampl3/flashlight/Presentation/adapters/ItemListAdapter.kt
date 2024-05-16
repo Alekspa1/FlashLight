@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.core.view.marginTop
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.exampl3.flashlight.Const
@@ -37,6 +38,14 @@ class ItemListAdapter(private val onLongClickListener: onLongClick,
                 if(item.changeDelItem){
                     cardView
                            .setCardBackgroundColor(ContextCompat.getColor(context, R.color.Grey))
+                    when (item.change) {
+                        true -> {
+                            imStatus.setImageResource(R.drawable.ic_item_true)
+                        }
+                        false -> {
+                            imStatus.setImageResource(R.drawable.ic_item_false)
+                        }
+                    }
                 } else{
                     when (item.change) {
                         true -> {
