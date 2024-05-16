@@ -10,6 +10,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.speech.RecognizerIntent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -50,6 +51,8 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
     private lateinit var datePickerDialog: DatePickerDialog
     lateinit var calendar: Calendar
     private lateinit var calendarZero: Calendar
+
+    private var listDel = mutableListOf<Item>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -102,8 +105,10 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
 
         binding.imVoiceFrag.setOnClickListener {
             try {
-                launcher.launch(voiceIntent)
+                //launcher.launch(voiceIntent)
+                db.CourseDao().deleteList(listDel)
             } catch (e: Exception) {
+
                 Toast.makeText(
                     view.context,
                     "Голосовой ввод пока недоступен для вашего устройства",
@@ -166,50 +171,65 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
         timePickerDialog.show()
     } // Установка времени
 
-    override fun onLongClick(item: Item) {
-        CoroutineScope(Dispatchers.IO).launch {
-            db.CourseDao().update(item.copy(changeAlarm = !item.changeAlarm))
-        }
-        if (item.changeAlarm) {
-            insertTime.
-            changeAlarmItem(item, Const.deleteAlarm)
-        }
-        if ((item.change || !item.changeAlarm) && item.alarmTime > calendarZero.timeInMillis) {
-            insertTime.
-            changeAlarmItem(
-                item.copy(change = false, changeAlarm = !item.changeAlarm),
-                item.interval
-            )
-            CoroutineScope(Dispatchers.IO).launch {
-                db.CourseDao().update(item.copy(change = false, changeAlarm = !item.changeAlarm))
-            }
-        }
-        if (!item.changeAlarm && item.alarmTime < calendarZero.timeInMillis) {
-            when (item.interval) {
-                Const.alarmOne -> {
-                    Toast.makeText(requireContext(), "Вы выбрали время которое уже прошло", Toast.LENGTH_SHORT).show()
+    override fun onLongClick(item: Item, action: Int) {
+
+        when(action){
+            Const.alarm -> {
+                CoroutineScope(Dispatchers.IO).launch {
+                    db.CourseDao().update(item.copy(changeAlarm = !item.changeAlarm))
+                }
+                if (item.changeAlarm) {
+                    insertTime.
+                    changeAlarmItem(item, Const.deleteAlarm)
+                }
+                if ((item.change || !item.changeAlarm) && item.alarmTime > calendarZero.timeInMillis) {
+                    insertTime.
+                    changeAlarmItem(
+                        item.copy(change = false, changeAlarm = !item.changeAlarm),
+                        item.interval
+                    )
                     CoroutineScope(Dispatchers.IO).launch {
-                        db.CourseDao().update(item.copy(changeAlarm = false))
+                        db.CourseDao().update(item.copy(change = false, changeAlarm = !item.changeAlarm))
                     }
                 }
-                Const.alarmDay -> {
-                    insertTime.
-                    insertAlarm(item, item.interval, "и через день", item.alarmTime+AlarmManager.INTERVAL_DAY)
+                if (!item.changeAlarm && item.alarmTime < calendarZero.timeInMillis) {
+                    when (item.interval) {
+                        Const.alarmOne -> {
+                            Toast.makeText(requireContext(), "Вы выбрали время которое уже прошло", Toast.LENGTH_SHORT).show()
+                            CoroutineScope(Dispatchers.IO).launch {
+                                db.CourseDao().update(item.copy(changeAlarm = false))
+                            }
+                        }
+                        Const.alarmDay -> {
+                            insertTime.
+                            insertAlarm(item, item.interval, "и через день", item.alarmTime+AlarmManager.INTERVAL_DAY)
+                        }
+                        Const.alarmWeek -> {
+                            insertTime.
+                            insertAlarm(item,item.interval, "и через неделю", item.alarmTime+AlarmManager.INTERVAL_DAY * 7)
+                        }
+                        Const.alarmMonth -> {
+                            insertTime.
+                            insertAlarm(item,item.interval, "и через месяц", item.alarmTime+ Const.MONTH)
+                        }
+                    }
                 }
-                Const.alarmWeek -> {
-                    insertTime.
-                    insertAlarm(item,item.interval, "и через неделю", item.alarmTime+AlarmManager.INTERVAL_DAY * 7)
+            }
+            Const.delete -> {
+                val newItem = item.copy(changeDelItem = !item.changeDelItem)
+                CoroutineScope(Dispatchers.IO).launch {
+                    db.CourseDao().update(newItem)
                 }
-                Const.alarmMonth -> {
-                    insertTime.
-                    insertAlarm(item,item.interval, "и через месяц", item.alarmTime+ Const.MONTH)
+                when(item.changeDelItem){
+                    true -> listDel.remove(item)
+                    false -> listDel.add(newItem)
                 }
             }
         }
-
 
     }
     override fun onClick(item: Item, action: Int) {
+
         when (action) {
             Const.change -> {
                 CoroutineScope(Dispatchers.IO).launch {
@@ -250,19 +270,30 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
             } // Установка будильника
 
             Const.changeItem -> {
-                DialogItemList.AlertList(requireContext(), object : DialogItemList.Listener {
-                    override fun onClick(name: String) {
-                        CoroutineScope(Dispatchers.IO).launch {val newitem = item.copy(name = name)
-                            if (item.changeAlarm) insertTime.changeAlarmItem(
-                                newitem,
-                                newitem.interval
-                            ) // если у item был установлен будильник то, тут мы перезаписываем будильник
-                            db.CourseDao().update(newitem)  }
+                if (listDel.isEmpty()){
+                    DialogItemList.AlertList(requireContext(), object : DialogItemList.Listener {
+                        override fun onClick(name: String) {
+                            CoroutineScope(Dispatchers.IO).launch {val newitem = item.copy(name = name)
+                                if (item.changeAlarm) insertTime.changeAlarmItem(
+                                    newitem,
+                                    newitem.interval
+                                ) // если у item был установлен будильник то, тут мы перезаписываем будильник
+                                db.CourseDao().update(newitem)  }
+                        }
+                    }, item.name)
+                } else {
+                    val newItem = item.copy(changeDelItem = !item.changeDelItem)
+                    CoroutineScope(Dispatchers.IO).launch {
+                        db.CourseDao().update(newItem)
                     }
-                }, item.name)
+                    when (item.changeDelItem) {
+                        true -> listDel.remove(item)
+                        false -> listDel.add(newItem)
+                    }
+                }
+
             } // Изменение имени элемента
         }
-
     }
     private fun proverkaFree(item: Item, result: Int, timeCal: Long) {
         when (result) {

@@ -19,6 +19,8 @@ interface CourseDao {
      fun insertAll(Courses: Item)
     @Delete
     fun delete(Course: Item)
+    @Delete
+    fun deleteList(list: List<Item>)
     @Update
     fun update(Course: Item)
 
