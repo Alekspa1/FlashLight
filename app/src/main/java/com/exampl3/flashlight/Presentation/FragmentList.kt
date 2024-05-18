@@ -325,6 +325,8 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
                 true -> listDel.remove(item)
                 false -> listDel.add(newItem)
             }
+            if (listDel.isEmpty()) modelFlashLight.edit.value = false
+
         }
     }
     private fun proverkaFree(item: Item, result: Int, timeCal: Long) {
