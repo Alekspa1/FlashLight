@@ -74,7 +74,6 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
         modelFlashLight.edit.observe(viewLifecycleOwner){
             if (it) binding.imageView.visibility = View.VISIBLE
             else binding.imageView.visibility = View.GONE
-            Log.d("MyLog", it.toString())
         }
         db.CourseDao().getAll().asLiveData().observe(viewLifecycleOwner) { list ->
             adapter.submitList(list.sortedWith { o1, o2 ->

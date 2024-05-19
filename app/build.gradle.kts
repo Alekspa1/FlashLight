@@ -44,6 +44,8 @@ android {
 }
 
 dependencies {
+    implementation("com.applandeo:material-calendar-view:1.9.2")
+
     implementation("com.yandex.android:mobileads:7.0.1")
     implementation("ru.rustore.sdk:billingclient:5.1.1")
     implementation ("com.google.dagger:hilt-android:2.51.1")
