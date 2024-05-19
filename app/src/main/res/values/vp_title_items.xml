@@ -3,6 +3,6 @@
     <string-array name="vp_title_main">
         <item>Блокнот</item>
         <item>Список дел</item>
-        <item>Фонарик</item>
+        <item>Календарь</item>
     </string-array>
 </resources>

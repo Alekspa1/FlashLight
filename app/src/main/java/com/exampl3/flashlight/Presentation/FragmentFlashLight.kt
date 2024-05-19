@@ -2,37 +2,53 @@ package com.exampl3.flashlight.Presentation
 
 
 
+import android.Manifest
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.asLiveData
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.applandeo.materialcalendarview.CalendarDay
 import com.applandeo.materialcalendarview.listeners.OnCalendarDayClickListener
+import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Domain.Room.GfgDatabase
+import com.exampl3.flashlight.Domain.Room.Item
+import com.exampl3.flashlight.Domain.model.InsertTime
+import com.exampl3.flashlight.Presentation.adapters.ItemListAdapter
 import com.exampl3.flashlight.R
 import com.exampl3.flashlight.databinding.FragmentBlankFlashLightBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Calendar
 import javax.inject.Inject
 
 
 @AndroidEntryPoint
-class FragmentFlashLight : Fragment()  {
+class FragmentFlashLight : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.onClick  {
     private lateinit var binding: FragmentBlankFlashLightBinding
     private val model: ViewModelFlashLight by activityViewModels()
     @Inject
     lateinit var db: GfgDatabase
-    private var calendar: Calendar = Calendar.getInstance()
+    @Inject
+    lateinit var insertTime: InsertTime
+    private lateinit var timePickerDialog: TimePickerDialog
+    private lateinit var datePickerDialog: DatePickerDialog
+    private lateinit var calendar: Calendar
+    private lateinit var calendarZero: Calendar
     private lateinit var calendarDay: CalendarDay
+    private lateinit var adapter: ItemListAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -45,6 +61,7 @@ class FragmentFlashLight : Fragment()  {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        initRcView()
         db.CourseDao().getAll().asLiveData().observe(viewLifecycleOwner){list ->
             val calendarDays = mutableListOf<CalendarDay>()
             list.forEach {item->
@@ -62,25 +79,160 @@ class FragmentFlashLight : Fragment()  {
 
         binding.calendarView.setOnCalendarDayClickListener(object : OnCalendarDayClickListener{
             override fun onClick(calendarDay: CalendarDay) {
-                val time = calendarDay.calendar.get(Calendar.DAY_OF_MONTH)
-                val c = Calendar.getInstance()
-                CoroutineScope(Dispatchers.IO).launch {
-                    db.CourseDao().getAllList().forEach { item->
-                        if (item.changeAlarm) {
-                            c.timeInMillis = item.alarmTime
-                            if (time == c.get(Calendar.DAY_OF_MONTH) ) {
-                                Log.d("MyLog", item.name)
-                            }
-                        }
-                    }
+                CoroutineScope(Dispatchers.Main).launch {
+                    adapter.submitList(addRcView(calendarDay))
                 }
             }
         })
+    }
+    private fun initRcView() {
+        val rcView = binding.rcViewItem
+        adapter = ItemListAdapter(this, this)
+        rcView.layoutManager = LinearLayoutManager(requireContext())
+        rcView.adapter = adapter
+
+    } // инициализировал ресайклер
+
+    suspend fun addRcView(calendarDay: CalendarDay) : List<Item> = withContext(Dispatchers.IO){
+        val listadd = mutableListOf<Item>()
+        val time = calendarDay.calendar.get(Calendar.DAY_OF_MONTH)
+        val c = Calendar.getInstance()
+        db.CourseDao().getAllList().forEach{item ->
+            if (item.changeAlarm) {
+                c.timeInMillis = item.alarmTime
+                if (time == c.get(Calendar.DAY_OF_MONTH) ) {
+                    listadd.add(item)
+                             }
+                         }
+                    }
+        return@withContext listadd
     }
 
 
     companion object {
         fun newInstance() = FragmentFlashLight()
+    }
+
+    override fun onLongClick(item: Item, action: Int) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onClick(item: Item, action: Int) {
+            when (action) {
+                Const.change -> {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        db.CourseDao().update(item.copy(change = !item.change))
+                        if (item.changeAlarm) {
+                            db.CourseDao()
+                                .update(item.copy(changeAlarm = false, change = !item.change))
+                        }
+                        insertTime.changeAlarmItem(item, Const.deleteAlarm)
+                    }
+                } // Изменение состояния элемента(активный/неактивный)
+
+                Const.delete -> {
+                    if (item.change) {
+                        CoroutineScope(Dispatchers.IO).launch { db.CourseDao().delete(item) }
+                        insertTime.changeAlarmItem(item, Const.deleteAlarm)
+                    } else {
+                        insertTime.deleteAlertDialog(requireContext(), item)
+                    }
+
+                } // Удаления элемента
+
+                Const.alarm -> {
+                    calendar = Calendar.getInstance()
+                    calendarZero = Calendar.getInstance()
+                    datePickerDialog(item)
+                } // Установка будильника
+
+                Const.changeItem -> {
+                    DialogItemList.AlertList(
+                        requireContext(),
+                        object : DialogItemList.Listener {
+                            override fun onClick(name: String) {
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    val newitem = item.copy(name = name)
+                                    if (item.changeAlarm) insertTime.changeAlarmItem(
+                                        newitem,
+                                        newitem.interval
+                                    ) // если у item был установлен будильник то, тут мы перезаписываем будильник
+                                    db.CourseDao().update(newitem)
+                                }
+                            }
+                        },
+                        item.name
+                    )
+
+                } // Изменение имени элемента
+            }
+    }
+    private fun datePickerDialog(item: Item) {
+        datePickerDialog = DatePickerDialog(
+            requireContext(),
+            { _, year, month, day ->
+                calendar.set(Calendar.YEAR, year)
+                calendar.set(Calendar.MONTH, month)
+                calendar.set(Calendar.DAY_OF_MONTH, day)
+                timePickerDialog(item)
+            },
+            calendarZero.get(Calendar.YEAR),
+            calendarZero.get(Calendar.MONTH),
+            calendarZero.get(Calendar.DAY_OF_MONTH)
+        )
+        datePickerDialog.show()
+    } // Установрка даты
+
+    private fun timePickerDialog(item: Item) {
+        timePickerDialog = TimePickerDialog(
+            requireContext(),
+            { _, hour, minute ->
+                calendar.set(Calendar.HOUR_OF_DAY, hour)
+                calendar.set(Calendar.MINUTE, minute)
+                DialogItemList.insertAlarm(
+                    requireView().context,
+                    object : DialogItemList.InsertAlarm {
+                        override fun onClick(result: Int) {
+                            if (calendar.timeInMillis >= calendarZero.timeInMillis) {
+                                proverkaFree(item, result, calendar.timeInMillis)
+                            } else Toast.makeText(
+                                view?.context,
+                                "Вы выбрали время которое уже прошло",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    })
+
+            },
+            calendarZero.get(Calendar.HOUR_OF_DAY),
+            calendarZero.get(Calendar.MINUTE),
+            true
+        )
+        timePickerDialog.show()
+    } // Установка времени
+
+    private fun proverkaFree(item: Item, result: Int, timeCal: Long) {
+        when (result) {
+            Const.alarmOne -> {
+                insertTime.insertAlarm(item, result, "", timeCal)
+            }
+            Const.alarmDay -> {
+                insertTime.insertAlarm(item, result, "и через день", timeCal)
+                if (!model.getPremium()) (activity as MainActivity).showAd()
+
+            }
+
+            Const.alarmWeek -> {
+                insertTime.insertAlarm(item, result, "и через неделю", timeCal)
+                if (!model.getPremium()) (activity as MainActivity).showAd()
+            }
+            Const.alarmMonth -> {
+                insertTime.insertAlarm(item, result, "и через месяц", timeCal)
+                if (!model.getPremium()) (activity as MainActivity).showAd()
+            }
+        }
+
+
     }
 
 }
