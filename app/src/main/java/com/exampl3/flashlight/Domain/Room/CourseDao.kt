@@ -17,6 +17,8 @@ interface CourseDao {
 
     @Query("SELECT * FROM Item")
     fun getAllList(): List<Item>
+    @Query("SELECT * FROM Item WHERE changeAlarm == true")
+    fun getAllListCalendar(): Flow<List<Item>>
     @Insert
      fun insertAll(Courses: Item)
     @Delete

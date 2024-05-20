@@ -27,12 +27,8 @@ class ViewModelFlashLight @Inject constructor(
     val edit: MutableLiveData<Boolean> by lazy {
         MutableLiveData<Boolean>()
     }
-
-
-
-
-    fun turnFlasLigh(flag: Boolean){
-            turnFlashLight.turnFlashLight(flag)
+    val listItemCalendarLD: MutableLiveData<List<Item>> by lazy {
+        MutableLiveData<List<Item>>()
     }
 fun alarmInsert(item: Item, action: Int){
     alarmInsert.alarmInsert(item, action)
