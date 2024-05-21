@@ -5,9 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.withContext
 
 
 @Dao
@@ -17,8 +15,8 @@ interface CourseDao {
 
     @Query("SELECT * FROM Item")
     fun getAllList(): List<Item>
-    @Query("SELECT * FROM Item WHERE changeAlarm == true")
-    fun getAllListCalendar(): Flow<List<Item>>
+    @Query("SELECT * FROM Item WHERE alarmTime > :time and alarmTime < (:time+86400000)")
+    fun getAllListCalendarRcView(time: Long): Flow<List<Item>>
     @Insert
      fun insertAll(Courses: Item)
     @Delete

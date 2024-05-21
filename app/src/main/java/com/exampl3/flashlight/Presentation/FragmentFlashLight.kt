@@ -2,17 +2,14 @@ package com.exampl3.flashlight.Presentation
 
 
 
-import android.Manifest
+import android.app.AlarmManager
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
-import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.asLiveData
@@ -26,12 +23,10 @@ import com.exampl3.flashlight.Domain.model.InsertTime
 import com.exampl3.flashlight.Presentation.adapters.ItemListAdapter
 import com.exampl3.flashlight.R
 import com.exampl3.flashlight.databinding.FragmentBlankFlashLightBinding
-import com.sdkit.paylib.payliblogging.impl.logging.c
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.util.Calendar
 import javax.inject.Inject
 
@@ -63,44 +58,34 @@ class FragmentFlashLight : Fragment(), ItemListAdapter.onLongClick, ItemListAdap
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initRcView()
-//        db.CourseDao().getAll().asLiveData().observe(viewLifecycleOwner){list ->
-//            val calendarDays = mutableListOf<CalendarDay>()
-//            list.forEach {item->
-//                calendar = Calendar.getInstance()
-//                calendar.timeInMillis = item.alarmTime
-//                calendarDay = CalendarDay(calendar)
-//                calendarDay.imageResource = R.drawable.ic_alarm_on
-//                if (item.changeAlarm){
-//                    calendarDays.add(calendarDay)
-//                }
-//            }
-//            binding.calendarView.setCalendarDays(calendarDays)
-//        }
 
-        db.CourseDao().getAllListCalendar().asLiveData().observe(viewLifecycleOwner){list->
+        db.CourseDao().getAll().asLiveData().observe(viewLifecycleOwner){list->
             val calendarDays = mutableListOf<CalendarDay>()
             list.forEach {item->
-                calendar = Calendar.getInstance()
-                calendar.timeInMillis = item.alarmTime
-                calendarDay = CalendarDay(calendar)
-                calendarDay.imageResource = R.drawable.ic_alarm_on
-                calendarDays.add(calendarDay)
+                if (item.changeAlarm) {
+                    calendar = Calendar.getInstance()
+                    calendar.timeInMillis = item.alarmTime
+                    calendarDay = CalendarDay(calendar)
+                    calendarDay.imageResource = R.drawable.ic_alarm_on
+                    calendarDays.add(calendarDay)
+                }
             }
             binding.calendarView.setCalendarDays(calendarDays)
-
-
         }
-
-
-        model.listItemCalendarLD.observe(viewLifecycleOwner){
-            adapter.submitList(it)
-        }
-
         binding.calendarView.setOnCalendarDayClickListener(object : OnCalendarDayClickListener{
             override fun onClick(calendarDay: CalendarDay) {
-                CoroutineScope(Dispatchers.Main).launch {
-                    //adapter.submitList(addRcView(calendarDay))
-                   model.listItemCalendarLD.postValue(addRcView(calendarDay.calendar.get(Calendar.DAY_OF_MONTH)))
+
+                db.CourseDao().getAllListCalendarRcView(calendarDay.calendar.timeInMillis)
+                    .asLiveData()
+                    .observe(viewLifecycleOwner){list->
+                        val listItemCalendar = mutableListOf<Item>()
+
+                     list.forEach { item->
+                         if (item.changeAlarm) listItemCalendar.add(item)
+                     }
+                        if (listItemCalendar.isEmpty()) binding.tvDela.visibility = View.VISIBLE
+                        else binding.tvDela.visibility = View.GONE
+                    adapter.submitList(listItemCalendar)
                 }
             }
         })
@@ -110,24 +95,7 @@ class FragmentFlashLight : Fragment(), ItemListAdapter.onLongClick, ItemListAdap
         adapter = ItemListAdapter(this, this)
         rcView.layoutManager = LinearLayoutManager(requireContext())
         rcView.adapter = adapter
-
     } // инициализировал ресайклер
-
-    suspend fun addRcView(calendarDay: Int) : List<Item> = withContext(Dispatchers.IO){
-        val listadd = mutableListOf<Item>()
-        //val time = calendarDay.calendar.get(Calendar.DAY_OF_MONTH)
-        //val c = Calendar.getInstance()
-
-        db.CourseDao().getAllList().forEach{item ->
-            if (item.changeAlarm) {
-                calendar.timeInMillis = item.alarmTime
-                if (calendarDay == calendar.get(Calendar.DAY_OF_MONTH) ) {
-                    listadd.add(item)
-                             }
-                         }
-                    }
-        return@withContext listadd
-    }
 
 
     companion object {
@@ -135,14 +103,55 @@ class FragmentFlashLight : Fragment(), ItemListAdapter.onLongClick, ItemListAdap
     }
 
     override fun onLongClick(item: Item, action: Int) {
-        TODO("Not yet implemented")
+        when(action){
+            Const.alarm -> {
+                CoroutineScope(Dispatchers.IO).launch {
+                    db.CourseDao().update(item.copy(changeAlarm = !item.changeAlarm))
+                }
+                if (item.changeAlarm) {
+                    insertTime.
+                    changeAlarmItem(item, Const.deleteAlarm)
+                }
+                if ((item.change || !item.changeAlarm) && item.alarmTime > calendarZero.timeInMillis) {
+                    insertTime.
+                    changeAlarmItem(
+                        item.copy(change = false, changeAlarm = !item.changeAlarm),
+                        item.interval
+                    )
+                    CoroutineScope(Dispatchers.IO).launch {
+                        db.CourseDao().update(item.copy(change = false, changeAlarm = !item.changeAlarm))
+                    }
+                }
+                if (!item.changeAlarm && item.alarmTime < calendarZero.timeInMillis) {
+                    when (item.interval) {
+                        Const.alarmOne -> {
+                            Toast.makeText(requireContext(), "Вы выбрали время которое уже прошло", Toast.LENGTH_SHORT).show()
+                            CoroutineScope(Dispatchers.IO).launch {
+                                db.CourseDao().update(item.copy(changeAlarm = false))
+                            }
+                        }
+                        Const.alarmDay -> {
+                            insertTime.
+                            insertAlarm(item, item.interval, "и через день", item.alarmTime+ AlarmManager.INTERVAL_DAY)
+                        }
+                        Const.alarmWeek -> {
+                            insertTime.
+                            insertAlarm(item,item.interval, "и через неделю", item.alarmTime+ AlarmManager.INTERVAL_DAY * 7)
+                        }
+                        Const.alarmMonth -> {
+                            insertTime.
+                            insertAlarm(item,item.interval, "и через месяц", item.alarmTime+ Const.MONTH)
+                        }
+                    }
+                }
+            }
+        }
+
     }
 
     override fun onClick(item: Item, action: Int) {
-        calendar.timeInMillis = item.alarmTime
             when (action) {
                 Const.change -> {
-                    updateRc(calendar)
                     CoroutineScope(Dispatchers.IO).launch {
                         db.CourseDao().update(item.copy(change = !item.change))
                         if (item.changeAlarm) {
@@ -257,11 +266,6 @@ class FragmentFlashLight : Fragment(), ItemListAdapter.onLongClick, ItemListAdap
         }
 
 
-    }
-    private fun updateRc(calendar: Calendar){
-        CoroutineScope(Dispatchers.Main).launch {
-            model.listItemCalendarLD.postValue(addRcView(calendar.get(Calendar.DAY_OF_MONTH)))
-        }
     }
 
 }
