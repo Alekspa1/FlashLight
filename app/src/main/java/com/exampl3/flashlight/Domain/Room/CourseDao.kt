@@ -15,10 +15,14 @@ interface CourseDao {
 
     @Query("SELECT * FROM Item")
     fun getAllList(): List<Item>
+    @Query("SELECT * FROM Item WHERE alarmTime > :time and alarmTime < (:time+86400000)")
+    fun getAllListCalendarRcView(time: Long): Flow<List<Item>>
     @Insert
      fun insertAll(Courses: Item)
     @Delete
     fun delete(Course: Item)
+    @Delete
+    suspend fun deleteList(list: List<Item>)
     @Update
     fun update(Course: Item)
 

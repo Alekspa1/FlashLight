@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.core.view.marginTop
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.exampl3.flashlight.Const
@@ -24,18 +25,6 @@ class ItemListAdapter(private val onLongClickListener: onLongClick,
 
                 textItem.text = item.name
                 tvAlarm.text = item.alarmText
-                when (item.change) {
-                    true -> {
-                        imStatus.setImageResource(R.drawable.ic_item_true)
-                        cardView
-                            .setCardBackgroundColor(ContextCompat.getColor(context, R.color.Active))
-                    }
-                    false -> {
-                        imStatus.setImageResource(R.drawable.ic_item_false)
-                        cardView
-                            .setCardBackgroundColor(ContextCompat.getColor(context, R.color.NoActive))
-                    }
-                }
                 when(item.changeAlarm){
                     true-> {
                         tvAlarm.visibility = View.VISIBLE
@@ -44,6 +33,31 @@ class ItemListAdapter(private val onLongClickListener: onLongClick,
                     false->{
                         tvAlarm.visibility = View.GONE
                         imAlarm.setImageResource(R.drawable.ic_alarm_off)
+                    }
+                }
+                if(item.changeDelItem){
+                    cardView
+                           .setCardBackgroundColor(ContextCompat.getColor(context, R.color.Grey))
+                    when (item.change) {
+                        true -> {
+                            imStatus.setImageResource(R.drawable.ic_item_true)
+                        }
+                        false -> {
+                            imStatus.setImageResource(R.drawable.ic_item_false)
+                        }
+                    }
+                } else{
+                    when (item.change) {
+                        true -> {
+                            imStatus.setImageResource(R.drawable.ic_item_true)
+                            cardView
+                                .setCardBackgroundColor(ContextCompat.getColor(context, R.color.Active))
+                        }
+                        false -> {
+                            imStatus.setImageResource(R.drawable.ic_item_false)
+                            cardView
+                                .setCardBackgroundColor(ContextCompat.getColor(context, R.color.NoActive))
+                        }
                     }
                 }
                 cardView.setOnClickListener {
@@ -59,9 +73,12 @@ class ItemListAdapter(private val onLongClickListener: onLongClick,
                     onClick.onClick(item, Const.alarm)
                 }
                 imAlarm.setOnLongClickListener {
-                    onLongClickListener.onLongClick(item)
+                    onLongClickListener.onLongClick(item, Const.alarm)
                     true
-
+                }
+                cardView.setOnLongClickListener {
+                    onLongClickListener.onLongClick(item, Const.delete)
+                    true
                 }
             }
         }
@@ -75,7 +92,7 @@ class ItemListAdapter(private val onLongClickListener: onLongClick,
         holder.bind(getItem(position), onLongClickListener, onClickListener)
     }
     interface onLongClick {
-        fun onLongClick(item: Item)
+        fun onLongClick(item: Item, action: Int)
 
     }
     interface onClick {

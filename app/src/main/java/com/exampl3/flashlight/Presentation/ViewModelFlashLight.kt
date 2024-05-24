@@ -1,6 +1,8 @@
 package com.exampl3.flashlight.Presentation
 
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.exampl3.flashlight.Domain.model.AlarmManagerImp
 import com.exampl3.flashlight.Domain.model.TurnFlashLightImpl
@@ -22,11 +24,11 @@ class ViewModelFlashLight @Inject constructor(
     fun saveNoteBook(value: String) = pref.saveStringNoteBook(value)
     fun getNotebook() = pref.getStringNoteBook()
 
-
-
-
-    fun turnFlasLigh(flag: Boolean){
-            turnFlashLight.turnFlashLight(flag)
+    val edit: MutableLiveData<Boolean> by lazy {
+        MutableLiveData<Boolean>()
+    }
+    val listItemCalendarLD: MutableLiveData<List<Item>> by lazy {
+        MutableLiveData<List<Item>>()
     }
 fun alarmInsert(item: Item, action: Int){
     alarmInsert.alarmInsert(item, action)

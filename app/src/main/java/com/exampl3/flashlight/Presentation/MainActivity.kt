@@ -235,6 +235,7 @@ open class MainActivity : AppCompatActivity() {
         TabLayoutMediator(binding.tabLayout, binding.placeHolder) { tab, pos ->
             tab.text = resources.getStringArray(R.array.vp_title_main)[pos]
         }.attach()
+
     } // инициализирую ViewPager
 
     private fun initYaBaner() {
@@ -290,7 +291,7 @@ open class MainActivity : AppCompatActivity() {
         billingClient = RuStoreBillingClientFactory.create(
             context = this,
             consoleApplicationId = "2063541058",
-            deeplinkScheme = "yourappscheme"
+            deeplinkScheme = "flashlight"
         )
         productsUseCase = billingClient.products
         purchasesUseCase = billingClient.purchases
