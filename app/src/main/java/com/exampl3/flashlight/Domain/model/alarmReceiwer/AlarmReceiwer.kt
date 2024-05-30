@@ -75,7 +75,7 @@ class AlarmReceiwer: BroadcastReceiver() {
             } // Когда нажал кнопку отложить
 
             Const.reboot -> {
-                Thread {
+                CoroutineScope(Dispatchers.IO).launch {
                     db.CourseDao().getAllList().forEach { item ->
                         if (item.changeAlarm && item.alarmTime > calendarZero.timeInMillis) {
                             alarmManager.alarmInsert(item, item.interval)
@@ -86,7 +86,8 @@ class AlarmReceiwer: BroadcastReceiver() {
 
                         }
                     }
-                }.start()
+                }
+
             } // После перезагрузки
         }
     }
