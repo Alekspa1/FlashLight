@@ -71,7 +71,12 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
             if (it) binding.imageView.visibility = View.VISIBLE
             else binding.imageView.visibility = View.GONE
         }
-        db.CourseDao().getAll().asLiveData().observe(viewLifecycleOwner) { list ->
+
+        modelFlashLight.categoryItemLD.observe(viewLifecycleOwner){value->
+            binding.tvCategory.text = value
+
+        }
+        modelFlashLight.categoryItemLDNew.observe(viewLifecycleOwner){list->
             adapter.submitList(list.sortedWith { o1, o2 ->
                 o2.changeAlarm.compareTo(true) - o1.changeAlarm.compareTo(
                     true
@@ -82,6 +87,24 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
                 )
             })
         }
+        db.CourseDao().getAll().asLiveData().observe(viewLifecycleOwner){
+            modelFlashLight.categoryItemLD.value?.let { it1 -> modelFlashLight.updateCategory(it1) }
+        }
+
+
+
+
+//        db.CourseDao().getAll().asLiveData().observe(viewLifecycleOwner) { list ->
+//            adapter.submitList(list.sortedWith { o1, o2 ->
+//                o2.changeAlarm.compareTo(true) - o1.changeAlarm.compareTo(
+//                    true
+//                )
+//            }.sortedWith { o1, o2 ->
+//                o1.change.compareTo(true) - o2.change.compareTo(
+//                    true
+//                )
+//            })
+//        }
         pLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
 
         val launcher =
@@ -102,7 +125,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
             DialogItemList.AlertList(requireContext(), object : DialogItemList.Listener {
                 override fun onClick(name: String) {
                     CoroutineScope(Dispatchers.IO).launch {
-                        db.CourseDao().insertAll(Item(null, name))
+                        db.CourseDao().insertAll(Item(null, name, category = modelFlashLight.categoryItemLD.value!!))
                     }
                 }
             }, null)
@@ -343,9 +366,32 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
                 if (!modelFlashLight.getPremium()) (activity as MainActivity).showAd()
             }
         }
-
-
     }
+//    private fun proverkaFree(item: Item, result: Int, timeCal: Long) {
+//        if (result == Const.alarmOne ) insertTime.insertAlarm(item, result, "", timeCal)
+//        else if (modelFlashLight.getPremium()) {
+//            when (result) {
+//
+//                Const.alarmDay -> {
+//                    insertTime.insertAlarm(item, result, "и через день", timeCal)
+//
+//                }
+//
+//                Const.alarmWeek -> {
+//                    insertTime.insertAlarm(item, result, "и через неделю", timeCal)
+//                }
+//                Const.alarmMonth -> {
+//                    insertTime.insertAlarm(item, result, "и через месяц", timeCal)
+//                }
+//            }
+//        }
+//        else
+//            Toast.makeText(view?.context, "Повторяющиеся напоминания доступны в PREMIUM версии", Toast.LENGTH_SHORT).show()
+//
+//
+//    } ЭТОТ КОНЕЧНЫЙ
+
+
 
     override fun onResume() {
         super.onResume()

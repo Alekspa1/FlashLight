@@ -11,9 +11,14 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
+import androidx.lifecycle.asLiveData
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.exampl3.flashlight.Const
+import com.exampl3.flashlight.Const.RUSTORE
 import com.exampl3.flashlight.Presentation.adapters.VpAdapter
 import com.exampl3.flashlight.Domain.Room.GfgDatabase
+import com.exampl3.flashlight.Domain.Room.ListCategory
+import com.exampl3.flashlight.Presentation.adapters.ListMenuAdapter
 import com.exampl3.flashlight.R
 import com.exampl3.flashlight.databinding.ActivityMainBinding
 import com.google.android.material.tabs.TabLayoutMediator
@@ -46,7 +51,7 @@ import java.util.UUID
 import javax.inject.Inject
 
 @AndroidEntryPoint
-open class MainActivity : AppCompatActivity() {
+open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
 
     private var interstitialAdLoader: InterstitialAdLoader? = null
     private var interstitialAd: InterstitialAd? = null
@@ -56,11 +61,12 @@ open class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var vpAdapter: VpAdapter
     private lateinit var calendarZero: Calendar
-    val modelFlashLight: ViewModelFlashLight by viewModels()
+    private val modelFlashLight: ViewModelFlashLight by viewModels()
     private lateinit var alarmManager: AlarmManager
     private lateinit var billingClient: RuStoreBillingClient
     private lateinit var productsUseCase: ProductsUseCase
     private lateinit var purchasesUseCase: PurchasesUseCase
+    private lateinit var adapter: ListMenuAdapter
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -69,9 +75,14 @@ open class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         initVp()
         updateAlarm()
+        initRcView()
         if (!modelFlashLight.getPremium()) initYaBaner()
         if (savedInstanceState == null) {
             billingClient.onNewIntent(intent)
+        }
+        modelFlashLight.updateCategory("Повседневные")
+        db.CourseDao().getAllListCategory().asLiveData().observe(this){
+            adapter.submitList(it)
         }
 
 
@@ -99,7 +110,7 @@ open class MainActivity : AppCompatActivity() {
             } // ПРЕМИУМ
             bUpdate.setOnClickListener {
                 try {
-                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse( "https://apps.rustore.ru/app/com.exampl3.flashlight" )))
+                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse( RUSTORE )))
                 }  catch (e: Exception) {
                     Toast.makeText(this@MainActivity, "Ошибка", Toast.LENGTH_SHORT).show()
                 }
@@ -111,9 +122,24 @@ open class MainActivity : AppCompatActivity() {
                     Toast.makeText(this@MainActivity, "Ошибка", Toast.LENGTH_SHORT).show()
                 }
             } // Обратная связь
+            tvCardMenu.setOnClickListener {
+                modelFlashLight.updateCategory("Повседневные")
+                binding.tabLayout.selectTab(binding.tabLayout.getTabAt(1))
+                drawer.closeDrawer(GravityCompat.START)
+            }
 
             imBAddMenu.setOnClickListener {
-                Toast.makeText(this@MainActivity, "Категории появятся в следующих обновлениях", Toast.LENGTH_SHORT).show()
+                if (modelFlashLight.getPremium()){
+                    DialogItemList.AlertList(this@MainActivity, object : DialogItemList.Listener {
+                        override fun onClick(name: String) {
+                            CoroutineScope(Dispatchers.IO).launch {
+                                db.CourseDao().insertCategory(ListCategory(null, name))
+                            }
+                        }
+                    }, null)
+                } else Toast.makeText(this@MainActivity, "Категории доступны в PREMIUM версии", Toast.LENGTH_SHORT).show()
+
+
             }
         }
     }
@@ -189,7 +215,7 @@ open class MainActivity : AppCompatActivity() {
                     modelFlashLight.savePremium(true)
                     Toast.makeText(
                         this,
-                        "Поздравляю! Теперь вам доступны премиум функции",
+                        "Поздравляю! Теперь вам доступны PREMIUM функции",
                         Toast.LENGTH_SHORT
                     ).show()
                 }
@@ -211,14 +237,14 @@ open class MainActivity : AppCompatActivity() {
             .addOnSuccessListener { purchases: List<Purchase> ->
                 if (purchases.isEmpty() && modelFlashLight.getPremium()) {
                     modelFlashLight.savePremium(false)
-                    Toast.makeText(this, "Премиум версия была отключена", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "PREMIUM версия была отключена", Toast.LENGTH_SHORT).show()
                 }
                 purchases.forEach {
                     if (it.productId == "premium_version_flash_light" &&
                         (it.purchaseState == PurchaseState.PAID || it.purchaseState == PurchaseState.CONFIRMED) && !modelFlashLight.getPremium()
                     ) {
                         modelFlashLight.savePremium(true)
-                        Toast.makeText(this, "Премиум версия была восстановлена", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "PREMIUM версия была восстановлена", Toast.LENGTH_SHORT).show()
                     }
                 }
 
@@ -279,7 +305,7 @@ open class MainActivity : AppCompatActivity() {
 //    } // обновляю будильники вернуть потом как было
 
     private fun updateAlarm() {
-        CoroutineScope(Dispatchers.IO).launch { db.CourseDao().getAllList().forEach { item ->
+        CoroutineScope(Dispatchers.Main).launch { db.CourseDao().getAllList().forEach { item ->
             if (item.changeAlarm && item.alarmTime > calendarZero.timeInMillis) {
                 modelFlashLight.alarmInsert(item, item.interval)
             }
@@ -299,6 +325,13 @@ open class MainActivity : AppCompatActivity() {
         alarmManager = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
     } // Инициализирую все
+    private fun initRcView() {
+        val rcView = binding.rcView
+        adapter = ListMenuAdapter(this)
+        rcView.layoutManager = LinearLayoutManager(this)
+        rcView.adapter = adapter
+
+    } // инициализировал ресайклер
 
 
         //Override функции
@@ -320,6 +353,56 @@ open class MainActivity : AppCompatActivity() {
         billingClient.onNewIntent(intent)
     }
 
+
+    override fun onClick(item: ListCategory, action: Int) {
+        modelFlashLight.updateCategory(item.name)
+
+        when(action){
+            Const.delete ->{
+                DialogItemList.AlertDelete(this, object : DialogItemList.Delete {
+                    override fun onClick(flag: Boolean) {
+                        if (flag) {
+                            CoroutineScope(Dispatchers.IO).launch {
+                                db.CourseDao().deleteCategory(item.name)
+                                db.CourseDao().deleteCategoryMenu(item)
+                                db.CourseDao().getAllList().forEach { itemList->
+                                    if (itemList.changeAlarm && itemList.category == item.name){
+                                        modelFlashLight.alarmInsert(itemList, Const.deleteAlarm)
+                                    }
+                                }
+                            }
+                            modelFlashLight.updateCategory("Повседневные")
+                        }
+                    }
+                })
+            } // Удаление элемента
+            Const.changeItem -> {
+                DialogItemList.AlertList(
+                    this,
+                    object : DialogItemList.Listener {
+                        override fun onClick(name: String) {
+                            CoroutineScope(Dispatchers.IO).launch {
+                                val newitem = item.copy(name = name)
+                                db.CourseDao().updateCategory(newitem)
+                                db.CourseDao().getAllNewNoFlow(item.name).forEach {
+                                    db.CourseDao().update(it.copy(category = name))
+                                }
+                            }
+                            modelFlashLight.updateCategory(name)
+                        }
+                    },
+                    item.name
+                )
+
+            } // Изменение имени элемента
+            Const.change -> {
+                binding.drawer.closeDrawer(GravityCompat.START)
+                binding.tabLayout.selectTab(binding.tabLayout.getTabAt(1))
+            } // Простое нажатие
+        }
+
+
+    }
 
 
 }
