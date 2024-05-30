@@ -14,7 +14,7 @@ android {
         applicationId = "com.exampl3.flashlight"
         minSdk = 24
         targetSdk = 34
-        versionCode = 12
+        versionCode = 13
         versionName = "6"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         kapt {

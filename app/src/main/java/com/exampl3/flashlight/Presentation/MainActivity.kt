@@ -363,15 +363,14 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
                     override fun onClick(flag: Boolean) {
                         if (flag) {
                             CoroutineScope(Dispatchers.IO).launch {
-                                db.CourseDao().deleteCategory(item.name)
-                                db.CourseDao().deleteCategoryMenu(item)
-                                db.CourseDao().getAllList().forEach { itemList->
-                                    if (itemList.changeAlarm && itemList.category == item.name){
+                                db.CourseDao().getAllNewNoFlow(item.name).forEach { itemList->
                                         modelFlashLight.alarmInsert(itemList, Const.deleteAlarm)
-                                    }
                                 }
+                                db.CourseDao().deleteCategory(item.name) // удаляю все из бд
+                                db.CourseDao().deleteCategoryMenu(item) // удаляю из меню
                             }
                             modelFlashLight.updateCategory("Повседневные")
+
                         }
                     }
                 })
