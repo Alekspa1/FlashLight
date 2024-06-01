@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -132,12 +133,13 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
                 if (modelFlashLight.getPremium()){
                     DialogItemList.AlertList(this@MainActivity, object : DialogItemList.Listener {
                         override fun onClick(name: String) {
-                            CoroutineScope(Dispatchers.IO).launch {
-                                db.CourseDao().insertCategory(ListCategory(null, name))
-                            }
+                         CoroutineScope(Dispatchers.IO).launch {
+                             db.CourseDao().insertCategory(ListCategory(null,name))
+                         }
                         }
                     }, null)
-                } else Toast.makeText(this@MainActivity, "Категории доступны в PREMIUM версии", Toast.LENGTH_SHORT).show()
+                }
+                else Toast.makeText(this@MainActivity, "Категории доступны в PREMIUM версии", Toast.LENGTH_SHORT).show()
 
 
             }
