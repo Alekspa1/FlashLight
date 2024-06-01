@@ -113,7 +113,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
                     val text = it.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
                     CoroutineScope(Dispatchers.IO).launch {
                         if (text != null) {
-                            db.CourseDao().insertAll(Item(null, text[0]))
+                            db.CourseDao().insertAll(Item(null, text[0], category = modelFlashLight.categoryItemLD.value!!))
                         }
                     }
 
