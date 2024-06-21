@@ -15,6 +15,7 @@ import androidx.core.view.GravityCompat
 import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.exampl3.flashlight.Const
+import com.exampl3.flashlight.Const.APP_GALERY
 import com.exampl3.flashlight.Const.RUSTORE
 import com.exampl3.flashlight.Presentation.adapters.VpAdapter
 import com.exampl3.flashlight.Domain.Room.GfgDatabase
