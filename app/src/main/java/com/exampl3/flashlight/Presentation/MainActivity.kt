@@ -112,7 +112,7 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
             } // ПРЕМИУМ
             bUpdate.setOnClickListener {
                 try {
-                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse( APP_GALERY )))
+                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse( RUSTORE )))
                 }  catch (e: Exception) {
                     Toast.makeText(this@MainActivity, "Ошибка", Toast.LENGTH_SHORT).show()
                 }
