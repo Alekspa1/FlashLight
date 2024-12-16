@@ -369,6 +369,10 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
                 insertTime.insertAlarm(item, result, "и через месяц", timeCal)
                 if (!modelFlashLight.getPremium()) (activity as MainActivity).showAd()
             }
+            Const.alarmYear -> {
+                insertTime.insertAlarm(item, result, "и через год", timeCal)
+                if (!modelFlashLight.getPremium()) (activity as MainActivity).showAd()
+            }
         }
     }
 //    private fun proverkaFree(item: Item, result: Int, timeCal: Long) {

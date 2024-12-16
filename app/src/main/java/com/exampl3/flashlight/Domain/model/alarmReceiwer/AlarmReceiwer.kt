@@ -5,7 +5,9 @@ import android.app.AlarmManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.widget.Toast
+
 import com.exampl3.flashlight.Domain.model.AlarmManagerImp
 import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Domain.Room.GfgDatabase
@@ -113,6 +115,43 @@ class AlarmReceiwer: BroadcastReceiver() {
             Const.alarmMonth-> {
                 insertTime.insertAlarm(item,item.interval,"и через месяц", item.alarmTime+ Const.MONTH)
             }
+            Const.alarmYear-> {
+                //val calendar = Calendar.getInstance()
+                val calendarNextYear = Calendar.getInstance()
+                calendarNextYear.set(calendarNextYear.get(Calendar.YEAR)+1,Calendar.JANUARY,1)
+                 val dayInYear = calendarZero.getActualMaximum(Calendar.DAY_OF_YEAR)
+                val nextYear = calendarNextYear.getActualMaximum(Calendar.DAY_OF_YEAR)
+                var year:Long
+                if (dayInYear == 366) {
+//                    calendar.set(Calendar.YEAR, calendar.get(Calendar.YEAR))
+//                    calendar.set(Calendar.MONTH, Calendar.FEBRUARY)
+//                    calendar.set(Calendar.DAY_OF_MONTH, 29)
+
+                    year = if (item.alarmTime <  february()) AlarmManager.INTERVAL_DAY * 366
+                    else AlarmManager.INTERVAL_DAY * 365
+                    insertTime.insertAlarm(item,item.interval,"и через год", item.alarmTime+ year)
+                }
+
+                if (nextYear == 366) {
+//                    calendar.set(Calendar.YEAR, calendar.get(Calendar.YEAR))
+//                    calendar.set(Calendar.MONTH, Calendar.FEBRUARY)
+//                    calendar.set(Calendar.DAY_OF_MONTH, 29)
+
+                    year = if (item.alarmTime >  february()) AlarmManager.INTERVAL_DAY * 366
+                    else AlarmManager.INTERVAL_DAY * 365
+                    insertTime.insertAlarm(item,item.interval,"и через год", item.alarmTime+ year)
+                }
+
+                }
+
+            }
         }
+
+    private fun february(): Long{
+        calendarZero.set(Calendar.YEAR, calendarZero.get(Calendar.YEAR))
+        calendarZero.set(Calendar.MONTH, Calendar.FEBRUARY)
+        calendarZero.set(Calendar.DAY_OF_MONTH, 29)
+        return calendarZero.timeInMillis
     }
 }
+

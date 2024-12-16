@@ -12,6 +12,7 @@ object Const {
     var premium_KEY = "premium_KEY"
     private val calendar: Calendar = Calendar.getInstance()
     private val dayInMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
+    private val dayInYear = calendar.getActualMaximum(Calendar.DAY_OF_YEAR)
     const val BANER = "R-M-4702196-1"
     const val MEZSTR = "R-M-4702196-2"
     const val keyNoteBook = "key"
@@ -30,9 +31,14 @@ object Const {
     const val alarmDay = 1
     const val alarmWeek = 2
     const val alarmMonth = 3
-    const val deleteAlarm = 4
-    const val alarmRepeat = 5
-    var MONTH = AlarmManager.INTERVAL_DAY* dayInMonth
+    const val alarmYear = 4
+    const val deleteAlarm = 5
+    const val alarmRepeat = 6
+    val MONTH = AlarmManager.INTERVAL_DAY* dayInMonth
+    //val YEAR = AlarmManager.INTERVAL_DAY* dayInYear
+
+
+
 
     fun isPermissionGranted(con: Context, p: String): Boolean {
         return ContextCompat.checkSelfPermission(con, p) == PackageManager.PERMISSION_GRANTED

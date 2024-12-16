@@ -6,7 +6,7 @@ import android.widget.EditText
 import android.widget.Toast
 
 object DialogItemList {
-    private val insertAlarmList = arrayOf("Один раз","Каждый день","Каждую неделю","Каждый месяц")
+    private val insertAlarmList = arrayOf("Один раз","Каждый день","Каждую неделю","Каждый месяц", "Каждый год")
 
     fun AlertList(context: Context, listener: Listener, name: String?){
         val builred = AlertDialog.Builder(context)
