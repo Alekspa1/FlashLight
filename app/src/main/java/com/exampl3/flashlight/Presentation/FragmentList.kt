@@ -10,6 +10,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.speech.RecognizerIntent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -76,6 +77,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
             binding.tvCategory.text = value
 
         }
+
         modelFlashLight.categoryItemLDNew.observe(viewLifecycleOwner){list->
             adapter.submitList(list.sortedWith { o1, o2 ->
                 o2.changeAlarm.compareTo(true) - o1.changeAlarm.compareTo(
@@ -87,8 +89,10 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
                 )
             })
         }
+
         db.CourseDao().getAll().asLiveData().observe(viewLifecycleOwner){
-            modelFlashLight.categoryItemLD.value?.let { it1 -> modelFlashLight.updateCategory(it1) }
+            modelFlashLight.categoryItemLD.value?.let { it1 -> modelFlashLight.updateCategory(it1)
+            }
         }
 
 
