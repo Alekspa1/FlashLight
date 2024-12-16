@@ -79,15 +79,17 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
         }
 
         modelFlashLight.categoryItemLDNew.observe(viewLifecycleOwner){list->
-            adapter.submitList(list.sortedWith { o1, o2 ->
-                o2.changeAlarm.compareTo(true) - o1.changeAlarm.compareTo(
-                    true
-                )
-            }.sortedWith { o1, o2 ->
-                o1.change.compareTo(true) - o2.change.compareTo(
-                    true
-                )
-            })
+//            adapter.submitList(list.sortedWith { o1, o2 ->
+//                o2.changeAlarm.compareTo(true) - o1.changeAlarm.compareTo(
+//                    true
+//                )
+//            }.sortedWith { o1, o2 ->
+//                o1.change.compareTo(true) - o2.change.compareTo(
+//                    true
+//                )
+//            })
+            adapter.submitList(list.sortedBy { it.id }.reversed().sortedBy { it.alarmTime }.reversed().sortedBy { it.change }.reversed().sortedBy { it.changeAlarm }.reversed())
+
         }
 
         db.CourseDao().getAll().asLiveData().observe(viewLifecycleOwner){
