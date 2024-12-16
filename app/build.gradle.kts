@@ -46,7 +46,9 @@ android {
 dependencies {
     implementation("com.applandeo:material-calendar-view:1.9.2")
 
+
     implementation("com.yandex.android:mobileads:7.3.0")
+
     implementation("ru.rustore.sdk:billingclient:5.1.1")
     implementation ("com.google.dagger:hilt-android:2.51.1")
     kapt ("com.google.dagger:hilt-compiler:2.51.1")
@@ -54,8 +56,10 @@ dependencies {
     implementation ("androidx.room:room-runtime:2.6.1")
     kapt ("androidx.room:room-compiler:2.6.1")
     implementation ("androidx.room:room-ktx:2.6.1")
+
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.4")
     implementation("androidx.fragment:fragment-ktx:1.8.2")
+
 
     
 
