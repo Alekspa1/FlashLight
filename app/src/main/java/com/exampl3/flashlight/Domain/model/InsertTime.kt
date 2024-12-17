@@ -18,7 +18,6 @@ class InsertTime @Inject constructor(
     ) : MainActivity() {
 
 
-
     fun deleteAlertDialog(context: Context, item: Item) {
         DialogItemList.AlertDelete(context, object : DialogItemList.Delete {
             override fun onClick(flag: Boolean) {
@@ -46,7 +45,7 @@ class InsertTime @Inject constructor(
 
     } // Изменение заметки
      fun insertAlarm(item: Item, interval: Int, intervalText: String, timeCal: Long) {
-        val dateFormat = "dd.MM"
+        val dateFormat = "dd.MM.yyyy"
         val timeFormat = "HH:mm"
         val date = SimpleDateFormat(dateFormat, Locale.US)
         val time = SimpleDateFormat(timeFormat, Locale.US)

@@ -30,9 +30,13 @@ object Const {
     const val alarmDay = 1
     const val alarmWeek = 2
     const val alarmMonth = 3
-    const val deleteAlarm = 4
-    const val alarmRepeat = 5
-    var MONTH = AlarmManager.INTERVAL_DAY* dayInMonth
+    const val alarmYear = 4
+    const val deleteAlarm = 5
+    const val alarmRepeat = 6
+    val MONTH = AlarmManager.INTERVAL_DAY* dayInMonth
+
+
+
 
     fun isPermissionGranted(con: Context, p: String): Boolean {
         return ContextCompat.checkSelfPermission(con, p) == PackageManager.PERMISSION_GRANTED

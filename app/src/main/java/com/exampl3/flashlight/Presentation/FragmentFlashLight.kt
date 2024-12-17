@@ -20,6 +20,7 @@ import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Domain.Room.GfgDatabase
 import com.exampl3.flashlight.Domain.Room.Item
 import com.exampl3.flashlight.Domain.model.InsertTime
+
 import com.exampl3.flashlight.Presentation.adapters.ItemListAdapter
 import com.exampl3.flashlight.R
 import com.exampl3.flashlight.databinding.FragmentBlankFlashLightBinding
@@ -32,9 +33,9 @@ import javax.inject.Inject
 
 
 @AndroidEntryPoint
-class FragmentFlashLight : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.onClick  {
+class FragmentFlashLight : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.onClick {
     private lateinit var binding: FragmentBlankFlashLightBinding
-    private val model: ViewModelFlashLight by activityViewModels()
+    private val modelFlashLight: ViewModelFlashLight by activityViewModels()
     @Inject
     lateinit var db: GfgDatabase
     @Inject
@@ -244,6 +245,7 @@ class FragmentFlashLight : Fragment(), ItemListAdapter.onLongClick, ItemListAdap
         timePickerDialog.show()
     } // Установка времени
 
+
     private fun proverkaFree(item: Item, result: Int, timeCal: Long) {
         when (result) {
             Const.alarmOne -> {
@@ -251,21 +253,26 @@ class FragmentFlashLight : Fragment(), ItemListAdapter.onLongClick, ItemListAdap
             }
             Const.alarmDay -> {
                 insertTime.insertAlarm(item, result, "и через день", timeCal)
-                if (!model.getPremium()) (activity as MainActivity).showAd()
+                if (!modelFlashLight.getPremium()) advertising()
 
             }
 
             Const.alarmWeek -> {
                 insertTime.insertAlarm(item, result, "и через неделю", timeCal)
-                if (!model.getPremium()) (activity as MainActivity).showAd()
+                if (!modelFlashLight.getPremium()) advertising()
             }
             Const.alarmMonth -> {
                 insertTime.insertAlarm(item, result, "и через месяц", timeCal)
-                if (!model.getPremium()) (activity as MainActivity).showAd()
+                if (!modelFlashLight.getPremium()) advertising()
+            }
+            Const.alarmYear -> {
+                insertTime.insertAlarm(item, result, "и через год", timeCal)
+                if (!modelFlashLight.getPremium()) advertising()
             }
         }
-
-
     }
+    private fun advertising(){
+        (activity as MainActivity).showAd()
+    } // запуск рекламы
 
 }

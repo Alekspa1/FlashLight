@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -15,7 +14,6 @@ import androidx.core.view.GravityCompat
 import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.exampl3.flashlight.Const
-import com.exampl3.flashlight.Const.APP_GALERY
 import com.exampl3.flashlight.Const.RUSTORE
 import com.exampl3.flashlight.Presentation.adapters.VpAdapter
 import com.exampl3.flashlight.Domain.Room.GfgDatabase

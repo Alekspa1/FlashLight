@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.exampl3.flashlight.Domain.Room.GfgDatabase
 import com.exampl3.flashlight.Domain.model.AlarmManagerImp
-import com.exampl3.flashlight.Domain.model.TurnFlashLightImpl
 import com.exampl3.flashlight.Domain.Room.Item
 import com.exampl3.flashlight.Domain.model.sharedPreference.SharedPreferenceImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -34,7 +33,6 @@ class ViewModelFlashLight @Inject constructor(
     val categoryItemLD = MutableLiveData<String>()
 
     val categoryItemLDNew = MutableLiveData<List<Item>>()
-
 
 fun alarmInsert(item: Item, action: Int){
     alarmInsert.alarmInsert(item, action)
