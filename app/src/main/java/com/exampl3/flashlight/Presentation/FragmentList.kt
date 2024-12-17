@@ -55,8 +55,6 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
 
     private var listDel = mutableListOf<Item>()
 
-
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -68,6 +66,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initRcView()
+
         modelFlashLight.edit.observe(viewLifecycleOwner){
             if (it) binding.imageView.visibility = View.VISIBLE
             else binding.imageView.visibility = View.GONE
@@ -79,6 +78,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
         }
 
         modelFlashLight.categoryItemLDNew.observe(viewLifecycleOwner){list->
+
 //            adapter.submitList(list.sortedWith { o1, o2 ->
 //                o2.changeAlarm.compareTo(true) - o1.changeAlarm.compareTo(
 //                    true
@@ -88,7 +88,13 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
 //                    true
 //                )
 //            })
-            adapter.submitList(list.sortedBy { it.id }.reversed().sortedBy { it.alarmTime }.reversed().sortedBy { it.change }.reversed().sortedBy { it.changeAlarm }.reversed())
+
+
+            adapter.submitList(list.sortedBy { it.id }.reversed().sortedBy { it.alarmTime }
+                .reversed().sortedBy { it.change }
+                .reversed().sortedBy { it.changeAlarm }
+                .reversed())
+
 
         }
 
@@ -96,21 +102,6 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
             modelFlashLight.categoryItemLD.value?.let { it1 -> modelFlashLight.updateCategory(it1)
             }
         }
-
-
-
-
-//        db.CourseDao().getAll().asLiveData().observe(viewLifecycleOwner) { list ->
-//            adapter.submitList(list.sortedWith { o1, o2 ->
-//                o2.changeAlarm.compareTo(true) - o1.changeAlarm.compareTo(
-//                    true
-//                )
-//            }.sortedWith { o1, o2 ->
-//                o1.change.compareTo(true) - o2.change.compareTo(
-//                    true
-//                )
-//            })
-//        }
         pLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
 
         val launcher =
@@ -359,21 +350,21 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
             }
             Const.alarmDay -> {
                 insertTime.insertAlarm(item, result, "и через день", timeCal)
-                if (!modelFlashLight.getPremium()) (activity as MainActivity).showAd()
+                if (!modelFlashLight.getPremium()) advertising()
 
             }
 
             Const.alarmWeek -> {
                 insertTime.insertAlarm(item, result, "и через неделю", timeCal)
-                if (!modelFlashLight.getPremium()) (activity as MainActivity).showAd()
+                if (!modelFlashLight.getPremium()) advertising()
             }
             Const.alarmMonth -> {
                 insertTime.insertAlarm(item, result, "и через месяц", timeCal)
-                if (!modelFlashLight.getPremium()) (activity as MainActivity).showAd()
+                if (!modelFlashLight.getPremium()) advertising()
             }
             Const.alarmYear -> {
                 insertTime.insertAlarm(item, result, "и через год", timeCal)
-                if (!modelFlashLight.getPremium()) (activity as MainActivity).showAd()
+                if (!modelFlashLight.getPremium()) advertising()
             }
         }
     }
@@ -416,6 +407,9 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
         }
         modelFlashLight.edit.value = false
     }
+    private fun advertising(){
+        (activity as MainActivity).showAd()
+    } // запуск рекламы
 
 
     companion object {

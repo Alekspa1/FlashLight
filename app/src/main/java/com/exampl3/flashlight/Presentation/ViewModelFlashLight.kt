@@ -35,7 +35,6 @@ class ViewModelFlashLight @Inject constructor(
 
     val categoryItemLDNew = MutableLiveData<List<Item>>()
 
-
 fun alarmInsert(item: Item, action: Int){
     alarmInsert.alarmInsert(item, action)
 }
