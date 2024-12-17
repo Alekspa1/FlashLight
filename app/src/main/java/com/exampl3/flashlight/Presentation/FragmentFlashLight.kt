@@ -60,36 +60,76 @@ class FragmentFlashLight : Fragment(), ItemListAdapter.onLongClick, ItemListAdap
         super.onViewCreated(view, savedInstanceState)
         initRcView()
 
-        db.CourseDao().getAll().asLiveData().observe(viewLifecycleOwner){list->
-            val calendarDays = mutableListOf<CalendarDay>()
-            list.forEach {item->
-                if (item.changeAlarm) {
-                    calendar = Calendar.getInstance()
-                    calendar.timeInMillis = item.alarmTime
-                    calendarDay = CalendarDay(calendar)
-                    calendarDay.imageResource = R.drawable.ic_alarm_on
-                    calendarDays.add(calendarDay)
-                }
-            }
-            binding.calendarView.setCalendarDays(calendarDays)
-        }
-        binding.calendarView.setOnCalendarDayClickListener(object : OnCalendarDayClickListener{
-            override fun onClick(calendarDay: CalendarDay) {
+//        db.CourseDao().getAll().asLiveData().observe(viewLifecycleOwner){list->
+//            val calendarDays = mutableListOf<CalendarDay>()
+//
+//            list.forEach {item->
+//                if (item.changeAlarm) {
+//                    calendar = Calendar.getInstance()
+//                    calendar.timeInMillis = item.alarmTime
+//                    calendarDay = CalendarDay(calendar)
+//                    calendarDay.imageResource = R.drawable.ic_alarm_on
+//                    calendarDays.add(calendarDay)
+//                }
+//            }
+//            binding.calendarView.setCalendarDays(calendarDays)
+//        }
+//        if (modelFlashLight.getPremium()) {
+//            binding.calendarView.setOnCalendarDayClickListener(object : OnCalendarDayClickListener {
+//                override fun onClick(calendarDay: CalendarDay) {
+//
+//                    db.CourseDao().getAllListCalendarRcView(calendarDay.calendar.timeInMillis)
+//                        .asLiveData()
+//                        .observe(viewLifecycleOwner) { list ->
+//                            val listItemCalendar = mutableListOf<Item>()
+//
+//                            list.forEach { item ->
+//                                if (item.changeAlarm) listItemCalendar.add(item)
+//                            }
+//                            if (listItemCalendar.isEmpty()) binding.tvDela.visibility = View.VISIBLE
+//                            else binding.tvDela.visibility = View.GONE
+//                            adapter.submitList(listItemCalendar)
+//                        }
+//                }
+//            })
+//        }
+    }
 
-                db.CourseDao().getAllListCalendarRcView(calendarDay.calendar.timeInMillis)
-                    .asLiveData()
-                    .observe(viewLifecycleOwner){list->
-                        val listItemCalendar = mutableListOf<Item>()
+    override fun onResume() {
+        super.onResume()
+        if (modelFlashLight.getPremium()){
+            db.CourseDao().getAll().asLiveData().observe(viewLifecycleOwner){list->
+                val calendarDays = mutableListOf<CalendarDay>()
 
-                     list.forEach { item->
-                         if (item.changeAlarm) listItemCalendar.add(item)
-                     }
-                        if (listItemCalendar.isEmpty()) binding.tvDela.visibility = View.VISIBLE
-                        else binding.tvDela.visibility = View.GONE
-                    adapter.submitList(listItemCalendar)
+                list.forEach {item->
+                    if (item.changeAlarm) {
+                        calendar = Calendar.getInstance()
+                        calendar.timeInMillis = item.alarmTime
+                        calendarDay = CalendarDay(calendar)
+                        calendarDay.imageResource = R.drawable.ic_alarm_on
+                        calendarDays.add(calendarDay)
+                    }
                 }
+                binding.calendarView.setCalendarDays(calendarDays)
             }
-        })
+            binding.calendarView.setOnCalendarDayClickListener(object : OnCalendarDayClickListener {
+                override fun onClick(calendarDay: CalendarDay) {
+
+                    db.CourseDao().getAllListCalendarRcView(calendarDay.calendar.timeInMillis)
+                        .asLiveData()
+                        .observe(viewLifecycleOwner) { list ->
+                            val listItemCalendar = mutableListOf<Item>()
+
+                            list.forEach { item ->
+                                if (item.changeAlarm) listItemCalendar.add(item)
+                            }
+                            if (listItemCalendar.isEmpty()) binding.tvDela.visibility = View.VISIBLE
+                            else binding.tvDela.visibility = View.GONE
+                            adapter.submitList(listItemCalendar)
+                        }
+                }
+            })
+        } else Toast.makeText(view?.context, "Отображение дел в календаре доступно в PREMIUM версии", Toast.LENGTH_SHORT).show()
     }
     private fun initRcView() {
         val rcView = binding.rcViewItem
