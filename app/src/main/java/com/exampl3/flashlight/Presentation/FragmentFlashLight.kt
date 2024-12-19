@@ -265,7 +265,7 @@ class FragmentFlashLight : Fragment(), ItemListAdapter.onLongClick, ItemListAdap
                 calendar.set(Calendar.MINUTE, minute)
                 DialogItemList.insertAlarm(
                     requireView().context,
-                    object : DialogItemList.InsertAlarm {
+                    object : DialogItemList.ActionInt {
                         override fun onClick(result: Int) {
                             if (calendar.timeInMillis >= calendarZero.timeInMillis) {
                                 proverkaFree(item, result, calendar.timeInMillis)

@@ -39,7 +39,7 @@ object DialogItemList {
         dialog.show()
 
     }
-    fun AlertDelete(context: Context, delete: Delete) {
+    fun AlertDelete(context: Context, delete: ActionTrueOrFalse) {
         val builred = AlertDialog.Builder(context)
         val dialog = builred.create()
         dialog.setTitle("Вы уверены что хотите это удалить?")
@@ -52,7 +52,7 @@ object DialogItemList {
         dialog.show()
 
     }
-    fun insertAlarm(context: Context, insertAlarm: InsertAlarm) {
+    fun insertAlarm(context: Context, insertAlarm: ActionInt) {
         var result = 0
 
         val builred = AlertDialog.Builder(context)
@@ -79,13 +79,53 @@ object DialogItemList {
 
     }
 
+    fun insertBilling(context: Context, billing: ActionInt, product: Array<String?>) {
+        var result = 0
+        val builred = AlertDialog.Builder(context)
+
+        builred.setTitle("Выберите тип покупки")
+        builred.setSingleChoiceItems(
+            product, 0
+        ) { _, id ->
+            result = id
+        }
+            .setPositiveButton("OK"
+            ) { window, _ ->
+                billing.onClick(result)
+                window.dismiss()
+            }
+            .setNegativeButton("Отмена") { window, _ ->
+                window.cancel()
+            }
+        builred.create()
+
+        val dialog = builred.create()
+        dialog.show()
+
+    }
+
+    fun openAuth(context: Context, action: ActionTrueOrFalse) {
+        val builred = AlertDialog.Builder(context)
+        val dialog = builred.create()
+        dialog.setTitle("Вы не авторизованы")
+        dialog.setMessage("Для продолжения вам необходимо авторизоваться в RUSTORE")
+            dialog.setButton(AlertDialog.BUTTON_POSITIVE, "Авторизоваться"){ _, _->
+            action.onClick(true)
+        }
+        dialog.setButton(AlertDialog.BUTTON_NEGATIVE, "Отмена"){_,_->
+            action.onClick(false)
+        }
+        dialog.show()
+
+    }
+
     interface Listener{
         fun onClick(name: String)
     }
-    interface Delete{
+    interface ActionTrueOrFalse{
         fun onClick(flag: Boolean)
     }
-    interface InsertAlarm{
+    interface ActionInt{
         fun onClick(result: Int)
     }
 

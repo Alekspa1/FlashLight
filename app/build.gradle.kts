@@ -14,8 +14,8 @@ android {
         applicationId = "com.exampl3.flashlight"
         minSdk = 24
         targetSdk = 34
-        versionCode = 15
-        versionName = "7"
+        versionCode = 16
+        versionName = "7.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         kapt {
             arguments {arg("room.schemaLocation", "$projectDir/schemas")}
@@ -50,7 +50,7 @@ dependencies {
     implementation("com.yandex.android:mobileads:7.8.0")
     implementation("com.yandex.ads.mediation:mobileads-mytarget:5.22.1.3")
 
-    implementation("ru.rustore.sdk:billingclient:5.1.1")
+    implementation("ru.rustore.sdk:billingclient:7.0.0")
     implementation ("com.google.dagger:hilt-android:2.51.1")
     kapt ("com.google.dagger:hilt-compiler:2.51.1")
 

@@ -22,10 +22,10 @@ class SharedPreferenceImpl @Inject constructor(
     private var  prefPremium: SharedPreferences = context.getSharedPreferences("PREMIUM", Context.MODE_PRIVATE)
     private val editPremium: SharedPreferences.Editor = prefPremium.edit()
      fun getPremium(): Boolean {
-        return prefPremium.getBoolean(Const.premium_KEY, false)
+        return prefPremium.getBoolean(Const.PREMIUM_KEY, false)
     }
      fun savePremium(flag: Boolean) {
-         editPremium.putBoolean(Const.premium_KEY, flag)
+         editPremium.putBoolean(Const.PREMIUM_KEY, flag)
          editPremium.apply()
     }
     private val  prefNotebook: SharedPreferences = context.getSharedPreferences("TABLE", Context.MODE_PRIVATE)

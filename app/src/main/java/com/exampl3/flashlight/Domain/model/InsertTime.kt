@@ -19,7 +19,7 @@ class InsertTime @Inject constructor(
 
 
     fun deleteAlertDialog(context: Context, item: Item) {
-        DialogItemList.AlertDelete(context, object : DialogItemList.Delete {
+        DialogItemList.AlertDelete(context, object : DialogItemList.ActionTrueOrFalse {
             override fun onClick(flag: Boolean) {
                 if (flag) {
                     CoroutineScope(
