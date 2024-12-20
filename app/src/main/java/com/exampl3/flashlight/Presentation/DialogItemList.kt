@@ -51,8 +51,8 @@ object DialogItemList {
         editText1.setText(name)
         editText2.setText(desc)
         builder.setTitle("Введите данные")
-        var input1 = editText1.text.toString()
-        var input2 = editText2.text.toString()
+        var input1: String
+        var input2: String
         builder.setPositiveButton("OK") { dialog, _ ->
             input1 = editText1.text.toString()
             input2 = editText2.text.toString()
