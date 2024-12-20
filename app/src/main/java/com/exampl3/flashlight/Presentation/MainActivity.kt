@@ -84,7 +84,7 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
         initVp()
         updateAlarm()
         initRcView()
-        getShopingList()
+       getShopingList()
         if (!modelFlashLight.getPremium()) initYaBaner()
         if (savedInstanceState == null) {
             billingClient.onNewIntent(intent)
@@ -142,7 +142,7 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
             imBAddMenu.setOnClickListener {
                 if (modelFlashLight.getPremium()){
                     DialogItemList.AlertList(this@MainActivity, object : DialogItemList.Listener {
-                        override fun onClick(name: String) {
+                        override fun onClickItem(name: String, action: Int?, id: Int?, desc: String?) {
                          CoroutineScope(Dispatchers.IO).launch {
                              db.CourseDao().insertCategory(ListCategory(null,name))
                          }
@@ -319,8 +319,6 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
 
 
     override fun onClick(item: ListCategory, action: Int) {
-        modelFlashLight.updateCategory(item.name)
-
         when(action){
             Const.delete ->{
                 DialogItemList.AlertDelete(this, object : DialogItemList.ActionTrueOrFalse {
@@ -343,7 +341,7 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
                 DialogItemList.AlertList(
                     this,
                     object : DialogItemList.Listener {
-                        override fun onClick(name: String) {
+                        override fun onClickItem(name: String, action: Int?, id: Int?, desc: String?) {
                             CoroutineScope(Dispatchers.IO).launch {
                                 val newitem = item.copy(name = name)
                                 db.CourseDao().updateCategory(newitem)
@@ -359,6 +357,7 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
 
             } // Изменение имени элемента
             Const.change -> {
+                modelFlashLight.updateCategory(item.name)
                 binding.drawer.closeDrawer(GravityCompat.START)
                 binding.tabLayout.selectTab(binding.tabLayout.getTabAt(1))
             } // Простое нажатие
@@ -370,14 +369,22 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
     private fun getListProduct(){
         productsUseCase.getProducts( productIds = PURCHASE_LIST)
             .addOnSuccessListener { products: List<Product> ->
-                val list = products.map { it.title }.toTypedArray()
+                val list = arrayOfNulls<String>(4)
+                products.forEach { product->
+                    when(product.productId){
+                        ONE_MONTH -> list[0] = product.title.toString()
+                        SIX_MONTH -> list[1] = product.title.toString()
+                        ONE_YEAR -> list[2] = product.title.toString()
+                        FOREVER -> list[3] = product.title.toString()
+                    }
+                }
                 DialogItemList.insertBilling(this@MainActivity, object : DialogItemList.ActionInt{
                     override fun onClick(result: Int) {
                         when(result){
-                            0 -> pokupka(FOREVER)
-                            1 -> pokupka(ONE_MONTH)
-                            2 -> pokupka(SIX_MONTH)
-                            3 -> pokupka(ONE_YEAR)
+                            0 -> pokupka(ONE_MONTH)
+                            1 -> pokupka(SIX_MONTH)
+                            2 -> pokupka(ONE_YEAR)
+                            3 -> pokupka(FOREVER)
                         }
                     }
 

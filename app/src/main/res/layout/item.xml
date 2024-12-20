@@ -38,6 +38,18 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
+                android:id="@+id/tvDesc"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textColor="@color/black"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="@+id/textItem"
+                app:layout_constraintStart_toStartOf="@+id/textItem"
+                app:layout_constraintTop_toBottomOf="@+id/textItem"
+                tools:visibility="visible" />
+
+            <TextView
                 android:id="@+id/tvAlarm"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -47,9 +59,9 @@
                 android:textColor="@color/white"
                 android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="@+id/textItem"
-                app:layout_constraintStart_toStartOf="@+id/textItem"
-                app:layout_constraintTop_toBottomOf="@+id/textItem"
+                app:layout_constraintEnd_toEndOf="@+id/tvDesc"
+                app:layout_constraintStart_toStartOf="@+id/tvDesc"
+                app:layout_constraintTop_toBottomOf="@+id/tvDesc"
                 tools:visibility="visible" />
 
             <ImageView

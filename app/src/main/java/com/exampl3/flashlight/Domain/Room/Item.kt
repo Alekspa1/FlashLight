@@ -16,4 +16,5 @@ data class Item(
     @ColumnInfo(name = "changeAlarmRepeat", defaultValue = "1.0")val changeDelItem: Boolean = false,
     @ColumnInfo(name = "interval", defaultValue = "1.0")val interval: Int = 0,
     @ColumnInfo(name = "category", defaultValue = "Повседневные")val category: String,
+    @ColumnInfo(name = "desc", defaultValue = "")val desc: String? = "",
     ): Serializable

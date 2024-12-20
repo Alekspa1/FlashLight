@@ -2,8 +2,11 @@ package com.exampl3.flashlight.Presentation
 
 import android.app.AlertDialog
 import android.content.Context
+import android.view.LayoutInflater
 import android.widget.EditText
 import android.widget.Toast
+import com.exampl3.flashlight.Const
+import com.exampl3.flashlight.R
 
 object DialogItemList {
     private val insertAlarmList = arrayOf("Один раз","Каждый день","Каждую неделю","Каждый месяц", "Каждый год")
@@ -15,19 +18,19 @@ object DialogItemList {
         edName.inputType
         builred.setView(edName)
         val dialog = builred.create()
-        dialog.setTitle("Введите название дела")
+        dialog.setTitle("Введите название категории")
         dialog.setButton(AlertDialog.BUTTON_POSITIVE, "Готово"){_,_->
 
             if (name == null){
                 if (edName.text.isEmpty()){
                     Toast.makeText(context, "Поле должно быть заполнено", Toast.LENGTH_SHORT).show()
                 } else {
-                    listener.onClick(edName.text.toString().trim())
+                    listener.onClickItem(edName.text.toString().trim(), null,null,null)
                     dialog.dismiss()
                 }
 
             } else {
-                listener.onClick(edName.text.toString().trim())
+                listener.onClickItem(edName.text.toString().trim(), null,null,null)
                 dialog.dismiss()
             }
 
@@ -38,6 +41,54 @@ object DialogItemList {
 
         dialog.show()
 
+    }
+    fun alertItem(context: Context, listener: Listener, name: String?, id: Int?, desc: String?){
+        val builder = AlertDialog.Builder(context)
+        val inflater = LayoutInflater.from(context)
+        val dialogLayout = inflater.inflate(R.layout.dialog_layout, null)
+        val editText1 = dialogLayout.findViewById<EditText>(R.id.edTitleAlert)
+        val editText2 = dialogLayout.findViewById<EditText>(R.id.edDescAlert)
+        editText1.setText(name)
+        editText2.setText(desc)
+        builder.setTitle("Введите данные")
+        var input1 = editText1.text.toString()
+        var input2 = editText2.text.toString()
+        builder.setPositiveButton("OK") { dialog, _ ->
+            input1 = editText1.text.toString()
+            input2 = editText2.text.toString()
+            if (name == null){
+                if (input1.isEmpty()){
+                    Toast.makeText(context, "Поле должно быть заполнено", Toast.LENGTH_SHORT).show()
+                } else {
+                    listener.onClickItem(input1.trim(), null, id,input2.trim())
+                    dialog.dismiss()
+                }
+
+            } else {
+                listener.onClickItem(input1.trim(), null, id,input2.trim())
+                dialog.dismiss()
+            }
+        }
+        builder.setNeutralButton("Установка будильника"){dialog, _ ->
+            input1 = editText1.text.toString()
+            input2 = editText2.text.toString()
+            if (name == null){
+                if (input1.isEmpty()){
+                    Toast.makeText(context, "Поле должно быть заполнено", Toast.LENGTH_SHORT).show()
+                } else {
+                    listener.onClickItem(input1.trim(), Const.alarm, id, input2.trim())
+                    dialog.dismiss()
+                }
+
+            } else {
+                listener.onClickItem(input1.trim(),Const.alarm, id, input2.trim())
+                dialog.dismiss()
+            }
+
+        }
+        builder.setNegativeButton("Отмена") { dialog, _ -> dialog.cancel() }
+        builder.setView(dialogLayout)
+        builder.show()
     }
     fun AlertDelete(context: Context, delete: ActionTrueOrFalse) {
         val builred = AlertDialog.Builder(context)
@@ -120,7 +171,7 @@ object DialogItemList {
     }
 
     interface Listener{
-        fun onClick(name: String)
+        fun onClickItem(name: String, action: Int?, id: Int?, desc: String?)
     }
     interface ActionTrueOrFalse{
         fun onClick(flag: Boolean)

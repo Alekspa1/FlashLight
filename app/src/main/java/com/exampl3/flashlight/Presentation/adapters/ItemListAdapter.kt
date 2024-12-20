@@ -25,6 +25,8 @@ class ItemListAdapter(private val onLongClickListener: onLongClick,
 
                 textItem.text = item.name
                 tvAlarm.text = item.alarmText
+                tvDesc.text = item.desc
+                if (tvDesc.text !== "" ) tvDesc.visibility = View.VISIBLE
                 when(item.changeAlarm){
                     true-> {
                         tvAlarm.visibility = View.VISIBLE

@@ -2,6 +2,7 @@ package com.exampl3.flashlight.Presentation
 
 
 
+import android.Manifest
 import android.app.AlarmManager
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
@@ -28,6 +29,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Calendar
 import javax.inject.Inject
 
@@ -221,27 +223,41 @@ class FragmentFlashLight : Fragment(), ItemListAdapter.onLongClick, ItemListAdap
                 } // Установка будильника
 
                 Const.changeItem -> {
-                    DialogItemList.AlertList(
+                    DialogItemList.alertItem(
                         requireContext(),
                         object : DialogItemList.Listener {
-                            override fun onClick(name: String) {
+                            override fun onClickItem(name: String, action: Int?, id: Int?, desc: String?) {
                                 CoroutineScope(Dispatchers.IO).launch {
-                                    val newitem = item.copy(name = name)
+                                    val newitem = item.copy(name = name, desc = desc)
                                     if (item.changeAlarm) insertTime.changeAlarmItem(
                                         newitem,
                                         newitem.interval
                                     ) // если у item был установлен будильник то, тут мы перезаписываем будильник
                                     db.CourseDao().update(newitem)
+                                    if (action == Const.alarm) {
+                                        if (view.let {
+                                                it?.let { it1 ->
+                                                    Const.isPermissionGranted(
+                                                        it1.context,
+                                                        Manifest.permission.POST_NOTIFICATIONS
+                                                    )
+                                                } == true
+                                            }) {
+                                            withContext(Dispatchers.Main){datePickerDialog(newitem)}
+                                        }
+                                    } // это если из окна изменения нажал установка будильника
                                 }
                             }
                         },
-                        item.name
+                        item.name,item.id,item.desc
                     )
 
                 } // Изменение имени элемента
             }
     }
     private fun datePickerDialog(item: Item) {
+        calendar = Calendar.getInstance()
+        calendarZero = Calendar.getInstance()
         datePickerDialog = DatePickerDialog(
             requireContext(),
             { _, year, month, day ->
