@@ -14,7 +14,7 @@
             android:id="@+id/tvCategory"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:background="@drawable/category"
+            android:layout_marginTop="1dp"
             android:gravity="center"
             android:padding="5dp"
             android:text="TextView"

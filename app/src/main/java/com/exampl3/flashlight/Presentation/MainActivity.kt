@@ -442,8 +442,6 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
         purchasesUseCase.getPurchases()
             .addOnSuccessListener { purchases: List<Purchase> ->
                 val staseList = purchases.map { it.purchaseState }
-                val info = purchases.map { mapOf((it.purchaseState to it.purchaseTime?.time)) to it.productId }
-                Log.d("MyLog", info.joinToString())
                 if ((purchases.isEmpty() || !staseList.contains(PurchaseState.CONFIRMED)) && modelFlashLight.getPremium()) {
                     modelFlashLight.savePremium(false)
                     Toast.makeText(this, "PREMIUM версия была отключена", Toast.LENGTH_SHORT).show()

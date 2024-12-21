@@ -9,7 +9,8 @@
     android:background="@drawable/img"
 
     tools:context=".Presentation.MainActivity"
-    tools:openDrawer="start">
+    tools:openDrawer="start"
+    >
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/content"
@@ -19,24 +20,30 @@
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabLayout"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:background="@color/vPager2_осн"
+            android:layout_height="35dp"
+            android:background="@color/Dark_Blue"
+            android:clipToPadding="false"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/imMenu"
             app:layout_constraintTop_toTopOf="parent"
-            app:tabIndicatorColor="@color/black"
+            app:tabIndicatorColor="@color/white"
             app:tabSelectedTextColor="@color/white"
-            app:tabTextColor="@color/black">
+            app:tabTextColor="#636363">
 
             <com.google.android.material.tabs.TabItem
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Monday" />
+                android:text="Блокнот" />
 
             <com.google.android.material.tabs.TabItem
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Tuesday" />
+                android:text="Список дел" />
+
+            <com.google.android.material.tabs.TabItem
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Календарь" />
 
         </com.google.android.material.tabs.TabLayout>
 
@@ -44,7 +51,7 @@
             android:id="@+id/imMenu"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
-            android:background="@color/vPager2_осн"
+            android:background="@color/Dark_Blue"
             android:paddingStart="8dp"
             android:src="@drawable/ic_menu"
             app:layout_constraintBottom_toBottomOf="@+id/tabLayout"
@@ -84,12 +91,11 @@
                 android:id="@+id/textView"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:background="@drawable/category"
                 android:gravity="center"
                 android:padding="5dp"
                 android:text="Категории"
                 android:textColor="@color/white"
-                android:textSize="24sp"
+                android:textSize="20sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -122,7 +128,7 @@
                         android:layout_margin="5dp"
                         android:text="Повседневные"
                         android:textColor="@color/white"
-                        android:textSize="25sp"
+                        android:textSize="18sp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
