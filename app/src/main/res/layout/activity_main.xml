@@ -182,19 +182,22 @@
                     android:id="@+id/bBuyPremium"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Приобрести PREMIUM версию" />
+                    android:text="Приобрести PREMIUM версию"
+                    android:textColor="@color/black" />
 
                 <Button
                     android:id="@+id/bCallback"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Обратная связь" />
+                    android:text="Обратная связь"
+                    android:textColor="@color/black" />
 
                 <Button
                     android:id="@+id/bUpdate"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Проверить обновления" />
+                    android:text="Проверить обновления"
+                    android:textColor="@color/black" />
 
             </LinearLayout>
 

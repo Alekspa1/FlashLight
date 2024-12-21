@@ -132,6 +132,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
         binding.imBAddFrag.setOnClickListener {
             DialogItemList.alertItem(requireContext(), object : DialogItemList.Listener {
                 override fun onClickItem(name: String, action: Int?, id: Int?, desc: String?) {
+                    var item: Item
                     CoroutineScope(Dispatchers.IO).launch {
                         db.CourseDao().insertAll(Item(null, name, category = modelFlashLight.categoryItemLD.value!!, desc = desc))
 
@@ -145,20 +146,26 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
                             }) {
                             CoroutineScope(Dispatchers.IO).launch {
                                 delay(500)
-                                val item = if(id == null)db.CourseDao().getAllList().last()
-                                else db.CourseDao().getItemId(id)
-                                withContext(Dispatchers.Main){
-                                        datePickerDialog(item)
-                                    }
+                                item = db.CourseDao().getAllList().last()
+                                if (item.name == name) {
+                                    withContext(Dispatchers.Main){
+                                    datePickerDialog(item) }
+                                } else {
+                                    delay(1000)
+                                    item = db.CourseDao().getAllList().last()
+                                    withContext(Dispatchers.Main){
+                                        datePickerDialog(item) }
                                 }
 
-                            }
+                                }
 
-
-                        } else {
+                            }  else {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                                 pLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                             }
+                        }
+
+
                         }
                     }
             }, null, null, null)

@@ -50,7 +50,7 @@ object DialogItemList {
         val editText2 = dialogLayout.findViewById<EditText>(R.id.edDescAlert)
         editText1.setText(name)
         editText2.setText(desc)
-        builder.setTitle("Введите данные")
+        builder.setTitle("Сфокусироваться")
         var input1: String
         var input2: String
         builder.setPositiveButton("OK") { dialog, _ ->
