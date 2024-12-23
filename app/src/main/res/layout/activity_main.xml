@@ -7,8 +7,8 @@
     android:layout_height="match_parent"
     android:layout_gravity="start"
     android:background="@drawable/img"
-    tools:context=".Presentation.MainActivity"
 
+    tools:context=".Presentation.MainActivity"
     tools:openDrawer="start">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -20,7 +20,7 @@
             android:id="@+id/tabLayout"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:background="@color/vPager"
+            android:background="@color/vPager2_осн"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/imMenu"
             app:layout_constraintTop_toTopOf="parent"
@@ -44,7 +44,7 @@
             android:id="@+id/imMenu"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
-            android:background="@color/vPager"
+            android:background="@color/vPager2_осн"
             android:paddingStart="8dp"
             android:src="@drawable/ic_menu"
             app:layout_constraintBottom_toBottomOf="@+id/tabLayout"
@@ -74,7 +74,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:background="@drawable/img">
+        android:background="@drawable/img_2">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -84,7 +84,7 @@
                 android:id="@+id/textView"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:background="@color/vPager2"
+                android:background="@drawable/category"
                 android:gravity="center"
                 android:padding="5dp"
                 android:text="Категории"
@@ -94,18 +94,21 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <androidx.cardview.widget.CardView
+            <com.google.android.material.card.MaterialCardView
                 android:id="@+id/tvCardMenu"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_margin="5dp"
                 android:backgroundTint="@color/vPager"
+                app:cardBackgroundColor="@color/vPager"
                 app:cardCornerRadius="15dp"
                 app:cardElevation="0dp"
                 app:cardMaxElevation="0dp"
                 app:layout_constraintEnd_toStartOf="@+id/imageView3"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView">
+                app:layout_constraintTop_toBottomOf="@+id/textView"
+                app:strokeColor="#9900E2FF"
+                app:strokeWidth="3dp">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
@@ -118,7 +121,7 @@
                         android:layout_height="wrap_content"
                         android:layout_margin="5dp"
                         android:text="Повседневные"
-                        android:textColor="@color/black"
+                        android:textColor="@color/white"
                         android:textSize="25sp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
@@ -126,7 +129,7 @@
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
             <ImageView
                 android:id="@+id/imageView3"
@@ -150,12 +153,12 @@
 
             <ImageButton
                 android:id="@+id/imBAddMenu"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="-24dp"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginEnd="8dp"
                 android:layout_marginBottom="8dp"
                 android:background="@null"
-                android:src="@android:drawable/btn_plus"
+                android:src="@drawable/ic_add"
                 app:layout_constraintBottom_toTopOf="@+id/drawerL"
                 app:layout_constraintEnd_toEndOf="parent" />
 
@@ -174,7 +177,7 @@
                 <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="2dp"
-                    app:cardBackgroundColor="@color/black">
+                    app:cardBackgroundColor="@color/white">
 
                 </androidx.cardview.widget.CardView>
 
@@ -182,22 +185,28 @@
                     android:id="@+id/bBuyPremium"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Приобрести PREMIUM версию"
-                    android:textColor="@color/black" />
+                    android:layout_marginTop="3dp"
+                    android:background="@drawable/notebook_background"
+                    android:text="Активировать PREMIUM версию"
+                    android:textColor="@color/white" />
 
                 <Button
                     android:id="@+id/bCallback"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:background="@drawable/notebook_background"
                     android:text="Обратная связь"
-                    android:textColor="@color/black" />
+                    android:textColor="@color/white" />
 
                 <Button
                     android:id="@+id/bUpdate"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:background="@drawable/notebook_background"
                     android:text="Проверить обновления"
-                    android:textColor="@color/black" />
+                    android:textColor="@color/white" />
 
             </LinearLayout>
 

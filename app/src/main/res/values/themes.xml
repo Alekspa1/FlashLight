@@ -5,7 +5,7 @@
 
         <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
-        <item name="colorPrimary">@color/vPager</item>
+        <item name="colorPrimary">@color/vPager2_осн</item>
     </style>
     <style name="Theme.FlashLight" parent="Base.Theme.FlashLight" />
 

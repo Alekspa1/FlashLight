@@ -54,8 +54,6 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
     lateinit var calendar: Calendar
     private lateinit var calendarZero: Calendar
 
-    private var listDel = mutableListOf<Item>()
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -68,10 +66,6 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
         super.onViewCreated(view, savedInstanceState)
         initRcView()
 
-        modelFlashLight.edit.observe(viewLifecycleOwner){
-            if (it) binding.imageView.visibility = View.VISIBLE
-            else binding.imageView.visibility = View.GONE
-        }
 
         modelFlashLight.categoryItemLD.observe(viewLifecycleOwner){value->
             binding.tvCategory.text = value
@@ -79,17 +73,6 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
         }
 
         modelFlashLight.categoryItemLDNew.observe(viewLifecycleOwner){list->
-
-//            adapter.submitList(list.sortedWith { o1, o2 ->
-//                o2.changeAlarm.compareTo(true) - o1.changeAlarm.compareTo(
-//                    true
-//                )
-//            }.sortedWith { o1, o2 ->
-//                o1.change.compareTo(true) - o2.change.compareTo(
-//                    true
-//                )
-//            })
-
 
             adapter.submitList(list.sortedBy { it.id }.reversed().sortedBy { it.alarmTime }
                 .reversed().sortedBy { it.change }
@@ -118,17 +101,6 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
                 }
 
             }
-
-//        binding.imBAddFrag.setOnClickListener {
-//            DialogItemList.AlertList(requireContext(), object : DialogItemList.Listener {
-//                override fun onClick(name: String) {
-//                    CoroutineScope(Dispatchers.IO).launch {
-//                        db.CourseDao().insertAll(Item(null, name, category = modelFlashLight.categoryItemLD.value!!))
-//                    }
-//                }
-//            }, null)
-//
-//        }
         binding.imBAddFrag.setOnClickListener {
             DialogItemList.alertItem(requireContext(), object : DialogItemList.Listener {
                 override fun onClickItem(name: String, action: Int?, id: Int?, desc: String?) {
@@ -184,15 +156,6 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
                 ).show()
             }
 
-        }
-
-        binding.imageView.setOnClickListener {
-            CoroutineScope(Dispatchers.Main).launch {
-                deleteAlarmAll(listDel)
-                db.CourseDao().deleteList(listDel)
-                listDel.removeAll(listDel)
-            }
-            modelFlashLight.edit.value = false
         }
 
     }
@@ -322,22 +285,10 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
                     }
                 }
             }
-            Const.delete -> {
-                modelFlashLight.edit.value = true
-                val newItem = item.copy(changeDelItem = !item.changeDelItem)
-                CoroutineScope(Dispatchers.IO).launch {
-                    db.CourseDao().update(newItem)
-                }
-                when(item.changeDelItem){
-                    true -> listDel.remove(item)
-                    false -> listDel.add(newItem)
-                }
-            }
         }
 
     }
     override fun onClick(item: Item, action: Int) {
-        if (listDel.isEmpty()) {
             when (action) {
                 Const.change -> {
                     CoroutineScope(Dispatchers.IO).launch {
@@ -375,26 +326,6 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
                         }
                     }
                 } // Установка будильника
-
-//                Const.changeItem -> {
-//                        DialogItemList.AlertList(
-//                            requireContext(),
-//                            object : DialogItemList.Listener {
-//                                override fun onClickItem(name: String, action: Int?, id: Int?, desc: String?) {
-//                                    CoroutineScope(Dispatchers.IO).launch {
-//                                        val newitem = item.copy(name = name)
-//                                        if (item.changeAlarm) insertTime.changeAlarmItem(
-//                                            newitem,
-//                                            newitem.interval
-//                                        ) // если у item был установлен будильник то, тут мы перезаписываем будильник
-//                                        db.CourseDao().update(newitem)
-//                                    }
-//                                }
-//                            },
-//                            item.name
-//                        )
-//
-//                } // Изменение имени элемента
                 Const.changeItem -> {
                     DialogItemList.alertItem(
                         requireContext(),
@@ -427,19 +358,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
 
                 } // Изменение имени элемента
             }
-            modelFlashLight.edit.value = false
-        }  else {
-            val newItem = item.copy(changeDelItem = !item.changeDelItem)
-            CoroutineScope(Dispatchers.IO).launch {
-                db.CourseDao().update(newItem)
-            }
-            when (item.changeDelItem) {
-                true -> listDel.remove(item)
-                false -> listDel.add(newItem)
-            }
-            if (listDel.isEmpty()) modelFlashLight.edit.value = false
 
-        }
     }
     private fun proverkaFree(item: Item, result: Int, timeCal: Long) {
         when (result) {
@@ -495,15 +414,6 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
     override fun onResume() {
         super.onResume()
         calendarZero = Calendar.getInstance()
-        CoroutineScope(Dispatchers.IO).launch {
-            db.CourseDao().getAllList().forEach {
-                if (it.changeDelItem) {
-                    db.CourseDao().update(it.copy(changeDelItem = false))
-                    listDel.remove(it)
-                }
-            }
-        }
-        modelFlashLight.edit.value = false
     }
     private fun advertising(){
         (activity as MainActivity).showAd()

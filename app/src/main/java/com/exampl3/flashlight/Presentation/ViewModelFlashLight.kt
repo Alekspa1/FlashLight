@@ -27,9 +27,6 @@ class ViewModelFlashLight @Inject constructor(
     fun saveNoteBook(value: String) = pref.saveStringNoteBook(value)
     fun getNotebook() = pref.getStringNoteBook()
 
-    val edit: MutableLiveData<Boolean> by lazy {
-        MutableLiveData<Boolean>()
-    }
     val categoryItemLD = MutableLiveData<String>()
 
     val categoryItemLDNew = MutableLiveData<List<Item>>()

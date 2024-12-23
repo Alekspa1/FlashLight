@@ -20,14 +20,10 @@ interface CourseDao {
     suspend fun getAllNewNoFlow(value: String): List<Item>
     @Query("SELECT * FROM Item")
     suspend fun getAllList(): List<Item>
-//    @Query("SELECT * FROM Item WHERE :id == id")
-//    suspend fun getItemId(id: Int): Item
     @Query("SELECT * FROM Item WHERE alarmTime > :time and alarmTime < (:time+86400000)")
     fun getAllListCalendarRcView(time: Long): Flow<List<Item>>
     @Query("DELETE FROM Item WHERE category == :value")
     fun deleteCategory(value: String)
-    @Delete
-    suspend fun deleteList(list: List<Item>)
     @Update
     fun update(Course: Item)
     @Insert

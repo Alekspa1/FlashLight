@@ -1,12 +1,12 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 7,
-    "identityHash": "1348cba404ecd02c1580c5cb5586f677",
+    "version": 8,
+    "identityHash": "09ae924ce630660e352ab5e75952be8b",
     "entities": [
       {
         "tableName": "Item",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER, `name` TEXT NOT NULL, `change` INTEGER NOT NULL, `alarmText` TEXT NOT NULL DEFAULT '1.0', `alarmTime` INTEGER NOT NULL DEFAULT 1.0, `changeAlarm` INTEGER NOT NULL DEFAULT 1.0, `changeAlarmRepeat` INTEGER NOT NULL DEFAULT 1.0, `interval` INTEGER NOT NULL DEFAULT 1.0, `category` TEXT NOT NULL DEFAULT 'Повседневные', `desc` TEXT DEFAULT '', PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER, `name` TEXT NOT NULL, `change` INTEGER NOT NULL, `alarmText` TEXT NOT NULL DEFAULT '1.0', `alarmTime` INTEGER NOT NULL DEFAULT 1.0, `changeAlarm` INTEGER NOT NULL DEFAULT 1.0, `interval` INTEGER NOT NULL DEFAULT 1.0, `category` TEXT NOT NULL DEFAULT 'Повседневные', `desc` TEXT DEFAULT '', PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -43,13 +43,6 @@
           {
             "fieldPath": "changeAlarm",
             "columnName": "changeAlarm",
-            "affinity": "INTEGER",
-            "notNull": true,
-            "defaultValue": "1.0"
-          },
-          {
-            "fieldPath": "changeAlarmRepeat",
-            "columnName": "changeAlarmRepeat",
             "affinity": "INTEGER",
             "notNull": true,
             "defaultValue": "1.0"
@@ -115,7 +108,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1348cba404ecd02c1580c5cb5586f677')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '09ae924ce630660e352ab5e75952be8b')"
     ]
   }
 }

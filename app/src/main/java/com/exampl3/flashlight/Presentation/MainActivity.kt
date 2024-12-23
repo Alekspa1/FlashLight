@@ -112,6 +112,7 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
         }
         loadInterstitialAd()
         with(binding) {
+            if(modelFlashLight.getPremium()) bBuyPremium.text = "PREMIUM версия активирована"
             imMenu.setOnClickListener {
                 drawer.openDrawer(GravityCompat.START)
             } //  Меню
