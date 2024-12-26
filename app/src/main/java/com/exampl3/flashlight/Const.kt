@@ -47,6 +47,7 @@ object Const {
         ONE_YEAR,
         )
     const val NOT_AUTHORIZED = "RuStore User Not Authorized"
+    const val DONATE = "https://www.tinkoff.ru/rm/r_yDLrspQXuU.pghPicassj/iZZa112656"
 
 
 

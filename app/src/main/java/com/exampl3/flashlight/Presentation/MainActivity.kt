@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.util.Log
 
 import android.widget.Toast
+import android.window.OnBackInvokedDispatcher
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
@@ -16,6 +17,7 @@ import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Const.AUTHORIZED_RUSTORE
+import com.exampl3.flashlight.Const.DONATE
 import com.exampl3.flashlight.Const.FOREVER
 import com.exampl3.flashlight.Const.NOT_AUTHORIZED
 import com.exampl3.flashlight.Const.ONE_MONTH
@@ -85,6 +87,7 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
         updateAlarm()
         initRcView()
        getShopingList()
+
         if (!modelFlashLight.getPremium()) initYaBaner()
         if (savedInstanceState == null) {
             billingClient.onNewIntent(intent)
@@ -154,6 +157,22 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
 
 
             }
+
+            tvCardShare.setOnClickListener {
+                stub("Общие дела")
+            }
+            bSettings.setOnClickListener {
+                stub("Настройки")
+                drawer.closeDrawer(GravityCompat.START)
+
+            }
+            bDonate.setOnClickListener {
+                try {
+                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse( DONATE)))
+                }  catch (e: Exception) {
+                    Toast.makeText(this@MainActivity, "Ошибка", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
     private fun destroyInterstitialAd() {
@@ -198,32 +217,6 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
             show(this@MainActivity)
         }
     }
-
-
-
-//    private fun shopingList() {
-//        purchasesUseCase.getPurchases()
-//            .addOnSuccessListener { purchases: List<Purchase> ->
-//                Log.d("MyLog", purchases.joinToString())
-//                if (purchases.isEmpty() && modelFlashLight.getPremium()) {
-//                    modelFlashLight.savePremium(false)
-//                    Toast.makeText(this, "PREMIUM версия была отключена", Toast.LENGTH_SHORT).show()
-//                }
-//                purchases.forEach {
-//                    if (it.productId == "premium_version_flash_light" &&
-//                        (it.purchaseState == PurchaseState.PAID || it.purchaseState == PurchaseState.CONFIRMED) && !modelFlashLight.getPremium()
-//                    ) {
-//                        modelFlashLight.savePremium(true)
-//                        Toast.makeText(this, "PREMIUM версия была восстановлена", Toast.LENGTH_SHORT).show()
-//                    }
-//                }
-//
-//            }
-//            .addOnFailureListener {
-//                // Process error
-//            }
-//
-//    } // Запрос ранее совершенных покупок первая
 
 
     private fun initVp() {
@@ -420,6 +413,7 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
         ).addOnSuccessListener { paymentResult: PaymentResult ->
             when (paymentResult) {
                 is PaymentResult.Success -> {
+                    binding.bBuyPremium.text = "PREMIUM версия активирована"
                     modelFlashLight.savePremium(true)
                     Toast.makeText(
                         this,
@@ -451,6 +445,7 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
                     ) {
                         modelFlashLight.savePremium(true)
                         Toast.makeText(this, "PREMIUM версия была восстановлена", Toast.LENGTH_SHORT).show()
+                        binding.bBuyPremium.text = "PREMIUM версия активирована"
                     }
                 }
 
@@ -459,7 +454,7 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
             }
 
     } // Запрос ранее совершенных покупок
-
-
-
+    private fun stub(text: String){
+        Toast.makeText(this, "$text появятся в следующих обновлениях", Toast.LENGTH_SHORT).show()
+    }
 }
