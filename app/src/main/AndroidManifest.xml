@@ -19,7 +19,7 @@
         android:label="Focus"
         android:roundIcon="@mipmap/ic_icon_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.FlashLight"
+        android:theme="@style/Base.Theme.FlashLight"
         tools:targetApi="31">
 
         <receiver

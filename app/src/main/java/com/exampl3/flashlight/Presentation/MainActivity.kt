@@ -5,8 +5,10 @@ import android.app.AlarmManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.WindowManager
 
 import android.widget.Toast
 import android.window.OnBackInvokedDispatcher
@@ -80,6 +82,9 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM){
+          setTheme(R.style.theme_35)
+        }
         super.onCreate(savedInstanceState)
         initAll()
         setContentView(binding.root)
@@ -115,7 +120,7 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
         }
         loadInterstitialAd()
         with(binding) {
-            if(modelFlashLight.getPremium()) bBuyPremium.text = "PREMIUM версия активирована"
+            if(modelFlashLight.getPremium()) bBuyPremium.text = this@MainActivity.getString(R.string.premium_on)
             imMenu.setOnClickListener {
                 drawer.openDrawer(GravityCompat.START)
             } //  Меню
@@ -413,7 +418,7 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
         ).addOnSuccessListener { paymentResult: PaymentResult ->
             when (paymentResult) {
                 is PaymentResult.Success -> {
-                    binding.bBuyPremium.text = "PREMIUM версия активирована"
+                    binding.bBuyPremium.text = this@MainActivity.getString(R.string.premium_on)
                     modelFlashLight.savePremium(true)
                     Toast.makeText(
                         this,
@@ -439,13 +444,14 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
                 if ((purchases.isEmpty() || !staseList.contains(PurchaseState.CONFIRMED)) && modelFlashLight.getPremium()) {
                     modelFlashLight.savePremium(false)
                     Toast.makeText(this, "PREMIUM версия была отключена", Toast.LENGTH_SHORT).show()
+                    binding.bBuyPremium.text = this@MainActivity.getString(R.string.premium_off)
                 }
                 purchases.forEach {
                     if (it.purchaseState == PurchaseState.CONFIRMED && !modelFlashLight.getPremium()
                     ) {
                         modelFlashLight.savePremium(true)
                         Toast.makeText(this, "PREMIUM версия была восстановлена", Toast.LENGTH_SHORT).show()
-                        binding.bBuyPremium.text = "PREMIUM версия активирована"
+                        binding.bBuyPremium.text = this@MainActivity.getString(R.string.premium_on)
                     }
                 }
 

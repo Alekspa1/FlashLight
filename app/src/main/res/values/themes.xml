@@ -1,13 +1,18 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.FlashLight" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-
         <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
         <item name="colorPrimary">@color/Dark_Blue</item>
     </style>
-    <style name="Theme.FlashLight" parent="Base.Theme.FlashLight" />
 
+
+
+    <style name="theme.35" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="colorPrimary">@color/Dark_Blue</item>
+        <item name="android:windowFullscreen">true</item>нуда
+    </style>
 
 </resources>

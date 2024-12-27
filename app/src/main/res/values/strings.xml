@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Список дел</string>
     <string name="start">Спасибо что выбрали мое приложение!</string>
+    <string name="premium_on">PREMIUM версия активирована</string>
+    <string name="premium_off">Активировать PREMIUM версию</string>
     <!-- TODO: Remove or change this placeholder text -->
 
 </resources>
