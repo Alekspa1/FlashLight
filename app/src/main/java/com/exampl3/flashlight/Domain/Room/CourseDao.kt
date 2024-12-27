@@ -5,9 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.withContext
 
 
 @Dao
@@ -26,8 +24,6 @@ interface CourseDao {
     fun getAllListCalendarRcView(time: Long): Flow<List<Item>>
     @Query("DELETE FROM Item WHERE category == :value")
     fun deleteCategory(value: String)
-    @Delete
-    suspend fun deleteList(list: List<Item>)
     @Update
     fun update(Course: Item)
     @Insert
@@ -38,8 +34,6 @@ interface CourseDao {
     //MENU
     @Query("SELECT * FROM ListCategory")
     fun getAllListCategory(): Flow<List<ListCategory>>
-    @Query("SELECT * FROM ListCategory")
-    suspend fun getAllListCategoryNoFlow(): List<ListCategory>
     @Insert
     fun insertCategory(Courses: ListCategory)
     @Delete

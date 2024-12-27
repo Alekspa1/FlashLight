@@ -9,8 +9,13 @@
     <color name="NoActive">#80F30404</color>
 
     <color name="vPager">#9900BCD4</color>
-    <color name="vPager2">#006F7E</color>
+    <color name="vPager2_осн">#006F7E</color>
+    <color name="vPager2">#9900BCD4</color>
     <color name="Background">#5E5E5E</color>
     <color name="Yellow">#FFEB3B</color>
     <color name="Grey">#806C6C6C</color>
+    <color name="Grey1">#1D1E20</color>
+    <color name="Grey2">#2F3035</color>
+    <color name="Grey3">#5E5F61</color>
+    <color name="Dark_Blue">#001491</color>
 </resources>

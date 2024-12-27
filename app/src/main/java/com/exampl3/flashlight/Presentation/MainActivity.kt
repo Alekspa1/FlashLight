@@ -6,15 +6,25 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 
 import android.widget.Toast
+import android.window.OnBackInvokedDispatcher
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.exampl3.flashlight.Const
+import com.exampl3.flashlight.Const.AUTHORIZED_RUSTORE
+import com.exampl3.flashlight.Const.DONATE
+import com.exampl3.flashlight.Const.FOREVER
+import com.exampl3.flashlight.Const.NOT_AUTHORIZED
+import com.exampl3.flashlight.Const.ONE_MONTH
+import com.exampl3.flashlight.Const.ONE_YEAR
+import com.exampl3.flashlight.Const.PURCHASE_LIST
 import com.exampl3.flashlight.Const.RUSTORE
+import com.exampl3.flashlight.Const.SIX_MONTH
 import com.exampl3.flashlight.Presentation.adapters.VpAdapter
 import com.exampl3.flashlight.Domain.Room.GfgDatabase
 import com.exampl3.flashlight.Domain.Room.ListCategory
@@ -39,13 +49,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import ru.rustore.sdk.billingclient.RuStoreBillingClient
 import ru.rustore.sdk.billingclient.RuStoreBillingClientFactory
+import ru.rustore.sdk.billingclient.model.product.Product
 import ru.rustore.sdk.billingclient.model.purchase.PaymentResult
 import ru.rustore.sdk.billingclient.model.purchase.Purchase
 import ru.rustore.sdk.billingclient.model.purchase.PurchaseState
 import ru.rustore.sdk.billingclient.usecase.ProductsUseCase
 import ru.rustore.sdk.billingclient.usecase.PurchasesUseCase
-import ru.rustore.sdk.billingclient.utils.pub.checkPurchasesAvailability
-import ru.rustore.sdk.core.feature.model.FeatureAvailabilityResult
 import java.util.Calendar
 import java.util.UUID
 import javax.inject.Inject
@@ -55,18 +64,19 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
 
     private var interstitialAdLoader: InterstitialAdLoader? = null
     private var interstitialAd: InterstitialAd? = null
-        private var bannerAd: BannerAdView? = null
+    private var bannerAd: BannerAdView? = null
     @Inject
     lateinit var db: GfgDatabase
     private lateinit var binding: ActivityMainBinding
     private lateinit var vpAdapter: VpAdapter
     private lateinit var calendarZero: Calendar
-    private val modelFlashLight: ViewModelFlashLight by viewModels()
+    val modelFlashLight: ViewModelFlashLight by viewModels()
     private lateinit var alarmManager: AlarmManager
     private lateinit var billingClient: RuStoreBillingClient
     private lateinit var productsUseCase: ProductsUseCase
     private lateinit var purchasesUseCase: PurchasesUseCase
     private lateinit var adapter: ListMenuAdapter
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,10 +86,14 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
         initVp()
         updateAlarm()
         initRcView()
+       getShopingList()
+
         if (!modelFlashLight.getPremium()) initYaBaner()
         if (savedInstanceState == null) {
             billingClient.onNewIntent(intent)
         }
+
+
         modelFlashLight.updateCategory("Повседневные")
         db.CourseDao().getAllListCategory().asLiveData().observe(this){
             adapter.submitList(it)
@@ -101,11 +115,12 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
         }
         loadInterstitialAd()
         with(binding) {
+            if(modelFlashLight.getPremium()) bBuyPremium.text = "PREMIUM версия активирована"
             imMenu.setOnClickListener {
                 drawer.openDrawer(GravityCompat.START)
             } //  Меню
             bBuyPremium.setOnClickListener {
-                proverkaVozmoznoyOplaty(this@MainActivity)
+                getListProduct()
                 drawer.closeDrawer(GravityCompat.START)
             } // ПРЕМИУМ
             bUpdate.setOnClickListener {
@@ -131,7 +146,7 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
             imBAddMenu.setOnClickListener {
                 if (modelFlashLight.getPremium()){
                     DialogItemList.AlertList(this@MainActivity, object : DialogItemList.Listener {
-                        override fun onClick(name: String) {
+                        override fun onClickItem(name: String, action: Int?, id: Int?, desc: String?) {
                          CoroutineScope(Dispatchers.IO).launch {
                              db.CourseDao().insertCategory(ListCategory(null,name))
                          }
@@ -141,6 +156,22 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
                 else Toast.makeText(this@MainActivity, "Категории доступны в PREMIUM версии", Toast.LENGTH_SHORT).show()
 
 
+            }
+
+            tvCardShare.setOnClickListener {
+                stub("Общие дела")
+            }
+            bSettings.setOnClickListener {
+                stub("Настройки")
+                drawer.closeDrawer(GravityCompat.START)
+
+            }
+            bDonate.setOnClickListener {
+                try {
+                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse( DONATE)))
+                }  catch (e: Exception) {
+                    Toast.makeText(this@MainActivity, "Ошибка", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
@@ -187,74 +218,6 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
         }
     }
 
-    private fun proverkaVozmoznoyOplaty(context: Context) {
-        RuStoreBillingClient.checkPurchasesAvailability(context)
-            .addOnSuccessListener { result ->
-                when (result) {
-                    FeatureAvailabilityResult.Available -> {
-                        pokupka()
-                    }
-                    is FeatureAvailabilityResult.Unavailable -> {
-                        Toast.makeText(context, "Оплата временно недоступна", Toast.LENGTH_SHORT)
-                            .show()
-                    }
-                }
-            }.addOnFailureListener {
-
-            }
-    } // Проверка возможности оплатить
-
-    private fun pokupka() {
-        purchasesUseCase.purchaseProduct(
-            productId = "premium_version_flash_light",
-            orderId = UUID.randomUUID().toString(),
-            quantity = 1,
-            developerPayload = null,
-        ).addOnSuccessListener { paymentResult: PaymentResult ->
-            when (paymentResult) {
-                is PaymentResult.Success -> {
-                    modelFlashLight.savePremium(true)
-                    Toast.makeText(
-                        this,
-                        "Поздравляю! Теперь вам доступны PREMIUM функции",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-
-                else -> {
-                    Toast.makeText(
-                        this,
-                        "Произошла ошибка оплаты",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
-        }.addOnFailureListener {
-        }
-    } // Покупка товара
-
-    private fun shopingList() {
-        purchasesUseCase.getPurchases()
-            .addOnSuccessListener { purchases: List<Purchase> ->
-                if (purchases.isEmpty() && modelFlashLight.getPremium()) {
-                    modelFlashLight.savePremium(false)
-                    Toast.makeText(this, "PREMIUM версия была отключена", Toast.LENGTH_SHORT).show()
-                }
-                purchases.forEach {
-                    if (it.productId == "premium_version_flash_light" &&
-                        (it.purchaseState == PurchaseState.PAID || it.purchaseState == PurchaseState.CONFIRMED) && !modelFlashLight.getPremium()
-                    ) {
-                        modelFlashLight.savePremium(true)
-                        Toast.makeText(this, "PREMIUM версия была восстановлена", Toast.LENGTH_SHORT).show()
-                    }
-                }
-
-            }
-            .addOnFailureListener {
-                // Process error
-            }
-
-    } // Запрос ранее совершенных покупок
 
     private fun initVp() {
         vpAdapter = VpAdapter(this)
@@ -337,12 +300,6 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
 
         //Override функции
 
-    override fun onResume() {
-        super.onResume()
-        CoroutineScope(Dispatchers.IO).launch {
-            shopingList()
-        }
-    }
     override fun onDestroy() {
         super.onDestroy()
         interstitialAdLoader?.setAdLoadListener(null)
@@ -356,11 +313,9 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
 
 
     override fun onClick(item: ListCategory, action: Int) {
-        modelFlashLight.updateCategory(item.name)
-
         when(action){
             Const.delete ->{
-                DialogItemList.AlertDelete(this, object : DialogItemList.Delete {
+                DialogItemList.AlertDelete(this, object : DialogItemList.ActionTrueOrFalse {
                     override fun onClick(flag: Boolean) {
                         if (flag) {
                             CoroutineScope(Dispatchers.IO).launch {
@@ -380,7 +335,7 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
                 DialogItemList.AlertList(
                     this,
                     object : DialogItemList.Listener {
-                        override fun onClick(name: String) {
+                        override fun onClickItem(name: String, action: Int?, id: Int?, desc: String?) {
                             CoroutineScope(Dispatchers.IO).launch {
                                 val newitem = item.copy(name = name)
                                 db.CourseDao().updateCategory(newitem)
@@ -396,13 +351,110 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
 
             } // Изменение имени элемента
             Const.change -> {
+                modelFlashLight.updateCategory(item.name)
                 binding.drawer.closeDrawer(GravityCompat.START)
                 binding.tabLayout.selectTab(binding.tabLayout.getTabAt(1))
             } // Простое нажатие
         }
 
 
+
     }
+    private fun getListProduct(){
+        productsUseCase.getProducts( productIds = PURCHASE_LIST)
+            .addOnSuccessListener { products: List<Product> ->
+                val list = arrayOfNulls<String>(4)
+                products.forEach { product->
+                    when(product.productId){
+                        ONE_MONTH -> list[0] = product.title.toString()
+                        SIX_MONTH -> list[1] = product.title.toString()
+                        ONE_YEAR -> list[2] = product.title.toString()
+                        FOREVER -> list[3] = product.title.toString()
+                    }
+                }
+                DialogItemList.insertBilling(this@MainActivity, object : DialogItemList.ActionInt{
+                    override fun onClick(result: Int) {
+                        when(result){
+                            0 -> pokupka(ONE_MONTH)
+                            1 -> pokupka(SIX_MONTH)
+                            2 -> pokupka(ONE_YEAR)
+                            3 -> pokupka(FOREVER)
+                        }
+                    }
 
+                }, list)
+            }
+            .addOnFailureListener { throwable: Throwable ->
+                when(throwable.message.toString()){
+                    NOT_AUTHORIZED ->
+                        DialogItemList.openAuth(this@MainActivity, object : DialogItemList.ActionTrueOrFalse{
+                            override fun onClick(flag: Boolean) {
+                                if (flag) {
+                                    try {
+                                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse( AUTHORIZED_RUSTORE )))
+                                    }  catch (e: Exception) {
+                                        Toast.makeText(this@MainActivity, "Ошибка", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            }
+                        })
+                    else ->
+                        Toast.makeText(this@MainActivity, "Оплата временно недоступна", Toast.LENGTH_SHORT).show()
+                }
+            }
 
+    } // Запрос списка продуктов
+    private fun pokupka(billing: String) {
+        purchasesUseCase.purchaseProduct(
+            productId = billing,
+            orderId = UUID.randomUUID().toString(),
+            quantity = 1,
+            developerPayload = null,
+        ).addOnSuccessListener { paymentResult: PaymentResult ->
+            when (paymentResult) {
+                is PaymentResult.Success -> {
+                    binding.bBuyPremium.text = "PREMIUM версия активирована"
+                    modelFlashLight.savePremium(true)
+                    Toast.makeText(
+                        this,
+                        "Поздравляю! Теперь вам доступны PREMIUM функции",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+                else -> {
+                    Toast.makeText(
+                        this,
+                        "Произошла ошибка оплаты",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
+    } // Покупка товара
+    private fun getShopingList() {
+        purchasesUseCase.getPurchases()
+            .addOnSuccessListener { purchases: List<Purchase> ->
+                val staseList = purchases.map { it.purchaseState }
+                if ((purchases.isEmpty() || !staseList.contains(PurchaseState.CONFIRMED)) && modelFlashLight.getPremium()) {
+                    modelFlashLight.savePremium(false)
+                    Toast.makeText(this, "PREMIUM версия была отключена", Toast.LENGTH_SHORT).show()
+                }
+                purchases.forEach {
+                    if (it.purchaseState == PurchaseState.CONFIRMED && !modelFlashLight.getPremium()
+                    ) {
+                        modelFlashLight.savePremium(true)
+                        Toast.makeText(this, "PREMIUM версия была восстановлена", Toast.LENGTH_SHORT).show()
+                        binding.bBuyPremium.text = "PREMIUM версия активирована"
+                    }
+                }
+
+            }
+            .addOnFailureListener {
+            }
+
+    } // Запрос ранее совершенных покупок
+    private fun stub(text: String){
+        Toast.makeText(this, "$text появятся в следующих обновлениях", Toast.LENGTH_SHORT).show()
+    }
 }
