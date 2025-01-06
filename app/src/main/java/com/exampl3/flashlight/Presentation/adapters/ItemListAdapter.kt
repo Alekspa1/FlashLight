@@ -41,14 +41,10 @@ class ItemListAdapter(private val onLongClickListener: onLongClick,
                         true -> {
                             cardView.setBackgroundResource(R.drawable.button_background_true)
                             imStatus.setImageResource(R.drawable.ic_item_true)
-//                            cardView
-//                                .setCardBackgroundColor(ContextCompat.getColor(context, R.color.Active))
                         }
                         false -> {
                             if(!item.changeAlarm) cardView.setBackgroundResource(R.drawable.button_background_false)
                             imStatus.setImageResource(R.drawable.ic_item_false)
-//                            cardView
-//                                .setCardBackgroundColor(ContextCompat.getColor(context, R.color.NoActive))
                         }
                     }
 
