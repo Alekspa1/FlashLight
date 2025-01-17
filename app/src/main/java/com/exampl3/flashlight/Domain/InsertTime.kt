@@ -1,8 +1,8 @@
-package com.exampl3.flashlight.Domain.model
+package com.exampl3.flashlight.Domain
 
 import android.content.Context
 import com.exampl3.flashlight.Const
-import com.exampl3.flashlight.Domain.Room.Item
+import com.exampl3.flashlight.Data.Room.Item
 import com.exampl3.flashlight.Presentation.DialogItemList
 import com.exampl3.flashlight.Presentation.MainActivity
 import dagger.hilt.android.AndroidEntryPoint

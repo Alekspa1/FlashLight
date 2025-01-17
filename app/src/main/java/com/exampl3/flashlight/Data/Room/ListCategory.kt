@@ -1,4 +1,4 @@
-package com.exampl3.flashlight.Domain.Room
+package com.exampl3.flashlight.Data.Room
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity

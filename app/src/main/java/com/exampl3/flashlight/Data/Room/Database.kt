@@ -1,4 +1,4 @@
-package com.exampl3.flashlight.Domain.Room
+package com.exampl3.flashlight.Data.Room
 
 import androidx.room.AutoMigration
 import androidx.room.Database
@@ -17,7 +17,7 @@ import androidx.room.RoomDatabase
                      ]
 
 )
-abstract class GfgDatabase: RoomDatabase()
+abstract class Database: RoomDatabase()
 {
 
    abstract fun CourseDao(): CourseDao

@@ -7,11 +7,8 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
-import android.view.WindowManager
 
 import android.widget.Toast
-import android.window.OnBackInvokedDispatcher
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
@@ -28,8 +25,8 @@ import com.exampl3.flashlight.Const.PURCHASE_LIST
 import com.exampl3.flashlight.Const.RUSTORE
 import com.exampl3.flashlight.Const.SIX_MONTH
 import com.exampl3.flashlight.Presentation.adapters.VpAdapter
-import com.exampl3.flashlight.Domain.Room.GfgDatabase
-import com.exampl3.flashlight.Domain.Room.ListCategory
+import com.exampl3.flashlight.Data.Room.Database
+import com.exampl3.flashlight.Data.Room.ListCategory
 import com.exampl3.flashlight.Presentation.adapters.ListMenuAdapter
 import com.exampl3.flashlight.R
 import com.exampl3.flashlight.databinding.ActivityMainBinding
@@ -68,7 +65,7 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
     private var interstitialAd: InterstitialAd? = null
     private var bannerAd: BannerAdView? = null
     @Inject
-    lateinit var db: GfgDatabase
+    lateinit var db: Database
     private lateinit var binding: ActivityMainBinding
     private lateinit var vpAdapter: VpAdapter
     private lateinit var calendarZero: Calendar
@@ -177,7 +174,8 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
                 }  catch (e: Exception) {
                     Toast.makeText(this@MainActivity, "Ошибка", Toast.LENGTH_SHORT).show()
                 }
-            }
+                drawer.closeDrawer(GravityCompat.START)
+            } // Донат
         }
     }
     private fun destroyInterstitialAd() {
@@ -356,9 +354,14 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
 
             } // Изменение имени элемента
             Const.change -> {
-                modelFlashLight.updateCategory(item.name)
-                binding.drawer.closeDrawer(GravityCompat.START)
-                binding.tabLayout.selectTab(binding.tabLayout.getTabAt(1))
+                if(modelFlashLight.getPremium()) {
+                    modelFlashLight.updateCategory(item.name)
+                    binding.drawer.closeDrawer(GravityCompat.START)
+                    binding.tabLayout.selectTab(binding.tabLayout.getTabAt(1))
+                } else
+                    Toast.makeText(this@MainActivity,
+                        "Категории доступны в PREMIUM версии",
+                        Toast.LENGTH_SHORT).show()
             } // Простое нажатие
         }
 
