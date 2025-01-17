@@ -14,8 +14,8 @@ android {
         applicationId = "com.exampl3.flashlight"
         minSdk = 24
         targetSdk = 35
-        versionCode = 17
-        versionName = "8"
+        versionCode = 18
+        versionName = "8.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         kapt {
             arguments {arg("room.schemaLocation", "$projectDir/schemas")}
@@ -47,7 +47,7 @@ dependencies {
     implementation("com.applandeo:material-calendar-view:1.9.2")
 
 
-    implementation("com.yandex.android:mobileads:7.8.0")
+    implementation("com.yandex.android:mobileads:7.9.0")
     implementation("com.yandex.ads.mediation:mobileads-mytarget:5.22.1.4")
 
     implementation("ru.rustore.sdk:billingclient:7.0.0")

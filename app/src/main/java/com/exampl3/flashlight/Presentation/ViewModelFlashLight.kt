@@ -4,10 +4,10 @@ package com.exampl3.flashlight.Presentation
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.exampl3.flashlight.Domain.Room.GfgDatabase
-import com.exampl3.flashlight.Domain.model.AlarmManagerImp
-import com.exampl3.flashlight.Domain.Room.Item
-import com.exampl3.flashlight.Domain.model.sharedPreference.SharedPreferenceImpl
+import com.exampl3.flashlight.Data.Room.Database
+import com.exampl3.flashlight.Domain.AlarmManagerImp
+import com.exampl3.flashlight.Data.Room.Item
+import com.exampl3.flashlight.Data.sharedPreference.SharedPreferenceImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -16,7 +16,7 @@ import javax.inject.Inject
 class ViewModelFlashLight @Inject constructor(
     private val pref: SharedPreferenceImpl,
     private val alarmInsert: AlarmManagerImp,
-    private val db: GfgDatabase
+    private val db: Database
 ): ViewModel() {
 
 

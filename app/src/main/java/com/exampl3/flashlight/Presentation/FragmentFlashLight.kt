@@ -18,9 +18,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.applandeo.materialcalendarview.CalendarDay
 import com.applandeo.materialcalendarview.listeners.OnCalendarDayClickListener
 import com.exampl3.flashlight.Const
-import com.exampl3.flashlight.Domain.Room.GfgDatabase
-import com.exampl3.flashlight.Domain.Room.Item
-import com.exampl3.flashlight.Domain.model.InsertTime
+import com.exampl3.flashlight.Data.Room.Database
+import com.exampl3.flashlight.Data.Room.Item
+import com.exampl3.flashlight.Domain.InsertTime
 
 import com.exampl3.flashlight.Presentation.adapters.ItemListAdapter
 import com.exampl3.flashlight.R
@@ -39,7 +39,7 @@ class FragmentFlashLight : Fragment(), ItemListAdapter.onLongClick, ItemListAdap
     private lateinit var binding: FragmentBlankFlashLightBinding
     private val modelFlashLight: ViewModelFlashLight by activityViewModels()
     @Inject
-    lateinit var db: GfgDatabase
+    lateinit var db: Database
     @Inject
     lateinit var insertTime: InsertTime
     private lateinit var timePickerDialog: TimePickerDialog

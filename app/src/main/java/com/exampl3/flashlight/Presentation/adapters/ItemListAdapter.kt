@@ -8,7 +8,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.exampl3.flashlight.Const
-import com.exampl3.flashlight.Domain.Room.Item
+import com.exampl3.flashlight.Data.Room.Item
 import com.exampl3.flashlight.R
 import com.exampl3.flashlight.databinding.ItemBinding
 
@@ -17,7 +17,6 @@ class ItemListAdapter(private val onLongClickListener: onLongClick,
 ): ListAdapter<Item, ItemListAdapter.ViewHolder>(DiffCallback()) {
     class ViewHolder(view: View): RecyclerView.ViewHolder(view) {
         private val binding = ItemBinding.bind(view)
-        private val context = view.context
         fun bind(item: Item, onLongClickListener: onLongClick, onClick: onClick) {
 
             with(binding) {

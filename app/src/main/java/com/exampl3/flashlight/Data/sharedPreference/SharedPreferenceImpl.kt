@@ -1,4 +1,4 @@
-package com.exampl3.flashlight.Domain.model.sharedPreference
+package com.exampl3.flashlight.Data.sharedPreference
 
 import android.app.Application
 import android.content.Context

@@ -23,10 +23,10 @@ import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Presentation.adapters.ItemListAdapter
-import com.exampl3.flashlight.Domain.Room.GfgDatabase
-import com.exampl3.flashlight.Domain.Room.Item
+import com.exampl3.flashlight.Data.Room.Database
+import com.exampl3.flashlight.Data.Room.Item
 import com.exampl3.flashlight.databinding.FragmentListBinding
-import com.exampl3.flashlight.Domain.model.InsertTime
+import com.exampl3.flashlight.Domain.InsertTime
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -42,7 +42,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
     private lateinit var adapter: ItemListAdapter
 
     @Inject
-    lateinit var db: GfgDatabase
+    lateinit var db: Database
     @Inject
     lateinit var voiceIntent: Intent
     @Inject

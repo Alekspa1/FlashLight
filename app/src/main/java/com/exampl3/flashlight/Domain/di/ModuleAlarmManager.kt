@@ -1,4 +1,4 @@
-package com.exampl3.flashlight.Domain.model.di
+package com.exampl3.flashlight.Domain.di
 
 import android.app.AlarmManager
 import android.app.Application

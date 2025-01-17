@@ -1,4 +1,4 @@
-package com.exampl3.flashlight.Domain.model.alarmReceiwer
+package com.exampl3.flashlight.Domain.alarmReceiwer
 
 import android.app.AlarmManager
 
@@ -7,11 +7,11 @@ import android.content.Context
 import android.content.Intent
 import android.widget.Toast
 
-import com.exampl3.flashlight.Domain.model.AlarmManagerImp
+import com.exampl3.flashlight.Domain.AlarmManagerImp
 import com.exampl3.flashlight.Const
-import com.exampl3.flashlight.Domain.Room.GfgDatabase
-import com.exampl3.flashlight.Domain.Room.Item
-import com.exampl3.flashlight.Domain.model.InsertTime
+import com.exampl3.flashlight.Data.Room.Database
+import com.exampl3.flashlight.Data.Room.Item
+import com.exampl3.flashlight.Domain.InsertTime
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -22,7 +22,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class AlarmReceiwer: BroadcastReceiver() {
     @Inject
-    lateinit var db: GfgDatabase
+    lateinit var db: Database
     @Inject
     lateinit var alarmManager: AlarmManagerImp
     @Inject
