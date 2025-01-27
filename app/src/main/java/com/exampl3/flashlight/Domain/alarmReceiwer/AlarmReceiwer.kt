@@ -11,7 +11,7 @@ import com.exampl3.flashlight.Domain.AlarmManagerImp
 import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Data.Room.Item
-import com.exampl3.flashlight.Domain.InsertTime
+import com.exampl3.flashlight.Domain.InsertAlarm
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -30,7 +30,7 @@ class AlarmReceiwer: BroadcastReceiver() {
     @Inject
     lateinit var notificationBuilderPassed: NotificationBuilderPassed
     @Inject
-    lateinit var insertTime: InsertTime
+    lateinit var insertAlarm: InsertAlarm
 
     private lateinit var calendarZero: Calendar
 
@@ -65,7 +65,7 @@ class AlarmReceiwer: BroadcastReceiver() {
                 val item = intent.getSerializableExtra(Const.keyIntentCallBackPostpone) as Item
                 when(item.interval){
                     Const.alarmOne->{
-                       insertTime.insertAlarm(item, Const.alarmOne,"", time)
+                       insertAlarm.insertAlarm(item, Const.alarmOne,"", time)
                     } else->{
                         val newItemFals = item.copy(id = item.id?.plus(1000), interval = Const.alarmRepeat, alarmTime = time)
                     alarmManager.alarmInsert(newItemFals, Const.alarmOne)
@@ -106,13 +106,13 @@ class AlarmReceiwer: BroadcastReceiver() {
                 }
             }
             Const.alarmDay-> {
-                insertTime.insertAlarm(item,item.interval,"и через день",  item.alarmTime+AlarmManager.INTERVAL_DAY)
+                insertAlarm.insertAlarm(item,item.interval,"и через день",  item.alarmTime+AlarmManager.INTERVAL_DAY)
             }
             Const.alarmWeek-> {
-                insertTime.insertAlarm(item,item.interval,"и через неделю", item.alarmTime+AlarmManager.INTERVAL_DAY*7)
+                insertAlarm.insertAlarm(item,item.interval,"и через неделю", item.alarmTime+AlarmManager.INTERVAL_DAY*7)
             }
             Const.alarmMonth-> {
-                insertTime.insertAlarm(item,item.interval,"и через месяц", item.alarmTime+ Const.MONTH)
+                insertAlarm.insertAlarm(item,item.interval,"и через месяц", item.alarmTime+ Const.MONTH)
             }
             Const.alarmYear-> {
                 val calendarNextYear = Calendar.getInstance()
@@ -123,16 +123,16 @@ class AlarmReceiwer: BroadcastReceiver() {
                 if (nowYear == 366) {
                     year = if (item.alarmTime <  february()) AlarmManager.INTERVAL_DAY * 366
                     else AlarmManager.INTERVAL_DAY * 365
-                    insertTime.insertAlarm(item,item.interval,"и через год", item.alarmTime+ year)
+                    insertAlarm.insertAlarm(item,item.interval,"и через год", item.alarmTime+ year)
                 } else {
                     year = AlarmManager.INTERVAL_DAY * 365
-                    insertTime.insertAlarm(item,item.interval,"и через год", item.alarmTime+ year)
+                    insertAlarm.insertAlarm(item,item.interval,"и через год", item.alarmTime+ year)
                 }
 
                 if (nextYear == 366) {
                     year = if (item.alarmTime >  february()) AlarmManager.INTERVAL_DAY * 366
                     else AlarmManager.INTERVAL_DAY * 365
-                    insertTime.insertAlarm(item,item.interval,"и через год", item.alarmTime+ year)
+                    insertAlarm.insertAlarm(item,item.interval,"и через год", item.alarmTime+ year)
                 }
 
                 }

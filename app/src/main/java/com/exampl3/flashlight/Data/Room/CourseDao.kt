@@ -15,8 +15,6 @@ interface CourseDao {
     @Query("SELECT * FROM Item")
     fun getAll(): Flow<List<Item>>
     @Query("SELECT * FROM Item WHERE category == :value")
-    fun getAllNew(value: String): Flow<List<Item>>
-    @Query("SELECT * FROM Item WHERE category == :value")
     suspend fun getAllNewNoFlow(value: String): List<Item>
     @Query("SELECT * FROM Item")
     suspend fun getAllList(): List<Item>

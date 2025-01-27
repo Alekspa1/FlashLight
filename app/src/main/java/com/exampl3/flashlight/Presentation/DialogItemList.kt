@@ -177,7 +177,7 @@ object DialogItemList {
         fun onClick(flag: Boolean)
     }
     interface ActionInt{
-        fun onClick(result: Int)
+        fun onClick(action: Int)
     }
 
 
