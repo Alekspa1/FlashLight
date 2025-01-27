@@ -21,7 +21,7 @@
             android:id="@+id/tabLayout"
             android:layout_width="0dp"
             android:layout_height="35dp"
-            android:background="@color/Dark_Blue"
+            android:background="@color/black"
             android:clipToPadding="false"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/imMenu"
@@ -51,7 +51,7 @@
             android:id="@+id/imMenu"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
-            android:background="@color/Dark_Blue"
+            android:background="@color/black"
             android:paddingStart="8dp"
             android:src="@drawable/ic_menu"
             app:layout_constraintBottom_toBottomOf="@+id/tabLayout"
@@ -201,6 +201,7 @@
                 android:id="@+id/rcView"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
+                android:layout_marginTop="5dp"
                 app:layout_constraintBottom_toTopOf="@+id/imBAddMenu"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -236,49 +237,191 @@
 
                 </androidx.cardview.widget.CardView>
 
-                <Button
-                    android:id="@+id/bBuyPremium"
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/bBuyPremiumCard"
                     android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:layout_marginTop="3dp"
-                    android:background="@drawable/notebook_background"
-                    android:text="Активировать PREMIUM версию"
-                    android:textColor="@color/white" />
-                <Button
-                    android:id="@+id/bUpdate"
-                    android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:layout_marginTop="3dp"
-                    android:background="@drawable/notebook_background"
-                    android:text="Проверить обновления"
-                    android:textColor="@color/white" />
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:backgroundTint="@color/Dark_Blue"
+                    app:cardBackgroundColor="@color/vPager"
+                    app:cardCornerRadius="15dp"
+                    app:cardElevation="0dp"
+                    app:cardMaxElevation="0dp"
+                    app:strokeColor="@color/Dark_Blue"
+                    app:strokeWidth="3dp">
 
-                <Button
-                    android:id="@+id/bCallback"
-                    android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:layout_marginTop="3dp"
-                    android:background="@drawable/notebook_background"
-                    android:text="Обратная связь"
-                    android:textColor="@color/white" />
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="5dp">
 
+                        <TextView
+                            android:id="@+id/bBuyPremium"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_margin="5dp"
+                            android:text="@string/premium_off"
+                            android:textColor="@color/white"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
 
-                <Button
-                    android:id="@+id/bSettings"
+                    </FrameLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/bUpdateCard"
                     android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:layout_marginTop="3dp"
-                    android:background="@drawable/notebook_background"
-                    android:text="Настройки"
-                    android:textColor="@color/white" />
-                <Button
-                    android:id="@+id/bDonate"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:backgroundTint="@color/Dark_Blue"
+                    app:cardBackgroundColor="@color/vPager"
+                    app:cardCornerRadius="15dp"
+                    app:cardElevation="0dp"
+                    app:cardMaxElevation="0dp"
+                    app:strokeColor="@color/Dark_Blue"
+                    app:strokeWidth="3dp">
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="5dp">
+
+                        <TextView
+                            android:id="@+id/bUpdate"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_margin="5dp"
+                            android:text="Проверить обновления"
+                            android:textColor="@color/white"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                    </FrameLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/bCallbackCard"
                     android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:layout_marginTop="3dp"
-                    android:background="@drawable/notebook_background"
-                    android:text="Поддержать разработчика"
-                    android:textColor="@color/white" />
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:backgroundTint="@color/Dark_Blue"
+                    app:cardBackgroundColor="@color/vPager"
+                    app:cardCornerRadius="15dp"
+                    app:cardElevation="0dp"
+                    app:cardMaxElevation="0dp"
+                    app:strokeColor="@color/Dark_Blue"
+                    app:strokeWidth="3dp">
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="5dp">
+
+                        <TextView
+                            android:id="@+id/bCallback"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_margin="5dp"
+                            android:text="Обратная связь"
+                            android:textColor="@color/white"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                    </FrameLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/bSettingsCard"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:backgroundTint="@color/Dark_Blue"
+                    app:cardBackgroundColor="@color/vPager"
+                    app:cardCornerRadius="15dp"
+                    app:cardElevation="0dp"
+                    app:cardMaxElevation="0dp"
+                    app:strokeColor="@color/Dark_Blue"
+                    app:strokeWidth="3dp">
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="5dp">
+
+                        <TextView
+                            android:id="@+id/bSettings"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_margin="5dp"
+                            android:text="Настройки"
+                            android:textColor="@color/white"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                    </FrameLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/bDonateCard"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:backgroundTint="@color/Dark_Blue"
+                    app:cardBackgroundColor="@color/vPager"
+                    app:cardCornerRadius="15dp"
+                    app:cardElevation="0dp"
+                    app:cardMaxElevation="0dp"
+                    app:strokeColor="@color/Dark_Blue"
+                    app:strokeWidth="3dp">
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="5dp">
+
+                        <TextView
+                            android:id="@+id/bDonate"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_margin="5dp"
+                            android:text="Поддержать разработчика"
+                            android:textColor="@color/white"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                    </FrameLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
 
             </LinearLayout>
 

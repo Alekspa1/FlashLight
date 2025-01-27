@@ -67,7 +67,7 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
     private var bannerAd: BannerAdView? = null
     @Inject
     lateinit var db: Database
-    lateinit var binding: ActivityMainBinding
+    private lateinit var binding: ActivityMainBinding
     private lateinit var vpAdapter: VpAdapter
     private lateinit var calendarZero: Calendar
     val modelFlashLight: ViewModelFlashLight by viewModels()
