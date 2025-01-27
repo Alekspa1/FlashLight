@@ -7,6 +7,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.view.View
 
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -66,7 +67,7 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
     private var bannerAd: BannerAdView? = null
     @Inject
     lateinit var db: Database
-    private lateinit var binding: ActivityMainBinding
+    lateinit var binding: ActivityMainBinding
     private lateinit var vpAdapter: VpAdapter
     private lateinit var calendarZero: Calendar
     val modelFlashLight: ViewModelFlashLight by viewModels()
@@ -421,13 +422,8 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
         ).addOnSuccessListener { paymentResult: PaymentResult ->
             when (paymentResult) {
                 is PaymentResult.Success -> {
-                    binding.bBuyPremium.text = this@MainActivity.getString(R.string.premium_on)
-                    modelFlashLight.savePremium(true)
-                    Toast.makeText(
-                        this,
-                        "Поздравляю! Теперь вам доступны PREMIUM функции",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    updatePremium(true,
+                        "Поздравляю! Теперь вам доступны PREMIUM функции" )
                 }
 
                 else -> {
@@ -445,16 +441,12 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
             .addOnSuccessListener { purchases: List<Purchase> ->
                 val staseList = purchases.map { it.purchaseState }
                 if ((purchases.isEmpty() || !staseList.contains(PurchaseState.CONFIRMED)) && modelFlashLight.getPremium()) {
-                    modelFlashLight.savePremium(false)
-                    Toast.makeText(this, "PREMIUM версия была отключена", Toast.LENGTH_SHORT).show()
-                    binding.bBuyPremium.text = this@MainActivity.getString(R.string.premium_off)
+                    updatePremium(false,"PREMIUM версия была отключена" )
                 }
                 purchases.forEach {
                     if (it.purchaseState == PurchaseState.CONFIRMED && !modelFlashLight.getPremium()
                     ) {
-                        modelFlashLight.savePremium(true)
-                        Toast.makeText(this, "PREMIUM версия была восстановлена", Toast.LENGTH_SHORT).show()
-                        binding.bBuyPremium.text = this@MainActivity.getString(R.string.premium_on)
+                        updatePremium(true,"PREMIUM версия была восстановлена" )
                     }
                 }
 
@@ -466,4 +458,15 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
     private fun stub(text: String){
         Toast.makeText(this, "$text появятся в следующих обновлениях", Toast.LENGTH_SHORT).show()
     }
+    private fun updatePremium(premium: Boolean, value: String){
+        modelFlashLight.savePremium(premium)
+        Toast.makeText(this, value, Toast.LENGTH_SHORT).show()
+        if(premium) {
+            binding.yaBaner.visibility = View.GONE
+            binding.bBuyPremium.text = this@MainActivity.getString(R.string.premium_on)
+        } else {
+            binding.yaBaner.visibility = View.VISIBLE
+            binding.bBuyPremium.text = this@MainActivity.getString(R.string.premium_off)
+        }
+    } // обновление ПРЕМИУМ версии
 }

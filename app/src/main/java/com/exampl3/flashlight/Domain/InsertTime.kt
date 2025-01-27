@@ -44,18 +44,18 @@ class InsertTime @Inject constructor(
         )
 
     } // Изменение заметки
-     fun insertAlarm(item: Item, interval: Int, intervalText: String, timeCal: Long) {
+     fun insertAlarm(item: Item, interval: Int, intervalText: String, alareTime: Long) {
         val dateFormat = "dd.MM.yyyy"
         val timeFormat = "HH:mm"
         val date = SimpleDateFormat(dateFormat, Locale.US)
         val time = SimpleDateFormat(timeFormat, Locale.US)
-        val resultDate = date.format(timeCal)
-        val resutTime = time.format(timeCal)
+        val resultDate = date.format(alareTime)
+        val resutTime = time.format(alareTime)
         val newAlarmText = "Напомнит: $resultDate в $resutTime"
         val newitem = item.copy(
             changeAlarm = true,
             alarmText = "$newAlarmText $intervalText",
-            alarmTime = timeCal,
+            alarmTime = alareTime,
             change = false,
             name = item.name,
             interval = interval

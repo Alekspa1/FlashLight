@@ -35,7 +35,7 @@ import javax.inject.Inject
 
 
 @AndroidEntryPoint
-class FragmentFlashLight : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.onClick {
+class FragmentCalendar : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.onClick {
     private lateinit var binding: FragmentBlankFlashLightBinding
     private val modelFlashLight: ViewModelFlashLight by activityViewModels()
     @Inject
@@ -108,7 +108,7 @@ class FragmentFlashLight : Fragment(), ItemListAdapter.onLongClick, ItemListAdap
 
 
     companion object {
-        fun newInstance() = FragmentFlashLight()
+        fun newInstance() = FragmentCalendar()
     }
 
     override fun onLongClick(item: Item, action: Int) {
