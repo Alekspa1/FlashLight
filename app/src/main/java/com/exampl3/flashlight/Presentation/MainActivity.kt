@@ -75,7 +75,6 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
     @Inject
     lateinit var calendarZero: Calendar
     val modelFlashLight: ViewModelFlashLight by viewModels()
-    private lateinit var alarmManager: AlarmManager
     private lateinit var billingClient: RuStoreBillingClient
     private lateinit var productsUseCase: ProductsUseCase
     private lateinit var purchasesUseCase: PurchasesUseCase
@@ -206,32 +205,40 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
     private fun updateAlarm() {
         CoroutineScope(Dispatchers.IO).launch {
             db.CourseDao().getAllList().forEach { item ->
+
                 if (item.changeAlarm && item.alarmTime > calendarZero.timeInMillis) {
                     when (item.interval) {
                         Const.alarmOne -> {
-                            modelFlashLight.alarmInsert(
-                                item,
-                                Const.alarmOne
-                            )
+                            withContext(Dispatchers.Main){
+                                modelFlashLight.alarmInsert(
+                                    item,
+                                    Const.alarmOne
+                                )
+                            }
                         }
 
                         else -> {
                             if (!modelFlashLight.getPremium()) {
-                                modelFlashLight.alarmInsert(
-                                    item,
-                                    Const.deleteAlarm
-                                )
+                                withContext(Dispatchers.Main){
+                                    modelFlashLight.alarmInsert(
+                                        item,
+                                        Const.deleteAlarm
+                                    )
+                                }
                                 db.CourseDao().update(item.copy(changeAlarm = false))
                             } else {
-                                modelFlashLight.alarmInsert(
-                                    item,
-                                    item.interval
-                                )
+                                withContext(Dispatchers.Main){
+                                    modelFlashLight.alarmInsert(
+                                        item,
+                                        item.interval
+                                    )
+                                }
                             }
                         }
                     }
                 }
-            }
+
+        }
         }
 
     } // обновляю будильники
@@ -245,7 +252,6 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
         )
         productsUseCase = billingClient.products
         purchasesUseCase = billingClient.purchases
-        alarmManager = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
     } // Инициализирую все
 

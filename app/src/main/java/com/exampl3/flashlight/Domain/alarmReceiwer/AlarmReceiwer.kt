@@ -5,10 +5,14 @@ import android.app.AlarmManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.os.Build
+import android.util.Log
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 
 import com.exampl3.flashlight.Domain.AlarmManagerImp
 import com.exampl3.flashlight.Const
+import com.exampl3.flashlight.Const.TEN_MINUTES
 import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Data.Room.Item
 import com.exampl3.flashlight.Domain.InsertAlarm
@@ -16,11 +20,14 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.time.Instant
+import java.time.ZoneId
 import java.util.Calendar
+import java.util.Date
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class AlarmReceiwer: BroadcastReceiver() {
+class AlarmReceiwer: BroadcastReceiver () {
     @Inject
     lateinit var db: Database
     @Inject
@@ -31,11 +38,11 @@ class AlarmReceiwer: BroadcastReceiver() {
     lateinit var notificationBuilderPassed: NotificationBuilderPassed
     @Inject
     lateinit var insertAlarm: InsertAlarm
-
-    private lateinit var calendarZero: Calendar
+    @Inject
+    lateinit var calendarZero: Calendar
 
     override fun onReceive(context: Context, intent: Intent) {
-        calendarZero = Calendar.getInstance()
+
 
 
         when (intent.action) {
@@ -61,7 +68,7 @@ class AlarmReceiwer: BroadcastReceiver() {
             } // Когда нажал кнопку готово
 
             Const.keyIntentCallBackPostpone -> {
-                val time = calendarZero.timeInMillis + 600000
+                val time = calendarZero.timeInMillis + TEN_MINUTES
                 val item = intent.getSerializableExtra(Const.keyIntentCallBackPostpone) as Item
                 when(item.interval){
                     Const.alarmOne->{
@@ -115,36 +122,47 @@ class AlarmReceiwer: BroadcastReceiver() {
                 insertAlarm.insertAlarm(item,item.interval,"и через месяц", item.alarmTime+ Const.MONTH)
             }
             Const.alarmYear-> {
-                val calendarNextYear = Calendar.getInstance()
-                calendarNextYear.set(calendarNextYear.get(Calendar.YEAR)+1,Calendar.JANUARY,1)
-                 val nowYear = calendarZero.getActualMaximum(Calendar.DAY_OF_YEAR)
-                val nextYear = calendarNextYear.getActualMaximum(Calendar.DAY_OF_YEAR)
-                var year:Long
-                if (nowYear == 366) {
-                    year = if (item.alarmTime <  february()) AlarmManager.INTERVAL_DAY * 366
-                    else AlarmManager.INTERVAL_DAY * 365
-                    insertAlarm.insertAlarm(item,item.interval,"и через год", item.alarmTime+ year)
-                } else {
-                    year = AlarmManager.INTERVAL_DAY * 365
-                    insertAlarm.insertAlarm(item,item.interval,"и через год", item.alarmTime+ year)
-                }
+                    insertAlarm.insertAlarm(item,item.interval,"и через год", addOneYear(item.alarmTime))
 
-                if (nextYear == 366) {
-                    year = if (item.alarmTime >  february()) AlarmManager.INTERVAL_DAY * 366
-                    else AlarmManager.INTERVAL_DAY * 365
-                    insertAlarm.insertAlarm(item,item.interval,"и через год", item.alarmTime+ year)
-                }
+//                calendarNextYear = Calendar.getInstance()
+//                calendarNextYear.set(calendarNextYear.get(Calendar.YEAR)+1,Calendar.JANUARY,1)
+//                 val nowYear = calendarZero.getActualMaximum(Calendar.DAY_OF_YEAR)
+//                val nextYear = calendarNextYear.getActualMaximum(Calendar.DAY_OF_YEAR)
+//                var year:Long
+//                if (nowYear == 366) {
+//                    year = if (item.alarmTime <  february()) AlarmManager.INTERVAL_DAY * 366
+//                    else AlarmManager.INTERVAL_DAY * 365
+//                    insertAlarm.insertAlarm(item,item.interval,"и через год", item.alarmTime+ year)
+//                }
+//
+//                else {
+//                    year = AlarmManager.INTERVAL_DAY * 365
+//                    insertAlarm.insertAlarm(item,item.interval,"и через год", item.alarmTime+ year)
+//                }
+//
+//                if (nextYear == 366) {
+//                    val calc = Calendar.getInstance()
+//                    calc.add(Calendar.YEAR,1)
+//                    calc.set(Calendar.MILLISECOND, item.alarmTime.toInt())
+//                    Log.d("MyLog", item.alarmTime.toString())
+//                    Log.d("MyLog", february().toString())
+//                    year = if (item.alarmTime >=  february()) AlarmManager.INTERVAL_DAY * 366
+//                    else AlarmManager.INTERVAL_DAY * 365
+//                    insertAlarm.insertAlarm(item,item.interval,"и через год", item.alarmTime+ calc.timeInMillis)
+//
+//                }
 
                 }
 
             }
         }
 
-    private fun february(): Long{
-        calendarZero.set(Calendar.YEAR, calendarZero.get(Calendar.YEAR))
-        calendarZero.set(Calendar.MONTH, Calendar.FEBRUARY)
-        calendarZero.set(Calendar.DAY_OF_MONTH, 29)
+
+    private fun addOneYear(dateInMillis: Long): Long {
+        calendarZero.timeInMillis = dateInMillis
+        calendarZero.add(Calendar.YEAR, 1) // Добавляем один год
         return calendarZero.timeInMillis
     }
+
 }
 

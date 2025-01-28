@@ -14,9 +14,9 @@ object Const {
     private val calendar: Calendar = Calendar.getInstance()
     private val dayInMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
     const val BANER = "R-M-4702196-1"
-    //const val BANER = "demo-banner-yandex"
-    const val MEZSTR = "R-M-4702196-2"
-    const val keyNoteBook = "key"
+    const val TEN_MINUTES = 600000
+
+    const val KEY_NOTE_BOOK = "key"
     const val delete = 10
     const val change = 11
     const val changeItem = 12

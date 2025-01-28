@@ -2,20 +2,22 @@ package com.exampl3.flashlight.Domain
 
 import android.content.Context
 import com.exampl3.flashlight.Const
+import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Data.Room.Item
 import com.exampl3.flashlight.Presentation.DialogItemList
-import com.exampl3.flashlight.Presentation.MainActivity
-import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
 import javax.inject.Inject
-@AndroidEntryPoint
+import javax.inject.Singleton
+
+@Singleton
 class InsertAlarm @Inject constructor(
     private val alarmInsert: AlarmManagerImp,
-    ) : MainActivity() {
+    var db: Database
+    )  {
 
 
     fun deleteAlertDialog(context: Context, item: Item) {

@@ -10,6 +10,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.speech.RecognizerIntent
+import android.util.Log
 
 import android.view.LayoutInflater
 import android.view.View
@@ -55,6 +56,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
     lateinit var insertTime: InsertTime
     private val modelFlashLight: ViewModelFlashLight by activityViewModels()
     private lateinit var pLauncher: ActivityResultLauncher<String>
+
     @Inject
     lateinit var calendarZero: Calendar
 
@@ -69,7 +71,6 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initRcView()
-
 
         modelFlashLight.categoryItemLD.observe(viewLifecycleOwner) { value ->
             binding.tvCategory.text = value
@@ -112,6 +113,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
                 }
 
             }
+
         binding.imBAddFrag.setOnClickListener {
             DialogItemList.alertItem(requireContext(), object : DialogItemList.Listener {
                 override fun onClickItem(name: String, action: Int?, id: Int?, desc: String?) {
@@ -190,112 +192,109 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
 
     override fun onLongClick(item: Item, action: Int) {
 
-        when (action) {
-            Const.alarm -> {
-                CoroutineScope(Dispatchers.IO).launch {
-                    db.CourseDao().update(item.copy(changeAlarm = !item.changeAlarm))
-                }
-                if (item.changeAlarm) {
-                    insertAlarm.changeAlarmItem(item, Const.deleteAlarm)
-                }
-                if ((item.change || !item.changeAlarm) && item.alarmTime > calendarZero.timeInMillis) {
-                    insertAlarm.changeAlarmItem(
-                        item.copy(change = false, changeAlarm = !item.changeAlarm),
-                        item.interval
-                    )
-                    CoroutineScope(Dispatchers.IO).launch {
-                        db.CourseDao()
-                            .update(item.copy(change = false, changeAlarm = !item.changeAlarm))
-                    }
-                }
-                if (!item.changeAlarm && item.alarmTime < calendarZero.timeInMillis) {
-                    when (item.interval) {
-                        Const.alarmOne -> {
-                            Toast.makeText(
-                                requireContext(),
-                                "Вы выбрали время которое уже прошло",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            CoroutineScope(Dispatchers.IO).launch {
-                                db.CourseDao().update(item.copy(changeAlarm = false))
-                            }
-                        }
-
-                        Const.alarmDay -> {
-                            insertAlarm.insertAlarm(
-                                item,
-                                item.interval,
-                                "и через день",
-                                item.alarmTime + AlarmManager.INTERVAL_DAY
-                            )
-                        }
-
-                        Const.alarmWeek -> {
-                            insertAlarm.insertAlarm(
-                                item,
-                                item.interval,
-                                "и через неделю",
-                                item.alarmTime + AlarmManager.INTERVAL_DAY * 7
-                            )
-                        }
-
-                        Const.alarmMonth -> {
-                            insertAlarm.insertAlarm(
-                                item,
-                                item.interval,
-                                "и через месяц",
-                                item.alarmTime + Const.MONTH
-                            )
-                        }
-
-                        Const.alarmYear -> {
-                            val calendarNextYear = Calendar.getInstance()
-                            calendarNextYear.set(
-                                calendarNextYear.get(Calendar.YEAR) + 1,
-                                Calendar.JANUARY,
-                                1
-                            )
-                            val nowYear = calendarZero.getActualMaximum(Calendar.DAY_OF_YEAR)
-                            val nextYear = calendarNextYear.getActualMaximum(Calendar.DAY_OF_YEAR)
-                            var year: Long
-                            if (nowYear == 366) {
-                                year =
-                                    if (item.alarmTime < february()) AlarmManager.INTERVAL_DAY * 366
-                                    else AlarmManager.INTERVAL_DAY * 365
-                                insertAlarm.insertAlarm(
-                                    item,
-                                    item.interval,
-                                    "и через год",
-                                    item.alarmTime + year
-                                )
-                            } else {
-                                year = AlarmManager.INTERVAL_DAY * 365
-                                insertAlarm.insertAlarm(
-                                    item,
-                                    item.interval,
-                                    "и через год",
-                                    item.alarmTime + year
-                                )
-                            }
-
-                            if (nextYear == 366) {
-                                year =
-                                    if (item.alarmTime > february()) AlarmManager.INTERVAL_DAY * 366
-                                    else AlarmManager.INTERVAL_DAY * 365
-                                insertAlarm.insertAlarm(
-                                    item,
-                                    item.interval,
-                                    "и через год",
-                                    item.alarmTime + year
-                                )
-                            }
-
-                        }
-
-                    }
-                }
+        CoroutineScope(Dispatchers.IO).launch {
+            db.CourseDao().update(item.copy(changeAlarm = !item.changeAlarm))
+        }
+        if (item.changeAlarm) {
+            insertAlarm.changeAlarmItem(item, Const.deleteAlarm)
+        }
+        if ((item.change || !item.changeAlarm) && item.alarmTime > calendarZero.timeInMillis) {
+            insertAlarm.changeAlarmItem(
+                item.copy(change = false, changeAlarm = !item.changeAlarm),
+                item.interval
+            )
+            CoroutineScope(Dispatchers.IO).launch {
+                db.CourseDao()
+                    .update(item.copy(change = false, changeAlarm = !item.changeAlarm))
             }
         }
+        if (!item.changeAlarm && item.alarmTime < calendarZero.timeInMillis) {
+            when (item.interval) {
+                Const.alarmOne -> {
+                    Toast.makeText(
+                        requireContext(),
+                        "Вы выбрали время которое уже прошло",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    CoroutineScope(Dispatchers.IO).launch {
+                        db.CourseDao().update(item.copy(changeAlarm = false))
+                    }
+                }
+
+                Const.alarmDay -> {
+                    insertAlarm.insertAlarm(
+                        item,
+                        item.interval,
+                        "и через день",
+                        item.alarmTime + AlarmManager.INTERVAL_DAY
+                    )
+                }
+
+                Const.alarmWeek -> {
+                    insertAlarm.insertAlarm(
+                        item,
+                        item.interval,
+                        "и через неделю",
+                        item.alarmTime + AlarmManager.INTERVAL_DAY * 7
+                    )
+                }
+
+                Const.alarmMonth -> {
+                    insertAlarm.insertAlarm(
+                        item,
+                        item.interval,
+                        "и через месяц",
+                        item.alarmTime + Const.MONTH
+                    )
+                }
+
+                Const.alarmYear -> {
+                    val calendarNextYear = Calendar.getInstance()
+                    calendarNextYear.set(
+                        calendarNextYear.get(Calendar.YEAR) + 1,
+                        Calendar.JANUARY,
+                        1
+                    )
+                    val nowYear = calendarZero.getActualMaximum(Calendar.DAY_OF_YEAR)
+                    val nextYear = calendarNextYear.getActualMaximum(Calendar.DAY_OF_YEAR)
+                    var year: Long
+                    if (nowYear == 366) {
+                        year =
+                            if (item.alarmTime < february()) AlarmManager.INTERVAL_DAY * 366
+                            else AlarmManager.INTERVAL_DAY * 365
+                        insertAlarm.insertAlarm(
+                            item,
+                            item.interval,
+                            "и через год",
+                            item.alarmTime + year
+                        )
+                    } else {
+                        year = AlarmManager.INTERVAL_DAY * 365
+                        insertAlarm.insertAlarm(
+                            item,
+                            item.interval,
+                            "и через год",
+                            item.alarmTime + year
+                        )
+                    }
+
+                    if (nextYear == 366) {
+                        year =
+                            if (item.alarmTime > february()) AlarmManager.INTERVAL_DAY * 366
+                            else AlarmManager.INTERVAL_DAY * 365
+                        insertAlarm.insertAlarm(
+                            item,
+                            item.interval,
+                            "и через год",
+                            item.alarmTime + year
+                        )
+                    }
+
+                }
+
+            }
+        }
+
 
     }
 
@@ -383,10 +382,6 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
 
     }
 
-    override fun onResume() {
-        super.onResume()
-        //calendarZero = Calendar.getInstance()
-    }
 
     private fun february(): Long {
         calendarZero.set(Calendar.YEAR, calendarZero.get(Calendar.YEAR))
