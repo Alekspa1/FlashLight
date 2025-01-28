@@ -124,34 +124,6 @@ class AlarmReceiwer: BroadcastReceiver () {
             Const.alarmYear-> {
                     insertAlarm.insertAlarm(item,item.interval,"и через год", addOneYear(item.alarmTime))
 
-//                calendarNextYear = Calendar.getInstance()
-//                calendarNextYear.set(calendarNextYear.get(Calendar.YEAR)+1,Calendar.JANUARY,1)
-//                 val nowYear = calendarZero.getActualMaximum(Calendar.DAY_OF_YEAR)
-//                val nextYear = calendarNextYear.getActualMaximum(Calendar.DAY_OF_YEAR)
-//                var year:Long
-//                if (nowYear == 366) {
-//                    year = if (item.alarmTime <  february()) AlarmManager.INTERVAL_DAY * 366
-//                    else AlarmManager.INTERVAL_DAY * 365
-//                    insertAlarm.insertAlarm(item,item.interval,"и через год", item.alarmTime+ year)
-//                }
-//
-//                else {
-//                    year = AlarmManager.INTERVAL_DAY * 365
-//                    insertAlarm.insertAlarm(item,item.interval,"и через год", item.alarmTime+ year)
-//                }
-//
-//                if (nextYear == 366) {
-//                    val calc = Calendar.getInstance()
-//                    calc.add(Calendar.YEAR,1)
-//                    calc.set(Calendar.MILLISECOND, item.alarmTime.toInt())
-//                    Log.d("MyLog", item.alarmTime.toString())
-//                    Log.d("MyLog", february().toString())
-//                    year = if (item.alarmTime >=  february()) AlarmManager.INTERVAL_DAY * 366
-//                    else AlarmManager.INTERVAL_DAY * 365
-//                    insertAlarm.insertAlarm(item,item.interval,"и через год", item.alarmTime+ calc.timeInMillis)
-//
-//                }
-
                 }
 
             }

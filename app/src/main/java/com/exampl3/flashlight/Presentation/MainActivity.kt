@@ -13,6 +13,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.GravityCompat
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.withCreated
@@ -86,6 +87,7 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
             setTheme(R.style.theme_35)
         }
         super.onCreate(savedInstanceState)
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
         initAll()
         setContentView(binding.root)
         initVp()

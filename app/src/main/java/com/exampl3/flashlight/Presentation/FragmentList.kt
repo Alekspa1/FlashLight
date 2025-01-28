@@ -249,49 +249,8 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
                 }
 
                 Const.alarmYear -> {
-                    val calendarNextYear = Calendar.getInstance()
-                    calendarNextYear.set(
-                        calendarNextYear.get(Calendar.YEAR) + 1,
-                        Calendar.JANUARY,
-                        1
-                    )
-                    val nowYear = calendarZero.getActualMaximum(Calendar.DAY_OF_YEAR)
-                    val nextYear = calendarNextYear.getActualMaximum(Calendar.DAY_OF_YEAR)
-                    var year: Long
-                    if (nowYear == 366) {
-                        year =
-                            if (item.alarmTime < february()) AlarmManager.INTERVAL_DAY * 366
-                            else AlarmManager.INTERVAL_DAY * 365
-                        insertAlarm.insertAlarm(
-                            item,
-                            item.interval,
-                            "и через год",
-                            item.alarmTime + year
-                        )
-                    } else {
-                        year = AlarmManager.INTERVAL_DAY * 365
-                        insertAlarm.insertAlarm(
-                            item,
-                            item.interval,
-                            "и через год",
-                            item.alarmTime + year
-                        )
-                    }
-
-                    if (nextYear == 366) {
-                        year =
-                            if (item.alarmTime > february()) AlarmManager.INTERVAL_DAY * 366
-                            else AlarmManager.INTERVAL_DAY * 365
-                        insertAlarm.insertAlarm(
-                            item,
-                            item.interval,
-                            "и через год",
-                            item.alarmTime + year
-                        )
-                    }
-
+                    insertAlarm.insertAlarm(item,item.interval,"и через год", addOneYear(item.alarmTime))
                 }
-
             }
         }
 
@@ -382,13 +341,16 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
 
     }
 
+    override fun onResume() {
+        super.onResume()
+        calendarZero = Calendar.getInstance()
+    }
 
-    private fun february(): Long {
-        calendarZero.set(Calendar.YEAR, calendarZero.get(Calendar.YEAR))
-        calendarZero.set(Calendar.MONTH, Calendar.FEBRUARY)
-        calendarZero.set(Calendar.DAY_OF_MONTH, 29)
+    private fun addOneYear(dateInMillis: Long): Long {
+        calendarZero.timeInMillis = dateInMillis
+        calendarZero.add(Calendar.YEAR, 1) // Добавляем один год
         return calendarZero.timeInMillis
-    } // дней в феврале
+    }
 
 
     companion object {
