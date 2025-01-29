@@ -73,8 +73,7 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
     private lateinit var binding: ActivityMainBinding
     private lateinit var vpAdapter: VpAdapter
 
-    @Inject
-    lateinit var calendarZero: Calendar
+    private lateinit var calendarZero: Calendar
     val modelFlashLight: ViewModelFlashLight by viewModels()
     private lateinit var billingClient: RuStoreBillingClient
     private lateinit var productsUseCase: ProductsUseCase
@@ -103,7 +102,7 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
         }
 
 
-        modelFlashLight.updateCategory("Повседневные")
+       modelFlashLight.updateCategory(getString(R.string.everyday))
         db.CourseDao().getAllListCategory().asLiveData().observe(this) {
             adapter.submitList(it)
         }
@@ -185,6 +184,11 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        calendarZero = Calendar.getInstance()
+    }
+
 
     private fun initVp() {
         vpAdapter = VpAdapter(this)
@@ -211,7 +215,7 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
                 if (item.changeAlarm && item.alarmTime > calendarZero.timeInMillis) {
                     when (item.interval) {
                         Const.alarmOne -> {
-                            withContext(Dispatchers.Main){
+                            withContext(Dispatchers.Main) {
                                 modelFlashLight.alarmInsert(
                                     item,
                                     Const.alarmOne
@@ -220,27 +224,30 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
                         }
 
                         else -> {
-                            if (!modelFlashLight.getPremium()) {
-                                withContext(Dispatchers.Main){
+                            withContext(Dispatchers.Main) {
+                                if (!modelFlashLight.getPremium()) {
                                     modelFlashLight.alarmInsert(
                                         item,
                                         Const.deleteAlarm
                                     )
-                                }
-                                db.CourseDao().update(item.copy(changeAlarm = false))
-                            } else {
-                                withContext(Dispatchers.Main){
+
+                                    withContext(Dispatchers.IO) {
+                                        db.CourseDao().update(item.copy(changeAlarm = false))
+                                    }
+                                } else {
+
                                     modelFlashLight.alarmInsert(
                                         item,
                                         item.interval
                                     )
+
                                 }
                             }
                         }
                     }
                 }
 
-        }
+            }
         }
 
     } // обновляю будильники

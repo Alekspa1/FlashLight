@@ -15,15 +15,15 @@ import javax.inject.Singleton
 
 @Singleton
 class InsertTime @Inject constructor(
-    private var calendar: Calendar,
-    private var calendarZero: Calendar,
     private val pref: SharedPreferenceImpl,
     private val insertAlarm: InsertAlarm,
-                                           ) {
+) {
     private lateinit var datePickerDialog: DatePickerDialog
     private lateinit var timePickerDialog: TimePickerDialog
+    private lateinit var calendar: Calendar
+    private lateinit var calendarZero: Calendar
 
-     fun datePickerDialog(context: Context, item: Item) {
+    fun datePickerDialog(context: Context, item: Item) {
         calendar = Calendar.getInstance()
         calendarZero = Calendar.getInstance()
         datePickerDialog = DatePickerDialog(
@@ -41,7 +41,7 @@ class InsertTime @Inject constructor(
         datePickerDialog.show()
     } // Установрка даты
 
-    private fun timePickerDialog(context: Context,item: Item) {
+    private fun timePickerDialog(context: Context, item: Item) {
         timePickerDialog = TimePickerDialog(
             context,
             { _, hour, minute ->
@@ -52,7 +52,12 @@ class InsertTime @Inject constructor(
                     object : DialogItemList.ActionInt {
                         override fun onClick(action: Int) {
                             if (calendar.timeInMillis >= calendarZero.timeInMillis) {
-                                proverkaFreeAndInsertStringIterval(context, item, action, calendar.timeInMillis)
+                                proverkaFreeAndInsertStringIterval(
+                                    context,
+                                    item,
+                                    action,
+                                    calendar.timeInMillis
+                                )
                             } else Toast.makeText(
                                 context,
                                 "Вы выбрали время которое уже прошло",
@@ -69,28 +74,67 @@ class InsertTime @Inject constructor(
         timePickerDialog.show()
     } // Установка времени
 
-    private fun proverkaFreeAndInsertStringIterval(context: Context, item: Item, action: Int, timeCal: Long) {
+    private fun proverkaFreeAndInsertStringIterval(
+        context: Context,
+        item: Item,
+        action: Int,
+        timeCal: Long
+    ) {
         when (action) {
             Const.alarmOne -> {
                 insertAlarm.insertAlarm(item, action, "", timeCal)
             }
+
             Const.alarmDay -> {
-                if (pref.getPremium()) insertAlarm.insertAlarm(item, action, "и через день", timeCal)
-                else Toast.makeText(context, "Повторяющиеся напоминания, доступны в PREMIUM версии", Toast.LENGTH_SHORT).show()
+                if (pref.getPremium()) insertAlarm.insertAlarm(
+                    item,
+                    action,
+                    "и через день",
+                    timeCal
+                )
+                else Toast.makeText(
+                    context,
+                    "Повторяющиеся напоминания, доступны в PREMIUM версии",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
 
             Const.alarmWeek -> {
-                if (pref.getPremium()) insertAlarm.insertAlarm(item, action, "и через неделю", timeCal)
-                else Toast.makeText(context, "Повторяющиеся напоминания, доступны в PREMIUM версии", Toast.LENGTH_SHORT).show()
+                if (pref.getPremium()) insertAlarm.insertAlarm(
+                    item,
+                    action,
+                    "и через неделю",
+                    timeCal
+                )
+                else Toast.makeText(
+                    context,
+                    "Повторяющиеся напоминания, доступны в PREMIUM версии",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
+
             Const.alarmMonth -> {
 
-                if (pref.getPremium())  insertAlarm.insertAlarm(item, action, "и через месяц", timeCal)
-                else Toast.makeText(context, "Повторяющиеся напоминания, доступны в PREMIUM версии", Toast.LENGTH_SHORT).show()
+                if (pref.getPremium()) insertAlarm.insertAlarm(
+                    item,
+                    action,
+                    "и через месяц",
+                    timeCal
+                )
+                else Toast.makeText(
+                    context,
+                    "Повторяющиеся напоминания, доступны в PREMIUM версии",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
+
             Const.alarmYear -> {
                 if (pref.getPremium()) insertAlarm.insertAlarm(item, action, "и через год", timeCal)
-                else Toast.makeText(context, "Повторяющиеся напоминания, доступны в PREMIUM версии", Toast.LENGTH_SHORT).show()
+                else Toast.makeText(
+                    context,
+                    "Повторяющиеся напоминания, доступны в PREMIUM версии",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     } // проверка премиум подписки и установка текста повторения

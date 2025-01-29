@@ -4,13 +4,10 @@ package com.exampl3.flashlight.Presentation
 import android.Manifest
 import android.app.Activity
 import android.app.AlarmManager
-import android.app.DatePickerDialog
-import android.app.TimePickerDialog
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.speech.RecognizerIntent
-import android.util.Log
 
 import android.view.LayoutInflater
 import android.view.View
@@ -57,8 +54,8 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
     private val modelFlashLight: ViewModelFlashLight by activityViewModels()
     private lateinit var pLauncher: ActivityResultLauncher<String>
 
-    @Inject
-    lateinit var calendarZero: Calendar
+
+    private lateinit var calendarZero: Calendar
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -77,7 +74,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
 
         }
 
-        modelFlashLight.categoryItemLDNew.observe(viewLifecycleOwner) { list ->
+        modelFlashLight.listItemLD.observe(viewLifecycleOwner) { list ->
 
             adapter.submitList(list.sortedBy { it.id }.reversed().sortedBy { it.alarmTime }
                 .reversed().sortedBy { it.change }
