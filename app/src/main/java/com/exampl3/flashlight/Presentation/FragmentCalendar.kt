@@ -3,9 +3,6 @@ package com.exampl3.flashlight.Presentation
 
 import android.Manifest
 import android.app.AlarmManager
-import android.app.DatePickerDialog
-import android.app.TimePickerDialog
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -124,7 +121,7 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onLongClick, ItemListAdapte
         when (action) {
             Const.alarm -> {
                 CoroutineScope(Dispatchers.IO).launch {
-                    db.CourseDao().update(item.copy(changeAlarm = !item.changeAlarm))
+                    db.CourseDao().updateItem(item.copy(changeAlarm = !item.changeAlarm))
                 }
                 if (item.changeAlarm) {
                     insertAlarm.changeAlarmItem(item, Const.deleteAlarm)
@@ -136,7 +133,7 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onLongClick, ItemListAdapte
                     )
                     CoroutineScope(Dispatchers.IO).launch {
                         db.CourseDao()
-                            .update(item.copy(change = false, changeAlarm = !item.changeAlarm))
+                            .updateItem(item.copy(change = false, changeAlarm = !item.changeAlarm))
                     }
                 }
                 if (!item.changeAlarm && item.alarmTime < calendarZero.timeInMillis) {
@@ -148,7 +145,7 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onLongClick, ItemListAdapte
                                 Toast.LENGTH_SHORT
                             ).show()
                             CoroutineScope(Dispatchers.IO).launch {
-                                db.CourseDao().update(item.copy(changeAlarm = false))
+                                db.CourseDao().updateItem(item.copy(changeAlarm = false))
                             }
                         }
 
@@ -189,10 +186,10 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onLongClick, ItemListAdapte
         when (action) {
             Const.change -> {
                 CoroutineScope(Dispatchers.IO).launch {
-                    db.CourseDao().update(item.copy(change = !item.change))
+                    db.CourseDao().updateItem(item.copy(change = !item.change))
                     if (item.changeAlarm) {
                         db.CourseDao()
-                            .update(item.copy(changeAlarm = false, change = !item.change))
+                            .updateItem(item.copy(changeAlarm = false, change = !item.change))
                     }
                     insertAlarm.changeAlarmItem(item, Const.deleteAlarm)
 
@@ -229,7 +226,7 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onLongClick, ItemListAdapte
                                     newitem,
                                     newitem.interval
                                 ) // если у item был установлен будильник то, тут мы перезаписываем будильник
-                                db.CourseDao().update(newitem)
+                                db.CourseDao().updateItem(newitem)
                                 if (action == Const.alarm) {
                                     if (view.let {
                                             it?.let { it1 ->

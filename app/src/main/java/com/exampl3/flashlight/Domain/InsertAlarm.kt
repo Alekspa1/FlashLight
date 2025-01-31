@@ -63,7 +63,7 @@ class InsertAlarm @Inject constructor(
             name = item.name,
             interval = interval
         )
-         CoroutineScope(Dispatchers.IO).launch {db.CourseDao().update(newitem)  }
+         CoroutineScope(Dispatchers.IO).launch {db.CourseDao().updateItem(newitem)  }
         changeAlarmItem(newitem, interval)
 
     } // установка будильника

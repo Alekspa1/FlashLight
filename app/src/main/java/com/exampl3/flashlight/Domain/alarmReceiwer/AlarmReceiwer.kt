@@ -56,7 +56,7 @@ class AlarmReceiwer : BroadcastReceiver() {
                     Const.alarmOne -> {
                         CoroutineScope(Dispatchers.IO).launch {
                             db.CourseDao()
-                                .update(item.copy(change = true, changeAlarm = false))
+                                .updateItem(item.copy(change = true, changeAlarm = false))
                         }
                     }
                 }
@@ -107,7 +107,7 @@ class AlarmReceiwer : BroadcastReceiver() {
         when (item.interval) {
             Const.alarmOne -> {
                 CoroutineScope(Dispatchers.IO).launch {
-                    db.CourseDao().update(
+                    db.CourseDao().updateItem(
                         item.copy(
                             changeAlarm = false,
                             name = "${item.name} $value".trim()

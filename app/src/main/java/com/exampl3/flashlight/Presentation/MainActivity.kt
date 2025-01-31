@@ -1,22 +1,17 @@
 package com.exampl3.flashlight.Presentation
 
 
-import android.app.AlarmManager
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.GravityCompat
 import androidx.lifecycle.asLiveData
-import androidx.lifecycle.withCreated
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Const.AUTHORIZED_RUSTORE
@@ -37,15 +32,7 @@ import com.exampl3.flashlight.databinding.ActivityMainBinding
 import com.google.android.material.tabs.TabLayoutMediator
 import com.yandex.mobile.ads.banner.BannerAdSize
 import com.yandex.mobile.ads.banner.BannerAdView
-import com.yandex.mobile.ads.common.AdError
 import com.yandex.mobile.ads.common.AdRequest
-import com.yandex.mobile.ads.common.AdRequestConfiguration
-import com.yandex.mobile.ads.common.AdRequestError
-import com.yandex.mobile.ads.common.ImpressionData
-import com.yandex.mobile.ads.interstitial.InterstitialAd
-import com.yandex.mobile.ads.interstitial.InterstitialAdEventListener
-import com.yandex.mobile.ads.interstitial.InterstitialAdLoadListener
-import com.yandex.mobile.ads.interstitial.InterstitialAdLoader
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -64,7 +51,7 @@ import java.util.UUID
 import javax.inject.Inject
 
 @AndroidEntryPoint
-open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
+class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
 
     private var bannerAd: BannerAdView? = null
 
@@ -86,23 +73,20 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
             setTheme(R.style.theme_35)
         }
         super.onCreate(savedInstanceState)
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-        initAll()
+        binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        initVp()
-        initRcView()
-        getShopingList()
-        updateAlarm()
-
+        initAll()
+        //initVp()
+        //initRcView()
+        // getShopingList()
+        //updateAlarm()
         if (!modelFlashLight.getPremium()) initYaBaner()
-
-
         if (savedInstanceState == null) {
             billingClient.onNewIntent(intent)
         }
+        modelFlashLight.updateAlarm(calendarZero.timeInMillis)
 
 
-       modelFlashLight.updateCategory(getString(R.string.everyday))
         db.CourseDao().getAllListCategory().asLiveData().observe(this) {
             adapter.submitList(it)
         }
@@ -113,18 +97,18 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
             imMenu.setOnClickListener {
                 drawer.openDrawer(GravityCompat.START)
             } //  Меню
-            bBuyPremium.setOnClickListener {
+            bBuyPremiumCard.setOnClickListener {
                 getListProduct()
                 drawer.closeDrawer(GravityCompat.START)
             } // ПРЕМИУМ
-            bUpdate.setOnClickListener {
+            bUpdateCard.setOnClickListener {
                 try {
                     startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(RUSTORE)))
                 } catch (e: Exception) {
                     Toast.makeText(this@MainActivity, "Ошибка", Toast.LENGTH_SHORT).show()
                 }
             } // Проверить обновления
-            bCallback.setOnClickListener {
+            bCallbackCard.setOnClickListener {
                 try {
                     startActivity(
                         Intent(
@@ -136,6 +120,14 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
                     Toast.makeText(this@MainActivity, "Ошибка", Toast.LENGTH_SHORT).show()
                 }
             } // Обратная связь
+            bDonateCard.setOnClickListener {
+                try {
+                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(DONATE)))
+                } catch (e: Exception) {
+                    Toast.makeText(this@MainActivity, "Ошибка", Toast.LENGTH_SHORT).show()
+                }
+                drawer.closeDrawer(GravityCompat.START)
+            } // Донат
             tvCardMenu.setOnClickListener {
                 modelFlashLight.updateCategory("Повседневные")
                 binding.tabLayout.selectTab(binding.tabLayout.getTabAt(1))
@@ -173,31 +165,19 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
                 drawer.closeDrawer(GravityCompat.START)
 
             }
-            bDonate.setOnClickListener {
-                try {
-                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(DONATE)))
-                } catch (e: Exception) {
-                    Toast.makeText(this@MainActivity, "Ошибка", Toast.LENGTH_SHORT).show()
-                }
-                drawer.closeDrawer(GravityCompat.START)
-            } // Донат
+
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        calendarZero = Calendar.getInstance()
-    }
 
-
-    private fun initVp() {
-        vpAdapter = VpAdapter(this)
-        binding.placeHolder.adapter = vpAdapter
-        TabLayoutMediator(binding.tabLayout, binding.placeHolder) { tab, pos ->
-            tab.text = resources.getStringArray(R.array.vp_title_main)[pos]
-        }.attach()
-
-    } // инициализирую ViewPager
+//    private fun initVp() {
+//        vpAdapter = VpAdapter(this)
+//        binding.placeHolder.adapter = vpAdapter
+//        TabLayoutMediator(binding.tabLayout, binding.placeHolder) { tab, pos ->
+//            tab.text = resources.getStringArray(R.array.vp_title_main)[pos]
+//        }.attach()
+//
+//    } // инициализирую ViewPager
 
     private fun initYaBaner() {
         bannerAd = BannerAdView(this)
@@ -232,7 +212,7 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
                                     )
 
                                     withContext(Dispatchers.IO) {
-                                        db.CourseDao().update(item.copy(changeAlarm = false))
+                                        db.CourseDao().updateItem(item.copy(changeAlarm = false))
                                     }
                                 } else {
 
@@ -253,7 +233,8 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
     } // обновляю будильники
 
     private fun initAll() {
-        binding = ActivityMainBinding.inflate(layoutInflater)
+        modelFlashLight.updateCategory(getString(R.string.everyday))
+        calendarZero = Calendar.getInstance()
         billingClient = RuStoreBillingClientFactory.create(
             context = this,
             consoleApplicationId = "2063541058",
@@ -262,15 +243,48 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
         productsUseCase = billingClient.products
         purchasesUseCase = billingClient.purchases
 
-    } // Инициализирую все
+        // инициализирую ViewPager
+        vpAdapter = VpAdapter(this)
+        binding.placeHolder.adapter = vpAdapter
+        TabLayoutMediator(binding.tabLayout, binding.placeHolder) { tab, pos ->
+            tab.text = resources.getStringArray(R.array.vp_title_main)[pos]
+        }.attach()
 
-    private fun initRcView() {
+        // инициализировал ресайклер
         val rcView = binding.rcView
         adapter = ListMenuAdapter(this)
         rcView.layoutManager = LinearLayoutManager(this)
         rcView.adapter = adapter
 
-    } // инициализировал ресайклер
+
+        // Запрос ранее совершенных покупок
+        purchasesUseCase.getPurchases()
+            .addOnSuccessListener { purchases: List<Purchase> ->
+                val staseList = purchases.map { it.purchaseState }
+                if ((purchases.isEmpty() || !staseList.contains(PurchaseState.CONFIRMED)) && modelFlashLight.getPremium()) {
+                    updatePremium(false, "PREMIUM версия была отключена")
+                }
+                purchases.forEach {
+                    if (it.purchaseState == PurchaseState.CONFIRMED && !modelFlashLight.getPremium()
+                    ) {
+                        updatePremium(true, "PREMIUM версия была восстановлена")
+                    }
+                }
+
+            }
+            .addOnFailureListener {
+            }
+
+
+    } // Инициализирую все
+
+//    private fun initRcView() {
+//        val rcView = binding.rcView
+//        adapter = ListMenuAdapter(this)
+//        rcView.layoutManager = LinearLayoutManager(this)
+//        rcView.adapter = adapter
+//
+//    } // инициализировал ресайклер
 
 
     //Override функции
@@ -291,7 +305,7 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
                                 db.CourseDao().getAllNewNoFlow(item.name).forEach { itemList ->
                                     modelFlashLight.alarmInsert(itemList, Const.deleteAlarm)
                                 }
-                                db.CourseDao().deleteCategory(item.name) // удаляю все из бд
+                                db.CourseDao().deleteItemInCategory(item.name) // удаляю все из бд
                                 db.CourseDao().deleteCategoryMenu(item) // удаляю из меню
                             }
                             modelFlashLight.updateCategory("Повседневные")
@@ -314,7 +328,7 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
                                 val newitem = item.copy(name = name)
                                 db.CourseDao().updateCategory(newitem)
                                 db.CourseDao().getAllNewNoFlow(item.name).forEach {
-                                    db.CourseDao().update(it.copy(category = name))
+                                    db.CourseDao().updateItem(it.copy(category = name))
                                 }
                             }
                             modelFlashLight.updateCategory(name)
@@ -428,25 +442,25 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
         }
     } // Покупка товара
 
-    private fun getShopingList() {
-        purchasesUseCase.getPurchases()
-            .addOnSuccessListener { purchases: List<Purchase> ->
-                val staseList = purchases.map { it.purchaseState }
-                if ((purchases.isEmpty() || !staseList.contains(PurchaseState.CONFIRMED)) && modelFlashLight.getPremium()) {
-                    updatePremium(false, "PREMIUM версия была отключена")
-                }
-                purchases.forEach {
-                    if (it.purchaseState == PurchaseState.CONFIRMED && !modelFlashLight.getPremium()
-                    ) {
-                        updatePremium(true, "PREMIUM версия была восстановлена")
-                    }
-                }
-
-            }
-            .addOnFailureListener {
-            }
-
-    } // Запрос ранее совершенных покупок
+//    private fun getShopingList() {
+//        purchasesUseCase.getPurchases()
+//            .addOnSuccessListener { purchases: List<Purchase> ->
+//                val staseList = purchases.map { it.purchaseState }
+//                if ((purchases.isEmpty() || !staseList.contains(PurchaseState.CONFIRMED)) && modelFlashLight.getPremium()) {
+//                    updatePremium(false, "PREMIUM версия была отключена")
+//                }
+//                purchases.forEach {
+//                    if (it.purchaseState == PurchaseState.CONFIRMED && !modelFlashLight.getPremium()
+//                    ) {
+//                        updatePremium(true, "PREMIUM версия была восстановлена")
+//                    }
+//                }
+//
+//            }
+//            .addOnFailureListener {
+//            }
+//
+//    } // Запрос ранее совершенных покупок
 
     private fun stub(text: String) {
         Toast.makeText(this, "$text появятся в следующих обновлениях", Toast.LENGTH_SHORT).show()

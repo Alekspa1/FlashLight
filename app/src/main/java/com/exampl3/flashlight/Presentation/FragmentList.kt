@@ -95,17 +95,17 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
                 if (it.resultCode == Activity.RESULT_OK) {
                     val text = it.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
-                    CoroutineScope(Dispatchers.IO).launch {
-                        if (text != null) {
-                            db.CourseDao().insertAll(
-                                Item(
-                                    null,
-                                    text[0],
-                                    category = modelFlashLight.categoryItemLD.value!!
-                                )
+                    if (text != null) {
+                        modelFlashLight.insertAlarm(
+                            Item(
+                                null,
+                                text[0],
+                                category = modelFlashLight.categoryItemLD.value!!
                             )
-                        }
+                        )
+
                     }
+
 
                 }
 
@@ -115,17 +115,16 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
             DialogItemList.alertItem(requireContext(), object : DialogItemList.Listener {
                 override fun onClickItem(name: String, action: Int?, id: Int?, desc: String?) {
                     var item: Item
-                    CoroutineScope(Dispatchers.IO).launch {
-                        db.CourseDao().insertAll(
-                            Item(
-                                null,
-                                name,
-                                category = modelFlashLight.categoryItemLD.value!!,
-                                desc = desc
-                            )
+                    modelFlashLight.insertAlarm(
+                        Item(
+                            null,
+                            name,
+                            category = modelFlashLight.categoryItemLD.value!!,
+                            desc = desc
                         )
+                    )
 
-                    }
+
                     if (action == Const.alarm) {
                         if (view.let {
                                 Const.isPermissionGranted(
@@ -190,7 +189,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
     override fun onLongClick(item: Item, action: Int) {
 
         CoroutineScope(Dispatchers.IO).launch {
-            db.CourseDao().update(item.copy(changeAlarm = !item.changeAlarm))
+            db.CourseDao().updateItem(item.copy(changeAlarm = !item.changeAlarm))
         }
         if (item.changeAlarm) {
             insertAlarm.changeAlarmItem(item, Const.deleteAlarm)
@@ -202,7 +201,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
             )
             CoroutineScope(Dispatchers.IO).launch {
                 db.CourseDao()
-                    .update(item.copy(change = false, changeAlarm = !item.changeAlarm))
+                    .updateItem(item.copy(change = false, changeAlarm = !item.changeAlarm))
             }
         }
         if (!item.changeAlarm && item.alarmTime < calendarZero.timeInMillis) {
@@ -214,7 +213,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
                         Toast.LENGTH_SHORT
                     ).show()
                     CoroutineScope(Dispatchers.IO).launch {
-                        db.CourseDao().update(item.copy(changeAlarm = false))
+                        db.CourseDao().updateItem(item.copy(changeAlarm = false))
                     }
                 }
 
@@ -246,7 +245,12 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
                 }
 
                 Const.alarmYear -> {
-                    insertAlarm.insertAlarm(item,item.interval,"и через год", addOneYear(item.alarmTime))
+                    insertAlarm.insertAlarm(
+                        item,
+                        item.interval,
+                        "и через год",
+                        addOneYear(item.alarmTime)
+                    )
                 }
             }
         }
@@ -258,10 +262,10 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
         when (action) {
             Const.change -> {
                 CoroutineScope(Dispatchers.IO).launch {
-                    db.CourseDao().update(item.copy(change = !item.change))
+                    db.CourseDao().updateItem(item.copy(change = !item.change))
                     if (item.changeAlarm) {
                         db.CourseDao()
-                            .update(item.copy(changeAlarm = false, change = !item.change))
+                            .updateItem(item.copy(changeAlarm = false, change = !item.change))
                     }
                     insertAlarm.changeAlarmItem(item, Const.deleteAlarm)
                 }
@@ -309,7 +313,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
                                     newitem,
                                     newitem.interval
                                 ) // если у item был установлен будильник то, тут мы перезаписываем будильник
-                                db.CourseDao().update(newitem)
+                                db.CourseDao().updateItem(newitem)
                                 if (action == Const.alarm) {
                                     if (view.let {
                                             it?.let { it1 ->
