@@ -35,7 +35,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Locale
 import javax.inject.Inject
 
 
@@ -64,7 +66,6 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onLongClick, ItemListAdapte
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentCalendarBinding.inflate(inflater, container, false)
-
         return binding.root
 
     }
@@ -76,73 +77,74 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onLongClick, ItemListAdapte
 
         pLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
 
-         binding.imBAddCalendar.setOnClickListener {
-             if (modelFlashLight.getPremium())
-            DialogItemList.alertItem(requireContext(), object : DialogItemList.Listener {
-                override fun onClickItem(name: String, action: Int?, id: Int?, desc: String?) {
-                    var item: Item
-                    modelFlashLight.insertItem(
-                        Item(
-                            null,
-                            name,
-                            category = modelFlashLight.categoryItemLD.value!!,
-                            desc = desc,
-                            alarmTime = calendarDayB.timeInMillis + Const.TEN_MINUTES
+        binding.imBAddCalendar.setOnClickListener {
+            if (modelFlashLight.getPremium())
+              if(getDateNow(calendarDayB) >= getDateNow(calendarZero)  )  DialogItemList.alertItem(requireContext(), object : DialogItemList.Listener {
+                    override fun onClickItem(name: String, action: Int?, id: Int?, desc: String?) {
+                        var item: Item
+                        modelFlashLight.insertItem(
+                            Item(
+                                null,
+                                name,
+                                category = requireContext().getString(R.string.everyday),
+                                desc = desc,
+                                alarmTime = calendarDayB.timeInMillis + Calendar.MINUTE,
+                                alarmText = textAlarmFormatted(calendarDayB.timeInMillis + Calendar.MINUTE)
+                            )
                         )
-                    )
 
 
-                    if (action == Const.alarm) {
-                        if (view.let {
-                                Const.isPermissionGranted(
-                                    it.context,
-                                    Manifest.permission.POST_NOTIFICATIONS
-                                )
-                            }) {
-                            CoroutineScope(Dispatchers.IO).launch {
-                                delay(500)
-                                item = db.CourseDao().getAllList().last()
-                                if (item.name == name) {
-                                    withContext(Dispatchers.Main) {
-                                        //insertTime.datePickerDialog(requireContext(), item)
-                                        modelFlashLight.insertAlarmByCalendar(
-                                            item,
-                                            calendarDayB,
-                                            requireContext()
-                                        )
-                                    }
-                                } else {
-                                    delay(1000)
+                        if (action == Const.alarm) {
+                            if (view.let {
+                                    Const.isPermissionGranted(
+                                        it.context,
+                                        Manifest.permission.POST_NOTIFICATIONS
+                                    )
+                                }) {
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    delay(500)
                                     item = db.CourseDao().getAllList().last()
-                                    withContext(Dispatchers.Main) {
-                                        modelFlashLight.insertAlarmByCalendar(
-                                            item,
-                                            calendarDayB,
-                                            requireContext()
-                                        )
-                                        //insertTime.datePickerDialog(requireContext(), item)
+                                    if (item.name == name) {
+                                        withContext(Dispatchers.Main) {
+                                            //insertTime.datePickerDialog(requireContext(), item)
+                                            modelFlashLight.insertAlarmByCalendar(
+                                                item,
+                                                calendarDayB,
+                                                requireContext()
+                                            )
+                                        }
+                                    } else {
+                                        delay(1000)
+                                        item = db.CourseDao().getAllList().last()
+                                        withContext(Dispatchers.Main) {
+                                            modelFlashLight.insertAlarmByCalendar(
+                                                item,
+                                                calendarDayB,
+                                                requireContext()
+                                            )
+                                            //insertTime.datePickerDialog(requireContext(), item)
+                                        }
                                     }
+
                                 }
 
+                            } else {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                    pLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                }
                             }
 
-                        } else {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                pLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                            }
+
                         }
-
-
                     }
-                }
-            }, null, null, null)
-             else Toast.makeText(
-                 requireContext(),
-                 "Отображение дел в календаре доступно в PREMIUM версии",
-                 Toast.LENGTH_SHORT
-             ).show()
+                }, null, null, null)
+            else Toast.makeText(requireContext(), "Вы выбрали время которое уже прошло", Toast.LENGTH_SHORT).show()
+            else Toast.makeText(
+                requireContext(),
+                "Отображение дел в календаре доступно в PREMIUM версии",
+                Toast.LENGTH_SHORT
+            ).show()
         }
-
 
 
     }
@@ -151,18 +153,17 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onLongClick, ItemListAdapte
         super.onResume()
         calendarZero = Calendar.getInstance()
         if (modelFlashLight.getPremium()) {
+
+            modelFlashLight.getListItemByCalendar(getDateNow(calendarDayB))
+
             modelFlashLight.listItemLDCalendar.observe(viewLifecycleOwner) {
                 adapter.submitList(it)
                 if (it.isNotEmpty()) binding.tvDela.visibility = View.GONE
                 else binding.tvDela.visibility = View.VISIBLE
             }
-
-            db.CourseDao().getAll().asLiveData().observe(viewLifecycleOwner) {
-                modelFlashLight.getListItemByCalendar(calendarDayB.timeInMillis)
-            }
-            modelFlashLight.getListItemByCalendar(calendarDayB.timeInMillis)
             db.CourseDao().getAll().asLiveData().observe(viewLifecycleOwner) { list ->
                 val calendarDays = mutableListOf<CalendarDay>()
+                modelFlashLight.getListItemByCalendar(getDateNow(calendarDayB))
 
                 list.forEach { item ->
                     if (item.changeAlarm || !item.change) {
@@ -178,7 +179,7 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onLongClick, ItemListAdapte
             binding.calendarView.setOnCalendarDayClickListener(object : OnCalendarDayClickListener {
                 override fun onClick(calendarDay: CalendarDay) {
                     calendarDayB = calendarDay.calendar
-                    modelFlashLight.getListItemByCalendar(calendarDayB.timeInMillis)
+                    modelFlashLight.getListItemByCalendar(getDateNow(calendarDayB))
 
                 }
 
@@ -339,6 +340,25 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onLongClick, ItemListAdapte
 
             } // Изменение имени элемента
         }
+    }
+
+    private fun getDateNow(calendar: Calendar): Long {
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        return calendar.timeInMillis
+    }
+
+    private fun textAlarmFormatted(alarm: Long): String{
+        val dateFormat = "dd.MM.yyyy"
+        val timeFormat = "HH:mm"
+        val date = SimpleDateFormat(dateFormat, Locale.US)
+        val time = SimpleDateFormat(timeFormat, Locale.US)
+        val resultDate = date.format(alarm)
+        val resutTime = time.format(alarm)
+        val newAlarmText = "Напомнит: $resultDate в $resutTime"
+        return newAlarmText
     }
 
 
