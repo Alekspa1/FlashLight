@@ -84,12 +84,14 @@ class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
         if (savedInstanceState == null) {
             billingClient.onNewIntent(intent)
         }
-        modelFlashLight.updateAlarm(calendarZero.timeInMillis)
-
-
-        db.CourseDao().getAllListCategory().asLiveData().observe(this) {
-            adapter.submitList(it)
-        }
+//        modelFlashLight.updateAlarm(calendarZero.timeInMillis)
+//
+//        modelFlashLight.getAllListCategory().asLiveData().observe(this){
+//            adapter.submitList(it)
+//        }
+//        db.CourseDao().getAllListCategory().asLiveData().observe(this) {
+//            adapter.submitList(it)
+//        }
 
         with(binding) {
             if (modelFlashLight.getPremium()) bBuyPremium.text =
@@ -159,8 +161,9 @@ class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
 
             tvCardShare.setOnClickListener {
                 stub("Общие дела")
+
             }
-            bSettings.setOnClickListener {
+            bSettingsCard.setOnClickListener {
                 stub("Настройки")
                 drawer.closeDrawer(GravityCompat.START)
 
@@ -196,7 +199,7 @@ class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
                     when (item.interval) {
                         Const.alarmOne -> {
                             withContext(Dispatchers.Main) {
-                                modelFlashLight.alarmInsert(
+                                modelFlashLight.changeAlarm(
                                     item,
                                     Const.alarmOne
                                 )
@@ -206,7 +209,7 @@ class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
                         else -> {
                             withContext(Dispatchers.Main) {
                                 if (!modelFlashLight.getPremium()) {
-                                    modelFlashLight.alarmInsert(
+                                    modelFlashLight.changeAlarm(
                                         item,
                                         Const.deleteAlarm
                                     )
@@ -216,7 +219,7 @@ class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
                                     }
                                 } else {
 
-                                    modelFlashLight.alarmInsert(
+                                    modelFlashLight.changeAlarm(
                                         item,
                                         item.interval
                                     )
@@ -274,7 +277,11 @@ class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
             }
             .addOnFailureListener {
             }
+        modelFlashLight.updateAlarm(calendarZero.timeInMillis)
 
+        modelFlashLight.getAllListCategory().asLiveData().observe(this){
+            adapter.submitList(it)
+        }
 
     } // Инициализирую все
 
@@ -303,7 +310,7 @@ class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
                         if (flag) {
                             CoroutineScope(Dispatchers.IO).launch {
                                 db.CourseDao().getAllNewNoFlow(item.name).forEach { itemList ->
-                                    modelFlashLight.alarmInsert(itemList, Const.deleteAlarm)
+                                    modelFlashLight.changeAlarm(itemList, Const.deleteAlarm)
                                 }
                                 db.CourseDao().deleteItemInCategory(item.name) // удаляю все из бд
                                 db.CourseDao().deleteCategoryMenu(item) // удаляю из меню

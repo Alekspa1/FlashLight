@@ -1,5 +1,6 @@
 package com.exampl3.flashlight.Data.Room
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -25,7 +26,7 @@ interface CourseDao {
     suspend fun getAllList(): List<Item>
 
     @Query("SELECT * FROM Item WHERE alarmTime > :time and alarmTime < (:time+86400000)")
-    fun getAllListCalendarRcView(time: Long): Flow<List<Item>>
+   suspend fun getAllListCalendarRcView(time: Long): List<Item>
 
     @Query("DELETE FROM Item WHERE category == :value")
     fun deleteItemInCategory(value: String)
@@ -42,10 +43,10 @@ interface CourseDao {
     fun getAllListCategory(): Flow<List<ListCategory>>
 
     @Insert
-    fun insertCategory(Courses: ListCategory)
+   suspend fun insertCategory(Courses: ListCategory)
 
     @Delete
-    fun delete(Course: Item)
+   suspend fun delete(Course: Item)
 
     @Delete
     fun deleteCategoryMenu(Course: ListCategory)

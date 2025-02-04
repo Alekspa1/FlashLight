@@ -16,11 +16,11 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object ModuleAlarmManager {
 
-    @Provides
-    @Singleton
-    fun providesAlarmManager(context: Application): AlarmManager{
-        return context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-    }
+//    @Provides
+//    @Singleton
+//    fun providesAlarmManager(context: Application): AlarmManager{
+//        return context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+//    }
 
 
     @Provides

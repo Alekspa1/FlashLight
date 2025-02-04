@@ -3,11 +3,17 @@ package com.exampl3.flashlight.Presentation
 
 import android.Manifest
 import android.app.AlarmManager
+import android.os.Build
+
 import android.os.Bundle
+import android.util.Log
+
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.asLiveData
@@ -22,10 +28,11 @@ import com.exampl3.flashlight.Domain.InsertTime
 
 import com.exampl3.flashlight.Presentation.adapters.ItemListAdapter
 import com.exampl3.flashlight.R
-import com.exampl3.flashlight.databinding.FragmentBlankFlashLightBinding
+import com.exampl3.flashlight.databinding.FragmentCalendarBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Calendar
@@ -34,7 +41,7 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class FragmentCalendar : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.onClick {
-    private lateinit var binding: FragmentBlankFlashLightBinding
+    private lateinit var binding: FragmentCalendarBinding
     private val modelFlashLight: ViewModelFlashLight by activityViewModels()
 
     @Inject
@@ -48,13 +55,16 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onLongClick, ItemListAdapte
     private lateinit var calendar: Calendar
     private lateinit var calendarZero: Calendar
     private lateinit var calendarDay: CalendarDay
+    private lateinit var calendarDayB: Calendar
     private lateinit var adapter: ItemListAdapter
+    private lateinit var pLauncher: ActivityResultLauncher<String>
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentBlankFlashLightBinding.inflate(inflater, container, false)
+        binding = FragmentCalendarBinding.inflate(inflater, container, false)
+
         return binding.root
 
     }
@@ -62,21 +72,104 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onLongClick, ItemListAdapte
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initRcView()
+        calendarDayB = Calendar.getInstance()
+
+        pLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
+
+         binding.imBAddCalendar.setOnClickListener {
+             if (modelFlashLight.getPremium())
+            DialogItemList.alertItem(requireContext(), object : DialogItemList.Listener {
+                override fun onClickItem(name: String, action: Int?, id: Int?, desc: String?) {
+                    var item: Item
+                    modelFlashLight.insertItem(
+                        Item(
+                            null,
+                            name,
+                            category = modelFlashLight.categoryItemLD.value!!,
+                            desc = desc,
+                            alarmTime = calendarDayB.timeInMillis + Const.TEN_MINUTES
+                        )
+                    )
+
+
+                    if (action == Const.alarm) {
+                        if (view.let {
+                                Const.isPermissionGranted(
+                                    it.context,
+                                    Manifest.permission.POST_NOTIFICATIONS
+                                )
+                            }) {
+                            CoroutineScope(Dispatchers.IO).launch {
+                                delay(500)
+                                item = db.CourseDao().getAllList().last()
+                                if (item.name == name) {
+                                    withContext(Dispatchers.Main) {
+                                        //insertTime.datePickerDialog(requireContext(), item)
+                                        modelFlashLight.insertAlarmByCalendar(
+                                            item,
+                                            calendarDayB,
+                                            requireContext()
+                                        )
+                                    }
+                                } else {
+                                    delay(1000)
+                                    item = db.CourseDao().getAllList().last()
+                                    withContext(Dispatchers.Main) {
+                                        modelFlashLight.insertAlarmByCalendar(
+                                            item,
+                                            calendarDayB,
+                                            requireContext()
+                                        )
+                                        //insertTime.datePickerDialog(requireContext(), item)
+                                    }
+                                }
+
+                            }
+
+                        } else {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                pLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                            }
+                        }
+
+
+                    }
+                }
+            }, null, null, null)
+             else Toast.makeText(
+                 requireContext(),
+                 "Отображение дел в календаре доступно в PREMIUM версии",
+                 Toast.LENGTH_SHORT
+             ).show()
+        }
+
+
 
     }
 
     override fun onResume() {
         super.onResume()
+        calendarZero = Calendar.getInstance()
         if (modelFlashLight.getPremium()) {
+            modelFlashLight.listItemLDCalendar.observe(viewLifecycleOwner) {
+                adapter.submitList(it)
+                if (it.isNotEmpty()) binding.tvDela.visibility = View.GONE
+                else binding.tvDela.visibility = View.VISIBLE
+            }
+
+            db.CourseDao().getAll().asLiveData().observe(viewLifecycleOwner) {
+                modelFlashLight.getListItemByCalendar(calendarDayB.timeInMillis)
+            }
+            modelFlashLight.getListItemByCalendar(calendarDayB.timeInMillis)
             db.CourseDao().getAll().asLiveData().observe(viewLifecycleOwner) { list ->
                 val calendarDays = mutableListOf<CalendarDay>()
 
                 list.forEach { item ->
-                    if (item.changeAlarm) {
+                    if (item.changeAlarm || !item.change) {
                         calendar = Calendar.getInstance()
                         calendar.timeInMillis = item.alarmTime
                         calendarDay = CalendarDay(calendar)
-                        calendarDay.imageResource = R.drawable.ic_alarm_on
+                        calendarDay.imageResource = R.drawable.ic_work
                         calendarDays.add(calendarDay)
                     }
                 }
@@ -84,20 +177,14 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onLongClick, ItemListAdapte
             }
             binding.calendarView.setOnCalendarDayClickListener(object : OnCalendarDayClickListener {
                 override fun onClick(calendarDay: CalendarDay) {
-                    db.CourseDao().getAllListCalendarRcView(calendarDay.calendar.timeInMillis)
-                        .asLiveData()
-                        .observe(viewLifecycleOwner) { list ->
-                            val listItemCalendar = mutableListOf<Item>()
+                    calendarDayB = calendarDay.calendar
+                    modelFlashLight.getListItemByCalendar(calendarDayB.timeInMillis)
 
-                            list.forEach { item ->
-                                if (item.changeAlarm) listItemCalendar.add(item)
-                            }
-                            if (listItemCalendar.isEmpty()) binding.tvDela.visibility = View.VISIBLE
-                            else binding.tvDela.visibility = View.GONE
-                            adapter.submitList(listItemCalendar)
-                        }
                 }
+
+
             })
+
         } else Toast.makeText(
             view?.context,
             "Отображение дел в календаре доступно в PREMIUM версии",
@@ -256,3 +343,5 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onLongClick, ItemListAdapte
 
 
 }
+
+

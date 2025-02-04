@@ -13,12 +13,12 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object ModuleRoom {
 
-    @Provides
-    @Singleton
-    fun provadeDB(context: Application): Database {
-    return Room.databaseBuilder(
-        context,
-        Database::class.java, "db"
-    ).build()
-    }
+//    @Provides
+//    @Singleton
+//    fun provadeDB(context: Application): Database {
+//    return Room.databaseBuilder(
+//        context,
+//        Database::class.java, "db"
+//    ).build()
+//    }
 }

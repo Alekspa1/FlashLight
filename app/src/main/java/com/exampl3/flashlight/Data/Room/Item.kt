@@ -7,7 +7,7 @@ import java.io.Serializable
 
 @Entity
 data class Item(
-    @PrimaryKey var id: Int?,
+    @PrimaryKey(autoGenerate = true) var id: Int?,
     @ColumnInfo(name = "name")val name: String,
     @ColumnInfo(name = "change")val change: Boolean = false,
     @ColumnInfo(name = "alarmText", defaultValue = "1.0")val alarmText: String = "",
