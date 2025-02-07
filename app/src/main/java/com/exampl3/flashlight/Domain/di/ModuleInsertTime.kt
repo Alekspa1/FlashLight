@@ -5,7 +5,7 @@ import android.app.Application
 import android.content.Context
 import androidx.room.Room
 import com.exampl3.flashlight.Data.InsertDateAndTimeImpl
-import com.exampl3.flashlight.Data.InsertOrDeleteAlarmImp
+import com.exampl3.flashlight.Data.ChangeAlarmImp
 import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Domain.repository.InsertDateAndTimeRepository
 import com.exampl3.flashlight.Domain.repository.InsertOrDeleteAlarmReository
@@ -13,7 +13,6 @@ import com.exampl3.flashlight.Domain.repository.InsertOrDeleteAlarmReository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -31,7 +30,7 @@ object ModuleInsertTime {
     @Provides
     @Singleton
     fun providesInsertOrDeletePerository(context: Application): InsertOrDeleteAlarmReository {
-      return  InsertOrDeleteAlarmImp(context, providesAlarmManager(context))
+      return  ChangeAlarmImp(context, providesAlarmManager(context))
     }
 
     @Provides

@@ -25,7 +25,7 @@ interface CourseDao {
     @Query("SELECT * FROM Item")
     suspend fun getAllList(): List<Item>
 
-    @Query("SELECT * FROM Item WHERE alarmTime > :time and alarmTime < (:time+86400000)")
+    @Query("SELECT * FROM Item WHERE alarmTime >= :time and alarmTime < (:time+86400000)")
    suspend fun getAllListCalendarRcView(time: Long): List<Item>
 
     @Query("DELETE FROM Item WHERE category == :value")

@@ -6,7 +6,6 @@ import android.app.AlarmManager
 import android.os.Build
 
 import android.os.Bundle
-import android.util.Log
 
 import android.view.LayoutInflater
 import android.view.View
@@ -89,7 +88,7 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onLongClick, ItemListAdapte
                                 category = requireContext().getString(R.string.everyday),
                                 desc = desc,
                                 alarmTime = calendarDayB.timeInMillis + Calendar.MINUTE,
-                                alarmText = textAlarmFormatted(calendarDayB.timeInMillis + Calendar.MINUTE)
+                                alarmText = textAlarmFormatted(calendarDayB.timeInMillis)
                             )
                         )
 
@@ -106,7 +105,6 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onLongClick, ItemListAdapte
                                     item = db.CourseDao().getAllList().last()
                                     if (item.name == name) {
                                         withContext(Dispatchers.Main) {
-                                            //insertTime.datePickerDialog(requireContext(), item)
                                             modelFlashLight.insertAlarmByCalendar(
                                                 item,
                                                 calendarDayB,
@@ -122,7 +120,6 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onLongClick, ItemListAdapte
                                                 calendarDayB,
                                                 requireContext()
                                             )
-                                            //insertTime.datePickerDialog(requireContext(), item)
                                         }
                                     }
 
@@ -213,8 +210,10 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onLongClick, ItemListAdapte
                 }
                 if (item.changeAlarm) {
                     insertAlarm.changeAlarmItem(item, Const.deleteAlarm)
+
                 }
                 if ((item.change || !item.changeAlarm) && item.alarmTime > calendarZero.timeInMillis) {
+
                     insertAlarm.changeAlarmItem(
                         item.copy(change = false, changeAlarm = !item.changeAlarm),
                         item.interval

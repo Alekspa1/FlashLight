@@ -1,18 +1,31 @@
 package com.exampl3.flashlight.Presentation
 
 
+import android.Manifest
+import android.app.Activity
+import android.content.ContentUris
+import android.content.ContentValues
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore
+import android.util.Log
 import android.view.View
 
 import android.widget.Toast
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.contract.ActivityResultContracts.CreateDocument
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.room.Room
 import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Const.AUTHORIZED_RUSTORE
 import com.exampl3.flashlight.Const.DONATE
@@ -46,6 +59,10 @@ import ru.rustore.sdk.billingclient.model.purchase.Purchase
 import ru.rustore.sdk.billingclient.model.purchase.PurchaseState
 import ru.rustore.sdk.billingclient.usecase.ProductsUseCase
 import ru.rustore.sdk.billingclient.usecase.PurchasesUseCase
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.IOException
 import java.util.Calendar
 import java.util.UUID
 import javax.inject.Inject
@@ -66,6 +83,7 @@ class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
     private lateinit var productsUseCase: ProductsUseCase
     private lateinit var purchasesUseCase: PurchasesUseCase
     private lateinit var adapter: ListMenuAdapter
+    private lateinit var pLauncher: ActivityResultLauncher<String>
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,22 +94,13 @@ class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         initAll()
-        //initVp()
-        //initRcView()
-        // getShopingList()
-        //updateAlarm()
+        pLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()){}
+
         if (!modelFlashLight.getPremium()) initYaBaner()
         if (savedInstanceState == null) {
             billingClient.onNewIntent(intent)
         }
-//        modelFlashLight.updateAlarm(calendarZero.timeInMillis)
-//
-//        modelFlashLight.getAllListCategory().asLiveData().observe(this){
-//            adapter.submitList(it)
-//        }
-//        db.CourseDao().getAllListCategory().asLiveData().observe(this) {
-//            adapter.submitList(it)
-//        }
+
 
         with(binding) {
             if (modelFlashLight.getPremium()) bBuyPremium.text =
@@ -162,8 +171,10 @@ class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
             tvCardShare.setOnClickListener {
                 stub("Общие дела")
 
+
             }
             bSettingsCard.setOnClickListener {
+
                 stub("Настройки")
                 drawer.closeDrawer(GravityCompat.START)
 
@@ -173,14 +184,7 @@ class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
     }
 
 
-//    private fun initVp() {
-//        vpAdapter = VpAdapter(this)
-//        binding.placeHolder.adapter = vpAdapter
-//        TabLayoutMediator(binding.tabLayout, binding.placeHolder) { tab, pos ->
-//            tab.text = resources.getStringArray(R.array.vp_title_main)[pos]
-//        }.attach()
-//
-//    } // инициализирую ViewPager
+
 
     private fun initYaBaner() {
         bannerAd = BannerAdView(this)
@@ -279,19 +283,12 @@ class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
             }
         modelFlashLight.updateAlarm(calendarZero.timeInMillis)
 
-        modelFlashLight.getAllListCategory().asLiveData().observe(this){
+        modelFlashLight.getAllListCategory().asLiveData().observe(this) {
             adapter.submitList(it)
         }
 
     } // Инициализирую все
 
-//    private fun initRcView() {
-//        val rcView = binding.rcView
-//        adapter = ListMenuAdapter(this)
-//        rcView.layoutManager = LinearLayoutManager(this)
-//        rcView.adapter = adapter
-//
-//    } // инициализировал ресайклер
 
 
     //Override функции
@@ -449,25 +446,7 @@ class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
         }
     } // Покупка товара
 
-//    private fun getShopingList() {
-//        purchasesUseCase.getPurchases()
-//            .addOnSuccessListener { purchases: List<Purchase> ->
-//                val staseList = purchases.map { it.purchaseState }
-//                if ((purchases.isEmpty() || !staseList.contains(PurchaseState.CONFIRMED)) && modelFlashLight.getPremium()) {
-//                    updatePremium(false, "PREMIUM версия была отключена")
-//                }
-//                purchases.forEach {
-//                    if (it.purchaseState == PurchaseState.CONFIRMED && !modelFlashLight.getPremium()
-//                    ) {
-//                        updatePremium(true, "PREMIUM версия была восстановлена")
-//                    }
-//                }
-//
-//            }
-//            .addOnFailureListener {
-//            }
-//
-//    } // Запрос ранее совершенных покупок
+
 
     private fun stub(text: String) {
         Toast.makeText(this, "$text появятся в следующих обновлениях", Toast.LENGTH_SHORT).show()

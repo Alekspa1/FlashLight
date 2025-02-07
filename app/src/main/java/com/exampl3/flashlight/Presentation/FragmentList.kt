@@ -121,7 +121,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
                             null,
                             name,
                             category = modelFlashLight.categoryItemLD.value!!,
-                            desc = desc
+                            desc = desc,
                         )
                     )
 
@@ -138,13 +138,13 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
                                 item = db.CourseDao().getAllList().last()
                                 if (item.name == name) {
                                     withContext(Dispatchers.Main) {
-                                        insertTime.datePickerDialog(requireContext(), item)
+                                        modelFlashLight.insertDateAndTimeitemInAlarm(item,requireContext())
                                     }
                                 } else {
                                     delay(1000)
                                     item = db.CourseDao().getAllList().last()
                                     withContext(Dispatchers.Main) {
-                                        insertTime.datePickerDialog(requireContext(), item)
+                                        modelFlashLight.insertDateAndTimeitemInAlarm(item,requireContext())
                                     }
                                 }
 
@@ -263,17 +263,16 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
         when (action) {
             Const.change -> {
                 modelFlashLight.updateItem(item.copy(change = !item.change))
-                if (item.changeAlarm) {modelFlashLight.updateItem(item.copy(changeAlarm = false, change = !item.change))}
+                if (item.changeAlarm) {
+                    modelFlashLight.updateItem(
+                        item.copy(
+                            changeAlarm = false,
+                            change = !item.change
+                        )
+                    )
+                }
                 modelFlashLight.changeAlarm(item, Const.deleteAlarm)
 
-//                CoroutineScope(Dispatchers.IO).launch {
-//                    db.CourseDao().updateItem(item.copy(change = !item.change))
-//                    if (item.changeAlarm) {
-//                        db.CourseDao()
-//                            .updateItem(item.copy(changeAlarm = false, change = !item.change))
-//                    }
-//                    insertAlarm.changeAlarmItem(item, Const.deleteAlarm)
-//                }
             } // Изменение состояния элемента(активный/неактивный)
 
             Const.delete -> {
@@ -281,19 +280,18 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
                     modelFlashLight.deleteItem(item)
                     modelFlashLight.changeAlarm(item, Const.deleteAlarm)
 
-//                    CoroutineScope(Dispatchers.IO).launch { db.CourseDao().delete(item) }
-//                    insertAlarm.changeAlarmItem(item, Const.deleteAlarm)
                 } else {
-                    DialogItemList.AlertDelete(requireContext(), object : DialogItemList.ActionTrueOrFalse {
-                        override fun onClick(flag: Boolean) {
-                            if (flag) {
-                                modelFlashLight.deleteItem(item)
-                                modelFlashLight.changeAlarm(item, Const.deleteAlarm)
+                    DialogItemList.AlertDelete(
+                        requireContext(),
+                        object : DialogItemList.ActionTrueOrFalse {
+                            override fun onClick(flag: Boolean) {
+                                if (flag) {
+                                    modelFlashLight.deleteItem(item)
+                                    modelFlashLight.changeAlarm(item, Const.deleteAlarm)
+                                }
                             }
-                        }
-                    })
+                        })
 
-                    //insertAlarm.deleteAlertDialog(requireContext(), item)
                 }
 
             } // Удаления элемента
@@ -306,8 +304,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
                             Manifest.permission.POST_NOTIFICATIONS
                         )
                     } == true) {
-                    //insertTime.datePickerDialog(requireContext(), item)
-                    modelFlashLight.insertDateAndTimeitemInAlarm(item,requireContext())
+                    modelFlashLight.insertDateAndTimeitemInAlarm(item, requireContext())
                 } else {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                         pLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
@@ -325,31 +322,28 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
                             id: Int?,
                             desc: String?
                         ) {
-                                val newitem = item.copy(name = name, desc = desc)
-                                if (item.changeAlarm) modelFlashLight.changeAlarm(newitem, newitem.interval)
-//                                    insertAlarm.changeAlarmItem(
-//                                    newitem,
-//                                    newitem.interval
-                                 // если у item был установлен будильник то, тут мы перезаписываем будильник
-                                modelFlashLight.updateItem(newitem)
-                                //db.CourseDao().updateItem(newitem)
-                                if (action == Const.alarm) {
-                                    if (view.let {
-                                            it?.let { it1 ->
-                                                Const.isPermissionGranted(
-                                                    it1.context,
-                                                    Manifest.permission.POST_NOTIFICATIONS
-                                                )
-                                            } == true
-                                        }) {
-                                        modelFlashLight.insertDateAndTimeitemInAlarm(newitem,requireContext())
-//                                            insertTime.datePickerDialog(
-//                                                requireContext(),
-//                                                item
-//                                            )
+                            val newitem = item.copy(name = name, desc = desc)
+                            if (item.changeAlarm) modelFlashLight.changeAlarm(
+                                newitem,
+                                newitem.interval
+                            )
 
-                                    }
-                                } // это если из окна изменения нажал установка будильника
+                            modelFlashLight.updateItem(newitem)   // если у item был установлен будильник то, тут мы перезаписываем будильник
+                            if (action == Const.alarm) {
+                                if (view.let {
+                                        it?.let { it1 ->
+                                            Const.isPermissionGranted(
+                                                it1.context,
+                                                Manifest.permission.POST_NOTIFICATIONS
+                                            )
+                                        } == true
+                                    }) {
+                                    modelFlashLight.insertDateAndTimeitemInAlarm(
+                                        newitem,
+                                        requireContext()
+                                    )
+                                }
+                            } // это если из окна изменения нажал установка будильника
 
                         }
                     },

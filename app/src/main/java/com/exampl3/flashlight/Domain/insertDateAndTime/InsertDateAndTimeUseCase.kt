@@ -12,4 +12,16 @@ class InsertDateAndTimeUseCase @Inject constructor(private val insertDateAndTime
     suspend fun exum(premium: Boolean, item: Item, date: Calendar, context: Context): Item {
         return insertDateAndTime.insertDateAndTime(premium, item, date, context)
     }
+
+    fun insertTime(item: Item,
+                    premium: Boolean,
+                    context: Context,
+                    action: Int,
+                    date: Long) : Item?{
+     return insertDateAndTime.proverkaFreeAndinsertStringInterval(item,
+         premium,
+         context,
+         action,
+         date)
+    }
 }

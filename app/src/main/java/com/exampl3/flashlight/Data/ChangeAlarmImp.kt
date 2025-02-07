@@ -8,15 +8,11 @@ import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Data.Room.Item
 import com.exampl3.flashlight.Domain.alarmReceiwer.AlarmReceiwer
 import com.exampl3.flashlight.Domain.repository.InsertOrDeleteAlarmReository
-import com.exampl3.flashlight.Presentation.DialogItemList
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class InsertOrDeleteAlarmImp @Inject constructor(
+class ChangeAlarmImp @Inject constructor(
     private val context: Application,
     private val alarmManager: AlarmManager
 ) : InsertOrDeleteAlarmReository {
