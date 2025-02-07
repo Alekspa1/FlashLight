@@ -134,7 +134,7 @@ object DialogItemList {
         var result = 0
         val builred = AlertDialog.Builder(context)
 
-        builred.setTitle("Выберите тип покупки (Неделя бесплатно)")
+        builred.setTitle("Выберите тип покупки (Неделя бесплатно)*")
         builred.setSingleChoiceItems(
             product, 0
         ) { _, id ->
