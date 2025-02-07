@@ -46,8 +46,8 @@ object DialogItemList {
         val builder = AlertDialog.Builder(context)
         val inflater = LayoutInflater.from(context)
         val dialogLayout = inflater.inflate(R.layout.dialog_layout, null)
-        val editText1 = dialogLayout.findViewById<EditText>(R.id.edTitleAlert)
-        val editText2 = dialogLayout.findViewById<EditText>(R.id.edDescAlert)
+        val editText1 = dialogLayout.findViewById<EditText>(R.id.itemName)
+        val editText2 = dialogLayout.findViewById<EditText>(R.id.edDescItemName)
         editText1.setText(name)
         editText2.setText(desc)
         builder.setTitle("Сфокусироваться")
@@ -134,7 +134,7 @@ object DialogItemList {
         var result = 0
         val builred = AlertDialog.Builder(context)
 
-        builred.setTitle("Выберите тип покупки")
+        builred.setTitle("Выберите тип покупки (Неделя бесплатно)")
         builred.setSingleChoiceItems(
             product, 0
         ) { _, id ->
@@ -177,7 +177,7 @@ object DialogItemList {
         fun onClick(flag: Boolean)
     }
     interface ActionInt{
-        fun onClick(result: Int)
+        fun onClick(action: Int)
     }
 
 

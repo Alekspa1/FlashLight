@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 8,
-    "identityHash": "09ae924ce630660e352ab5e75952be8b",
+    "identityHash": "eec2361833701d35d4e21ae4003dbbd7",
     "entities": [
       {
         "tableName": "Item",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER, `name` TEXT NOT NULL, `change` INTEGER NOT NULL, `alarmText` TEXT NOT NULL DEFAULT '1.0', `alarmTime` INTEGER NOT NULL DEFAULT 1.0, `changeAlarm` INTEGER NOT NULL DEFAULT 1.0, `interval` INTEGER NOT NULL DEFAULT 1.0, `category` TEXT NOT NULL DEFAULT 'Повседневные', `desc` TEXT DEFAULT '', PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `name` TEXT NOT NULL, `change` INTEGER NOT NULL, `alarmText` TEXT NOT NULL DEFAULT '1.0', `alarmTime` INTEGER NOT NULL DEFAULT 1.0, `changeAlarm` INTEGER NOT NULL DEFAULT 1.0, `changeAlarmRepeat` INTEGER NOT NULL DEFAULT 1.0, `interval` INTEGER NOT NULL DEFAULT 1.0, `category` TEXT NOT NULL DEFAULT 'Повседневные', `desc` TEXT DEFAULT '')",
         "fields": [
           {
             "fieldPath": "id",
@@ -48,6 +48,13 @@
             "defaultValue": "1.0"
           },
           {
+            "fieldPath": "changeAlarmRepeat",
+            "columnName": "changeAlarmRepeat",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "1.0"
+          },
+          {
             "fieldPath": "interval",
             "columnName": "interval",
             "affinity": "INTEGER",
@@ -70,7 +77,7 @@
           }
         ],
         "primaryKey": {
-          "autoGenerate": false,
+          "autoGenerate": true,
           "columnNames": [
             "id"
           ]
@@ -108,7 +115,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '09ae924ce630660e352ab5e75952be8b')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'eec2361833701d35d4e21ae4003dbbd7')"
     ]
   }
 }

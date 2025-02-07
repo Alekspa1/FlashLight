@@ -1,6 +1,7 @@
 package com.exampl3.flashlight.Presentation.adapters
 
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,6 +19,7 @@ class ItemListAdapter(private val onLongClickListener: onLongClick,
     class ViewHolder(view: View): RecyclerView.ViewHolder(view) {
         private val binding = ItemBinding.bind(view)
         fun bind(item: Item, onLongClickListener: onLongClick, onClick: onClick) {
+
 
             with(binding) {
 

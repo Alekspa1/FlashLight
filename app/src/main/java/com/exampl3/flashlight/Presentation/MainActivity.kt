@@ -1,20 +1,31 @@
 package com.exampl3.flashlight.Presentation
 
 
-import android.app.AlarmManager
+import android.Manifest
+import android.app.Activity
+import android.content.ContentUris
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore
+import android.util.Log
 import android.view.View
 
 import android.widget.Toast
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.contract.ActivityResultContracts.CreateDocument
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.room.Room
 import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Const.AUTHORIZED_RUSTORE
 import com.exampl3.flashlight.Const.DONATE
@@ -34,19 +45,12 @@ import com.exampl3.flashlight.databinding.ActivityMainBinding
 import com.google.android.material.tabs.TabLayoutMediator
 import com.yandex.mobile.ads.banner.BannerAdSize
 import com.yandex.mobile.ads.banner.BannerAdView
-import com.yandex.mobile.ads.common.AdError
 import com.yandex.mobile.ads.common.AdRequest
-import com.yandex.mobile.ads.common.AdRequestConfiguration
-import com.yandex.mobile.ads.common.AdRequestError
-import com.yandex.mobile.ads.common.ImpressionData
-import com.yandex.mobile.ads.interstitial.InterstitialAd
-import com.yandex.mobile.ads.interstitial.InterstitialAdEventListener
-import com.yandex.mobile.ads.interstitial.InterstitialAdLoadListener
-import com.yandex.mobile.ads.interstitial.InterstitialAdLoader
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import ru.rustore.sdk.billingclient.RuStoreBillingClient
 import ru.rustore.sdk.billingclient.RuStoreBillingClientFactory
 import ru.rustore.sdk.billingclient.model.product.Product
@@ -55,41 +59,42 @@ import ru.rustore.sdk.billingclient.model.purchase.Purchase
 import ru.rustore.sdk.billingclient.model.purchase.PurchaseState
 import ru.rustore.sdk.billingclient.usecase.ProductsUseCase
 import ru.rustore.sdk.billingclient.usecase.PurchasesUseCase
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.IOException
 import java.util.Calendar
 import java.util.UUID
 import javax.inject.Inject
 
 @AndroidEntryPoint
-open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
+class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
 
-    private var interstitialAdLoader: InterstitialAdLoader? = null
-    private var interstitialAd: InterstitialAd? = null
     private var bannerAd: BannerAdView? = null
+
     @Inject
     lateinit var db: Database
     private lateinit var binding: ActivityMainBinding
     private lateinit var vpAdapter: VpAdapter
+
     private lateinit var calendarZero: Calendar
     val modelFlashLight: ViewModelFlashLight by viewModels()
-    private lateinit var alarmManager: AlarmManager
     private lateinit var billingClient: RuStoreBillingClient
     private lateinit var productsUseCase: ProductsUseCase
     private lateinit var purchasesUseCase: PurchasesUseCase
     private lateinit var adapter: ListMenuAdapter
-
+    private lateinit var pLauncher: ActivityResultLauncher<String>
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM){
-          setTheme(R.style.theme_35)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            setTheme(R.style.theme_35)
         }
         super.onCreate(savedInstanceState)
-        initAll()
+        binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        initVp()
-        updateAlarm()
-        initRcView()
-       getShopingList()
+        initAll()
+        pLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()){}
 
         if (!modelFlashLight.getPremium()) initYaBaner()
         if (savedInstanceState == null) {
@@ -97,49 +102,43 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
         }
 
 
-        modelFlashLight.updateCategory("Повседневные")
-        db.CourseDao().getAllListCategory().asLiveData().observe(this){
-            adapter.submitList(it)
-        }
-
-
-        interstitialAdLoader = InterstitialAdLoader(this).apply {
-            setAdLoadListener(object : InterstitialAdLoadListener {
-                override fun onAdLoaded(interstitialAd: InterstitialAd) {
-                    this@MainActivity.interstitialAd = interstitialAd
-                    // The ad was loaded successfully. Now you can show loaded ad.
-                }
-
-                override fun onAdFailedToLoad(error: AdRequestError) {
-                    // Ad failed to load with AdRequestError.
-                    // Attempting to load a new ad from the onAdFailedToLoad() method is strongly discouraged.
-                }
-            })
-        }
-        loadInterstitialAd()
         with(binding) {
-            if(modelFlashLight.getPremium()) bBuyPremium.text = this@MainActivity.getString(R.string.premium_on)
+            if (modelFlashLight.getPremium()) bBuyPremium.text =
+                this@MainActivity.getString(R.string.premium_on)
             imMenu.setOnClickListener {
                 drawer.openDrawer(GravityCompat.START)
             } //  Меню
-            bBuyPremium.setOnClickListener {
+            bBuyPremiumCard.setOnClickListener {
                 getListProduct()
                 drawer.closeDrawer(GravityCompat.START)
             } // ПРЕМИУМ
-            bUpdate.setOnClickListener {
+            bUpdateCard.setOnClickListener {
                 try {
-                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse( RUSTORE )))
-                }  catch (e: Exception) {
+                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(RUSTORE)))
+                } catch (e: Exception) {
                     Toast.makeText(this@MainActivity, "Ошибка", Toast.LENGTH_SHORT).show()
                 }
             } // Проверить обновления
-            bCallback.setOnClickListener {
+            bCallbackCard.setOnClickListener {
                 try {
-                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse( "mailto:apereverzev47@gmail.com" )))
-                }  catch (e: Exception) {
+                    startActivity(
+                        Intent(
+                            Intent.ACTION_VIEW,
+                            Uri.parse("mailto:apereverzev47@gmail.com")
+                        )
+                    )
+                } catch (e: Exception) {
                     Toast.makeText(this@MainActivity, "Ошибка", Toast.LENGTH_SHORT).show()
                 }
             } // Обратная связь
+            bDonateCard.setOnClickListener {
+                try {
+                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(DONATE)))
+                } catch (e: Exception) {
+                    Toast.makeText(this@MainActivity, "Ошибка", Toast.LENGTH_SHORT).show()
+                }
+                drawer.closeDrawer(GravityCompat.START)
+            } // Донат
             tvCardMenu.setOnClickListener {
                 modelFlashLight.updateCategory("Повседневные")
                 binding.tabLayout.selectTab(binding.tabLayout.getTabAt(1))
@@ -147,90 +146,45 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
             }
 
             imBAddMenu.setOnClickListener {
-                if (modelFlashLight.getPremium()){
+                if (modelFlashLight.getPremium()) {
                     DialogItemList.AlertList(this@MainActivity, object : DialogItemList.Listener {
-                        override fun onClickItem(name: String, action: Int?, id: Int?, desc: String?) {
-                         CoroutineScope(Dispatchers.IO).launch {
-                             db.CourseDao().insertCategory(ListCategory(null,name))
-                         }
+                        override fun onClickItem(
+                            name: String,
+                            action: Int?,
+                            id: Int?,
+                            desc: String?
+                        ) {
+                            CoroutineScope(Dispatchers.IO).launch {
+                                db.CourseDao().insertCategory(ListCategory(null, name))
+                            }
                         }
                     }, null)
-                }
-                else Toast.makeText(this@MainActivity, "Категории доступны в PREMIUM версии", Toast.LENGTH_SHORT).show()
+                } else Toast.makeText(
+                    this@MainActivity,
+                    "Категории доступны в PREMIUM версии",
+                    Toast.LENGTH_SHORT
+                ).show()
 
 
             }
 
             tvCardShare.setOnClickListener {
                 stub("Общие дела")
+
+
             }
-            bSettings.setOnClickListener {
+            bSettingsCard.setOnClickListener {
+
                 stub("Настройки")
                 drawer.closeDrawer(GravityCompat.START)
 
             }
-            bDonate.setOnClickListener {
-                try {
-                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse( DONATE)))
-                }  catch (e: Exception) {
-                    Toast.makeText(this@MainActivity, "Ошибка", Toast.LENGTH_SHORT).show()
-                }
-                drawer.closeDrawer(GravityCompat.START)
-            } // Донат
-        }
-    }
-    private fun destroyInterstitialAd() {
-        interstitialAd?.setAdEventListener(null)
-        interstitialAd = null
-    }
-    private fun loadInterstitialAd() {
-        val adRequestConfiguration = AdRequestConfiguration.Builder(Const.MEZSTR).build()
-        interstitialAdLoader?.loadAd(adRequestConfiguration)
-    }
-     fun showAd() {
-        interstitialAd?.apply {
-            setAdEventListener(object : InterstitialAdEventListener {
-                override fun onAdShown() {
-                    // Called when ad is shown.
-                }
-                override fun onAdFailedToShow(adError: AdError) {
-                    // Called when an InterstitialAd failed to show.
-                    // Clean resources after Ad dismissed
-                    interstitialAd?.setAdEventListener(null)
-                    interstitialAd = null
 
-                    // Now you can preload the next interstitial ad.
-                    loadInterstitialAd()
-                }
-                override fun onAdDismissed() {
-                    // Called when ad is dismissed.
-                    // Clean resources after Ad dismissed
-                    interstitialAd?.setAdEventListener(null)
-                    interstitialAd = null
-
-                    // Now you can preload the next interstitial ad.
-                    loadInterstitialAd()
-                }
-                override fun onAdClicked() {
-                    // Called when a click is recorded for an ad.
-                }
-                override fun onAdImpression(impressionData: ImpressionData?) {
-                    // Called when an impression is recorded for an ad.
-                }
-            })
-            show(this@MainActivity)
         }
     }
 
 
-    private fun initVp() {
-        vpAdapter = VpAdapter(this)
-        binding.placeHolder.adapter = vpAdapter
-        TabLayoutMediator(binding.tabLayout, binding.placeHolder) { tab, pos ->
-            tab.text = resources.getStringArray(R.array.vp_title_main)[pos]
-        }.attach()
 
-    } // инициализирую ViewPager
 
     private fun initYaBaner() {
         bannerAd = BannerAdView(this)
@@ -241,47 +195,53 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
 
     } // Инициализирую Яндекс Рекламу
 
-//    private fun updateAlarm() {
-//        CoroutineScope(Dispatchers.IO).launch { db.CourseDao().getAllList().forEach { item ->
-//            if (item.changeAlarm && item.alarmTime > calendarZero.timeInMillis) {
-//                when (item.interval) {
-//                    Const.alarmOne -> {
-//                        modelFlashLight.alarmInsert(
-//                            item,
-//                            Const.alarmOne
-//                        )
-//                    }
-//                    else -> {
-//                        if (!modelFlashLight.getSP()) {
-//                            modelFlashLight.alarmInsert(
-//                                item,
-//                                Const.deleteAlarm
-//                            )
-//                            db.CourseDao().update(item.copy(changeAlarm = false))
-//                        }
-//                        else {
-//                            modelFlashLight.alarmInsert(
-//                                item,
-//                                item.interval
-//                            )
-//                        }
-//                    }
-//                }
-//            }
-//        } }
-//
-//    } // обновляю будильники вернуть потом как было
-
     private fun updateAlarm() {
-        CoroutineScope(Dispatchers.Main).launch { db.CourseDao().getAllList().forEach { item ->
-            if (item.changeAlarm && item.alarmTime > calendarZero.timeInMillis) {
-                modelFlashLight.alarmInsert(item, item.interval)
+        CoroutineScope(Dispatchers.IO).launch {
+            db.CourseDao().getAllList().forEach { item ->
+
+                if (item.changeAlarm && item.alarmTime > calendarZero.timeInMillis) {
+                    when (item.interval) {
+                        Const.alarmOne -> {
+                            withContext(Dispatchers.Main) {
+                                modelFlashLight.changeAlarm(
+                                    item,
+                                    Const.alarmOne
+                                )
+                            }
+                        }
+
+                        else -> {
+                            withContext(Dispatchers.Main) {
+                                if (!modelFlashLight.getPremium()) {
+                                    modelFlashLight.changeAlarm(
+                                        item,
+                                        Const.deleteAlarm
+                                    )
+
+                                    withContext(Dispatchers.IO) {
+                                        db.CourseDao().updateItem(item.copy(changeAlarm = false))
+                                    }
+                                } else {
+
+                                    modelFlashLight.changeAlarm(
+                                        item,
+                                        item.interval
+                                    )
+
+                                }
+                            }
+                        }
+                    }
+                }
+
             }
-        } }
+        }
 
     } // обновляю будильники
-    private fun initAll(){
-        binding = ActivityMainBinding.inflate(layoutInflater)
+
+    private fun initAll() {
+        modelFlashLight.updateCategory(getString(R.string.everyday))
+        calendarZero = Calendar.getInstance()
         billingClient = RuStoreBillingClientFactory.create(
             context = this,
             consoleApplicationId = "2063541058",
@@ -289,27 +249,50 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
         )
         productsUseCase = billingClient.products
         purchasesUseCase = billingClient.purchases
-        calendarZero = Calendar.getInstance()
-        alarmManager = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-    } // Инициализирую все
-    private fun initRcView() {
+        // инициализирую ViewPager
+        vpAdapter = VpAdapter(this)
+        binding.placeHolder.adapter = vpAdapter
+        TabLayoutMediator(binding.tabLayout, binding.placeHolder) { tab, pos ->
+            tab.text = resources.getStringArray(R.array.vp_title_main)[pos]
+        }.attach()
+
+        // инициализировал ресайклер
         val rcView = binding.rcView
         adapter = ListMenuAdapter(this)
         rcView.layoutManager = LinearLayoutManager(this)
         rcView.adapter = adapter
 
-    } // инициализировал ресайклер
+
+        // Запрос ранее совершенных покупок
+        purchasesUseCase.getPurchases()
+            .addOnSuccessListener { purchases: List<Purchase> ->
+                val staseList = purchases.map { it.purchaseState }
+                if ((purchases.isEmpty() || !staseList.contains(PurchaseState.CONFIRMED)) && modelFlashLight.getPremium()) {
+                    updatePremium(false, "PREMIUM версия была отключена")
+                }
+                purchases.forEach {
+                    if (it.purchaseState == PurchaseState.CONFIRMED && !modelFlashLight.getPremium()
+                    ) {
+                        updatePremium(true, "PREMIUM версия была восстановлена")
+                    }
+                }
+
+            }
+            .addOnFailureListener {
+            }
+        modelFlashLight.updateAlarm(calendarZero.timeInMillis)
+
+        modelFlashLight.getAllListCategory().asLiveData().observe(this) {
+            adapter.submitList(it)
+        }
+
+    } // Инициализирую все
 
 
-        //Override функции
 
-    override fun onDestroy() {
-        super.onDestroy()
-        interstitialAdLoader?.setAdLoadListener(null)
-        interstitialAdLoader = null
-        destroyInterstitialAd()
-    }
+    //Override функции
+
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         billingClient.onNewIntent(intent)
@@ -317,16 +300,16 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
 
 
     override fun onClick(item: ListCategory, action: Int) {
-        when(action){
-            Const.delete ->{
+        when (action) {
+            Const.delete -> {
                 DialogItemList.AlertDelete(this, object : DialogItemList.ActionTrueOrFalse {
                     override fun onClick(flag: Boolean) {
                         if (flag) {
                             CoroutineScope(Dispatchers.IO).launch {
-                                db.CourseDao().getAllNewNoFlow(item.name).forEach { itemList->
-                                        modelFlashLight.alarmInsert(itemList, Const.deleteAlarm)
+                                db.CourseDao().getAllNewNoFlow(item.name).forEach { itemList ->
+                                    modelFlashLight.changeAlarm(itemList, Const.deleteAlarm)
                                 }
-                                db.CourseDao().deleteCategory(item.name) // удаляю все из бд
+                                db.CourseDao().deleteItemInCategory(item.name) // удаляю все из бд
                                 db.CourseDao().deleteCategoryMenu(item) // удаляю из меню
                             }
                             modelFlashLight.updateCategory("Повседневные")
@@ -339,12 +322,17 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
                 DialogItemList.AlertList(
                     this,
                     object : DialogItemList.Listener {
-                        override fun onClickItem(name: String, action: Int?, id: Int?, desc: String?) {
+                        override fun onClickItem(
+                            name: String,
+                            action: Int?,
+                            id: Int?,
+                            desc: String?
+                        ) {
                             CoroutineScope(Dispatchers.IO).launch {
                                 val newitem = item.copy(name = name)
                                 db.CourseDao().updateCategory(newitem)
                                 db.CourseDao().getAllNewNoFlow(item.name).forEach {
-                                    db.CourseDao().update(it.copy(category = name))
+                                    db.CourseDao().updateItem(it.copy(category = name))
                                 }
                             }
                             modelFlashLight.updateCategory(name)
@@ -355,35 +343,37 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
 
             } // Изменение имени элемента
             Const.change -> {
-                if(modelFlashLight.getPremium()) {
+                if (modelFlashLight.getPremium()) {
                     modelFlashLight.updateCategory(item.name)
                     binding.drawer.closeDrawer(GravityCompat.START)
                     binding.tabLayout.selectTab(binding.tabLayout.getTabAt(1))
                 } else
-                    Toast.makeText(this@MainActivity,
+                    Toast.makeText(
+                        this@MainActivity,
                         "Категории доступны в PREMIUM версии",
-                        Toast.LENGTH_SHORT).show()
+                        Toast.LENGTH_SHORT
+                    ).show()
             } // Простое нажатие
         }
 
 
-
     }
-    private fun getListProduct(){
-        productsUseCase.getProducts( productIds = PURCHASE_LIST)
+
+    private fun getListProduct() {
+        productsUseCase.getProducts(productIds = PURCHASE_LIST)
             .addOnSuccessListener { products: List<Product> ->
                 val list = arrayOfNulls<String>(4)
-                products.forEach { product->
-                    when(product.productId){
+                products.forEach { product ->
+                    when (product.productId) {
                         ONE_MONTH -> list[0] = product.title.toString()
                         SIX_MONTH -> list[1] = product.title.toString()
                         ONE_YEAR -> list[2] = product.title.toString()
                         FOREVER -> list[3] = product.title.toString()
                     }
                 }
-                DialogItemList.insertBilling(this@MainActivity, object : DialogItemList.ActionInt{
-                    override fun onClick(result: Int) {
-                        when(result){
+                DialogItemList.insertBilling(this@MainActivity, object : DialogItemList.ActionInt {
+                    override fun onClick(action: Int) {
+                        when (action) {
                             0 -> pokupka(ONE_MONTH)
                             1 -> pokupka(SIX_MONTH)
                             2 -> pokupka(ONE_YEAR)
@@ -394,25 +384,42 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
                 }, list)
             }
             .addOnFailureListener { throwable: Throwable ->
-                when(throwable.message.toString()){
+                when (throwable.message.toString()) {
                     NOT_AUTHORIZED ->
-                        DialogItemList.openAuth(this@MainActivity, object : DialogItemList.ActionTrueOrFalse{
-                            override fun onClick(flag: Boolean) {
-                                if (flag) {
-                                    try {
-                                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse( AUTHORIZED_RUSTORE )))
-                                    }  catch (e: Exception) {
-                                        Toast.makeText(this@MainActivity, "Ошибка", Toast.LENGTH_SHORT).show()
+                        DialogItemList.openAuth(
+                            this@MainActivity,
+                            object : DialogItemList.ActionTrueOrFalse {
+                                override fun onClick(flag: Boolean) {
+                                    if (flag) {
+                                        try {
+                                            startActivity(
+                                                Intent(
+                                                    Intent.ACTION_VIEW,
+                                                    Uri.parse(AUTHORIZED_RUSTORE)
+                                                )
+                                            )
+                                        } catch (e: Exception) {
+                                            Toast.makeText(
+                                                this@MainActivity,
+                                                "Ошибка",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
                                     }
                                 }
-                            }
-                        })
+                            })
+
                     else ->
-                        Toast.makeText(this@MainActivity, "Оплата временно недоступна", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this@MainActivity,
+                            "Оплата временно недоступна",
+                            Toast.LENGTH_SHORT
+                        ).show()
                 }
             }
 
     } // Запрос списка продуктов
+
     private fun pokupka(billing: String) {
         purchasesUseCase.purchaseProduct(
             productId = billing,
@@ -422,8 +429,10 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
         ).addOnSuccessListener { paymentResult: PaymentResult ->
             when (paymentResult) {
                 is PaymentResult.Success -> {
-                    updatePremium(true,
-                        "Поздравляю! Теперь вам доступны PREMIUM функции" )
+                    updatePremium(
+                        true,
+                        "Поздравляю! Теперь вам доступны PREMIUM функции"
+                    )
                 }
 
                 else -> {
@@ -436,32 +445,17 @@ open class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
             }
         }
     } // Покупка товара
-    private fun getShopingList() {
-        purchasesUseCase.getPurchases()
-            .addOnSuccessListener { purchases: List<Purchase> ->
-                val staseList = purchases.map { it.purchaseState }
-                if ((purchases.isEmpty() || !staseList.contains(PurchaseState.CONFIRMED)) && modelFlashLight.getPremium()) {
-                    updatePremium(false,"PREMIUM версия была отключена" )
-                }
-                purchases.forEach {
-                    if (it.purchaseState == PurchaseState.CONFIRMED && !modelFlashLight.getPremium()
-                    ) {
-                        updatePremium(true,"PREMIUM версия была восстановлена" )
-                    }
-                }
 
-            }
-            .addOnFailureListener {
-            }
 
-    } // Запрос ранее совершенных покупок
-    private fun stub(text: String){
+
+    private fun stub(text: String) {
         Toast.makeText(this, "$text появятся в следующих обновлениях", Toast.LENGTH_SHORT).show()
     }
-    private fun updatePremium(premium: Boolean, value: String){
+
+    private fun updatePremium(premium: Boolean, value: String) {
         modelFlashLight.savePremium(premium)
         Toast.makeText(this, value, Toast.LENGTH_SHORT).show()
-        if(premium) {
+        if (premium) {
             binding.yaBaner.visibility = View.GONE
             binding.bBuyPremium.text = this@MainActivity.getString(R.string.premium_on)
         } else {

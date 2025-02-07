@@ -5,15 +5,37 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <EditText
+    <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/edTitleAlert"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Введите название" />
+        android:layout_marginTop="10dp"
+        android:hint="Название">
 
-    <EditText
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/itemName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textMultiLine" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+
+
+
+    <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/edDescAlert"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Введите описание (необязательно)" />
+        android:layout_marginTop="10dp"
+        android:hint="Описание (Необязательно)">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edDescItemName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textMultiLine" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+
+
 </LinearLayout>

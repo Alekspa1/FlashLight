@@ -3,6 +3,7 @@
     <string name="start">Спасибо что выбрали мое приложение!</string>
     <string name="premium_on">PREMIUM версия активирована</string>
     <string name="premium_off">Активировать PREMIUM версию</string>
+    <string name="everyday">Повседневные</string>
     <!-- TODO: Remove or change this placeholder text -->
 
 </resources>

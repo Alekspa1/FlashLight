@@ -3,7 +3,8 @@
     <style name="Base.Theme.FlashLight" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
-        <item name="colorPrimary">@color/black</item>
+        <item name="colorPrimaryDark">@color/black</item>
+        <item name="colorPrimary">@color/white</item>
     </style>
 
 
@@ -11,7 +12,8 @@
     <style name="theme.35" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
-        <item name="colorPrimary">@color/black</item>
         <item name="android:windowFullscreen">true</item>
+        <item name="colorPrimary">@color/white</item>
     </style>
+
 </resources>

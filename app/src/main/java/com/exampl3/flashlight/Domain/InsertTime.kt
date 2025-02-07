@@ -1,69 +1,142 @@
 package com.exampl3.flashlight.Domain
 
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import android.content.Context
+import android.util.Log
+import android.widget.Toast
 import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Data.Room.Item
+import com.exampl3.flashlight.Data.sharedPreference.SharedPreferenceImpl
 import com.exampl3.flashlight.Presentation.DialogItemList
-import com.exampl3.flashlight.Presentation.MainActivity
-import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Locale
+import java.util.Calendar
 import javax.inject.Inject
-@AndroidEntryPoint
+import javax.inject.Singleton
+
+@Singleton
 class InsertTime @Inject constructor(
-    private val alarmInsert: AlarmManagerImp,
-    ) : MainActivity() {
+    private val pref: SharedPreferenceImpl,
+    private val insertAlarm: InsertAlarm,
+) {
+    private lateinit var datePickerDialog: DatePickerDialog
+    private lateinit var timePickerDialog: TimePickerDialog
+    private lateinit var calendar: Calendar
+    private lateinit var calendarZero: Calendar
 
+    fun datePickerDialog(context: Context, item: Item) {
+        calendar = Calendar.getInstance()
+        calendarZero = Calendar.getInstance()
+        datePickerDialog = DatePickerDialog(
+            context,
+            { _, year, month, day ->
+                calendar.set(Calendar.YEAR, year)
+                calendar.set(Calendar.MONTH, month)
+                calendar.set(Calendar.DAY_OF_MONTH, day)
+                timePickerDialog(context, item)
+            },
+            calendarZero.get(Calendar.YEAR),
+            calendarZero.get(Calendar.MONTH),
+            calendarZero.get(Calendar.DAY_OF_MONTH)
+        )
+        datePickerDialog.show()
+    } // Установрка даты
 
-    fun deleteAlertDialog(context: Context, item: Item) {
-        DialogItemList.AlertDelete(context, object : DialogItemList.ActionTrueOrFalse {
-            override fun onClick(flag: Boolean) {
-                if (flag) {
-                    CoroutineScope(
-                        Dispatchers
-                            .IO
-                    ).launch {
-                        changeAlarmItem(item, Const.deleteAlarm)
-                        db.CourseDao().delete(item)
+    private fun timePickerDialog(context: Context, item: Item) {
+        timePickerDialog = TimePickerDialog(
+            context,
+            { _, hour, minute ->
+                calendar.set(Calendar.HOUR_OF_DAY, hour)
+                calendar.set(Calendar.MINUTE, minute)
+                DialogItemList.insertAlarm(
+                    context,
+                    object : DialogItemList.ActionInt {
+                        override fun onClick(action: Int) {
+                            if (calendar.timeInMillis >= calendarZero.timeInMillis) {
+                                proverkaFreeAndInsertStringIterval(
+                                    context,
+                                    item,
+                                    action,
+                                    calendar.timeInMillis
+                                )
+                            } else Toast.makeText(
+                                context,
+                                "Вы выбрали время которое уже прошло",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    })
 
+            },
+            calendarZero.get(Calendar.HOUR_OF_DAY),
+            calendarZero.get(Calendar.MINUTE),
+            true
+        )
+        timePickerDialog.show()
+    } // Установка времени
 
-                    }
-
-                }
+    private fun proverkaFreeAndInsertStringIterval(
+        context: Context,
+        item: Item,
+        action: Int,
+        timeCal: Long
+    ) {
+        when (action) {
+            Const.alarmOne -> {
+                insertAlarm.insertAlarm(item, action, "", timeCal)
             }
-        })
-    } // Подтверждение на удаление
 
-    fun changeAlarmItem(item: Item, action: Int) {
-        alarmInsert.alarmInsert(
-            item,
-            action
-        )
+            Const.alarmDay -> {
+                if (pref.getPremium()) insertAlarm.insertAlarm(
+                    item,
+                    action,
+                    "и через день",
+                    timeCal
+                )
+                else Toast.makeText(
+                    context,
+                    "Повторяющиеся напоминания, доступны в PREMIUM версии",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
 
-    } // Изменение заметки
+            Const.alarmWeek -> {
+                if (pref.getPremium()) insertAlarm.insertAlarm(
+                    item,
+                    action,
+                    "и через неделю",
+                    timeCal
+                )
+                else Toast.makeText(
+                    context,
+                    "Повторяющиеся напоминания, доступны в PREMIUM версии",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
 
-     fun insertAlarm(item: Item, interval: Int, intervalText: String, alareTime: Long) {
-        val dateFormat = "dd.MM.yyyy"
-        val timeFormat = "HH:mm"
-        val date = SimpleDateFormat(dateFormat, Locale.US)
-        val time = SimpleDateFormat(timeFormat, Locale.US)
-        val resultDate = date.format(alareTime)
-        val resutTime = time.format(alareTime)
-        val newAlarmText = "Напомнит: $resultDate в $resutTime"
-        val newitem = item.copy(
-            changeAlarm = true,
-            alarmText = "$newAlarmText $intervalText",
-            alarmTime = alareTime,
-            change = false,
-            name = item.name,
-            interval = interval
-        )
-         CoroutineScope(Dispatchers.IO).launch {db.CourseDao().update(newitem)  }
-        changeAlarmItem(newitem, interval)
+            Const.alarmMonth -> {
 
-    } // установка будильника
+                if (pref.getPremium()) insertAlarm.insertAlarm(
+                    item,
+                    action,
+                    "и через месяц",
+                    timeCal
+                )
+                else Toast.makeText(
+                    context,
+                    "Повторяющиеся напоминания, доступны в PREMIUM версии",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+
+            Const.alarmYear -> {
+                if (pref.getPremium()) insertAlarm.insertAlarm(item, action, "и через год", timeCal)
+                else Toast.makeText(
+                    context,
+                    "Повторяющиеся напоминания, доступны в PREMIUM версии",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    } // проверка премиум подписки и установка текста повторения
 
 }

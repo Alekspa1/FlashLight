@@ -17,7 +17,7 @@
             android:layout_marginTop="1dp"
             android:gravity="center"
             android:padding="5dp"
-            android:text="TextView"
+            android:text="@string/everyday"
             android:textColor="@color/white"
             android:textSize="20sp"
             app:layout_constraintEnd_toEndOf="parent"
