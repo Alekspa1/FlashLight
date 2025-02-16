@@ -87,9 +87,7 @@ class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-            setTheme(R.style.theme_35)
-        }
+
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -100,7 +98,6 @@ class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
         if (savedInstanceState == null) {
             billingClient.onNewIntent(intent)
         }
-
 
         with(binding) {
             if (modelFlashLight.getPremium()) bBuyPremium.text =
@@ -169,13 +166,11 @@ class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
             }
 
             tvCardShare.setOnClickListener {
-                modelFlashLight.savePremium(true)
                 stub("Общие дела")
 
 
             }
             bSettingsCard.setOnClickListener {
-            modelFlashLight.savePremium(false)
                 stub("Настройки")
                 drawer.closeDrawer(GravityCompat.START)
 
