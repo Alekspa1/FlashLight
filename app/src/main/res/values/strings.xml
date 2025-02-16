@@ -4,6 +4,8 @@
     <string name="premium_on">PREMIUM версия активирована</string>
     <string name="premium_off">Активировать PREMIUM версию</string>
     <string name="everyday">Повседневные</string>
+    <string name="timeHasPassed">Вы выбрали время которое уже прошло</string>
+    <string name="repeadAlarmOff">Повторяющиеся напоминания, доступны в PREMIUM версии</string>
     <!-- TODO: Remove or change this placeholder text -->
 
 </resources>

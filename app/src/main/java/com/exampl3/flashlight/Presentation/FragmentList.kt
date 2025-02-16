@@ -24,8 +24,6 @@ import com.exampl3.flashlight.Presentation.adapters.ItemListAdapter
 import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Data.Room.Item
 import com.exampl3.flashlight.databinding.FragmentListBinding
-import com.exampl3.flashlight.Domain.InsertAlarm
-import com.exampl3.flashlight.Domain.InsertTime
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -45,12 +43,6 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
 
     @Inject
     lateinit var voiceIntent: Intent
-
-    @Inject
-    lateinit var insertAlarm: InsertAlarm
-
-    @Inject
-    lateinit var insertTime: InsertTime
     private val modelFlashLight: ViewModelFlashLight by activityViewModels()
     private lateinit var pLauncher: ActivityResultLauncher<String>
 
@@ -138,13 +130,21 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
                                 item = db.CourseDao().getAllList().last()
                                 if (item.name == name) {
                                     withContext(Dispatchers.Main) {
-                                        modelFlashLight.insertDateAndTimeitemInAlarm(item,requireContext())
+                                        modelFlashLight.insertDateAndAlarm(
+                                            item,
+                                            null,
+                                            requireContext()
+                                        )
                                     }
                                 } else {
                                     delay(1000)
                                     item = db.CourseDao().getAllList().last()
                                     withContext(Dispatchers.Main) {
-                                        modelFlashLight.insertDateAndTimeitemInAlarm(item,requireContext())
+                                        modelFlashLight.insertDateAndAlarm(
+                                            item,
+                                            null,
+                                            requireContext()
+                                        )
                                     }
                                 }
 
@@ -188,74 +188,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
     } // инициализировал ресайклер
 
     override fun onLongClick(item: Item, action: Int) {
-
-        CoroutineScope(Dispatchers.IO).launch {
-            db.CourseDao().updateItem(item.copy(changeAlarm = !item.changeAlarm))
-        }
-        if (item.changeAlarm) {
-            insertAlarm.changeAlarmItem(item, Const.deleteAlarm)
-        }
-        if ((item.change || !item.changeAlarm) && item.alarmTime > calendarZero.timeInMillis) {
-            insertAlarm.changeAlarmItem(
-                item.copy(change = false, changeAlarm = !item.changeAlarm),
-                item.interval
-            )
-            CoroutineScope(Dispatchers.IO).launch {
-                db.CourseDao()
-                    .updateItem(item.copy(change = false, changeAlarm = !item.changeAlarm))
-            }
-        }
-        if (!item.changeAlarm && item.alarmTime < calendarZero.timeInMillis) {
-            when (item.interval) {
-                Const.alarmOne -> {
-                    Toast.makeText(
-                        requireContext(),
-                        "Вы выбрали время которое уже прошло",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    CoroutineScope(Dispatchers.IO).launch {
-                        db.CourseDao().updateItem(item.copy(changeAlarm = false))
-                    }
-                }
-
-                Const.alarmDay -> {
-                    insertAlarm.insertAlarm(
-                        item,
-                        item.interval,
-                        "и через день",
-                        item.alarmTime + AlarmManager.INTERVAL_DAY
-                    )
-                }
-
-                Const.alarmWeek -> {
-                    insertAlarm.insertAlarm(
-                        item,
-                        item.interval,
-                        "и через неделю",
-                        item.alarmTime + AlarmManager.INTERVAL_DAY * 7
-                    )
-                }
-
-                Const.alarmMonth -> {
-                    insertAlarm.insertAlarm(
-                        item,
-                        item.interval,
-                        "и через месяц",
-                        item.alarmTime + Const.MONTH
-                    )
-                }
-
-                Const.alarmYear -> {
-                    insertAlarm.insertAlarm(
-                        item,
-                        item.interval,
-                        "и через год",
-                        addOneYear(item.alarmTime)
-                    )
-                }
-            }
-        }
-
+        modelFlashLight.insertStringAndAlarm(item, requireContext(), false)
 
     }
 
@@ -304,7 +237,8 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
                             Manifest.permission.POST_NOTIFICATIONS
                         )
                     } == true) {
-                    modelFlashLight.insertDateAndTimeitemInAlarm(item, requireContext())
+
+                    modelFlashLight.insertDateAndAlarm(item, null, requireContext())
                 } else {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                         pLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
@@ -338,8 +272,9 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
                                             )
                                         } == true
                                     }) {
-                                    modelFlashLight.insertDateAndTimeitemInAlarm(
+                                    modelFlashLight.insertDateAndAlarm(
                                         newitem,
+                                        null,
                                         requireContext()
                                     )
                                 }
@@ -358,12 +293,6 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
     override fun onResume() {
         super.onResume()
         calendarZero = Calendar.getInstance()
-    }
-
-    private fun addOneYear(dateInMillis: Long): Long {
-        calendarZero.timeInMillis = dateInMillis
-        calendarZero.add(Calendar.YEAR, 1) // Добавляем один год
-        return calendarZero.timeInMillis
     }
 
 

@@ -169,12 +169,13 @@ class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
             }
 
             tvCardShare.setOnClickListener {
+                modelFlashLight.savePremium(true)
                 stub("Общие дела")
 
 
             }
             bSettingsCard.setOnClickListener {
-
+            modelFlashLight.savePremium(false)
                 stub("Настройки")
                 drawer.closeDrawer(GravityCompat.START)
 
@@ -195,49 +196,6 @@ class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
 
     } // Инициализирую Яндекс Рекламу
 
-    private fun updateAlarm() {
-        CoroutineScope(Dispatchers.IO).launch {
-            db.CourseDao().getAllList().forEach { item ->
-
-                if (item.changeAlarm && item.alarmTime > calendarZero.timeInMillis) {
-                    when (item.interval) {
-                        Const.alarmOne -> {
-                            withContext(Dispatchers.Main) {
-                                modelFlashLight.changeAlarm(
-                                    item,
-                                    Const.alarmOne
-                                )
-                            }
-                        }
-
-                        else -> {
-                            withContext(Dispatchers.Main) {
-                                if (!modelFlashLight.getPremium()) {
-                                    modelFlashLight.changeAlarm(
-                                        item,
-                                        Const.deleteAlarm
-                                    )
-
-                                    withContext(Dispatchers.IO) {
-                                        db.CourseDao().updateItem(item.copy(changeAlarm = false))
-                                    }
-                                } else {
-
-                                    modelFlashLight.changeAlarm(
-                                        item,
-                                        item.interval
-                                    )
-
-                                }
-                            }
-                        }
-                    }
-                }
-
-            }
-        }
-
-    } // обновляю будильники
 
     private fun initAll() {
         modelFlashLight.updateCategory(getString(R.string.everyday))
@@ -293,7 +251,7 @@ class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
 
     //Override функции
 
-    override fun onNewIntent(intent: Intent?) {
+    override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         billingClient.onNewIntent(intent)
     }
@@ -312,7 +270,7 @@ class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
                                 db.CourseDao().deleteItemInCategory(item.name) // удаляю все из бд
                                 db.CourseDao().deleteCategoryMenu(item) // удаляю из меню
                             }
-                            modelFlashLight.updateCategory("Повседневные")
+                            modelFlashLight.updateCategory(getString(R.string.everyday))
 
                         }
                     }

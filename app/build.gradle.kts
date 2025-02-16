@@ -47,7 +47,7 @@ dependencies {
     implementation("com.applandeo:material-calendar-view:1.9.2")
 
 
-    implementation("com.yandex.android:mobileads:7.9.0")
+    implementation("com.yandex.android:mobileads:7.10.0")
     implementation("com.yandex.ads.mediation:mobileads-mytarget:5.22.1.4")
 
     implementation("ru.rustore.sdk:billingclient:7.0.0")

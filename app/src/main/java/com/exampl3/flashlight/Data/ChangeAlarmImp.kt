@@ -5,6 +5,7 @@ import android.app.Application
 import android.app.PendingIntent
 import android.content.Intent
 import com.exampl3.flashlight.Const
+import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Data.Room.Item
 import com.exampl3.flashlight.Domain.alarmReceiwer.AlarmReceiwer
 import com.exampl3.flashlight.Domain.repository.InsertOrDeleteAlarmReository
@@ -14,11 +15,12 @@ import javax.inject.Singleton
 @Singleton
 class ChangeAlarmImp @Inject constructor(
     private val context: Application,
-    private val alarmManager: AlarmManager
+    private val alarmManager: AlarmManager,
 ) : InsertOrDeleteAlarmReository {
 
 
     override fun changeAlarm(item: Item, action: Int) {
+
         val alarmtIntent = Intent(context, AlarmReceiwer::class.java).let { intent ->
             intent.putExtra(Const.keyIntent, item)
             intent.setAction(Const.keyIntentAlarm)

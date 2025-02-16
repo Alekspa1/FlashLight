@@ -75,6 +75,7 @@ class NotificationBuilder @Inject constructor(
             NotificationCompat.Builder(it, Const.CHANNEL_ID)
                 .setSmallIcon(R.drawable.icon)
                 .setContentTitle(item.name)
+                .setContentText(item.desc)
                 .setChannelId(Const.CHANNEL_ID)
                 .setPriority(NotificationManager.IMPORTANCE_HIGH)
                 .setStyle(bigTextStyle)

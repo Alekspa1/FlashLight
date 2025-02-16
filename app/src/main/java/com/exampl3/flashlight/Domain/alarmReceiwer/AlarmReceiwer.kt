@@ -1,18 +1,16 @@
 package com.exampl3.flashlight.Domain.alarmReceiwer
 
-import android.app.AlarmManager
-
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
 
-import com.exampl3.flashlight.Domain.AlarmManagerImp
 import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Const.TEN_MINUTES
 import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Data.Room.Item
-import com.exampl3.flashlight.Domain.InsertAlarm
+import com.exampl3.flashlight.Domain.InsertDateAndAlarm
+import com.exampl3.flashlight.Domain.insertOrDeleteAlarm.ChangeAlarmUseCase
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,27 +24,30 @@ class AlarmReceiwer : BroadcastReceiver() {
     lateinit var db: Database
 
     @Inject
-    lateinit var alarmManager: AlarmManagerImp
-
-    @Inject
     lateinit var notificationBuilder: NotificationBuilder
 
     @Inject
     lateinit var notificationBuilderPassed: NotificationBuilderPassed
 
     @Inject
-    lateinit var insertAlarm: InsertAlarm
-    lateinit var calendarZero: Calendar
+    lateinit var insertDateAndAlarm: InsertDateAndAlarm
+
+    @Inject
+    lateinit var changeAlarm: ChangeAlarmUseCase
+
+    private lateinit var calendarZero: Calendar
+
 
     override fun onReceive(context: Context, intent: Intent) {
 
         calendarZero = Calendar.getInstance()
 
         when (intent.action) {
+
             Const.keyIntentAlarm -> {
                 val item = intent.getSerializableExtra(Const.keyIntent) as Item
                 notificationBuilder.input(item)
-                repeatAlarm(item, "")
+                repeatAlarm(item, "", context)
 
             } // Приход будильника
 
@@ -69,7 +70,13 @@ class AlarmReceiwer : BroadcastReceiver() {
                 val item = intent.getSerializableExtra(Const.keyIntentCallBackPostpone) as Item
                 when (item.interval) {
                     Const.alarmOne -> {
-                        insertAlarm.insertAlarm(item, Const.alarmOne, "", time)
+                        insertDateAndAlarm.ChangeItemBeforeAlarm(item, context, time)
+//                        changeAlarm.exum(item.copy(alarmTime = time), item.interval)
+//                        CoroutineScope(Dispatchers.IO).launch {
+//                            db.CourseDao().updateItem(item.copy(alarmTime = time))
+//                        }
+
+                        //insertAlarm.insertAlarm(item, Const.alarmOne, "", time)
                     }
 
                     else -> {
@@ -78,7 +85,8 @@ class AlarmReceiwer : BroadcastReceiver() {
                             interval = Const.alarmRepeat,
                             alarmTime = time
                         )
-                        alarmManager.alarmInsert(newItemFals, Const.alarmOne)
+                        changeAlarm.exum(newItemFals, Const.alarmOne)
+                        //alarmManager.alarmInsert(newItemFals, Const.alarmOne)
                     }
                 }
                 Toast.makeText(context, "Отложено на 10 минут", Toast.LENGTH_SHORT).show()
@@ -89,11 +97,12 @@ class AlarmReceiwer : BroadcastReceiver() {
                 CoroutineScope(Dispatchers.IO).launch {
                     db.CourseDao().getAllList().forEach { item ->
                         if (item.changeAlarm && item.alarmTime > calendarZero.timeInMillis) {
-                            alarmManager.alarmInsert(item, item.interval)
+                            changeAlarm.exum(item, item.interval)
+                            //alarmManager.alarmInsert(item, item.interval)
                         }
                         if (item.changeAlarm && item.alarmTime < calendarZero.timeInMillis) {
                             notificationBuilderPassed.input(item)
-                            repeatAlarm(item, "(Пропущено)")
+                            repeatAlarm(item, "(Пропущено)", context)
 
                         }
                     }
@@ -103,10 +112,10 @@ class AlarmReceiwer : BroadcastReceiver() {
         }
     }
 
-    private fun repeatAlarm(item: Item, value: String) {
-        when (item.interval) {
-            Const.alarmOne -> {
-                CoroutineScope(Dispatchers.IO).launch {
+    private fun repeatAlarm(item: Item, value: String, context: Context) {
+        CoroutineScope(Dispatchers.IO).launch {
+            when (item.interval) {
+                Const.alarmOne -> {
                     db.CourseDao().updateItem(
                         item.copy(
                             changeAlarm = false,
@@ -114,54 +123,17 @@ class AlarmReceiwer : BroadcastReceiver() {
                         )
                     )
                 }
-            }
 
-            Const.alarmDay -> {
-                insertAlarm.insertAlarm(
-                    item,
-                    item.interval,
-                    "и через день",
-                    item.alarmTime + AlarmManager.INTERVAL_DAY
-                )
-            }
-
-            Const.alarmWeek -> {
-                insertAlarm.insertAlarm(
-                    item,
-                    item.interval,
-                    "и через неделю",
-                    item.alarmTime + AlarmManager.INTERVAL_DAY * 7
-                )
-            }
-
-            Const.alarmMonth -> {
-                insertAlarm.insertAlarm(
-                    item,
-                    item.interval,
-                    "и через месяц",
-                    item.alarmTime + Const.MONTH
-                )
-            }
-
-            Const.alarmYear -> {
-                insertAlarm.insertAlarm(
-                    item,
-                    item.interval,
-                    "и через год",
-                    addOneYear(item.alarmTime)
-                )
+                else -> {
+                    db.CourseDao().updateItem(item.copy(changeAlarm = false))
+                    insertDateAndAlarm.alarmRepead(item, context)
+                }
 
             }
-
         }
-    }
 
+    } // Установка повторяющихся будильников
 
-    private fun addOneYear(dateInMillis: Long): Long {
-        calendarZero.timeInMillis = dateInMillis
-        calendarZero.add(Calendar.YEAR, 1) // Добавляем один год
-        return calendarZero.timeInMillis
-    }
 
 }
 
