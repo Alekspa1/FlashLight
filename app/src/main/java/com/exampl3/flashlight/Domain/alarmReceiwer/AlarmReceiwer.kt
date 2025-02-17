@@ -72,22 +72,15 @@ class AlarmReceiwer : BroadcastReceiver() {
 
             KEY_INTENT_CALL_POSTPONE -> {
                 val time = calendarZero.timeInMillis + TEN_MINUTES
-                val item = intent.getSerializableExtra(Const.KEY_INTENT_CALL_POSTPONE) as Item
+                val item = intent.getSerializableExtra(KEY_INTENT_CALL_POSTPONE) as Item
                 when (item.interval) {
-                    Const.ALARM_ONE -> {
+                    ALARM_ONE -> {
                         //insertDateAndAlarm.ChangeItemBeforeAlarm(item, context, time)
                         val newItem = item.copy(changeAlarm = true, alarmTime = time)
                         CoroutineScope(Dispatchers.IO).launch {
-                        db.CourseDao().updateItem(newItem)
+                            db.CourseDao().updateItem(newItem)
                         }
-                        changeAlarm.exum(newItem, Const.ALARM_ONE)
-
-//                        changeAlarm.exum(item.copy(alarmTime = time), item.interval)
-//                        CoroutineScope(Dispatchers.IO).launch {
-//                            db.CourseDao().updateItem(item.copy(alarmTime = time))
-//                        }
-
-                        //insertAlarm.insertAlarm(item, Const.alarmOne, "", time)
+                        changeAlarm.exum(newItem, ALARM_ONE)
                     }
 
                     else -> {
@@ -96,8 +89,7 @@ class AlarmReceiwer : BroadcastReceiver() {
                             interval = Const.ALARM_REPEAT,
                             alarmTime = time
                         )
-                        changeAlarm.exum(newItemFals, Const.ALARM_ONE)
-                        //alarmManager.alarmInsert(newItemFals, Const.alarmOne)
+                        changeAlarm.exum(newItemFals, ALARM_ONE)
                     }
                 }
                 Toast.makeText(context, "Отложено на 10 минут", Toast.LENGTH_SHORT).show()
@@ -109,7 +101,6 @@ class AlarmReceiwer : BroadcastReceiver() {
                     db.CourseDao().getAllList().forEach { item ->
                         if (item.changeAlarm && item.alarmTime > calendarZero.timeInMillis) {
                             changeAlarm.exum(item, item.interval)
-                            //alarmManager.alarmInsert(item, item.interval)
                         }
                         if (item.changeAlarm && item.alarmTime < calendarZero.timeInMillis) {
                             notificationBuilderPassed.input(item)
@@ -136,7 +127,6 @@ class AlarmReceiwer : BroadcastReceiver() {
                 }
 
                 else -> {
-                   // db.CourseDao().updateItem(item.copy(changeAlarm = false))
                     insertDateAndAlarm.alarmRepead(item, context)
                 }
 

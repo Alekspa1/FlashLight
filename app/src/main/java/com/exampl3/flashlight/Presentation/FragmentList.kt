@@ -122,7 +122,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
                     )
 
 
-                    if (action == Const.ALARM) {
+                    if (action == ALARM) {
                         if (view.let {
                                 Const.isPermissionGranted(
                                     it.context,
