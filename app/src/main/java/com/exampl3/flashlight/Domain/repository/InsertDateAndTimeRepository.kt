@@ -6,10 +6,10 @@ import java.util.Calendar
 
 interface InsertDateAndTimeRepository {
 
-    suspend fun insertDate(item: Item, context: Context) : Calendar
+    suspend fun insertDate(item: Item, context: Context): Calendar
 
-    suspend fun insertTime(item: Item, date: Calendar?, context: Context) : Long
+    suspend fun insertTime(item: Item, date: Calendar?, context: Context): Long
 
-    suspend fun insertActionByItem(context: Context, premium: Boolean) : Int?
+    suspend fun insertActionByItem(context: Context, premium: Boolean): Int?
 
 }

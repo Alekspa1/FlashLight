@@ -19,6 +19,10 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.exampl3.flashlight.Const
+import com.exampl3.flashlight.Const.ALARM
+import com.exampl3.flashlight.Const.CHANGE
+import com.exampl3.flashlight.Const.CHANGE_ITEM
+import com.exampl3.flashlight.Const.DELETE
 import com.exampl3.flashlight.Presentation.adapters.ItemListAdapter
 import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Data.Room.Item
@@ -33,7 +37,7 @@ import java.util.Calendar
 import javax.inject.Inject
 
 @AndroidEntryPoint
-open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapter.onClick {
+open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.onLongClick {
     private lateinit var binding: FragmentListBinding
     private lateinit var adapter: ItemListAdapter
 
@@ -194,7 +198,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
 
     override fun onClick(item: Item, action: Int) {
         when (action) {
-            Const.CHANGE -> {
+            CHANGE -> {
                 modelFlashLight.updateItem(item.copy(change = !item.change))
                 if (item.changeAlarm) {
                     modelFlashLight.updateItem(
@@ -208,7 +212,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
 
             } // Изменение состояния элемента(активный/неактивный)
 
-            Const.DELETE -> {
+            DELETE -> {
                 if (item.change) {
                     modelFlashLight.deleteItem(item)
                     modelFlashLight.changeAlarm(item, Const.DELETE_ALARM)
@@ -229,7 +233,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
 
             } // Удаления элемента
 
-            Const.ALARM -> {
+            ALARM -> {
 
                 if (view?.let {
                         Const.isPermissionGranted(
@@ -246,7 +250,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
                 }
             } // Установка будильника
 
-            Const.CHANGE_ITEM -> {
+            CHANGE_ITEM -> {
                 DialogItemList.alertItem(
                     requireContext(),
                     object : DialogItemList.Listener {
@@ -263,7 +267,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
                             )
 
                             modelFlashLight.updateItem(newitem)   // если у item был установлен будильник то, тут мы перезаписываем будильник
-                            if (action == Const.ALARM) {
+                            if (action == ALARM) {
                                 if (view.let {
                                         it?.let { it1 ->
                                             Const.isPermissionGranted(

@@ -11,7 +11,7 @@ import com.exampl3.flashlight.Data.Room.Item
 import com.exampl3.flashlight.Data.Room.ListCategory
 import com.exampl3.flashlight.Data.sharedPreference.SharedPreferenceImpl
 import com.exampl3.flashlight.Domain.InsertDateAndAlarm
-import com.exampl3.flashlight.Domain.insertOrDeleteAlarm.ChangeAlarmUseCase
+import com.exampl3.flashlight.Domain.useCase.insertOrDeleteAlarm.ChangeAlarmUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
@@ -70,12 +70,13 @@ class ViewModelFlashLight @Inject constructor(
 
     }
 
-    fun insertDateAndAlarm(item: Item, date: Calendar?, context: Context){
+    fun insertDateAndAlarm(item: Item, date: Calendar?, context: Context) {
         viewModelScope.launch {
             insertDateAndTime.exumDateAndAction(item, date, context)
         }
     }
-    fun insertStringAndAlarm(item: Item, context: Context, first: Boolean){
+
+    fun insertStringAndAlarm(item: Item, context: Context, first: Boolean) {
         viewModelScope.launch {
             insertDateAndTime.exumAlarm(item, context, first)
         }

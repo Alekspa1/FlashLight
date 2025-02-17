@@ -1,4 +1,4 @@
-package com.exampl3.flashlight.Domain.insertDateAndTime
+package com.exampl3.flashlight.Domain.useCase.insertDateAndTime
 
 import android.content.Context
 import android.widget.Toast
@@ -9,14 +9,15 @@ import java.util.Calendar
 import javax.inject.Inject
 import javax.inject.Singleton
 
+
 @Singleton
-class InsertDateUseCase @Inject constructor(private val insertDate: InsertDateAndTimeRepository) {
+class InsertTimeUseCase @Inject constructor(private val insertTime: InsertDateAndTimeRepository) {
 
-    private val calendarZero = Calendar.getInstance()
+    private val calendarZero = Calendar.getInstance().timeInMillis
 
-    suspend fun exum(item: Item,context: Context): Calendar? {
-        val date = insertDate.insertDate(item, context)
-        return if (date >= calendarZero) date
+    suspend fun exum(item: Item, dateCalendar: Calendar?, context: Context): Long? {
+        val time = insertTime.insertTime(item, dateCalendar, context)
+        return if (time >= calendarZero) time
         else {
             Toast.makeText(context, R.string.timeHasPassed, Toast.LENGTH_SHORT).show()
             null

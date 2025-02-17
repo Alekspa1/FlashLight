@@ -15,7 +15,7 @@ import com.exampl3.flashlight.Const.TEN_MINUTES
 import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Data.Room.Item
 import com.exampl3.flashlight.Domain.InsertDateAndAlarm
-import com.exampl3.flashlight.Domain.insertOrDeleteAlarm.ChangeAlarmUseCase
+import com.exampl3.flashlight.Domain.useCase.insertOrDeleteAlarm.ChangeAlarmUseCase
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -57,9 +57,9 @@ class AlarmReceiwer : BroadcastReceiver() {
             } // Приход будильника
 
             KEY_INTENT_CALL_BACKREADY -> {
-                val item = intent.getSerializableExtra(Const.KEY_INTENT_CALL_BACKREADY) as Item
+                val item = intent.getSerializableExtra(KEY_INTENT_CALL_BACKREADY) as Item
                 when (item.interval) {
-                    Const.ALARM_ONE -> {
+                    ALARM_ONE -> {
                         CoroutineScope(Dispatchers.IO).launch {
                             db.CourseDao()
                                 .updateItem(item.copy(change = true, changeAlarm = false))

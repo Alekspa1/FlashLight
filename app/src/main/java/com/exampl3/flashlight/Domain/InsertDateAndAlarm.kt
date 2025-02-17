@@ -7,10 +7,10 @@ import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Data.Room.Item
 import com.exampl3.flashlight.Data.sharedPreference.SharedPreferenceImpl
-import com.exampl3.flashlight.Domain.insertDateAndTime.InsertActionAlarmByItemUseCase
-import com.exampl3.flashlight.Domain.insertDateAndTime.InsertDateUseCase
-import com.exampl3.flashlight.Domain.insertDateAndTime.InsertTimeUseCase
-import com.exampl3.flashlight.Domain.insertOrDeleteAlarm.ChangeAlarmUseCase
+import com.exampl3.flashlight.Domain.useCase.insertDateAndTime.InsertActionAlarmByItemUseCase
+import com.exampl3.flashlight.Domain.useCase.insertDateAndTime.InsertDateUseCase
+import com.exampl3.flashlight.Domain.useCase.insertDateAndTime.InsertTimeUseCase
+import com.exampl3.flashlight.Domain.useCase.insertOrDeleteAlarm.ChangeAlarmUseCase
 import java.util.Calendar
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -59,14 +59,7 @@ class InsertDateAndAlarm @Inject constructor(
                 val newItem = item.copy(change = false, changeAlarm = !item.changeAlarm)
                 changeAlarm.exum(newItem, item.interval)
                 db.CourseDao().updateItem(newItem)
-//                ChangeItemBeforeAlarm(
-//                    item.copy(change = false, changeAlarm = !item.changeAlarm),
-//                    context,
-//                    item.alarmTime
-//                )
-
             }
-
             if (!item.changeAlarm && item.alarmTime < calendarZero.timeInMillis) {
                 alarmRepead(item, context)
             }
@@ -87,36 +80,38 @@ class InsertDateAndAlarm @Inject constructor(
                     Toast.LENGTH_SHORT
                 ).show()
 
-                //db.CourseDao().updateItem(item.copy(changeAlarm = false))
             }
 
             Const.ALARM_DAY -> {
-                val newItem = item.copy(changeAlarm = true, alarmTime = item.alarmTime + AlarmManager.INTERVAL_DAY)
-                //ChangeItemBeforeAlarm(item, context, item.alarmTime + AlarmManager.INTERVAL_DAY)
-                changeAlarm.exum(newItem,newItem.interval)
+                val newItem = item.copy(
+                    changeAlarm = true,
+                    alarmTime = item.alarmTime + AlarmManager.INTERVAL_DAY
+                )
+                changeAlarm.exum(newItem, newItem.interval)
                 db.CourseDao().updateItem(newItem)
 
 
             }
 
             Const.ALARM_WEEK -> {
-                //ChangeItemBeforeAlarm(item, context, item.alarmTime + AlarmManager.INTERVAL_DAY * 7)
-                val newItem = item.copy(changeAlarm = true, alarmTime = item.alarmTime + AlarmManager.INTERVAL_DAY * 7)
-                changeAlarm.exum(newItem,newItem.interval)
+                val newItem = item.copy(
+                    changeAlarm = true,
+                    alarmTime = item.alarmTime + AlarmManager.INTERVAL_DAY * 7
+                )
+                changeAlarm.exum(newItem, newItem.interval)
                 db.CourseDao().updateItem(newItem)
             }
 
             Const.ALARM_MONTH -> {
-                //ChangeItemBeforeAlarm(item, context, item.alarmTime + Const.MONTH)
-                val newItem = item.copy(changeAlarm = true, alarmTime = item.alarmTime + Const.MONTH)
-                changeAlarm.exum(newItem,newItem.interval)
+                val newItem =
+                    item.copy(changeAlarm = true, alarmTime = item.alarmTime + Const.MONTH)
+                changeAlarm.exum(newItem, newItem.interval)
                 db.CourseDao().updateItem(newItem)
             }
 
             Const.ALARM_YEAR -> {
-                //ChangeItemBeforeAlarm(item, context, addOneYear(item.alarmTime))
                 val newItem = item.copy(changeAlarm = true, alarmTime = addOneYear(item.alarmTime))
-                changeAlarm.exum(newItem,newItem.interval)
+                changeAlarm.exum(newItem, newItem.interval)
                 db.CourseDao().updateItem(newItem)
             }
         }

@@ -1,8 +1,10 @@
-package com.exampl3.flashlight.Domain.di
+package com.exampl3.flashlight.Domain
 
 import android.app.AlarmManager
 import android.app.Application
 import android.content.Context
+import android.content.Intent
+import android.speech.RecognizerIntent
 import androidx.room.Room
 import com.exampl3.flashlight.Data.InsertDateAndTimeImpl
 import com.exampl3.flashlight.Data.ChangeAlarmImp
@@ -18,7 +20,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object ModuleInsertTime {
+object Di {
 
 
     @Provides
@@ -30,7 +32,7 @@ object ModuleInsertTime {
     @Provides
     @Singleton
     fun providesInsertOrDeletePerository(context: Application): InsertOrDeleteAlarmReository {
-      return  ChangeAlarmImp(context, providesAlarmManager(context))
+        return ChangeAlarmImp(context, providesAlarmManager(context))
     }
 
     @Provides
@@ -48,8 +50,16 @@ object ModuleInsertTime {
         ).build()
     }
 
-
-
+    @Provides
+    @Singleton
+    fun providesVoiceIntent(): Intent {
+        val voiceIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+        voiceIntent.putExtra(
+            RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+        )
+        return voiceIntent
+    }
 
 
 }

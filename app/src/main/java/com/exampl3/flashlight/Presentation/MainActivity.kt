@@ -16,6 +16,7 @@ import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Const.AUTHORIZED_RUSTORE
+import com.exampl3.flashlight.Const.DELETE
 import com.exampl3.flashlight.Const.DONATE
 import com.exampl3.flashlight.Const.FOREVER
 import com.exampl3.flashlight.Const.NOT_AUTHORIZED
@@ -237,7 +238,7 @@ class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
 
     override fun onClick(item: ListCategory, action: Int) {
         when (action) {
-            Const.DELETE -> {
+            DELETE -> {
                 DialogItemList.AlertDelete(this, object : DialogItemList.ActionTrueOrFalse {
                     override fun onClick(flag: Boolean) {
                         if (flag) {

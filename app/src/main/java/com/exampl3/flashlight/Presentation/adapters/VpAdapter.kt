@@ -17,6 +17,8 @@ class VpAdapter(fragment: FragmentActivity) : FragmentStateAdapter(fragment) {
     override fun getItemCount(): Int {
         return listFrag.size
     }
+
     override fun createFragment(position: Int): Fragment {
-        return listFrag[position]}
+        return listFrag[position]
+    }
 }
