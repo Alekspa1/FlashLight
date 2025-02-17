@@ -1,17 +1,17 @@
 package com.exampl3.flashlight.Presentation.adapters
 
 
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Data.Room.Item
 import com.exampl3.flashlight.R
 import com.exampl3.flashlight.databinding.ItemBinding
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class ItemListAdapter(private val onLongClickListener: onLongClick,
                       private val onClickListener: onClick
@@ -24,7 +24,7 @@ class ItemListAdapter(private val onLongClickListener: onLongClick,
             with(binding) {
 
                 textItem.text = item.name
-                tvAlarm.text = item.alarmText
+                tvAlarm.text = alarmText(item) ?: "".trim()
                 tvDesc.text = item.desc
                 if (tvDesc.text !== "" ) tvDesc.visibility = View.VISIBLE
                 when(item.changeAlarm){
@@ -50,22 +50,57 @@ class ItemListAdapter(private val onLongClickListener: onLongClick,
                     }
 
                 cardView.setOnClickListener {
-                    onClick.onClick(item, Const.changeItem)
+                    onClick.onClick(item, Const.CHANGE_ITEM)
                 }
                 imStatus.setOnClickListener {
-                    onClick.onClick(item, Const.change)
+                    onClick.onClick(item, Const.CHANGE)
                 }
                 imDeleteList.setOnClickListener {
-                    onClick.onClick(item, Const.delete)
+                    onClick.onClick(item, Const.DELETE)
                 }
                 imAlarm.setOnClickListener {
-                    onClick.onClick(item, Const.alarm)
+                    onClick.onClick(item, Const.ALARM)
                 }
                 imAlarm.setOnLongClickListener {
-                    onLongClickListener.onLongClick(item, Const.alarm)
+                    onLongClickListener.onLongClick(item, Const.ALARM)
                     true
                 }
             }
+        }
+        private fun alarmText(item: Item) : String? {
+            val dateFormat = "dd.MM.yyyy"
+            val timeFormat = "HH:mm"
+            val date = SimpleDateFormat(dateFormat, Locale.US)
+            val time = SimpleDateFormat(timeFormat, Locale.US)
+            val resultDate = date.format(item.alarmTime)
+            val resutTime = time.format(item.alarmTime)
+            val alarmText = "Напомнит: $resultDate в $resutTime"
+
+            when (item.interval) {
+                Const.ALARM_ONE -> {
+                    return alarmText
+                }
+
+                Const.ALARM_DAY -> {
+                    return "$alarmText и через день"
+
+                }
+
+                Const.ALARM_WEEK -> {
+                    return "$alarmText и через неделю"
+                }
+
+                Const.ALARM_MONTH -> {
+                    return "$alarmText и через месяц"
+                }
+
+                Const.ALARM_YEAR -> {
+                    return "$alarmText и через год"
+                }
+
+
+            }
+            return null
         }
     }
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -83,4 +118,6 @@ class ItemListAdapter(private val onLongClickListener: onLongClick,
     interface onClick {
         fun onClick(item: Item, action: Int)
     }
+
+
 }

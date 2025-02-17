@@ -1,31 +1,19 @@
 package com.exampl3.flashlight.Presentation
 
 
-import android.Manifest
-import android.app.Activity
-import android.content.ContentUris
-import android.content.ContentValues
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.os.Environment
-import android.provider.MediaStore
-import android.util.Log
 import android.view.View
 
 import android.widget.Toast
-import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.result.contract.ActivityResultContracts.CreateDocument
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.room.Room
 import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Const.AUTHORIZED_RUSTORE
 import com.exampl3.flashlight.Const.DONATE
@@ -50,7 +38,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import ru.rustore.sdk.billingclient.RuStoreBillingClient
 import ru.rustore.sdk.billingclient.RuStoreBillingClientFactory
 import ru.rustore.sdk.billingclient.model.product.Product
@@ -59,10 +46,6 @@ import ru.rustore.sdk.billingclient.model.purchase.Purchase
 import ru.rustore.sdk.billingclient.model.purchase.PurchaseState
 import ru.rustore.sdk.billingclient.usecase.ProductsUseCase
 import ru.rustore.sdk.billingclient.usecase.PurchasesUseCase
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.io.IOException
 import java.util.Calendar
 import java.util.UUID
 import javax.inject.Inject
@@ -254,13 +237,13 @@ class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
 
     override fun onClick(item: ListCategory, action: Int) {
         when (action) {
-            Const.delete -> {
+            Const.DELETE -> {
                 DialogItemList.AlertDelete(this, object : DialogItemList.ActionTrueOrFalse {
                     override fun onClick(flag: Boolean) {
                         if (flag) {
                             CoroutineScope(Dispatchers.IO).launch {
                                 db.CourseDao().getAllNewNoFlow(item.name).forEach { itemList ->
-                                    modelFlashLight.changeAlarm(itemList, Const.deleteAlarm)
+                                    modelFlashLight.changeAlarm(itemList, Const.DELETE_ALARM)
                                 }
                                 db.CourseDao().deleteItemInCategory(item.name) // удаляю все из бд
                                 db.CourseDao().deleteCategoryMenu(item) // удаляю из меню
@@ -271,7 +254,7 @@ class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
                     }
                 })
             } // Удаление элемента
-            Const.changeItem -> {
+            Const.CHANGE_ITEM -> {
                 DialogItemList.AlertList(
                     this,
                     object : DialogItemList.Listener {
@@ -295,7 +278,7 @@ class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
                 )
 
             } // Изменение имени элемента
-            Const.change -> {
+            Const.CHANGE -> {
                 if (modelFlashLight.getPremium()) {
                     modelFlashLight.updateCategory(item.name)
                     binding.drawer.closeDrawer(GravityCompat.START)

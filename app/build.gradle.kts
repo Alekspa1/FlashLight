@@ -14,8 +14,8 @@ android {
         applicationId = "com.exampl3.flashlight"
         minSdk = 24
         targetSdk = 35
-        versionCode = 20
-        versionName = "8.3"
+        versionCode = 21
+        versionName = "8.4"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         kapt {
             arguments {arg("room.schemaLocation", "$projectDir/schemas")}
@@ -59,7 +59,7 @@ dependencies {
     implementation ("androidx.room:room-ktx:2.6.1")
 
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.7")
-    implementation("androidx.fragment:fragment-ktx:1.8.5")
+    implementation("androidx.fragment:fragment-ktx:1.8.6")
 
 
     

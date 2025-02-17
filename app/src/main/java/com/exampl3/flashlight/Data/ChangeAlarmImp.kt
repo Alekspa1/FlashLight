@@ -5,7 +5,6 @@ import android.app.Application
 import android.app.PendingIntent
 import android.content.Intent
 import com.exampl3.flashlight.Const
-import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Data.Room.Item
 import com.exampl3.flashlight.Domain.alarmReceiwer.AlarmReceiwer
 import com.exampl3.flashlight.Domain.repository.InsertOrDeleteAlarmReository
@@ -15,15 +14,14 @@ import javax.inject.Singleton
 @Singleton
 class ChangeAlarmImp @Inject constructor(
     private val context: Application,
-    private val alarmManager: AlarmManager,
+    private val alarmManager: AlarmManager
 ) : InsertOrDeleteAlarmReository {
 
 
     override fun changeAlarm(item: Item, action: Int) {
-
         val alarmtIntent = Intent(context, AlarmReceiwer::class.java).let { intent ->
-            intent.putExtra(Const.keyIntent, item)
-            intent.setAction(Const.keyIntentAlarm)
+            intent.putExtra(Const.KEY_INTENT, item)
+            intent.setAction(Const.KEY_INTENT_ALARM)
             PendingIntent.getBroadcast(
                 context,
                 item.id!!,
@@ -32,7 +30,7 @@ class ChangeAlarmImp @Inject constructor(
             )
         }
         when (action) {
-            Const.deleteAlarm -> alarmManager.cancel(alarmtIntent)
+            Const.DELETE_ALARM -> alarmManager.cancel(alarmtIntent)
             else -> alarmManager.setExactAndAllowWhileIdle(
                 AlarmManager.RTC_WAKEUP,
                 item.alarmTime,

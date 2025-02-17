@@ -11,10 +11,6 @@ import com.exampl3.flashlight.Data.Room.Item
 import com.exampl3.flashlight.Data.Room.ListCategory
 import com.exampl3.flashlight.Data.sharedPreference.SharedPreferenceImpl
 import com.exampl3.flashlight.Domain.InsertDateAndAlarm
-import com.exampl3.flashlight.Domain.insertDateAndTime.InsertActionAlarmByItemUseCase
-import com.exampl3.flashlight.Domain.insertDateAndTime.InsertDateUseCase
-import com.exampl3.flashlight.Domain.insertDateAndTime.InsertStringAlarmByItemUseCase
-import com.exampl3.flashlight.Domain.insertDateAndTime.InsertTimeUseCase
 import com.exampl3.flashlight.Domain.insertOrDeleteAlarm.ChangeAlarmUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
@@ -76,12 +72,12 @@ class ViewModelFlashLight @Inject constructor(
 
     fun insertDateAndAlarm(item: Item, date: Calendar?, context: Context){
         viewModelScope.launch {
-            insertDateAndTime.exumDate(item, date, context)
+            insertDateAndTime.exumDateAndAction(item, date, context)
         }
     }
     fun insertStringAndAlarm(item: Item, context: Context, first: Boolean){
         viewModelScope.launch {
-            insertDateAndTime.exumString(item, context, first)
+            insertDateAndTime.exumAlarm(item, context, first)
         }
     }
 
@@ -93,10 +89,10 @@ class ViewModelFlashLight @Inject constructor(
         viewModelScope.launch {
             listItem(calendaZero).forEach { item ->
                 when (item.interval) {
-                    Const.alarmOne -> {
+                    Const.ALARM_ONE -> {
                         changeAlarm(
                             item,
-                            Const.alarmOne
+                            Const.ALARM_ONE
                         )
 
                     }
@@ -105,7 +101,7 @@ class ViewModelFlashLight @Inject constructor(
                         if (!getPremium()) {
                             changeAlarm(
                                 item,
-                                Const.deleteAlarm
+                                Const.DELETE_ALARM
                             )
                             updateItem(item.copy(changeAlarm = false))
                         } else {

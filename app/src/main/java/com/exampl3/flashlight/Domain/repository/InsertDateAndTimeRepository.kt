@@ -10,16 +10,6 @@ interface InsertDateAndTimeRepository {
 
     suspend fun insertTime(item: Item, date: Calendar?, context: Context) : Long
 
-    suspend fun insertActionByItem(context: Context) : Int
-
-    fun proverkaFreeAndinsertStringInterval(
-        item: Item,
-        context: Context,
-        action: Int,
-        date: Long,
-        premium: Boolean
-    ) : Item?
-    fun createItem(item: Item, interval: Int, intervalText: String, alareTime: Long): Item
-
+    suspend fun insertActionByItem(context: Context, premium: Boolean) : Int?
 
 }

@@ -6,6 +6,11 @@ import android.content.Intent
 import android.widget.Toast
 
 import com.exampl3.flashlight.Const
+import com.exampl3.flashlight.Const.ALARM_ONE
+import com.exampl3.flashlight.Const.KEY_INTENT_ALARM
+import com.exampl3.flashlight.Const.KEY_INTENT_CALL_BACKREADY
+import com.exampl3.flashlight.Const.KEY_INTENT_CALL_POSTPONE
+import com.exampl3.flashlight.Const.REBOOT
 import com.exampl3.flashlight.Const.TEN_MINUTES
 import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Data.Room.Item
@@ -44,17 +49,17 @@ class AlarmReceiwer : BroadcastReceiver() {
 
         when (intent.action) {
 
-            Const.keyIntentAlarm -> {
-                val item = intent.getSerializableExtra(Const.keyIntent) as Item
+            KEY_INTENT_ALARM -> {
+                val item = intent.getSerializableExtra(Const.KEY_INTENT) as Item
                 notificationBuilder.input(item)
                 repeatAlarm(item, "", context)
 
             } // Приход будильника
 
-            Const.keyIntentCallBackReady -> {
-                val item = intent.getSerializableExtra(Const.keyIntentCallBackReady) as Item
+            KEY_INTENT_CALL_BACKREADY -> {
+                val item = intent.getSerializableExtra(Const.KEY_INTENT_CALL_BACKREADY) as Item
                 when (item.interval) {
-                    Const.alarmOne -> {
+                    Const.ALARM_ONE -> {
                         CoroutineScope(Dispatchers.IO).launch {
                             db.CourseDao()
                                 .updateItem(item.copy(change = true, changeAlarm = false))
@@ -65,12 +70,18 @@ class AlarmReceiwer : BroadcastReceiver() {
 
             } // Когда нажал кнопку готово
 
-            Const.keyIntentCallBackPostpone -> {
+            KEY_INTENT_CALL_POSTPONE -> {
                 val time = calendarZero.timeInMillis + TEN_MINUTES
-                val item = intent.getSerializableExtra(Const.keyIntentCallBackPostpone) as Item
+                val item = intent.getSerializableExtra(Const.KEY_INTENT_CALL_POSTPONE) as Item
                 when (item.interval) {
-                    Const.alarmOne -> {
-                        insertDateAndAlarm.ChangeItemBeforeAlarm(item, context, time)
+                    Const.ALARM_ONE -> {
+                        //insertDateAndAlarm.ChangeItemBeforeAlarm(item, context, time)
+                        val newItem = item.copy(changeAlarm = true, alarmTime = time)
+                        CoroutineScope(Dispatchers.IO).launch {
+                        db.CourseDao().updateItem(newItem)
+                        }
+                        changeAlarm.exum(newItem, Const.ALARM_ONE)
+
 //                        changeAlarm.exum(item.copy(alarmTime = time), item.interval)
 //                        CoroutineScope(Dispatchers.IO).launch {
 //                            db.CourseDao().updateItem(item.copy(alarmTime = time))
@@ -82,10 +93,10 @@ class AlarmReceiwer : BroadcastReceiver() {
                     else -> {
                         val newItemFals = item.copy(
                             id = item.id?.plus(1000),
-                            interval = Const.alarmRepeat,
+                            interval = Const.ALARM_REPEAT,
                             alarmTime = time
                         )
-                        changeAlarm.exum(newItemFals, Const.alarmOne)
+                        changeAlarm.exum(newItemFals, Const.ALARM_ONE)
                         //alarmManager.alarmInsert(newItemFals, Const.alarmOne)
                     }
                 }
@@ -93,7 +104,7 @@ class AlarmReceiwer : BroadcastReceiver() {
                 notificationBuilder.alarmPush().cancel(item.id!!)
             } // Когда нажал кнопку отложить
 
-            Const.reboot -> {
+            REBOOT -> {
                 CoroutineScope(Dispatchers.IO).launch {
                     db.CourseDao().getAllList().forEach { item ->
                         if (item.changeAlarm && item.alarmTime > calendarZero.timeInMillis) {
@@ -115,7 +126,7 @@ class AlarmReceiwer : BroadcastReceiver() {
     private fun repeatAlarm(item: Item, value: String, context: Context) {
         CoroutineScope(Dispatchers.IO).launch {
             when (item.interval) {
-                Const.alarmOne -> {
+                ALARM_ONE -> {
                     db.CourseDao().updateItem(
                         item.copy(
                             changeAlarm = false,
@@ -125,7 +136,7 @@ class AlarmReceiwer : BroadcastReceiver() {
                 }
 
                 else -> {
-                    db.CourseDao().updateItem(item.copy(changeAlarm = false))
+                   // db.CourseDao().updateItem(item.copy(changeAlarm = false))
                     insertDateAndAlarm.alarmRepead(item, context)
                 }
 

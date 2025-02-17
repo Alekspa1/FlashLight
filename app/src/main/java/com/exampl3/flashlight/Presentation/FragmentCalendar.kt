@@ -2,7 +2,6 @@ package com.exampl3.flashlight.Presentation
 
 
 import android.Manifest
-import android.app.AlarmManager
 import android.os.Build
 
 import android.os.Bundle
@@ -86,7 +85,7 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onLongClick, ItemListAdapte
                         )
 
 
-                        if (action == Const.alarm) {
+                        if (action == Const.ALARM) {
                             if (view.let {
                                     Const.isPermissionGranted(
                                         it.context,
@@ -204,7 +203,7 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onLongClick, ItemListAdapte
     }
     override fun onClick(item: Item, action: Int) {
         when (action) {
-            Const.change -> {
+            Const.CHANGE -> {
                 modelFlashLight.updateItem(item.copy(change = !item.change))
                 if (item.changeAlarm) {
                     modelFlashLight.updateItem(
@@ -214,14 +213,14 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onLongClick, ItemListAdapte
                         )
                     )
                 }
-                modelFlashLight.changeAlarm(item, Const.deleteAlarm)
+                modelFlashLight.changeAlarm(item, Const.DELETE_ALARM)
 
             } // Изменение состояния элемента(активный/неактивный)
 
-            Const.delete -> {
+            Const.DELETE -> {
                 if (item.change) {
                     modelFlashLight.deleteItem(item)
-                    modelFlashLight.changeAlarm(item, Const.deleteAlarm)
+                    modelFlashLight.changeAlarm(item, Const.DELETE_ALARM)
 
                 } else {
                     DialogItemList.AlertDelete(
@@ -230,7 +229,7 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onLongClick, ItemListAdapte
                             override fun onClick(flag: Boolean) {
                                 if (flag) {
                                     modelFlashLight.deleteItem(item)
-                                    modelFlashLight.changeAlarm(item, Const.deleteAlarm)
+                                    modelFlashLight.changeAlarm(item, Const.DELETE_ALARM)
                                 }
                             }
                         })
@@ -239,7 +238,7 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onLongClick, ItemListAdapte
 
             } // Удаления элемента
 
-            Const.alarm -> {
+            Const.ALARM -> {
 
                 if (view?.let {
                         Const.isPermissionGranted(
@@ -256,7 +255,7 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onLongClick, ItemListAdapte
                 }
             } // Установка будильника
 
-            Const.changeItem -> {
+            Const.CHANGE_ITEM -> {
                 DialogItemList.alertItem(
                     requireContext(),
                     object : DialogItemList.Listener {
@@ -273,7 +272,7 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onLongClick, ItemListAdapte
                             )
 
                             modelFlashLight.updateItem(newitem)   // если у item был установлен будильник то, тут мы перезаписываем будильник
-                            if (action == Const.alarm) {
+                            if (action == Const.ALARM) {
                                 if (view.let {
                                         it?.let { it1 ->
                                             Const.isPermissionGranted(

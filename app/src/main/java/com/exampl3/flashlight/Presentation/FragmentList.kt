@@ -3,7 +3,6 @@ package com.exampl3.flashlight.Presentation
 
 import android.Manifest
 import android.app.Activity
-import android.app.AlarmManager
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -114,11 +113,12 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
                             name,
                             category = modelFlashLight.categoryItemLD.value!!,
                             desc = desc,
+                            alarmTime = 0
                         )
                     )
 
 
-                    if (action == Const.alarm) {
+                    if (action == Const.ALARM) {
                         if (view.let {
                                 Const.isPermissionGranted(
                                     it.context,
@@ -194,7 +194,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
 
     override fun onClick(item: Item, action: Int) {
         when (action) {
-            Const.change -> {
+            Const.CHANGE -> {
                 modelFlashLight.updateItem(item.copy(change = !item.change))
                 if (item.changeAlarm) {
                     modelFlashLight.updateItem(
@@ -204,14 +204,14 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
                         )
                     )
                 }
-                modelFlashLight.changeAlarm(item, Const.deleteAlarm)
+                modelFlashLight.changeAlarm(item, Const.DELETE_ALARM)
 
             } // Изменение состояния элемента(активный/неактивный)
 
-            Const.delete -> {
+            Const.DELETE -> {
                 if (item.change) {
                     modelFlashLight.deleteItem(item)
-                    modelFlashLight.changeAlarm(item, Const.deleteAlarm)
+                    modelFlashLight.changeAlarm(item, Const.DELETE_ALARM)
 
                 } else {
                     DialogItemList.AlertDelete(
@@ -220,7 +220,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
                             override fun onClick(flag: Boolean) {
                                 if (flag) {
                                     modelFlashLight.deleteItem(item)
-                                    modelFlashLight.changeAlarm(item, Const.deleteAlarm)
+                                    modelFlashLight.changeAlarm(item, Const.DELETE_ALARM)
                                 }
                             }
                         })
@@ -229,7 +229,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
 
             } // Удаления элемента
 
-            Const.alarm -> {
+            Const.ALARM -> {
 
                 if (view?.let {
                         Const.isPermissionGranted(
@@ -246,7 +246,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
                 }
             } // Установка будильника
 
-            Const.changeItem -> {
+            Const.CHANGE_ITEM -> {
                 DialogItemList.alertItem(
                     requireContext(),
                     object : DialogItemList.Listener {
@@ -263,7 +263,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onLongClick, ItemListAdapt
                             )
 
                             modelFlashLight.updateItem(newitem)   // если у item был установлен будильник то, тут мы перезаписываем будильник
-                            if (action == Const.alarm) {
+                            if (action == Const.ALARM) {
                                 if (view.let {
                                         it?.let { it1 ->
                                             Const.isPermissionGranted(

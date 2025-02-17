@@ -76,12 +76,12 @@ object DialogItemList {
                 if (input1.isEmpty()){
                     Toast.makeText(context, "Поле должно быть заполнено", Toast.LENGTH_SHORT).show()
                 } else {
-                    listener.onClickItem(input1.trim(), Const.alarm, id, input2.trim())
+                    listener.onClickItem(input1.trim(), Const.ALARM, id, input2.trim())
                     dialog.dismiss()
                 }
 
             } else {
-                listener.onClickItem(input1.trim(),Const.alarm, id, input2.trim())
+                listener.onClickItem(input1.trim(),Const.ALARM, id, input2.trim())
                 dialog.dismiss()
             }
 

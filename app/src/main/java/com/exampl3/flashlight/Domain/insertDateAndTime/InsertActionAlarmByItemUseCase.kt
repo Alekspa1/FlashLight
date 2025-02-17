@@ -8,8 +8,8 @@ import javax.inject.Singleton
 @Singleton
 class InsertActionAlarmByItemUseCase @Inject constructor(private val action: InsertDateAndTimeRepository) {
 
-    suspend fun exum(context: Context): Int{
-        return action.insertActionByItem(context)
+    suspend fun exum(context: Context,premium: Boolean): Int?{
+        return action.insertActionByItem(context, premium)
 
     }
 

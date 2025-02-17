@@ -19,13 +19,13 @@ class ListMenuAdapter(
         fun bind(item: ListCategory, onClick: onClick) {
             binding.textItem.text = item.name
             binding.cardView.setOnClickListener {
-                onClick.onClick(item, Const.change)
+                onClick.onClick(item, Const.CHANGE)
             }
             binding.imDeleteList.setOnClickListener {
-                onClick.onClick(item, Const.delete)
+                onClick.onClick(item, Const.DELETE)
             }
             binding.cardView.setOnLongClickListener {
-                onClick.onClick(item, Const.changeItem)
+                onClick.onClick(item, Const.CHANGE_ITEM)
                 true
             }
     }
