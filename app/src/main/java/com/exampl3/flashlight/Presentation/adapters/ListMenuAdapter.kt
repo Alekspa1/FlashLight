@@ -13,26 +13,27 @@ import com.exampl3.flashlight.databinding.ItemCategoryBinding
 
 class ListMenuAdapter(
     private val onClickListener: onClick
-): ListAdapter<ListCategory, ListMenuAdapter.ViewHolder>(DiffCallbackListCategory()) {
-    class ViewHolder(view: View): RecyclerView.ViewHolder(view) {
+) : ListAdapter<ListCategory, ListMenuAdapter.ViewHolder>(DiffCallbackListCategory()) {
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         private val binding = ItemCategoryBinding.bind(view)
         fun bind(item: ListCategory, onClick: onClick) {
             binding.textItem.text = item.name
             binding.cardView.setOnClickListener {
-                onClick.onClick(item, Const.change)
+                onClick.onClick(item, Const.CHANGE)
             }
             binding.imDeleteList.setOnClickListener {
-                onClick.onClick(item, Const.delete)
+                onClick.onClick(item, Const.DELETE)
             }
             binding.cardView.setOnLongClickListener {
-                onClick.onClick(item, Const.changeItem)
+                onClick.onClick(item, Const.CHANGE_ITEM)
                 true
             }
-    }
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_category, parent, false)
+        val view =
+            LayoutInflater.from(parent.context).inflate(R.layout.item_category, parent, false)
         return ViewHolder(view)
     }
 

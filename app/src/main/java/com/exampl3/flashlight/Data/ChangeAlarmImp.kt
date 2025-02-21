@@ -20,8 +20,8 @@ class ChangeAlarmImp @Inject constructor(
 
     override fun changeAlarm(item: Item, action: Int) {
         val alarmtIntent = Intent(context, AlarmReceiwer::class.java).let { intent ->
-            intent.putExtra(Const.keyIntent, item)
-            intent.setAction(Const.keyIntentAlarm)
+            intent.putExtra(Const.KEY_INTENT, item)
+            intent.setAction(Const.KEY_INTENT_ALARM)
             PendingIntent.getBroadcast(
                 context,
                 item.id!!,
@@ -30,7 +30,7 @@ class ChangeAlarmImp @Inject constructor(
             )
         }
         when (action) {
-            Const.deleteAlarm -> alarmManager.cancel(alarmtIntent)
+            Const.DELETE_ALARM -> alarmManager.cancel(alarmtIntent)
             else -> alarmManager.setExactAndAllowWhileIdle(
                 AlarmManager.RTC_WAKEUP,
                 item.alarmTime,

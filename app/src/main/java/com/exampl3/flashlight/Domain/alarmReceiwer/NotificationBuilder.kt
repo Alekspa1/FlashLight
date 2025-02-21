@@ -41,8 +41,8 @@ class NotificationBuilder @Inject constructor(
     private fun notificationBuilder(item: Item): NotificationCompat.Builder {
 
         val intentCancel = Intent(context, AlarmReceiwer::class.java)
-        intentCancel.setAction(Const.keyIntentCallBackReady)
-        intentCancel.putExtra(Const.keyIntentCallBackReady, item)
+        intentCancel.setAction(Const.KEY_INTENT_CALL_BACKREADY)
+        intentCancel.putExtra(Const.KEY_INTENT_CALL_BACKREADY, item)
 
         val canselIntent =
             PendingIntent.getBroadcast(
@@ -51,8 +51,8 @@ class NotificationBuilder @Inject constructor(
             )
 
         val intentPostpone = Intent(context, AlarmReceiwer::class.java)
-        intentPostpone.setAction(Const.keyIntentCallBackPostpone)
-        intentPostpone.putExtra(Const.keyIntentCallBackPostpone, item)
+        intentPostpone.setAction(Const.KEY_INTENT_CALL_POSTPONE)
+        intentPostpone.putExtra(Const.KEY_INTENT_CALL_POSTPONE, item)
 
         val postponeIntent =
             PendingIntent.getBroadcast(
@@ -75,6 +75,7 @@ class NotificationBuilder @Inject constructor(
             NotificationCompat.Builder(it, Const.CHANNEL_ID)
                 .setSmallIcon(R.drawable.icon)
                 .setContentTitle(item.name)
+                .setContentText(item.desc)
                 .setChannelId(Const.CHANNEL_ID)
                 .setPriority(NotificationManager.IMPORTANCE_HIGH)
                 .setStyle(bigTextStyle)

@@ -1,33 +1,22 @@
 package com.exampl3.flashlight.Presentation
 
 
-import android.Manifest
-import android.app.Activity
-import android.content.ContentUris
-import android.content.ContentValues
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.os.Environment
-import android.provider.MediaStore
-import android.util.Log
 import android.view.View
 
 import android.widget.Toast
-import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.result.contract.ActivityResultContracts.CreateDocument
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.room.Room
 import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Const.AUTHORIZED_RUSTORE
+import com.exampl3.flashlight.Const.DELETE
 import com.exampl3.flashlight.Const.DONATE
 import com.exampl3.flashlight.Const.FOREVER
 import com.exampl3.flashlight.Const.NOT_AUTHORIZED
@@ -50,7 +39,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import ru.rustore.sdk.billingclient.RuStoreBillingClient
 import ru.rustore.sdk.billingclient.RuStoreBillingClientFactory
 import ru.rustore.sdk.billingclient.model.product.Product
@@ -59,10 +47,6 @@ import ru.rustore.sdk.billingclient.model.purchase.Purchase
 import ru.rustore.sdk.billingclient.model.purchase.PurchaseState
 import ru.rustore.sdk.billingclient.usecase.ProductsUseCase
 import ru.rustore.sdk.billingclient.usecase.PurchasesUseCase
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.io.IOException
 import java.util.Calendar
 import java.util.UUID
 import javax.inject.Inject
@@ -87,9 +71,7 @@ class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-            setTheme(R.style.theme_35)
-        }
+
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -100,7 +82,6 @@ class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
         if (savedInstanceState == null) {
             billingClient.onNewIntent(intent)
         }
-
 
         with(binding) {
             if (modelFlashLight.getPremium()) bBuyPremium.text =
@@ -174,7 +155,6 @@ class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
 
             }
             bSettingsCard.setOnClickListener {
-
                 stub("Настройки")
                 drawer.closeDrawer(GravityCompat.START)
 
@@ -195,49 +175,6 @@ class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
 
     } // Инициализирую Яндекс Рекламу
 
-    private fun updateAlarm() {
-        CoroutineScope(Dispatchers.IO).launch {
-            db.CourseDao().getAllList().forEach { item ->
-
-                if (item.changeAlarm && item.alarmTime > calendarZero.timeInMillis) {
-                    when (item.interval) {
-                        Const.alarmOne -> {
-                            withContext(Dispatchers.Main) {
-                                modelFlashLight.changeAlarm(
-                                    item,
-                                    Const.alarmOne
-                                )
-                            }
-                        }
-
-                        else -> {
-                            withContext(Dispatchers.Main) {
-                                if (!modelFlashLight.getPremium()) {
-                                    modelFlashLight.changeAlarm(
-                                        item,
-                                        Const.deleteAlarm
-                                    )
-
-                                    withContext(Dispatchers.IO) {
-                                        db.CourseDao().updateItem(item.copy(changeAlarm = false))
-                                    }
-                                } else {
-
-                                    modelFlashLight.changeAlarm(
-                                        item,
-                                        item.interval
-                                    )
-
-                                }
-                            }
-                        }
-                    }
-                }
-
-            }
-        }
-
-    } // обновляю будильники
 
     private fun initAll() {
         modelFlashLight.updateCategory(getString(R.string.everyday))
@@ -293,7 +230,7 @@ class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
 
     //Override функции
 
-    override fun onNewIntent(intent: Intent?) {
+    override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         billingClient.onNewIntent(intent)
     }
@@ -301,24 +238,24 @@ class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
 
     override fun onClick(item: ListCategory, action: Int) {
         when (action) {
-            Const.delete -> {
+            DELETE -> {
                 DialogItemList.AlertDelete(this, object : DialogItemList.ActionTrueOrFalse {
                     override fun onClick(flag: Boolean) {
                         if (flag) {
                             CoroutineScope(Dispatchers.IO).launch {
                                 db.CourseDao().getAllNewNoFlow(item.name).forEach { itemList ->
-                                    modelFlashLight.changeAlarm(itemList, Const.deleteAlarm)
+                                    modelFlashLight.changeAlarm(itemList, Const.DELETE_ALARM)
                                 }
                                 db.CourseDao().deleteItemInCategory(item.name) // удаляю все из бд
                                 db.CourseDao().deleteCategoryMenu(item) // удаляю из меню
                             }
-                            modelFlashLight.updateCategory("Повседневные")
+                            modelFlashLight.updateCategory(getString(R.string.everyday))
 
                         }
                     }
                 })
             } // Удаление элемента
-            Const.changeItem -> {
+            Const.CHANGE_ITEM -> {
                 DialogItemList.AlertList(
                     this,
                     object : DialogItemList.Listener {
@@ -342,7 +279,7 @@ class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
                 )
 
             } // Изменение имени элемента
-            Const.change -> {
+            Const.CHANGE -> {
                 if (modelFlashLight.getPremium()) {
                     modelFlashLight.updateCategory(item.name)
                     binding.drawer.closeDrawer(GravityCompat.START)
