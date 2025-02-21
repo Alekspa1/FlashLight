@@ -45,8 +45,7 @@ class InsertDateAndAlarm @Inject constructor(
     suspend fun exumAlarm(item: Item, context: Context, first: Boolean) {
         calendarZero = Calendar.getInstance()
         if (first) {
-            //ChangeItemBeforeAlarm(item, context, item.alarmTime)
-            db.CourseDao().updateItem(item.copy(changeAlarm = true))
+            db.CourseDao().updateItem(item.copy(changeAlarm = true, change = false))
             changeAlarm.exum(item, item.interval)
 
         } else {
