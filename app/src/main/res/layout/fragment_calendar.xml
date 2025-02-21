@@ -1,81 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    layout_height=""
+    layout_width=""
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".Presentation.FragmentCalendar">
+    android:layout_height="wrap_content">
 
-    <com.applandeo.materialcalendarview.CalendarView
-        android:id="@+id/calendarView"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:layout_marginTop="1dp"
-        android:verticalScrollbarPosition="defaultPosition"
-        app:abbreviationsBarColor="@color/black"
-        app:abbreviationsLabelsColor="@color/white"
-        app:anotherMonthsDaysLabelsColor="#636363"
-        app:daysLabelsColor="@color/white"
-        app:eventsEnabled="true"
-        app:headerColor="@color/black"
-        app:headerLabelColor="@color/white"
-        app:layout_constraintBottom_toTopOf="@+id/rcViewItem"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0"
-        app:pagesColor="@color/black"
-        app:selectionColor="@color/Grey1"
-        app:selectionLabelColor="@color/white"
-        app:todayLabelColor="@color/paylib_design_avatar_thumb_drawable_gradient_end_4"
-        app:type="one_day_picker"
-        tools:visibility="visible">
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".Presentation.FragmentCalendar">
 
-    </com.applandeo.materialcalendarview.CalendarView>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rcViewItem"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginBottom="2dp"
-        app:layout_constraintBottom_toTopOf="@+id/imBAddCalendar"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/guideline2"
-        app:layout_constraintVertical_bias="0.0"
-        tools:visibility="visible" />
+        <com.applandeo.materialcalendarview.CalendarView
+            android:id="@+id/calendarView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="1dp"
+            android:verticalScrollbarPosition="defaultPosition"
+            app:abbreviationsBarColor="@color/black"
+            app:abbreviationsLabelsColor="@color/white"
+            app:anotherMonthsDaysLabelsColor="#636363"
+            app:daysLabelsColor="@color/white"
+            app:eventsEnabled="true"
+            app:headerColor="@color/black"
+            app:headerLabelColor="@color/white"
+            app:layout_constraintBottom_toTopOf="@+id/rcViewItem"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1.0"
+            app:pagesColor="@color/black"
+            app:selectionColor="@color/Grey1"
+            app:selectionLabelColor="@color/white"
+            app:todayLabelColor="@color/paylib_design_avatar_thumb_drawable_gradient_end_4"
+            app:type="one_day_picker"
+            tools:visibility="visible">
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_begin="363dp" />
+        </com.applandeo.materialcalendarview.CalendarView>
 
-    <TextView
-        android:id="@+id/tvDela"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Список дел пуст"
-        android:textColor="@color/white"
-        android:textSize="34sp"
-        app:layout_constraintBottom_toBottomOf="@+id/rcViewItem"
-        app:layout_constraintEnd_toEndOf="@+id/rcViewItem"
-        app:layout_constraintStart_toStartOf="@+id/rcViewItem"
-        app:layout_constraintTop_toBottomOf="@+id/calendarView" />
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rcViewItem"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="2dp"
+            app:layout_constraintBottom_toTopOf="@+id/imBAddCalendar"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/calendarView"
+            tools:visibility="visible" />
 
-    <ImageButton
-        android:id="@+id/imBAddCalendar"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        android:background="@null"
-        android:scaleType="centerInside"
-        android:src="@drawable/ic_add"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        <TextView
+            android:id="@+id/tvDela"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Список дел пуст"
+            android:textColor="@color/white"
+            android:textSize="34sp"
+            app:layout_constraintBottom_toBottomOf="@+id/rcViewItem"
+            app:layout_constraintEnd_toEndOf="@+id/rcViewItem"
+            app:layout_constraintStart_toStartOf="@+id/rcViewItem"
+            app:layout_constraintTop_toBottomOf="@+id/calendarView" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <ImageButton
+            android:id="@+id/imBAddCalendar"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="@null"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_add"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
