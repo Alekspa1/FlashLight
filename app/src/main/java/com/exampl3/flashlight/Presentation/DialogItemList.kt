@@ -3,14 +3,19 @@ package com.exampl3.flashlight.Presentation
 import android.app.AlertDialog
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.WindowManager
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.Toast
+import androidx.core.content.ContextCompat.getSystemService
 import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.R
 
 object DialogItemList {
     private val insertAlarmList =
         arrayOf("Один раз", "Каждый день", "Каждую неделю", "Каждый месяц", "Каждый год")
+
+
 
     fun AlertList(context: Context, listener: Listener, name: String?) {
         val builred = AlertDialog.Builder(context)
@@ -52,6 +57,7 @@ object DialogItemList {
         val editText2 = dialogLayout.findViewById<EditText>(R.id.edDescItemName)
         editText1.setText(name)
         editText2.setText(desc)
+        editText1.requestFocus()
         builder.setTitle("Сфокусироваться")
         var input1: String
         var input2: String
@@ -91,6 +97,10 @@ object DialogItemList {
         builder.setNegativeButton("Отмена") { dialog, _ -> dialog.cancel() }
         builder.setView(dialogLayout)
         builder.show()
+        editText1.postDelayed({
+            val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.showSoftInput(editText1, InputMethodManager.SHOW_IMPLICIT)
+        }, 200)
     }
 
     fun AlertDelete(context: Context, delete: ActionTrueOrFalse) {

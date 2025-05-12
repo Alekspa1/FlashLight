@@ -47,12 +47,12 @@ dependencies {
     implementation("com.applandeo:material-calendar-view:1.9.2")
 
 
-    implementation("com.yandex.android:mobileads:7.10.0")
-    implementation("com.yandex.ads.mediation:mobileads-mytarget:5.22.1.4")
+    implementation("com.yandex.android:mobileads:7.12.2")
+    implementation("com.yandex.ads.mediation:mobileads-mytarget:5.22.1.8")
 
     implementation("ru.rustore.sdk:billingclient:7.0.0")
-    implementation ("com.google.dagger:hilt-android:2.51.1")
-    kapt ("com.google.dagger:hilt-compiler:2.51.1")
+    implementation ("com.google.dagger:hilt-android:2.55")
+    kapt ("com.google.dagger:hilt-compiler:2.55")
 
     implementation ("androidx.room:room-runtime:2.6.1")
     kapt ("androidx.room:room-compiler:2.6.1")

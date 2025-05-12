@@ -75,7 +75,6 @@ class AlarmReceiwer : BroadcastReceiver() {
                 val item = intent.getSerializableExtra(KEY_INTENT_CALL_POSTPONE) as Item
                 when (item.interval) {
                     ALARM_ONE -> {
-                        //insertDateAndAlarm.ChangeItemBeforeAlarm(item, context, time)
                         val newItem = item.copy(changeAlarm = true, alarmTime = time)
                         CoroutineScope(Dispatchers.IO).launch {
                             db.CourseDao().updateItem(newItem)
@@ -120,6 +119,7 @@ class AlarmReceiwer : BroadcastReceiver() {
                 ALARM_ONE -> {
                     db.CourseDao().updateItem(
                         item.copy(
+                            change = false,
                             changeAlarm = false,
                             name = "${item.name} $value".trim()
                         )
