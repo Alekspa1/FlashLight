@@ -2,7 +2,6 @@ package com.exampl3.flashlight.Presentation
 
 
 import android.content.Context
-import android.net.Uri
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
