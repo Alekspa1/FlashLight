@@ -45,13 +45,15 @@ android {
 
 dependencies {
     implementation("com.applandeo:material-calendar-view:1.9.2")
-
+    implementation ("com.github.bumptech.glide:glide:4.15.1")
+    kapt ("com.github.bumptech.glide:compiler:4.15.1")
 
     implementation("com.yandex.android:mobileads:7.12.2")
     implementation("com.yandex.ads.mediation:mobileads-mytarget:5.22.1.8")
 
     implementation("ru.rustore.sdk:billingclient:7.0.0")
     implementation ("com.google.dagger:hilt-android:2.55")
+    implementation("androidx.activity:activity-ktx:1.8.1")
     kapt ("com.google.dagger:hilt-compiler:2.55")
 
     implementation ("androidx.room:room-runtime:2.6.1")

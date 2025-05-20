@@ -49,6 +49,13 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
     private lateinit var calendarDayB: Calendar
     private lateinit var adapter: ItemListAdapter
     private lateinit var pLauncher: ActivityResultLauncher<String>
+    private val pickImageLauncher = registerForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let {
+            modelFlashLight.uriPhoto.value = uri.toString()
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -75,7 +82,8 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
                             name: String,
                             action: Int?,
                             id: Int?,
-                            desc: String?
+                            desc: String?,
+                            uri: String?
                         ) {
                             var item: Item
                             modelFlashLight.insertItem(
@@ -84,7 +92,8 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
                                     name,
                                     category = requireContext().getString(R.string.everyday),
                                     desc = desc,
-                                    alarmTime = calendarDayB.timeInMillis
+                                    alarmTime = calendarDayB.timeInMillis,
+                                    alarmText = uri.toString()
                                 )
                             )
 
@@ -132,8 +141,7 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
                         }
                     },
                     null,
-                    null,
-                    null
+                      model = modelFlashLight, lifecycleOwner = this,pickImageLauncher
                 )
                 else Toast.makeText(
                     requireContext(),
@@ -274,9 +282,10 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
                             name: String,
                             action: Int?,
                             id: Int?,
-                            desc: String?
+                            desc: String?,
+                            uri: String?
                         ) {
-                            val newitem = item.copy(name = name, desc = desc)
+                            val newitem = item.copy(name = name, desc = desc, alarmText = uri.toString())
                             if (item.changeAlarm) modelFlashLight.changeAlarm(
                                 newitem,
                                 newitem.interval
@@ -302,7 +311,7 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
 
                         }
                     },
-                    item.name, item.id, item.desc
+                    item,  model = modelFlashLight, lifecycleOwner = this,pickImageLauncher
                 )
 
             } // Изменение имени элемента

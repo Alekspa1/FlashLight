@@ -2,6 +2,7 @@ package com.exampl3.flashlight.Presentation
 
 
 import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -38,6 +39,8 @@ class ViewModelFlashLight @Inject constructor(
     val listItemLD = MutableLiveData<List<Item>>()
 
     val listItemLDCalendar = MutableLiveData<List<Item>>()
+
+    val uriPhoto = MutableLiveData<String>()
 
     fun getAllListCategory(): Flow<List<ListCategory>> {
         return db.CourseDao().getAllListCategory()

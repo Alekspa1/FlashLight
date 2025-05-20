@@ -4,9 +4,11 @@ package com.exampl3.flashlight.Presentation
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.speech.RecognizerIntent
+import android.util.Log
 
 import android.view.LayoutInflater
 import android.view.View
@@ -49,7 +51,13 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
     private val modelFlashLight: ViewModelFlashLight by activityViewModels()
     private lateinit var pLauncher: ActivityResultLauncher<String>
 
-
+    private val pickImageLauncher = registerForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let {
+            modelFlashLight.uriPhoto.value = uri.toString()
+        }
+    }
     private lateinit var calendarZero: Calendar
 
     override fun onCreateView(
@@ -63,6 +71,9 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initRcView()
+        modelFlashLight.uriPhoto.observe(viewLifecycleOwner){
+            Log.d("MyLog", it)
+        }
 
         modelFlashLight.categoryItemLD.observe(viewLifecycleOwner) { value ->
             binding.tvCategory.text = value
@@ -109,15 +120,17 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
 
         binding.imBAddFrag.setOnClickListener {
             DialogItemList.alertItem(requireContext(), object : DialogItemList.Listener {
-                override fun onClickItem(name: String, action: Int?, id: Int?, desc: String?) {
+                override fun onClickItem(name: String, action: Int?, id: Int?, desc: String?, uri: String?) {
                     var item: Item
+
                     modelFlashLight.insertItem(
                         Item(
                             null,
                             name,
                             category = modelFlashLight.categoryItemLD.value!!,
                             desc = desc,
-                            alarmTime = 0
+                            alarmTime = 0,
+                            alarmText = uri.toString()
                         )
                     )
 
@@ -163,7 +176,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
 
                     }
                 }
-            }, null, null, null)
+            }, null,  model = modelFlashLight, lifecycleOwner = this,pick = pickImageLauncher)
 
         }
 
@@ -258,9 +271,10 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
                             name: String,
                             action: Int?,
                             id: Int?,
-                            desc: String?
+                            desc: String?,
+                            uri: String?
                         ) {
-                            val newitem = item.copy(name = name, desc = desc)
+                            val newitem = item.copy(name = name, desc = desc, alarmText = uri.toString())
                             if (item.changeAlarm) modelFlashLight.changeAlarm(
                                 newitem,
                                 newitem.interval
@@ -286,7 +300,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
 
                         }
                     },
-                    item.name, item.id, item.desc
+                    item, model = modelFlashLight, lifecycleOwner = this, pickImageLauncher
                 )
 
             } // Изменение имени элемента

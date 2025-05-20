@@ -1,17 +1,29 @@
 package com.exampl3.flashlight.Presentation
 
 import android.app.AlertDialog
+import android.app.Dialog
 import android.content.Context
+import android.net.Uri
+import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
-import androidx.core.content.ContextCompat.getSystemService
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.LifecycleOwner
+import com.bumptech.glide.Glide
 import com.exampl3.flashlight.Const
+import com.exampl3.flashlight.Data.Room.Item
 import com.exampl3.flashlight.R
 
 object DialogItemList {
+
     private val insertAlarmList =
         arrayOf("Один раз", "Каждый день", "Каждую неделю", "Каждый месяц", "Каждый год")
 
@@ -31,12 +43,12 @@ object DialogItemList {
                 if (edName.text.isEmpty()) {
                     Toast.makeText(context, "Поле должно быть заполнено", Toast.LENGTH_SHORT).show()
                 } else {
-                    listener.onClickItem(edName.text.toString().trim(), null, null, null)
+                    listener.onClickItem(edName.text.toString().trim(), null, null, null, null)
                     dialog.dismiss()
                 }
 
             } else {
-                listener.onClickItem(edName.text.toString().trim(), null, null, null)
+                listener.onClickItem(edName.text.toString().trim(), null, null, null, null)
                 dialog.dismiss()
             }
 
@@ -49,14 +61,70 @@ object DialogItemList {
 
     }
 
-    fun alertItem(context: Context, listener: Listener, name: String?, id: Int?, desc: String?) {
+    fun showExpandedImage(uri: String, context: Context) {
+
+        val dialog = Dialog(context).apply {
+            setContentView(R.layout.dialog_expanded_image)
+//            window?.setLayout(
+//                WindowManager.LayoutParams.MATCH_PARENT,
+//                WindowManager.LayoutParams.MATCH_PARENT
+//            )
+            val image = findViewById<ImageView>(R.id.expandedImage)
+
+                Glide.with(context)
+                    .load(uri)
+                    .into(image)
+            image.setOnClickListener { dismiss() } // закрыть по клику
+
+        }
+        dialog.show()
+    }
+
+    fun alertItem(context: Context, listener: Listener, item: Item?,
+                  model: ViewModelFlashLight,
+                  lifecycleOwner: LifecycleOwner,
+                  pick:  ActivityResultLauncher<String>) {
         val builder = AlertDialog.Builder(context)
         val inflater = LayoutInflater.from(context)
         val dialogLayout = inflater.inflate(R.layout.dialog_layout, null)
         val editText1 = dialogLayout.findViewById<EditText>(R.id.itemName)
         val editText2 = dialogLayout.findViewById<EditText>(R.id.edDescItemName)
-        editText1.setText(name)
-        editText2.setText(desc)
+        val imView = dialogLayout.findViewById<ImageView>(R.id.imPhoto)
+        val deleteText = dialogLayout.findViewById<TextView>(R.id.tvDel)
+        val addPhoto = dialogLayout.findViewById<TextView>(R.id.tvAddPhoto)
+
+        model.uriPhoto.value = ""
+        var uriString = ""
+
+        model.uriPhoto.observe(lifecycleOwner) { uri ->
+            updateImagePreview(imView, deleteText, uri)
+            uriString = uri.toString()
+        }
+        imView.setOnClickListener {
+            //val uriItem = item?.alarmText ?: model.uriPhoto.value.toString()
+            showExpandedImage(uriString, context)
+
+        }
+        if (item != null) {
+            updateImagePreview(imView, deleteText, item.alarmText)
+            editText1.setText(item.name)
+            editText2.setText(item.desc)
+            uriString = item.alarmText
+            updateImagePreview(imView, deleteText, uriString)
+        } else updateImagePreview(imView, deleteText, "")
+
+        deleteText.setOnClickListener {
+            updateImagePreview(imView, deleteText, "")
+            model.uriPhoto.value = ""
+        }
+
+        addPhoto.setOnClickListener {
+            pick.launch("image/*")
+        }
+
+
+
+
         editText1.requestFocus()
         builder.setTitle("Сфокусироваться")
         var input1: String
@@ -64,32 +132,32 @@ object DialogItemList {
         builder.setPositiveButton("OK") { dialog, _ ->
             input1 = editText1.text.toString()
             input2 = editText2.text.toString()
-            if (name == null) {
+            if (item == null) {
                 if (input1.isEmpty()) {
-                    Toast.makeText(context, "Поле должно быть заполнено", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Название не должно быть пустым", Toast.LENGTH_SHORT).show()
                 } else {
-                    listener.onClickItem(input1.trim(), null, id, input2.trim())
+                    listener.onClickItem(input1.trim(), null, null, input2.trim(), uriString)
                     dialog.dismiss()
                 }
 
             } else {
-                listener.onClickItem(input1.trim(), null, id, input2.trim())
+                listener.onClickItem(input1.trim(), null, item.id, input2.trim(), uriString)
                 dialog.dismiss()
             }
         }
         builder.setNeutralButton("Установка будильника") { dialog, _ ->
             input1 = editText1.text.toString()
             input2 = editText2.text.toString()
-            if (name == null) {
+            if (item == null) {
                 if (input1.isEmpty()) {
-                    Toast.makeText(context, "Поле должно быть заполнено", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Название не должно быть пустым", Toast.LENGTH_SHORT).show()
                 } else {
-                    listener.onClickItem(input1.trim(), Const.ALARM, id, input2.trim())
+                    listener.onClickItem(input1.trim(), Const.ALARM, null, input2.trim(), uriString)
                     dialog.dismiss()
                 }
 
             } else {
-                listener.onClickItem(input1.trim(), Const.ALARM, id, input2.trim())
+                listener.onClickItem(input1.trim(), Const.ALARM, item.id, input2.trim(), uriString)
                 dialog.dismiss()
             }
 
@@ -102,6 +170,102 @@ object DialogItemList {
             imm.showSoftInput(editText1, InputMethodManager.SHOW_IMPLICIT)
         }, 200)
     }
+
+//    fun alertItem(context: Context, listener: Listener, name: String?, id: Int?, desc: String?,
+//                  currentImageUri: Uri? = null,
+//                  model: ViewModelFlashLight,
+//                  lifecycleOwner: LifecycleOwner,
+//                  pick:  ActivityResultLauncher<String>? = null) {
+//        val builder = AlertDialog.Builder(context)
+//        val inflater = LayoutInflater.from(context)
+//        val dialogLayout = inflater.inflate(R.layout.dialog_layout, null)
+//        val editText1 = dialogLayout.findViewById<EditText>(R.id.itemName)
+//        val editText2 = dialogLayout.findViewById<EditText>(R.id.edDescItemName)
+//        val imView = dialogLayout.findViewById<ImageView>(R.id.imPhoto)
+//        val deleteText = dialogLayout.findViewById<TextView>(R.id.tvDel)
+//        val addPhoto = dialogLayout.findViewById<TextView>(R.id.tvAddPhoto)
+//        var selectedImageUri: Uri? = currentImageUri
+//        model.uriPhoto.observe(lifecycleOwner) { uri ->
+//            updateImagePreview(imView, deleteText, uri)
+//        }
+//        updateImagePreview(imView, deleteText, selectedImageUri)
+//        deleteText.setOnClickListener {
+//            selectedImageUri = null
+//            updateImagePreview(imView, deleteText, null)
+//        }
+//
+//        addPhoto.setOnClickListener {
+//            pick?.launch("image/*")
+//            Glide.with(context).load(selectedImageUri).into(imView)
+//        }
+//
+//
+//        editText1.setText(name)
+//        editText2.setText(desc)
+//        editText1.requestFocus()
+//        builder.setTitle("Сфокусироваться")
+//        var input1: String
+//        var input2: String
+//        builder.setPositiveButton("OK") { dialog, _ ->
+//            input1 = editText1.text.toString()
+//            input2 = editText2.text.toString()
+//            if (name == null) {
+//                if (input1.isEmpty()) {
+//                    Toast.makeText(context, "Поле должно быть заполнено", Toast.LENGTH_SHORT).show()
+//                } else {
+//                    listener.onClickItem(input1.trim(), null, id, input2.trim())
+//                    dialog.dismiss()
+//                }
+//
+//            } else {
+//                listener.onClickItem(input1.trim(), null, id, input2.trim())
+//                dialog.dismiss()
+//            }
+//        }
+//        builder.setNeutralButton("Установка будильника") { dialog, _ ->
+//            input1 = editText1.text.toString()
+//            input2 = editText2.text.toString()
+//            if (name == null) {
+//                if (input1.isEmpty()) {
+//                    Toast.makeText(context, "Поле должно быть заполнено", Toast.LENGTH_SHORT).show()
+//                } else {
+//                    listener.onClickItem(input1.trim(), Const.ALARM, id, input2.trim())
+//                    dialog.dismiss()
+//                }
+//
+//            } else {
+//                listener.onClickItem(input1.trim(), Const.ALARM, id, input2.trim())
+//                dialog.dismiss()
+//            }
+//
+//        }
+//        builder.setNegativeButton("Отмена") { dialog, _ -> dialog.cancel() }
+//        builder.setView(dialogLayout)
+//        builder.show()
+//        editText1.postDelayed({
+//            val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+//            imm.showSoftInput(editText1, InputMethodManager.SHOW_IMPLICIT)
+//        }, 200)
+//    }
+
+    private fun updateImagePreview(
+        imageView: ImageView,
+        deleteBtn: TextView,
+        uri: String
+    ) {
+        if (uri.isNotEmpty()) {
+            Glide.with(imageView.context)
+                .load(uri)
+                .into(imageView)
+            imageView.visibility = View.VISIBLE
+            deleteBtn.visibility = View.VISIBLE
+        } else {
+            imageView.visibility = View.GONE
+            deleteBtn.visibility = View.GONE
+        }
+    }
+
+
 
     fun AlertDelete(context: Context, delete: ActionTrueOrFalse) {
         val builred = AlertDialog.Builder(context)
@@ -187,7 +351,7 @@ object DialogItemList {
     }
 
     interface Listener {
-        fun onClickItem(name: String, action: Int?, id: Int?, desc: String?)
+        fun onClickItem(name: String, action: Int?, id: Int?, desc: String?, uri: String?)
     }
 
     interface ActionTrueOrFalse {
