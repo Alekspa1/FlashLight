@@ -2,6 +2,9 @@ package com.exampl3.flashlight.Presentation
 
 
 import android.content.Context
+import android.net.Uri
+import android.widget.Toast
+import androidx.core.net.toUri
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,6 +18,8 @@ import com.exampl3.flashlight.Domain.useCase.insertOrDeleteAlarm.ChangeAlarmUseC
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.IOException
 import java.util.Calendar
 import javax.inject.Inject
 
@@ -46,6 +51,46 @@ class ViewModelFlashLight @Inject constructor(
     }
 
 
+
+     fun saveImagePermanently(context: Context, uri: Uri): Uri {
+        val imagesDir = File(context.filesDir, "images")
+        if (!imagesDir.exists()) {
+            imagesDir.mkdirs() // Создаем директорию, если она не существует
+        }
+        val file = File(imagesDir, "${System.currentTimeMillis()}.jpg")
+
+        context.contentResolver.openInputStream(uri)?.use { input ->
+            file.outputStream().use { output ->
+                input.copyTo(output)
+            }
+        }
+
+        if (file.exists()) {
+            return Uri.fromFile(file)
+        } else {
+            Toast.makeText(context, "Произошла ошибка сохранения", Toast.LENGTH_SHORT).show()
+            return "".toUri()
+        }
+    }
+
+    private fun deleteSavedImage(imageUri: Uri) {
+        try {
+            // Для URI вида "file:///data/data/.../images/123.jpg"
+            if (imageUri.scheme == "file") {
+                File(imageUri.path!!).delete()
+                return
+            }
+
+            // Если URI в строковом формате (из вашего saveImagePermanently)
+            val uriString = imageUri.toString()
+            if (uriString.startsWith("file://")) {
+                File(uriString.substringAfter("file://")).delete()
+            }
+        } catch (_: Exception) {
+        }
+    }
+
+
     fun updateCategory(value: String) {
         categoryItemLD.value = value
         viewModelScope.launch {
@@ -65,6 +110,8 @@ class ViewModelFlashLight @Inject constructor(
 
     fun deleteItem(item: Item) {
         viewModelScope.launch { db.CourseDao().delete(item) }
+        deleteSavedImage(item.alarmText.toUri())
+
     }
 
     fun changeAlarm(item: Item, action: Int) {

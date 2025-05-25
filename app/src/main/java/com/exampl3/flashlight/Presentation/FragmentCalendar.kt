@@ -19,6 +19,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.applandeo.materialcalendarview.CalendarDay
 import com.applandeo.materialcalendarview.listeners.OnCalendarDayClickListener
 import com.exampl3.flashlight.Const
+import com.exampl3.flashlight.Const.ALARM
+import com.exampl3.flashlight.Const.CHANGE
+import com.exampl3.flashlight.Const.CHANGE_ITEM
+import com.exampl3.flashlight.Const.DELETE
+import com.exampl3.flashlight.Const.IMAGE
 import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Data.Room.Item
 
@@ -49,11 +54,13 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
     private lateinit var calendarDayB: Calendar
     private lateinit var adapter: ItemListAdapter
     private lateinit var pLauncher: ActivityResultLauncher<String>
+
     private val pickImageLauncher = registerForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri ->
         uri?.let {
-            modelFlashLight.uriPhoto.value = uri.toString()
+            val permanentFile = modelFlashLight.saveImagePermanently(requireContext(), it)
+            modelFlashLight.uriPhoto.value = permanentFile.toString()
         }
     }
 
@@ -222,7 +229,7 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
 
     override fun onClick(item: Item, action: Int) {
         when (action) {
-            Const.CHANGE -> {
+            CHANGE -> {
                 modelFlashLight.updateItem(item.copy(change = !item.change))
                 if (item.changeAlarm) {
                     modelFlashLight.updateItem(
@@ -236,7 +243,7 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
 
             } // Изменение состояния элемента(активный/неактивный)
 
-            Const.DELETE -> {
+            DELETE -> {
                 if (item.change) {
                     modelFlashLight.deleteItem(item)
                     modelFlashLight.changeAlarm(item, Const.DELETE_ALARM)
@@ -257,7 +264,7 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
 
             } // Удаления элемента
 
-            Const.ALARM -> {
+            ALARM -> {
 
                 if (view?.let {
                         Const.isPermissionGranted(
@@ -274,7 +281,7 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
                 }
             } // Установка будильника
 
-            Const.CHANGE_ITEM -> {
+            CHANGE_ITEM -> {
                 DialogItemList.alertItem(
                     requireContext(),
                     object : DialogItemList.Listener {
@@ -315,6 +322,10 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
                 )
 
             } // Изменение имени элемента
+
+            IMAGE -> {
+                DialogItemList.showExpandedImage(item.alarmText, requireContext())
+            } // Открытие картинки
         }
 
     }

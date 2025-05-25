@@ -28,13 +28,14 @@
                 android:id="@+id/im_photoView"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:layout_marginTop="-12dp"
-                android:layout_marginEnd="-12dp"
+                android:layout_marginStart="8dp"
                 android:visibility="gone"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="@+id/imStatus"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/imStatus"
+                app:layout_constraintVertical_bias="0.0"
                 app:srcCompat="@drawable/ic_image"
-                tools:visibility="visible" />
+                tools:visibility="gone" />
 
             <TextView
                 android:id="@+id/textItem"
@@ -45,8 +46,7 @@
                 android:textColor="@color/white"
                 android:textSize="20sp"
                 app:layout_constraintEnd_toStartOf="@+id/imStatus"
-                app:layout_constraintHorizontal_bias="0.2"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/im_photoView"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView

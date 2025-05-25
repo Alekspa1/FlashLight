@@ -9,6 +9,9 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+
 
     <application
         android:name=".Presentation.App"
@@ -21,6 +24,7 @@
         android:supportsRtl="true"
         android:theme="@style/Base.Theme.FlashLight"
         tools:targetApi="31">
+
 
         <receiver
             android:name=".Domain.alarmReceiwer.AlarmReceiwer"

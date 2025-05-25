@@ -69,6 +69,9 @@ class ItemListAdapter(
                     onLongClickListener.onLongClick(item, Const.ALARM)
                     true
                 }
+                imPhotoView.setOnClickListener {
+                    onClick.onClick(item, Const.IMAGE )
+                }
             }
         }
 

@@ -85,7 +85,6 @@ class InsertDateAndTimeImpl : InsertDateAndTimeRepository {
                         }
                     }
                 }
-                //actionDeferred.complete(action)
             }
         })
         return actionDeferred.await()

@@ -3,6 +3,7 @@ package com.exampl3.flashlight.Presentation
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -60,17 +61,13 @@ object DialogItemList {
 
         val dialog = Dialog(context).apply {
             setContentView(R.layout.dialog_expanded_image)
-//            window?.setLayout(
-//                WindowManager.LayoutParams.MATCH_PARENT,
-//                WindowManager.LayoutParams.MATCH_PARENT
-//            )
             val image = findViewById<ImageView>(R.id.expandedImage)
 
-                Glide.with(context)
+            Glide.with(context)
                     .load(uri)
                     .into(image)
-            image.setOnClickListener { dismiss() } // закрыть по клику
 
+            image.setOnClickListener { dismiss() } // закрыть по клику
         }
         dialog.show()
     }
@@ -96,9 +93,7 @@ object DialogItemList {
             uriString = uri.toString()
         }
         imView.setOnClickListener {
-            //val uriItem = item?.alarmText ?: model.uriPhoto.value.toString()
             showExpandedImage(uriString, context)
-
         }
         if (item != null) {
             updateImagePreview(imView, deleteText, item.alarmText)
@@ -106,7 +101,14 @@ object DialogItemList {
             editText2.setText(item.desc)
             uriString = item.alarmText
             updateImagePreview(imView, deleteText, uriString)
-        } else updateImagePreview(imView, deleteText, "")
+        } else {
+            updateImagePreview(imView, deleteText, "")
+            editText1.requestFocus()
+            editText1.postDelayed({
+                val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.showSoftInput(editText1, InputMethodManager.SHOW_IMPLICIT)
+            }, 200)
+        }
 
         deleteText.setOnClickListener {
             updateImagePreview(imView, deleteText, "")
@@ -120,7 +122,7 @@ object DialogItemList {
 
 
 
-        editText1.requestFocus()
+
         builder.setTitle("Сфокусироваться")
         var input1: String
         var input2: String
@@ -160,10 +162,6 @@ object DialogItemList {
         builder.setNegativeButton("Отмена") { dialog, _ -> dialog.cancel() }
         builder.setView(dialogLayout)
         builder.show()
-        editText1.postDelayed({
-            val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            imm.showSoftInput(editText1, InputMethodManager.SHOW_IMPLICIT)
-        }, 200)
     }
 
 //    fun alertItem(context: Context, listener: Listener, name: String?, id: Int?, desc: String?,
@@ -259,7 +257,6 @@ object DialogItemList {
             deleteBtn.visibility = View.GONE
         }
     }
-
 
 
     fun AlertDelete(context: Context, delete: ActionTrueOrFalse) {
