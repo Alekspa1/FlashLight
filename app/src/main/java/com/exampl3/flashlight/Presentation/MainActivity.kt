@@ -133,7 +133,8 @@ class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
                             name: String,
                             action: Int?,
                             id: Int?,
-                            desc: String?
+                            desc: String?,
+                            uri: String?
                         ) {
                             CoroutineScope(Dispatchers.IO).launch {
                                 db.CourseDao().insertCategory(ListCategory(null, name))
@@ -263,7 +264,8 @@ class MainActivity : AppCompatActivity(), ListMenuAdapter.onClick {
                             name: String,
                             action: Int?,
                             id: Int?,
-                            desc: String?
+                            desc: String?,
+                            uri: String?
                         ) {
                             CoroutineScope(Dispatchers.IO).launch {
                                 val newitem = item.copy(name = name)

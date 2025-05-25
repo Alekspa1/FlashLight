@@ -19,6 +19,7 @@ class ItemListAdapter(
 ) : ListAdapter<Item, ItemListAdapter.ViewHolder>(DiffCallback()) {
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         private val binding = ItemBinding.bind(view)
+
         fun bind(item: Item, onLongClickListener: onLongClick, onClick: onClick) {
             with(binding) {
 
@@ -26,6 +27,8 @@ class ItemListAdapter(
                 tvAlarm.text = alarmText(item) ?: "".trim()
                 tvDesc.text = item.desc
                 if (tvDesc.text !== "") tvDesc.visibility = View.VISIBLE
+                if (item.alarmText.isNotEmpty()) imPhotoView.visibility = View.VISIBLE
+                else imPhotoView.visibility = View.GONE
                 when (item.changeAlarm) {
                     true -> {
                         cardView.setBackgroundResource(R.drawable.button_background_alarm)
@@ -65,6 +68,9 @@ class ItemListAdapter(
                 imAlarm.setOnLongClickListener {
                     onLongClickListener.onLongClick(item, Const.ALARM)
                     true
+                }
+                imPhotoView.setOnClickListener {
+                    onClick.onClick(item, Const.IMAGE )
                 }
             }
         }
