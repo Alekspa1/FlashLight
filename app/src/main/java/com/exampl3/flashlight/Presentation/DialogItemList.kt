@@ -3,7 +3,6 @@ package com.exampl3.flashlight.Presentation
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -12,7 +11,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
-import androidx.core.net.toUri
 import androidx.lifecycle.LifecycleOwner
 import com.bumptech.glide.Glide
 import com.exampl3.flashlight.Const

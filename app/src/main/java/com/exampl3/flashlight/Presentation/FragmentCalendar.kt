@@ -110,7 +110,7 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
                             )
 
 
-                            if (action == Const.ALARM) {
+                            if (action == ALARM) {
                                 if (view.let {
                                         Const.isPermissionGranted(
                                             it.context,
@@ -310,7 +310,7 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
                             )
 
                             modelFlashLight.updateItem(newitem)   // если у item был установлен будильник то, тут мы перезаписываем будильник
-                            if (action == Const.ALARM) {
+                            if (action == ALARM) {
                                 if (view.let {
                                         it?.let { it1 ->
                                             Const.isPermissionGranted(
