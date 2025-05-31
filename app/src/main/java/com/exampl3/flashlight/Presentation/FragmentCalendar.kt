@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.asLiveData
@@ -59,8 +60,7 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
         ActivityResultContracts.GetContent()
     ) { uri ->
         uri?.let {
-            val permanentFile = modelFlashLight.saveImagePermanently(requireContext(), it)
-            modelFlashLight.uriPhoto.value = permanentFile.toString()
+            modelFlashLight.uriPhoto.value = it.toString()
         }
     }
 
@@ -93,6 +93,11 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
                             uri: String?
                         ) {
                             var item: Item
+                            var permanentFile = ""
+                            if(uri!!.isNotEmpty()){
+                                permanentFile =
+                                    modelFlashLight.saveImagePermanently(requireContext(), uri.toUri()).toString()
+                            }
                             modelFlashLight.insertItem(
                                 Item(
                                     null,
@@ -100,7 +105,7 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
                                     category = requireContext().getString(R.string.everyday),
                                     desc = desc,
                                     alarmTime = calendarDayB.timeInMillis,
-                                    alarmText = uri.toString()
+                                    alarmText = permanentFile
                                 )
                             )
 
@@ -292,7 +297,13 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
                             desc: String?,
                             uri: String?
                         ) {
-                            val newitem = item.copy(name = name, desc = desc, alarmText = uri.toString())
+                            var permanentFile = uri
+                            if (item.alarmText != uri) {
+                                modelFlashLight.deleteSavedImage(item.alarmText.toUri())
+                                permanentFile = modelFlashLight.saveImagePermanently(requireContext(), uri!!.toUri()).toString()
+
+                            }
+                            val newitem = item.copy(name = name, desc = desc, alarmText = permanentFile.toString())
                             if (item.changeAlarm) modelFlashLight.changeAlarm(
                                 newitem,
                                 newitem.interval

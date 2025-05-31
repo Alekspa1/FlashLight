@@ -39,6 +39,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.FileNotFoundException
 import java.util.Calendar
 import javax.inject.Inject
 
@@ -55,20 +56,13 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
     private val modelFlashLight: ViewModelFlashLight by activityViewModels()
     private lateinit var pLauncher: ActivityResultLauncher<String>
 
-//    private val pickImageLauncher = registerForActivityResult(
-//        ActivityResultContracts.GetContent()
-//    ) { uri ->
-//        uri?.let {
-//            modelFlashLight.uriPhoto.value = uri.toString()
-//        }
-//    }
+
 
     private val pickImageLauncher = registerForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri ->
         uri?.let {
-            val permanentFile = modelFlashLight.saveImagePermanently(requireContext(), it)
-            modelFlashLight.uriPhoto.value = permanentFile.toString()
+            modelFlashLight.uriPhoto.value = it.toString()
         }
     }
 
@@ -134,6 +128,12 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
             DialogItemList.alertItem(requireContext(), object : DialogItemList.Listener {
                 override fun onClickItem(name: String, action: Int?, id: Int?, desc: String?, uri: String?) {
                     var item: Item
+                    var permanentFile = ""
+                    if(uri!!.isNotEmpty()){
+                        permanentFile =
+                            modelFlashLight.saveImagePermanently(requireContext(), uri.toUri()).toString()
+                    }
+
 
                     modelFlashLight.insertItem(
                         Item(
@@ -142,7 +142,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
                             category = modelFlashLight.categoryItemLD.value!!,
                             desc = desc,
                             alarmTime = 0,
-                            alarmText = uri.toString()
+                            alarmText = permanentFile
                         )
                     )
 
@@ -288,7 +288,13 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
                             desc: String?,
                             uri: String?
                         ) {
-                            val newitem = item.copy(name = name, desc = desc, alarmText = uri.toString())
+                            var permanentFile = uri
+                            if (item.alarmText != uri) {
+                                modelFlashLight.deleteSavedImage(item.alarmText.toUri())
+                                permanentFile = modelFlashLight.saveImagePermanently(requireContext(), uri!!.toUri()).toString()
+
+                            }
+                            val newitem = item.copy(name = name, desc = desc, alarmText = permanentFile.toString())
                             if (item.changeAlarm) modelFlashLight.changeAlarm(
                                 newitem,
                                 newitem.interval

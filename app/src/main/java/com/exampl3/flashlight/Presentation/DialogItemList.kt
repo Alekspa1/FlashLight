@@ -12,6 +12,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
+import androidx.core.net.toUri
 import androidx.lifecycle.LifecycleOwner
 import com.bumptech.glide.Glide
 import com.exampl3.flashlight.Const
@@ -111,11 +112,17 @@ object DialogItemList {
         }
 
         deleteText.setOnClickListener {
-            updateImagePreview(imView, deleteText, "")
             model.uriPhoto.value = ""
+//            if (item != null) {
+//                model.deleteSavedImage(item.alarmText.toUri())
+//            }
         }
 
         addPhoto.setOnClickListener {
+//            if (item != null) {
+//                model.uriPhoto.value = ""
+//                model.deleteSavedImage(item.alarmText.toUri())
+//            }
             pick.launch("image/*")
         }
 

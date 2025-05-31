@@ -19,6 +19,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import java.io.File
+import java.io.FileNotFoundException
 import java.io.IOException
 import java.util.Calendar
 import javax.inject.Inject
@@ -53,27 +54,36 @@ class ViewModelFlashLight @Inject constructor(
 
 
      fun saveImagePermanently(context: Context, uri: Uri): Uri {
-        val imagesDir = File(context.filesDir, "images")
-        if (!imagesDir.exists()) {
-            imagesDir.mkdirs() // Создаем директорию, если она не существует
-        }
-        val file = File(imagesDir, "${System.currentTimeMillis()}.jpg")
+         try {
+             val imagesDir = File(context.filesDir, "images")
+             if (!imagesDir.exists()) {
+                 imagesDir.mkdirs() // Создаем директорию, если она не существует
+             }
+             val file = File(imagesDir, "${System.currentTimeMillis()}.jpg")
 
-        context.contentResolver.openInputStream(uri)?.use { input ->
-            file.outputStream().use { output ->
-                input.copyTo(output)
-            }
-        }
+             context.contentResolver.openInputStream(uri)?.use { input ->
+                 file.outputStream().use { output ->
+                     input.copyTo(output)
+                 }
+             }
 
-        if (file.exists()) {
-            return Uri.fromFile(file)
-        } else {
-            Toast.makeText(context, "Произошла ошибка сохранения", Toast.LENGTH_SHORT).show()
-            return "".toUri()
-        }
-    }
+             if (file.exists()) {
+                 return Uri.fromFile(file)
+             } else {
+                 Toast.makeText(context, "Произошла ошибка сохранения", Toast.LENGTH_SHORT).show()
+                 return "".toUri()
+             }
+         }
+         catch (_: FileNotFoundException){
+             return "".toUri()
+         }
 
-    private fun deleteSavedImage(imageUri: Uri) {
+     }
+
+
+
+
+    fun deleteSavedImage(imageUri: Uri) {
         try {
             // Для URI вида "file:///data/data/.../images/123.jpg"
             if (imageUri.scheme == "file") {
