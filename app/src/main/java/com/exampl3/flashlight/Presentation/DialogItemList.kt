@@ -88,20 +88,20 @@ object DialogItemList {
         var uriString = ""
 
         model.uriPhoto.observe(lifecycleOwner) { uri ->
-            updateImagePreview(imView, deleteText, uri)
+            updateImagePreview(imView, deleteText, addPhoto, uri)
             uriString = uri.toString()
         }
         imView.setOnClickListener {
             showExpandedImage(uriString, context)
         }
         if (item != null) {
-            updateImagePreview(imView, deleteText, item.alarmText)
+            updateImagePreview(imView, deleteText, addPhoto, item.alarmText)
             editText1.setText(item.name)
             editText2.setText(item.desc)
             uriString = item.alarmText
-            updateImagePreview(imView, deleteText, uriString)
+            updateImagePreview(imView, deleteText, addPhoto, uriString)
         } else {
-            updateImagePreview(imView, deleteText, "")
+            updateImagePreview(imView, deleteText, addPhoto, "")
             editText1.requestFocus()
             editText1.postDelayed({
                 val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -249,6 +249,7 @@ object DialogItemList {
     private fun updateImagePreview(
         imageView: ImageView,
         deleteBtn: TextView,
+        addBtn: TextView,
         uri: String
     ) {
         if (uri.isNotEmpty()) {
@@ -257,9 +258,11 @@ object DialogItemList {
                 .into(imageView)
             imageView.visibility = View.VISIBLE
             deleteBtn.visibility = View.VISIBLE
+            addBtn.text = "Заменить изображение"
         } else {
             imageView.visibility = View.GONE
             deleteBtn.visibility = View.GONE
+            addBtn.text = "Добавить изображение"
         }
     }
 
