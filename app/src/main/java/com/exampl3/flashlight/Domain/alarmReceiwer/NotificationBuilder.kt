@@ -1,15 +1,19 @@
 package com.exampl3.flashlight.Domain.alarmReceiwer
 
 import android.app.Application
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.media.AudioAttributes
 import android.media.RingtoneManager
 import android.os.Build
+import android.provider.MediaStore
 import androidx.core.app.NotificationCompat
+import androidx.core.net.toUri
 import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Data.Room.Item
 import com.exampl3.flashlight.Presentation.MainActivity
@@ -68,8 +72,17 @@ class NotificationBuilder @Inject constructor(
                 context, item.id!!, intentPush,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
+        val bitmap:Bitmap? = try {
+            MediaStore.Images.Media.getBitmap(context.contentResolver, item.alarmText.toUri())
+        } catch (_: Exception){
+            null
+        }
+        val bigIcon = NotificationCompat.BigPictureStyle()
+            .bigPicture(bitmap)
 
-        val bigTextStyle = NotificationCompat.BigTextStyle()
+
+
+
 
         return context.let {
             NotificationCompat.Builder(it, Const.CHANNEL_ID)
@@ -78,11 +91,13 @@ class NotificationBuilder @Inject constructor(
                 .setContentText(item.desc)
                 .setChannelId(Const.CHANNEL_ID)
                 .setPriority(NotificationManager.IMPORTANCE_HIGH)
-                .setStyle(bigTextStyle)
+                .setStyle(bigIcon)
                 .setContentIntent(contentIntent)
                 .addAction(0, "Готово", canselIntent)
                 .addAction(0, "Отложить", postponeIntent)
                 .setAutoCancel(true)
+
         }
     }
+
 }

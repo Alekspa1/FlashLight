@@ -1,7 +1,6 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("com.google.devtools.ksp")
     id("kotlin-kapt")
     id ("dagger.hilt.android.plugin")
 }
@@ -17,9 +16,9 @@ android {
         versionCode = 24
         versionName = "8.7"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        kapt {
-            arguments {arg("room.schemaLocation", "$projectDir/schemas")}
-        }
+    }
+    kapt {
+        arguments {arg("room.schemaLocation", "$projectDir/schemas")}
     }
 
     buildTypes {
@@ -45,31 +44,31 @@ android {
 
 dependencies {
     implementation("com.applandeo:material-calendar-view:1.9.2")
-    implementation ("com.github.bumptech.glide:glide:4.15.1")
-    kapt ("com.github.bumptech.glide:compiler:4.15.1")
+    implementation ("com.github.bumptech.glide:glide:4.16.0")
+    kapt ("com.github.bumptech.glide:compiler:4.16.0")
 
-    implementation("com.yandex.android:mobileads:7.12.2")
-    implementation("com.yandex.ads.mediation:mobileads-mytarget:5.22.1.8")
+    implementation("com.yandex.android:mobileads:7.14.1")
+    implementation("com.yandex.ads.mediation:mobileads-mytarget:5.27.1.4")
 
     implementation("ru.rustore.sdk:billingclient:7.0.0")
-    implementation ("com.google.dagger:hilt-android:2.55")
-    implementation("androidx.activity:activity-ktx:1.8.1")
-    kapt ("com.google.dagger:hilt-compiler:2.55")
+    implementation ("com.google.dagger:hilt-android:2.57")
+    implementation("androidx.activity:activity-ktx:1.10.1")
+    kapt ("com.google.dagger:hilt-compiler:2.57")
 
-    implementation ("androidx.room:room-runtime:2.6.1")
-    kapt ("androidx.room:room-compiler:2.6.1")
-    implementation ("androidx.room:room-ktx:2.6.1")
+    implementation ("androidx.room:room-runtime:2.7.2")
+    kapt ("androidx.room:room-compiler:2.7.2")
+    implementation ("androidx.room:room-ktx:2.7.2")
 
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.8.7")
-    implementation("androidx.fragment:fragment-ktx:1.8.6")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.9.2")
+    implementation("androidx.fragment:fragment-ktx:1.8.8")
 
 
     
 
-    implementation("androidx.core:core-ktx:1.15.0")
-    implementation("androidx.appcompat:appcompat:1.7.0")
+    implementation("androidx.core:core-ktx:1.16.0")
+    implementation("androidx.appcompat:appcompat:1.7.1")
     implementation("com.google.android.material:material:1.12.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.2.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.2.1")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
