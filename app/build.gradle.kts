@@ -45,6 +45,10 @@ android {
 dependencies {
     implementation("com.applandeo:material-calendar-view:1.9.2")
     implementation ("com.github.bumptech.glide:glide:4.16.0")
+    implementation("androidx.navigation:navigation-fragment-ktx:2.9.2")
+    implementation("androidx.navigation:navigation-ui-ktx:2.9.2")
+    implementation("androidx.fragment:fragment:1.8.8")
+    implementation("androidx.cardview:cardview:1.0.0")
     kapt ("com.github.bumptech.glide:compiler:4.16.0")
 
     implementation("com.yandex.android:mobileads:7.14.1")
