@@ -39,6 +39,7 @@ import com.google.android.material.tabs.TabLayoutMediator
 import com.yandex.mobile.ads.banner.BannerAdSize
 import com.yandex.mobile.ads.banner.BannerAdView
 import com.yandex.mobile.ads.common.AdRequest
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -54,7 +55,7 @@ import java.util.Calendar
 import java.util.UUID
 import javax.inject.Inject
 
-
+@AndroidEntryPoint
 class FragmentMain : Fragment(), ListMenuAdapter.onClick {
     private var bannerAd: BannerAdView? = null
 
