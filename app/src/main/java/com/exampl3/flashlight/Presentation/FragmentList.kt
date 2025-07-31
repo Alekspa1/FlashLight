@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.speech.RecognizerIntent
+import android.util.Log
 
 import android.view.LayoutInflater
 import android.view.View
@@ -18,7 +19,9 @@ import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.asLiveData
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Const.ALARM
 import com.exampl3.flashlight.Const.CHANGE
@@ -38,6 +41,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileNotFoundException
 import java.util.Calendar
+import java.util.Collections
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -52,7 +56,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
     lateinit var voiceIntent: Intent
     private val modelFlashLight: ViewModelFlashLight by activityViewModels()
     private lateinit var pLauncher: ActivityResultLauncher<String>
-
+    var sorted = 1
 
 
     private val pickImageLauncher = registerForActivityResult(
@@ -84,11 +88,16 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
         }
 
         modelFlashLight.listItemLD.observe(viewLifecycleOwner) { list ->
+            if (sorted == 0) {
+                adapter.submitList(list.sortedBy { it.id }.reversed().sortedBy { it.alarmTime }
+                    .reversed().sortedBy { it.change }
+                    .reversed().sortedBy { it.changeAlarm }
+                    .reversed())
+            }
+            else {
+                adapter.submitList(list.sortedBy { it.sort })
+            }
 
-            adapter.submitList(list.sortedBy { it.id }.reversed().sortedBy { it.alarmTime }
-                .reversed().sortedBy { it.change }
-                .reversed().sortedBy { it.changeAlarm }
-                .reversed())
 
 
         }
@@ -122,6 +131,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
             }
 
         binding.imBAddFrag.setOnClickListener {
+            var sort = 0
             DialogItemList.alertItem(requireContext(), object : DialogItemList.Listener {
                 override fun onClickItem(name: String, action: Int?, id: Int?, desc: String?, uri: String?) {
                     var item: Item
@@ -130,8 +140,13 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
                         permanentFile =
                             modelFlashLight.saveImagePermanently(requireContext(), uri.toUri()).toString()
                     }
-
-
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val s = db.CourseDao().getAllList().last().sort + 1
+                        withContext(Dispatchers.Main) {
+                            sort = s
+                            Log.d("MyLog", s.toString())
+                        }
+                    }
                     modelFlashLight.insertItem(
                         Item(
                             null,
@@ -139,7 +154,8 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
                             category = modelFlashLight.categoryItemLD.value!!,
                             desc = desc,
                             alarmTime = 0,
-                            alarmText = permanentFile
+                            alarmText = permanentFile,
+                            sort = sort
                         )
                     )
 
@@ -210,8 +226,95 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
         adapter = ItemListAdapter(this, this)
         rcView.layoutManager = LinearLayoutManager(requireContext())
         rcView.adapter = adapter
+        initIHelper()
 
     } // инициализировал ресайклер
+
+    private fun initIHelper() {
+        val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.Callback() {
+            private var startPosition = -1
+            private var currentPosition = -1
+            private val updatedItems = mutableListOf<Item>()
+
+            override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
+                return makeMovementFlags(ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0)
+            }
+
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                val fromPosition = viewHolder.adapterPosition
+                val toPosition = target.adapterPosition
+
+                if (startPosition == -1) {
+                    startPosition = fromPosition
+                }
+                currentPosition = toPosition
+
+                val currentList = adapter.currentList.toMutableList()
+                Collections.swap(currentList, fromPosition, toPosition)
+                adapter.submitList(currentList)
+
+                return true
+            }
+
+            override fun onSwiped(
+                viewHolder: RecyclerView.ViewHolder,
+                direction: Int
+            ) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
+                super.onSelectedChanged(viewHolder, actionState)
+
+                when (actionState) {
+                    ItemTouchHelper.ACTION_STATE_IDLE -> {
+
+                        if (startPosition != -1 && currentPosition != -1 && startPosition != currentPosition) {
+                            updatePositionsInDatabase(startPosition, currentPosition)
+                        }
+                        startPosition = -1
+                        currentPosition = -1
+                    }
+                }
+            }
+
+            private fun updatePositionsInDatabase(from: Int, to: Int) {
+                    val currentList = adapter.currentList.toMutableList()
+
+                    // Обновляем позиции всех элементов между from и to
+                    if (from < to) {
+                        // Движение вниз
+                        for (i in from until to) {
+                            currentList[i] = currentList[i].copy(sort = i)
+                            updatedItems.add(currentList[i])
+                        }
+                    } else {
+                        // Движение вверх
+                        for (i in from downTo to + 1) {
+                            currentList[i] = currentList[i].copy(sort = i)
+                            updatedItems.add(currentList[i])
+                        }
+                    }
+
+                    // Обновляем конечную позицию
+                    currentList[to] = currentList[to].copy(sort = to)
+                    updatedItems.add(currentList[to])
+
+                    // Сохраняем изменения
+                    updatedItems.distinctBy { it.id }.forEach { item ->
+                        modelFlashLight.updateItem(item)
+                    }
+                    updatedItems.clear()
+
+            }
+        })
+
+        itemTouchHelper.attachToRecyclerView(binding.rcView)
+    }
 
     override fun onLongClick(item: Item, action: Int) {
         modelFlashLight.insertStringAndAlarm(item, requireContext(), false)
