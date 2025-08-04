@@ -15,7 +15,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.asLiveData
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.applandeo.materialcalendarview.CalendarDay
 import com.applandeo.materialcalendarview.listeners.OnCalendarDayClickListener
@@ -29,6 +29,7 @@ import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Data.Room.Item
 
 import com.exampl3.flashlight.Presentation.adapters.ItemListAdapter
+import com.exampl3.flashlight.Presentation.adapters.draganddrop.DragItemTouchHelperCallback
 import com.exampl3.flashlight.R
 import com.exampl3.flashlight.databinding.FragmentCalendarBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -216,18 +217,22 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
 
     private fun initRcView() {
         val rcView = binding.rcViewItem
+
         adapter = ItemListAdapter(
             onLongClickListener = this,
             onClickListener = this,
             onOrderChanged = { updatedList ->
-                // Здесь обновляем порядок в ViewModel или другом хранилище
                 modelFlashLight.updateItemsOrder(updatedList)
-            }
+            },
+            touchHelper = null
         )
         rcView.layoutManager = LinearLayoutManager(requireContext())
         rcView.adapter = adapter
-    } // инициализировал ресайклер
+        val touchHelper = ItemTouchHelper(DragItemTouchHelperCallback(adapter))
+        touchHelper.attachToRecyclerView(rcView)
+        adapter.touchHelper = touchHelper
 
+    } // инициализировал ресайклер
 
     companion object {
         fun newInstance() = FragmentCalendar()

@@ -1,14 +1,32 @@
 package com.exampl3.flashlight.Presentation.adapters.draganddrop
 
+
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 
 class DragItemTouchHelperCallback(
     private val adapter: ItemTouchHelperAdapter
 ) : ItemTouchHelper.SimpleCallback(
-    ItemTouchHelper.UP or ItemTouchHelper.DOWN,  // drag directions
-    0  // disable swipe
+    ItemTouchHelper.UP or ItemTouchHelper.DOWN,
+    0
 ) {
+
+    private var draggedViewHolder: RecyclerView.ViewHolder? = null
+
+    override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
+        super.onSelectedChanged(viewHolder, actionState)
+        draggedViewHolder?.itemView?.alpha = 1f
+        if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
+            viewHolder?.itemView?.alpha = 0.5f // Затемнение
+            draggedViewHolder = viewHolder
+        }
+    }
+
+    override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
+        super.clearView(recyclerView, viewHolder)
+        viewHolder.itemView.alpha = 1f
+        draggedViewHolder = null
+    }
 
     override fun onMove(
         recyclerView: RecyclerView,
@@ -19,14 +37,7 @@ class DragItemTouchHelperCallback(
         return true
     }
 
-    override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
-        super.clearView(recyclerView, viewHolder)
-        adapter.onMoveComplete()
-    }
+    override fun isLongPressDragEnabled() = false
 
-    override fun isLongPressDragEnabled() = true
-    override fun onSwiped(
-        viewHolder: RecyclerView.ViewHolder,
-        direction: Int
-    ) {}
+    override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {}
 }

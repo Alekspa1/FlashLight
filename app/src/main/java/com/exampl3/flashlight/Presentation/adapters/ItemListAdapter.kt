@@ -4,6 +4,7 @@ package com.exampl3.flashlight.Presentation.adapters
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.exampl3.flashlight.Const
@@ -18,10 +19,19 @@ import java.util.Locale
 class ItemListAdapter(
     private val onLongClickListener: onLongClick,
     private val onClickListener: onClick,
-    private val onOrderChanged: (List<Item>) -> Unit
+    private val onOrderChanged: (List<Item>) -> Unit,
+    var touchHelper: ItemTouchHelper?,
 ) : ListAdapter<Item, ItemListAdapter.ViewHolder>(DiffCallback()), ItemTouchHelperAdapter {
-    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    class ViewHolder(view: View,private val touchHelper: ItemTouchHelper?) : RecyclerView.ViewHolder(view) {
         private val binding = ItemBinding.bind(view)
+
+        init {
+            binding.cardView.setOnLongClickListener {
+                // Явно запускаем перетаскивание
+                touchHelper?.startDrag(this)
+                true
+            }
+        }
 
         fun bind(item: Item, onLongClickListener: onLongClick, onClick: onClick) {
             with(binding) {
@@ -117,7 +127,7 @@ class ItemListAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item, parent, false)
-        return ViewHolder(view)
+        return ViewHolder(view, touchHelper)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {

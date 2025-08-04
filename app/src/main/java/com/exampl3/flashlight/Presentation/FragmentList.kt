@@ -7,7 +7,6 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.speech.RecognizerIntent
-import android.util.Log
 
 import android.view.LayoutInflater
 import android.view.View
@@ -18,7 +17,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -39,10 +37,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
-import java.io.FileNotFoundException
 import java.util.Calendar
-import java.util.Collections
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -88,20 +83,6 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
 
         }
 
-        modelFlashLight.listItemLD.observe(viewLifecycleOwner) { list ->
-            if (sorted == 0) {
-                adapter.submitList(list.sortedBy { it.id }.reversed().sortedBy { it.alarmTime }
-                    .reversed().sortedBy { it.change }
-                    .reversed().sortedBy { it.changeAlarm }
-                    .reversed())
-            }
-            else {
-                adapter.submitList(list.sortedBy { it.sort })
-            }
-
-
-
-        }
 
         db.CourseDao().getAll().observe(viewLifecycleOwner) {
             modelFlashLight.categoryItemLD.value?.let { it1 ->
@@ -224,18 +205,44 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
             onLongClickListener = this,
             onClickListener = this,
             onOrderChanged = { updatedList ->
-                // Здесь обновляем порядок в ViewModel или другом хранилище
                 modelFlashLight.updateItemsOrder(updatedList)
-            }
+            },
+            touchHelper = null
         )
         rcView.layoutManager = LinearLayoutManager(requireContext())
         rcView.adapter = adapter
-        ItemTouchHelper(DragItemTouchHelperCallback(adapter)).apply {
-            attachToRecyclerView(rcView)
+        val touchHelper = ItemTouchHelper(DragItemTouchHelperCallback(adapter))
+        touchHelper.attachToRecyclerView(rcView)
+        adapter.touchHelper = touchHelper
+
+        modelFlashLight.listItemLD.observe(viewLifecycleOwner) { list ->
+            scrollInStartAdapter() // это чтобы при создании жлемента, был скролл наверх
+            if (sorted == 0) {
+                adapter.submitList(list.sortedBy { it.id }.reversed().sortedBy { it.alarmTime }
+                    .reversed().sortedBy { it.change }
+                    .reversed().sortedBy { it.changeAlarm }
+                    .reversed())
+            }
+            else {
+                adapter.submitList(list.sortedBy { it.sort })
+            }
+
+
+
         }
 
-
     } // инициализировал ресайклер
+
+    private fun scrollInStartAdapter(){
+        adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                if (positionStart == 0) {  // Элементы добавились в начало (верх списка)
+                    binding.rcView.scrollToPosition(0)
+                    adapter.unregisterAdapterDataObserver(this)
+                }
+            }
+        })
+    }
 
 
 
