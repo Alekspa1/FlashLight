@@ -182,7 +182,7 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
                 if (it.isNotEmpty()) binding.tvDela.visibility = View.GONE
                 else binding.tvDela.visibility = View.VISIBLE
             }
-            db.CourseDao().getAll().asLiveData().observe(viewLifecycleOwner) { list ->
+            db.CourseDao().getAll().observe(viewLifecycleOwner) { list ->
                 val calendarDays = mutableListOf<CalendarDay>()
                 modelFlashLight.getListItemByCalendar(getDateNow(calendarDayB))
 

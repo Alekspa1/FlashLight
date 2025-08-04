@@ -14,7 +14,7 @@ interface CourseDao {
 
     //ITEM
     @Query("SELECT * FROM Item")
-    fun getAll(): Flow<List<Item>>
+    fun getAll(): LiveData<List<Item>>
 
     @Query("SELECT * FROM Item WHERE category == :value")
     suspend fun getAllNewNoFlow(value: String): List<Item>
@@ -36,6 +36,9 @@ interface CourseDao {
 
     @Insert
     suspend fun insertItem(item: Item)
+
+    @Query("SELECT * FROM Item WHERE sort = (SELECT MAX(sort) FROM Item)")
+    suspend fun getItemWithMaxSort(): Item?
 
 
     //MENU

@@ -102,7 +102,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
 
         }
 
-        db.CourseDao().getAll().asLiveData().observe(viewLifecycleOwner) {
+        db.CourseDao().getAll().observe(viewLifecycleOwner) {
             modelFlashLight.categoryItemLD.value?.let { it1 ->
                 modelFlashLight.updateCategory(it1)
 
@@ -130,8 +130,9 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
 
             }
 
+
         binding.imBAddFrag.setOnClickListener {
-            var sort = 0
+            modelFlashLight.getItemMaxSort()
             DialogItemList.alertItem(requireContext(), object : DialogItemList.Listener {
                 override fun onClickItem(name: String, action: Int?, id: Int?, desc: String?, uri: String?) {
                     var item: Item
@@ -140,13 +141,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
                         permanentFile =
                             modelFlashLight.saveImagePermanently(requireContext(), uri.toUri()).toString()
                     }
-                    CoroutineScope(Dispatchers.IO).launch {
-                        val s = db.CourseDao().getAllList().last().sort + 1
-                        withContext(Dispatchers.Main) {
-                            sort = s
-                            Log.d("MyLog", s.toString())
-                        }
-                    }
+
                     modelFlashLight.insertItem(
                         Item(
                             null,
@@ -155,7 +150,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
                             desc = desc,
                             alarmTime = 0,
                             alarmText = permanentFile,
-                            sort = sort
+                            sort = modelFlashLight.maxSorted.value?:0
                         )
                     )
 
@@ -281,6 +276,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
                     }
                 }
             }
+
 
             private fun updatePositionsInDatabase(from: Int, to: Int) {
                     val currentList = adapter.currentList.toMutableList()

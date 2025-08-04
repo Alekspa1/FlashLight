@@ -46,6 +46,8 @@ class ViewModelFlashLight @Inject constructor(
 
     val uriPhoto = MutableLiveData<String>()
 
+    val maxSorted = MutableLiveData<Int?>()
+
     fun getAllListCategory(): Flow<List<ListCategory>> {
         return db.CourseDao().getAllListCategory()
     }
@@ -109,6 +111,11 @@ class ViewModelFlashLight @Inject constructor(
 
     }
 
+    fun getItemMaxSort() {
+        viewModelScope.launch {
+            maxSorted.value = (db.CourseDao().getItemWithMaxSort()?.sort?.plus(1))
+        }
+    }
     fun insertItem(item: Item) {
         viewModelScope.launch { db.CourseDao().insertItem(item) }
     }
