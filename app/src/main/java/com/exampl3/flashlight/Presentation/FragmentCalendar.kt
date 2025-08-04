@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.applandeo.materialcalendarview.CalendarDay
 import com.applandeo.materialcalendarview.listeners.OnCalendarDayClickListener
 import com.exampl3.flashlight.Const
@@ -25,6 +26,8 @@ import com.exampl3.flashlight.Const.CHANGE
 import com.exampl3.flashlight.Const.CHANGE_ITEM
 import com.exampl3.flashlight.Const.DELETE
 import com.exampl3.flashlight.Const.IMAGE
+import com.exampl3.flashlight.Const.SORT_STANDART
+import com.exampl3.flashlight.Const.SORT_USER
 import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Data.Room.Item
 
@@ -106,7 +109,8 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
                                     category = requireContext().getString(R.string.everyday),
                                     desc = desc,
                                     alarmTime = calendarDayB.timeInMillis,
-                                    alarmText = permanentFile
+                                    alarmText = permanentFile,
+                                    sort = modelFlashLight.maxSorted.value?:0
                                 )
                             )
 
@@ -179,6 +183,7 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
             modelFlashLight.getListItemByCalendar(getDateNow(calendarDayB))
 
             modelFlashLight.listItemLDCalendar.observe(viewLifecycleOwner) {
+                scrollInStartAdapter()
                 adapter.submitList(it)
                 if (it.isNotEmpty()) binding.tvDela.visibility = View.GONE
                 else binding.tvDela.visibility = View.VISIBLE
@@ -229,10 +234,23 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
         rcView.layoutManager = LinearLayoutManager(requireContext())
         rcView.adapter = adapter
         val touchHelper = ItemTouchHelper(DragItemTouchHelperCallback(adapter))
-        touchHelper.attachToRecyclerView(rcView)
-        adapter.touchHelper = touchHelper
+        if (modelFlashLight.getSort() == SORT_USER) {
+            touchHelper.attachToRecyclerView(rcView)
+            adapter.touchHelper = touchHelper
+        }
+
 
     } // инициализировал ресайклер
+    private fun scrollInStartAdapter(){
+        adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                if (positionStart == 0) {  // Элементы добавились в начало (верх списка)
+                    binding.rcViewItem.scrollToPosition(0)
+                    adapter.unregisterAdapterDataObserver(this)
+                }
+            }
+        })
+    }
 
     companion object {
         fun newInstance() = FragmentCalendar()

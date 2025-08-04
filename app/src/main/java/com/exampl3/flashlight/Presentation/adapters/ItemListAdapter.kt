@@ -27,7 +27,6 @@ class ItemListAdapter(
 
         init {
             binding.cardView.setOnLongClickListener {
-                // Явно запускаем перетаскивание
                 touchHelper?.startDrag(this)
                 true
             }

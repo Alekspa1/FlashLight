@@ -12,6 +12,7 @@ import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Data.Room.Item
 import com.exampl3.flashlight.Data.Room.ListCategory
+import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
 import com.exampl3.flashlight.Data.sharedPreference.SharedPreferenceImpl
 import com.exampl3.flashlight.Domain.InsertDateAndAlarm
 import com.exampl3.flashlight.Domain.useCase.insertOrDeleteAlarm.ChangeAlarmUseCase
@@ -26,6 +27,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ViewModelFlashLight @Inject constructor(
     private val pref: SharedPreferenceImpl,
+    private val settingsPref: SettingsSharedPreference,
     private val db: Database,
     private val insertDateAndTime: InsertDateAndAlarm,
     private val changeAlarm: ChangeAlarmUseCase,
@@ -52,37 +54,33 @@ class ViewModelFlashLight @Inject constructor(
         return db.CourseDao().getAllListCategory()
     }
 
+    fun saveSort(value: String) = settingsPref.saveSort(value)
+    fun getSort() = settingsPref.getSort()
+    fun saveImagePermanently(context: Context, uri: Uri): Uri {
+        try {
+            val imagesDir = File(context.filesDir, "images")
+            if (!imagesDir.exists()) {
+                imagesDir.mkdirs() // Создаем директорию, если она не существует
+            }
+            val file = File(imagesDir, "${System.currentTimeMillis()}.jpg")
 
+            context.contentResolver.openInputStream(uri)?.use { input ->
+                file.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
 
-     fun saveImagePermanently(context: Context, uri: Uri): Uri {
-         try {
-             val imagesDir = File(context.filesDir, "images")
-             if (!imagesDir.exists()) {
-                 imagesDir.mkdirs() // Создаем директорию, если она не существует
-             }
-             val file = File(imagesDir, "${System.currentTimeMillis()}.jpg")
+            if (file.exists()) {
+                return Uri.fromFile(file)
+            } else {
+                Toast.makeText(context, "Произошла ошибка сохранения", Toast.LENGTH_SHORT).show()
+                return "".toUri()
+            }
+        } catch (_: FileNotFoundException) {
+            return "".toUri()
+        }
 
-             context.contentResolver.openInputStream(uri)?.use { input ->
-                 file.outputStream().use { output ->
-                     input.copyTo(output)
-                 }
-             }
-
-             if (file.exists()) {
-                 return Uri.fromFile(file)
-             } else {
-                 Toast.makeText(context, "Произошла ошибка сохранения", Toast.LENGTH_SHORT).show()
-                 return "".toUri()
-             }
-         }
-         catch (_: FileNotFoundException){
-             return "".toUri()
-         }
-
-     }
-
-
-
+    }
 
     fun deleteSavedImage(imageUri: Uri) {
         try {
@@ -110,11 +108,12 @@ class ViewModelFlashLight @Inject constructor(
 
 
     }
+
     fun updateItemsOrder(newList: List<Item>) {
-            viewModelScope.launch {
-                saveNewOrder(newList)
-                listItemLD.value = newList
-            }
+        viewModelScope.launch {
+            saveNewOrder(newList)
+            listItemLD.value = newList
+        }
 
     }
 
@@ -128,6 +127,7 @@ class ViewModelFlashLight @Inject constructor(
             maxSorted.value = (db.CourseDao().getItemWithMaxSort()?.sort?.minus(1))
         }
     }
+
     fun insertItem(item: Item) {
         viewModelScope.launch { db.CourseDao().insertItem(item) }
     }

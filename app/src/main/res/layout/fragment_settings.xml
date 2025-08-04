@@ -37,28 +37,44 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_settings">
 
-        <TextView
-            android:id="@+id/textView6"
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/bSetSort"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="TextView" />
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="10dp"
+            android:backgroundTint="@color/Dark_Blue"
+            app:cardBackgroundColor="@color/vPager"
+            app:cardCornerRadius="15dp"
+            app:cardElevation="0dp"
+            app:cardMaxElevation="0dp"
+            app:strokeColor="@color/Dark_Blue"
+            app:strokeWidth="3dp">
 
-        <TextView
-            android:id="@+id/textView7"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="TextView" />
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="5dp">
 
-        <TextView
-            android:id="@+id/textView8"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="TextView" />
+                <TextView
+                    android:id="@+id/bSort"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_margin="5dp"
+                    android:text="Сортировка"
+                    android:textColor="@color/white"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:id="@+id/textView9"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="TextView" />
+            </FrameLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

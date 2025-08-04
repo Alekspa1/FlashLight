@@ -111,16 +111,9 @@ object DialogItemList {
 
         deleteText.setOnClickListener {
             model.uriPhoto.value = ""
-//            if (item != null) {
-//                model.deleteSavedImage(item.alarmText.toUri())
-//            }
         }
 
         addPhoto.setOnClickListener {
-//            if (item != null) {
-//                model.uriPhoto.value = ""
-//                model.deleteSavedImage(item.alarmText.toUri())
-//            }
             pick.launch("image/*")
         }
 
@@ -169,82 +162,6 @@ object DialogItemList {
         builder.show()
     }
 
-//    fun alertItem(context: Context, listener: Listener, name: String?, id: Int?, desc: String?,
-//                  currentImageUri: Uri? = null,
-//                  model: ViewModelFlashLight,
-//                  lifecycleOwner: LifecycleOwner,
-//                  pick:  ActivityResultLauncher<String>? = null) {
-//        val builder = AlertDialog.Builder(context)
-//        val inflater = LayoutInflater.from(context)
-//        val dialogLayout = inflater.inflate(R.layout.dialog_layout, null)
-//        val editText1 = dialogLayout.findViewById<EditText>(R.id.itemName)
-//        val editText2 = dialogLayout.findViewById<EditText>(R.id.edDescItemName)
-//        val imView = dialogLayout.findViewById<ImageView>(R.id.imPhoto)
-//        val deleteText = dialogLayout.findViewById<TextView>(R.id.tvDel)
-//        val addPhoto = dialogLayout.findViewById<TextView>(R.id.tvAddPhoto)
-//        var selectedImageUri: Uri? = currentImageUri
-//        model.uriPhoto.observe(lifecycleOwner) { uri ->
-//            updateImagePreview(imView, deleteText, uri)
-//        }
-//        updateImagePreview(imView, deleteText, selectedImageUri)
-//        deleteText.setOnClickListener {
-//            selectedImageUri = null
-//            updateImagePreview(imView, deleteText, null)
-//        }
-//
-//        addPhoto.setOnClickListener {
-//            pick?.launch("image/*")
-//            Glide.with(context).load(selectedImageUri).into(imView)
-//        }
-//
-//
-//        editText1.setText(name)
-//        editText2.setText(desc)
-//        editText1.requestFocus()
-//        builder.setTitle("Сфокусироваться")
-//        var input1: String
-//        var input2: String
-//        builder.setPositiveButton("OK") { dialog, _ ->
-//            input1 = editText1.text.toString()
-//            input2 = editText2.text.toString()
-//            if (name == null) {
-//                if (input1.isEmpty()) {
-//                    Toast.makeText(context, "Поле должно быть заполнено", Toast.LENGTH_SHORT).show()
-//                } else {
-//                    listener.onClickItem(input1.trim(), null, id, input2.trim())
-//                    dialog.dismiss()
-//                }
-//
-//            } else {
-//                listener.onClickItem(input1.trim(), null, id, input2.trim())
-//                dialog.dismiss()
-//            }
-//        }
-//        builder.setNeutralButton("Установка будильника") { dialog, _ ->
-//            input1 = editText1.text.toString()
-//            input2 = editText2.text.toString()
-//            if (name == null) {
-//                if (input1.isEmpty()) {
-//                    Toast.makeText(context, "Поле должно быть заполнено", Toast.LENGTH_SHORT).show()
-//                } else {
-//                    listener.onClickItem(input1.trim(), Const.ALARM, id, input2.trim())
-//                    dialog.dismiss()
-//                }
-//
-//            } else {
-//                listener.onClickItem(input1.trim(), Const.ALARM, id, input2.trim())
-//                dialog.dismiss()
-//            }
-//
-//        }
-//        builder.setNegativeButton("Отмена") { dialog, _ -> dialog.cancel() }
-//        builder.setView(dialogLayout)
-//        builder.show()
-//        editText1.postDelayed({
-//            val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-//            imm.showSoftInput(editText1, InputMethodManager.SHOW_IMPLICIT)
-//        }, 200)
-//    }
 
     private fun updateImagePreview(
         imageView: ImageView,
@@ -323,6 +240,33 @@ object DialogItemList {
                 "OK"
             ) { window, _ ->
                 billing.onClick(result)
+                window.dismiss()
+            }
+            .setNegativeButton("Отмена") { window, _ ->
+                window.cancel()
+            }
+        builred.create()
+
+        val dialog = builred.create()
+        dialog.show()
+
+    }
+
+    fun settingSort(context: Context, sort: ActionInt) {
+        val listSort = arrayOf("По умолчанию","Пользовательская")
+        var result = 0
+        val builred = AlertDialog.Builder(context)
+
+        builred.setTitle("Выберите тип сортировки")
+        builred.setSingleChoiceItems(
+            listSort, 0
+        ) { _, id ->
+            result = id
+        }
+            .setPositiveButton(
+                "OK"
+            ) { window, _ ->
+                sort.onClick(result)
                 window.dismiss()
             }
             .setNegativeButton("Отмена") { window, _ ->

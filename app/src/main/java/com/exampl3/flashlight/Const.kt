@@ -50,6 +50,10 @@ object Const {
     const val NOT_AUTHORIZED = "RuStore User Not Authorized"
     const val DONATE = "https://www.tinkoff.ru/rm/r_yDLrspQXuU.pghPicassj/iZZa112656"
 
+    const val SORT_SETTINGS = "SORT_SETTINGS"
+    const val SORT_STANDART = "SORT_STANDART"
+    const val SORT_USER = "SORT_USER"
+
 
 
     fun isPermissionGranted(con: Context, p: String): Boolean {

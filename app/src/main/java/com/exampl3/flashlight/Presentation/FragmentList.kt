@@ -26,6 +26,8 @@ import com.exampl3.flashlight.Const.CHANGE
 import com.exampl3.flashlight.Const.CHANGE_ITEM
 import com.exampl3.flashlight.Const.DELETE
 import com.exampl3.flashlight.Const.IMAGE
+import com.exampl3.flashlight.Const.SORT_STANDART
+import com.exampl3.flashlight.Const.SORT_USER
 import com.exampl3.flashlight.Presentation.adapters.ItemListAdapter
 import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Data.Room.Item
@@ -52,7 +54,6 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
     lateinit var voiceIntent: Intent
     private val modelFlashLight: ViewModelFlashLight by activityViewModels()
     private lateinit var pLauncher: ActivityResultLauncher<String>
-    var sorted = 1
 
 
     private val pickImageLauncher = registerForActivityResult(
@@ -212,12 +213,14 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
         rcView.layoutManager = LinearLayoutManager(requireContext())
         rcView.adapter = adapter
         val touchHelper = ItemTouchHelper(DragItemTouchHelperCallback(adapter))
-        touchHelper.attachToRecyclerView(rcView)
-        adapter.touchHelper = touchHelper
+        if (modelFlashLight.getSort() == SORT_USER) {
+            touchHelper.attachToRecyclerView(rcView)
+            adapter.touchHelper = touchHelper
+        }
 
         modelFlashLight.listItemLD.observe(viewLifecycleOwner) { list ->
             scrollInStartAdapter() // это чтобы при создании жлемента, был скролл наверх
-            if (sorted == 0) {
+            if (modelFlashLight.getSort() == SORT_STANDART) {
                 adapter.submitList(list.sortedBy { it.id }.reversed().sortedBy { it.alarmTime }
                     .reversed().sortedBy { it.change }
                     .reversed().sortedBy { it.changeAlarm }
