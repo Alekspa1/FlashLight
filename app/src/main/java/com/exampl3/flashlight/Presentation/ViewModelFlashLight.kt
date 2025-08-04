@@ -110,10 +110,22 @@ class ViewModelFlashLight @Inject constructor(
 
 
     }
+    fun updateItemsOrder(newList: List<Item>) {
+            viewModelScope.launch {
+                saveNewOrder(newList)
+                listItemLD.value = newList
+            }
+
+    }
+
+    suspend fun saveNewOrder(newList: List<Item>) {
+        db.CourseDao().deleteAllItems()
+        db.CourseDao().insertItems(newList)
+    }
 
     fun getItemMaxSort() {
         viewModelScope.launch {
-            maxSorted.value = (db.CourseDao().getItemWithMaxSort()?.sort?.plus(1))
+            maxSorted.value = (db.CourseDao().getItemWithMaxSort()?.sort?.minus(1))
         }
     }
     fun insertItem(item: Item) {

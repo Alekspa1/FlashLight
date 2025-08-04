@@ -8,15 +8,18 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Data.Room.Item
+import com.exampl3.flashlight.Presentation.adapters.draganddrop.ItemTouchHelperAdapter
 import com.exampl3.flashlight.R
 import com.exampl3.flashlight.databinding.ItemBinding
 import java.text.SimpleDateFormat
+import java.util.Collections
 import java.util.Locale
 
 class ItemListAdapter(
     private val onLongClickListener: onLongClick,
-    private val onClickListener: onClick
-) : ListAdapter<Item, ItemListAdapter.ViewHolder>(DiffCallback()) {
+    private val onClickListener: onClick,
+    private val onOrderChanged: (List<Item>) -> Unit
+) : ListAdapter<Item, ItemListAdapter.ViewHolder>(DiffCallback()), ItemTouchHelperAdapter {
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         private val binding = ItemBinding.bind(view)
 
@@ -121,6 +124,20 @@ class ItemListAdapter(
         holder.bind(getItem(position), onLongClickListener, onClickListener)
     }
 
+    override fun onItemMove(fromPosition: Int, toPosition: Int) {
+        val currentList = currentList.toMutableList()
+        Collections.swap(currentList, fromPosition, toPosition)
+        submitList(currentList)
+    }
+
+    override fun onMoveComplete() {
+        val itemsWithNewOrder = currentList.mapIndexed { index, item ->
+            item.copy(sort = index) // Предполагая, что у Item есть поле sort
+        }
+        submitList(itemsWithNewOrder)
+        onOrderChanged(itemsWithNewOrder)
+    }
+
     interface onLongClick {
         fun onLongClick(item: Item, action: Int)
 
@@ -129,7 +146,5 @@ class ItemListAdapter(
     interface onClick {
         fun onClick(item: Item, action: Int)
     }
-
-
 
 }

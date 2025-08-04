@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
@@ -37,8 +38,17 @@ interface CourseDao {
     @Insert
     suspend fun insertItem(item: Item)
 
-    @Query("SELECT * FROM Item WHERE sort = (SELECT MAX(sort) FROM Item)")
+    @Query("SELECT * FROM Item WHERE sort = (SELECT MIN(sort) FROM Item)")
     suspend fun getItemWithMaxSort(): Item?
+
+    @Update
+    suspend fun updateItems(items: List<Item>)
+
+    @Query("DELETE FROM item")
+    suspend fun deleteAllItems()
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertItems(items: List<Item>)
 
 
     //MENU

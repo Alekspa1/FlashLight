@@ -216,7 +216,14 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
 
     private fun initRcView() {
         val rcView = binding.rcViewItem
-        adapter = ItemListAdapter(this, this)
+        adapter = ItemListAdapter(
+            onLongClickListener = this,
+            onClickListener = this,
+            onOrderChanged = { updatedList ->
+                // Здесь обновляем порядок в ViewModel или другом хранилище
+                modelFlashLight.updateItemsOrder(updatedList)
+            }
+        )
         rcView.layoutManager = LinearLayoutManager(requireContext())
         rcView.adapter = adapter
     } // инициализировал ресайклер

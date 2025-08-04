@@ -17,5 +17,5 @@ data class Item(
     @ColumnInfo(name = "interval", defaultValue = "1.0")val interval: Int = 0,
     @ColumnInfo(name = "category", defaultValue = "Повседневные")val category: String,
     @ColumnInfo(name = "desc", defaultValue = "")val desc: String? = "",
-    @ColumnInfo(name = "sort", defaultValue = "0")val sort: Int = 0,
+    @ColumnInfo(name = "sort", defaultValue = "0")var sort: Int = 0,
     ): Serializable
