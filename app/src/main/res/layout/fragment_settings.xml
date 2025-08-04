@@ -39,7 +39,7 @@
         app:layout_constraintTop_toBottomOf="@+id/tv_settings">
 
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/bSetSort1"
+            android:id="@+id/bSetSort"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
@@ -59,7 +59,7 @@
                 android:padding="5dp">
 
                 <TextView
-                    android:id="@+id/bSort1"
+                    android:id="@+id/bSort"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
