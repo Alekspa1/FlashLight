@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.speech.RecognizerIntent
+import android.util.Log
 
 import android.view.LayoutInflater
 import android.view.View
@@ -219,6 +220,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
         }
 
         modelFlashLight.listItemLD.observe(viewLifecycleOwner) { list ->
+            Log.d("MyLog", "upgrate")
             scrollInStartAdapter() // это чтобы при создании жлемента, был скролл наверх
             if (modelFlashLight.getSort() == SORT_STANDART) {
                 adapter.submitList(list.sortedBy { it.id }.reversed().sortedBy { it.alarmTime }

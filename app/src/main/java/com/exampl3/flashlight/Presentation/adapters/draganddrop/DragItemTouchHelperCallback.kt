@@ -26,6 +26,7 @@ class DragItemTouchHelperCallback(
         super.clearView(recyclerView, viewHolder)
         viewHolder.itemView.alpha = 1f
         draggedViewHolder = null
+        adapter.onMoveComplete()
     }
 
     override fun onMove(

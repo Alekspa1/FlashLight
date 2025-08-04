@@ -40,7 +40,6 @@ class FragmentSettings : Fragment() {
         binding.bSetSort.setOnClickListener {
             DialogItemList.settingSort(requireActivity(), object : DialogItemList.ActionInt {
                 override fun onClick(action: Int) {
-                    Log.d("MyLog", action.toString())
                     when (action) {
                         0 -> modelFlashLight.saveSort(SORT_STANDART)
                         1 -> modelFlashLight.saveSort(SORT_USER)
