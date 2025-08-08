@@ -12,6 +12,7 @@
 
         <TextView
             android:id="@+id/tvCategory"
+            style="@style/StyleMenu"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="1dp"
@@ -19,7 +20,6 @@
             android:padding="5dp"
             android:text="@string/everyday"
             android:textColor="@color/white"
-            android:textSize="20sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

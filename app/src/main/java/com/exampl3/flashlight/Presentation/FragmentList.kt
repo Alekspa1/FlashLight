@@ -28,6 +28,7 @@ import com.exampl3.flashlight.Const.DELETE
 import com.exampl3.flashlight.Const.IMAGE
 import com.exampl3.flashlight.Const.SORT_STANDART
 import com.exampl3.flashlight.Const.SORT_USER
+import com.exampl3.flashlight.Const.THEME_ZABOR
 import com.exampl3.flashlight.Presentation.adapters.ItemListAdapter
 import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Data.Room.Item
@@ -82,6 +83,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initRcView()
+        theme()
 
 
         modelFlashLight.categoryItemLD.observe(viewLifecycleOwner) { value ->
@@ -376,6 +378,14 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
     override fun onResume() {
         super.onResume()
         calendarZero = Calendar.getInstance()
+    }
+
+    private fun theme(){
+        if (modelFlashLight.getTheme() == THEME_ZABOR) {
+            with(binding){
+             tvCategory.setTextAppearance(R.style.StyleMenuZabor)
+            }
+        }
     }
 
 

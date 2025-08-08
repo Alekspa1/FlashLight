@@ -43,7 +43,7 @@ class FragmentSettings : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        theme(binding,requireContext())
+        theme()
 
         with(binding){
             bCallbackCard.setOnClickListener {
@@ -98,9 +98,17 @@ class FragmentSettings : Fragment() {
 
 
     }
-    private fun theme(binding: FragmentSettingsBinding, context: Context){
+    private fun theme(){
         if (modelFlashLight.getTheme() == THEME_ZABOR) {
-            binding.parentSettings.setBackgroundResource(R.drawable.zabor)
+            with(binding){
+                parentSettings.setBackgroundResource(R.drawable.zabor)
+                tvSettings.setTextAppearance(R.style.StyleMenuZabor)
+                val listTextViewSettings = listOf(bSort,bTextSize,bAlarmSound,bTheme,bDonate,bCallback)
+                listTextViewSettings.forEach {
+                    it.setTextAppearance(R.style.StyleButtonZabor)
+                }
+            }
+
 
         }
     }

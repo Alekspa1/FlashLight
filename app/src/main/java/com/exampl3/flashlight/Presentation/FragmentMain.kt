@@ -55,6 +55,7 @@ import ru.rustore.sdk.billingclient.usecase.PurchasesUseCase
 import java.util.Calendar
 import java.util.UUID
 import javax.inject.Inject
+import androidx.core.net.toUri
 
 @AndroidEntryPoint
 class FragmentMain : Fragment(), ListMenuAdapter.onClick {
@@ -102,7 +103,7 @@ class FragmentMain : Fragment(), ListMenuAdapter.onClick {
             } // ПРЕМИУМ
             bUpdateCard.setOnClickListener {
                 try {
-                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(RUSTORE)))
+                    startActivity(Intent(Intent.ACTION_VIEW, RUSTORE.toUri()))
                 } catch (e: Exception) {
                     Toast.makeText(requireActivity(), "Ошибка", Toast.LENGTH_SHORT).show()
                 }
@@ -215,8 +216,19 @@ class FragmentMain : Fragment(), ListMenuAdapter.onClick {
 
     private fun theme(){
         if (modelFlashLight.getTheme() == THEME_ZABOR) {
-            binding.drawer.setBackgroundResource(R.drawable.zabor)
-            binding.navView.setBackgroundResource(R.drawable.zabor)
+            with(binding){
+                drawer.setBackgroundResource(R.drawable.zabor)
+                navView.setBackgroundResource(R.drawable.zabor)
+                val listTextButtom = listOf(bBuyPremium,bUpdate,bSettings)
+                val listTextItem = listOf(tvTitileMenu,draverTvTitileMenu)
+                listTextButtom.forEach { textView ->
+                    textView.setTextAppearance(R.style.StyleButtonZabor)
+                }
+                listTextItem.forEach { textView ->
+                    textView.setTextAppearance(R.style.StyleItemZabor)
+                }
+                tvCategoryDrawer.setTextAppearance(R.style.StyleMenuZabor)
+            }
         }
     }
 

@@ -91,13 +91,13 @@
             android:layout_height="match_parent">
 
             <TextView
-                android:id="@+id/textView"
+                android:id="@+id/tvCategoryDrawer"
+                style="@style/StyleMenu"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:padding="5dp"
                 android:text="Категории"
-                android:textColor="@color/white"
                 android:textSize="20sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -115,7 +115,7 @@
                 app:cardMaxElevation="0dp"
                 app:layout_constraintEnd_toStartOf="@+id/imageView3"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView"
+                app:layout_constraintTop_toBottomOf="@+id/tvCategoryDrawer"
                 app:strokeColor="#9900E2FF"
                 app:strokeWidth="3dp">
 
@@ -126,12 +126,11 @@
 
                     <TextView
                         android:id="@+id/tvTitileMenu"
+                        style="@style/StyleItem"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_margin="5dp"
                         android:text="@string/everyday"
-                        android:textColor="@color/white"
-                        android:textSize="18sp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
@@ -174,12 +173,11 @@
 
                     <TextView
                         android:id="@+id/draverTvTitileMenu"
+                        style="@style/StyleItem"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_margin="5dp"
                         android:text="Общие"
-                        android:textColor="@color/white"
-                        android:textSize="18sp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />

@@ -10,8 +10,8 @@
 
     <ImageView
         android:id="@+id/im_back"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:src="@drawable/ic_back"
         app:layout_constraintBottom_toBottomOf="@+id/tv_settings"
         app:layout_constraintStart_toStartOf="parent"
@@ -19,13 +19,13 @@
 
     <TextView
         android:id="@+id/tv_settings"
+        style="@style/StyleMenu"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal|center_vertical"
-        android:padding="15dp"
+        android:padding="10dp"
         android:text="Настройки"
-        android:textColor="@color/white"
-        android:textSize="24sp"
+        android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/im_back"
         app:layout_constraintTop_toTopOf="parent" />
@@ -34,7 +34,8 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:orientation="vertical"
-        android:padding="10dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -44,7 +45,7 @@
             android:id="@+id/bSetSort"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
             android:backgroundTint="@color/Dark_Blue"
             app:cardBackgroundColor="@color/vPager"
             app:cardCornerRadius="15dp"
@@ -55,8 +56,7 @@
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="5dp">
+                android:layout_height="match_parent">
 
                 <TextView
                     android:id="@+id/bSort"
@@ -65,7 +65,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
 
-                    android:layout_margin="5dp"
+                    android:layout_margin="10dp"
                     android:text="Сортировка"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -80,7 +80,7 @@
             android:id="@+id/bSetSort2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
             android:backgroundTint="@color/Dark_Blue"
             app:cardBackgroundColor="@color/vPager"
             app:cardCornerRadius="15dp"
@@ -91,16 +91,15 @@
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="5dp">
+                android:layout_height="match_parent">
 
                 <TextView
-                    android:id="@+id/bSort2"
+                    android:id="@+id/bTextSize"
                     style="@style/StyleButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layout_margin="5dp"
+                    android:layout_margin="10dp"
                     android:text="Размер шрифта"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -115,7 +114,7 @@
             android:id="@+id/bSetSort3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
             android:backgroundTint="@color/Dark_Blue"
             app:cardBackgroundColor="@color/vPager"
             app:cardCornerRadius="15dp"
@@ -126,16 +125,15 @@
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="5dp">
+                android:layout_height="match_parent">
 
                 <TextView
-                    android:id="@+id/bSort3"
+                    android:id="@+id/bAlarmSound"
                     style="@style/StyleButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layout_margin="5dp"
+                    android:layout_margin="10dp"
                     android:text="Звук будильника"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -150,7 +148,7 @@
             android:id="@+id/bSetTheme"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
             android:backgroundTint="@color/Dark_Blue"
             app:cardBackgroundColor="@color/vPager"
             app:cardCornerRadius="15dp"
@@ -161,16 +159,15 @@
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="5dp">
+                android:layout_height="match_parent">
 
                 <TextView
-                    android:id="@+id/bSort4"
+                    android:id="@+id/bTheme"
                     style="@style/StyleButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layout_margin="5dp"
+                    android:layout_margin="10dp"
                     android:text="Тема"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -185,7 +182,7 @@
             android:id="@+id/bDonateCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
             android:backgroundTint="@color/Dark_Blue"
             app:cardBackgroundColor="@color/vPager"
             app:cardCornerRadius="15dp"
@@ -196,8 +193,7 @@
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="5dp">
+                android:layout_height="match_parent">
 
                 <TextView
                     android:id="@+id/bDonate"
@@ -205,7 +201,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layout_margin="5dp"
+                    android:layout_margin="10dp"
                     android:text="Поддержать разработчика"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -220,7 +216,7 @@
             android:id="@+id/bCallbackCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
             android:backgroundTint="@color/Dark_Blue"
             app:cardBackgroundColor="@color/vPager"
             app:cardCornerRadius="15dp"
@@ -231,8 +227,7 @@
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="5dp">
+                android:layout_height="match_parent">
 
                 <TextView
                     android:id="@+id/bCallback"
@@ -240,7 +235,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layout_margin="5dp"
+                    android:layout_margin="10dp"
                     android:text="Обратная связь"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
