@@ -53,6 +53,9 @@ object Const {
     const val SORT_SETTINGS = "SORT_SETTINGS"
     const val SORT_STANDART = "SORT_STANDART"
     const val SORT_USER = "SORT_USER"
+    const val THEME_SETTINGS = "THEME_SETTINGS"
+    const val THEME_FUTURE = "THEME_FUTURE"
+    const val THEME_ZABOR = "THEME_ZABOR"
 
 
 

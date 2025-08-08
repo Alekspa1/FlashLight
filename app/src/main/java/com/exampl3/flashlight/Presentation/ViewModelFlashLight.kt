@@ -56,6 +56,10 @@ class ViewModelFlashLight @Inject constructor(
 
     fun saveSort(value: String) = settingsPref.saveSort(value)
     fun getSort() = settingsPref.getSort()
+
+    fun saveTheme(value: String) = settingsPref.saveTheme(value)
+    fun getTheme() = settingsPref.getTheme()
+
     fun saveImagePermanently(context: Context, uri: Uri): Uri {
         try {
             val imagesDir = File(context.filesDir, "images")
@@ -117,9 +121,10 @@ class ViewModelFlashLight @Inject constructor(
 
     }
 
-    suspend fun saveNewOrder(newList: List<Item>) {
-        db.CourseDao().deleteAllItems()
-        db.CourseDao().insertItems(newList)
+ fun saveNewOrder(newList: List<Item>) {
+        newList.forEach { newItem->
+            updateItem(newItem)
+        }
     }
 
     fun getItemMaxSort() {

@@ -253,11 +253,38 @@ object DialogItemList {
     }
 
     fun settingSort(context: Context, sort: ActionInt) {
-        val listSort = arrayOf("По умолчанию","Пользовательская")
+        val listSort = arrayOf("По умолчанию","Пользовательская (Можно вручную сортировать дела)")
         var result = 0
         val builred = AlertDialog.Builder(context)
 
         builred.setTitle("Выберите тип сортировки")
+        builred.setSingleChoiceItems(
+            listSort, 0
+        ) { _, id ->
+            result = id
+        }
+            .setPositiveButton(
+                "OK"
+            ) { window, _ ->
+                sort.onClick(result)
+                window.dismiss()
+            }
+            .setNegativeButton("Отмена") { window, _ ->
+                window.cancel()
+            }
+        builred.create()
+
+        val dialog = builred.create()
+        dialog.show()
+
+    }
+
+    fun settingTheme(context: Context, sort: ActionInt) {
+        val listSort = arrayOf("Неоновая","Деревянная")
+        var result = 0
+        val builred = AlertDialog.Builder(context)
+
+        builred.setTitle("Выберите тему")
         builred.setSingleChoiceItems(
             listSort, 0
         ) { _, id ->

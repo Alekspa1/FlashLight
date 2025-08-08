@@ -7,6 +7,8 @@ import android.content.SharedPreferences
 
 import com.exampl3.flashlight.Const.SORT_SETTINGS
 import com.exampl3.flashlight.Const.SORT_STANDART
+import com.exampl3.flashlight.Const.THEME_FUTURE
+import com.exampl3.flashlight.Const.THEME_SETTINGS
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -22,6 +24,13 @@ class SettingsSharedPreference @Inject constructor(
 
     fun saveSort(value: String){
         editPremium.putString(SORT_SETTINGS, value)
+        editPremium.apply()
+    }
+
+    fun getTheme(): String? = prefSettings.getString(THEME_SETTINGS, THEME_FUTURE)
+
+    fun saveTheme(value: String){
+        editPremium.putString(THEME_SETTINGS, value)
         editPremium.apply()
     }
 }

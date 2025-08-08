@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/drawer"
-    android:fitsSystemWindows="true"
+
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="start"
@@ -77,14 +77,14 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.google.android.material.navigation.NavigationView
+        android:id="@+id/navView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:background="@drawable/img_2"
-        android:layout_marginBottom="?attr/actionBarSize"
-        android:fitsSystemWindows="false"
+        android:background="@drawable/img_2">
+        <!--        android:layout_marginBottom="?attr/actionBarSize"-->
+        <!--        android:fitsSystemWindows="false"-->
 
-        >
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -259,14 +259,13 @@
 
                         <TextView
                             android:id="@+id/bBuyPremium"
+                            style="@style/StyleButton"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
                             android:layout_margin="5dp"
                             android:text="@string/premium_off"
-                            android:textColor="@color/white"
                             android:textSize="14sp"
-                            android:textStyle="bold"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
@@ -296,51 +295,13 @@
 
                         <TextView
                             android:id="@+id/bUpdate"
+                            style="@style/StyleButton"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
                             android:layout_margin="5dp"
                             android:text="Проверить обновления"
-                            android:textColor="@color/white"
                             android:textSize="14sp"
-                            android:textStyle="bold"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
-
-                    </FrameLayout>
-
-                </com.google.android.material.card.MaterialCardView>
-
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/bCallbackCard"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
-                    android:backgroundTint="@color/Dark_Blue"
-                    app:cardBackgroundColor="@color/vPager"
-                    app:cardCornerRadius="15dp"
-                    app:cardElevation="0dp"
-                    app:cardMaxElevation="0dp"
-                    app:strokeColor="@color/Dark_Blue"
-                    app:strokeWidth="3dp">
-
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:padding="5dp">
-
-                        <TextView
-                            android:id="@+id/bCallback"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_margin="5dp"
-                            android:text="Обратная связь"
-                            android:textColor="@color/white"
-                            android:textSize="14sp"
-                            android:textStyle="bold"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
@@ -370,51 +331,13 @@
 
                         <TextView
                             android:id="@+id/bSettings"
+                            style="@style/StyleButton"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
                             android:layout_margin="5dp"
                             android:text="Настройки"
-                            android:textColor="@color/white"
                             android:textSize="14sp"
-                            android:textStyle="bold"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
-
-                    </FrameLayout>
-
-                </com.google.android.material.card.MaterialCardView>
-
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/bDonateCard"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
-                    android:backgroundTint="@color/Dark_Blue"
-                    app:cardBackgroundColor="@color/vPager"
-                    app:cardCornerRadius="15dp"
-                    app:cardElevation="0dp"
-                    app:cardMaxElevation="0dp"
-                    app:strokeColor="@color/Dark_Blue"
-                    app:strokeWidth="3dp">
-
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:padding="5dp">
-
-                        <TextView
-                            android:id="@+id/bDonate"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_margin="5dp"
-                            android:text="Поддержать разработчика"
-                            android:textColor="@color/white"
-                            android:textSize="14sp"
-                            android:textStyle="bold"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"

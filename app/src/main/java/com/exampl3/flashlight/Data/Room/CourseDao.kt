@@ -35,7 +35,7 @@ interface CourseDao {
     @Update
     suspend fun updateItem(item: Item)
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertItem(item: Item)
 
     @Query("SELECT * FROM Item WHERE sort = (SELECT MIN(sort) FROM Item)")
@@ -43,12 +43,6 @@ interface CourseDao {
 
     @Update
     suspend fun updateItems(items: List<Item>)
-
-    @Query("DELETE FROM item")
-    suspend fun deleteAllItems()
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertItems(items: List<Item>)
 
 
     //MENU

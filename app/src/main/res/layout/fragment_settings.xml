@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/parentSettings"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/img"
@@ -33,6 +34,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:orientation="vertical"
+        android:padding="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -42,9 +44,7 @@
             android:id="@+id/bSetSort"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="10dp"
+            android:layout_marginTop="8dp"
             android:backgroundTint="@color/Dark_Blue"
             app:cardBackgroundColor="@color/vPager"
             app:cardCornerRadius="15dp"
@@ -60,14 +60,13 @@
 
                 <TextView
                     android:id="@+id/bSort"
+                    style="@style/StyleButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+
                     android:layout_margin="5dp"
                     android:text="Сортировка"
-                    android:textColor="@color/white"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -81,9 +80,7 @@
             android:id="@+id/bSetSort2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="10dp"
+            android:layout_marginTop="8dp"
             android:backgroundTint="@color/Dark_Blue"
             app:cardBackgroundColor="@color/vPager"
             app:cardCornerRadius="15dp"
@@ -99,14 +96,12 @@
 
                 <TextView
                     android:id="@+id/bSort2"
+                    style="@style/StyleButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_margin="5dp"
                     android:text="Размер шрифта"
-                    android:textColor="@color/white"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -120,9 +115,7 @@
             android:id="@+id/bSetSort3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="10dp"
+            android:layout_marginTop="8dp"
             android:backgroundTint="@color/Dark_Blue"
             app:cardBackgroundColor="@color/vPager"
             app:cardCornerRadius="15dp"
@@ -138,14 +131,12 @@
 
                 <TextView
                     android:id="@+id/bSort3"
+                    style="@style/StyleButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_margin="5dp"
                     android:text="Звук будильника"
-                    android:textColor="@color/white"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -156,12 +147,10 @@
         </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/bSetSort4"
+            android:id="@+id/bSetTheme"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="10dp"
+            android:layout_marginTop="8dp"
             android:backgroundTint="@color/Dark_Blue"
             app:cardBackgroundColor="@color/vPager"
             app:cardCornerRadius="15dp"
@@ -177,14 +166,82 @@
 
                 <TextView
                     android:id="@+id/bSort4"
+                    style="@style/StyleButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_margin="5dp"
                     android:text="Тема"
-                    android:textColor="@color/white"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </FrameLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/bDonateCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:backgroundTint="@color/Dark_Blue"
+            app:cardBackgroundColor="@color/vPager"
+            app:cardCornerRadius="15dp"
+            app:cardElevation="0dp"
+            app:cardMaxElevation="0dp"
+            app:strokeColor="@color/Dark_Blue"
+            app:strokeWidth="3dp">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="5dp">
+
+                <TextView
+                    android:id="@+id/bDonate"
+                    style="@style/StyleButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_margin="5dp"
+                    android:text="Поддержать разработчика"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </FrameLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/bCallbackCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:backgroundTint="@color/Dark_Blue"
+            app:cardBackgroundColor="@color/vPager"
+            app:cardCornerRadius="15dp"
+            app:cardElevation="0dp"
+            app:cardMaxElevation="0dp"
+            app:strokeColor="@color/Dark_Blue"
+            app:strokeWidth="3dp">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="5dp">
+
+                <TextView
+                    android:id="@+id/bCallback"
+                    style="@style/StyleButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_margin="5dp"
+                    android:text="Обратная связь"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"

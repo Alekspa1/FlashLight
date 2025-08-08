@@ -7,7 +7,6 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.speech.RecognizerIntent
-import android.util.Log
 
 import android.view.LayoutInflater
 import android.view.View
@@ -32,7 +31,9 @@ import com.exampl3.flashlight.Const.SORT_USER
 import com.exampl3.flashlight.Presentation.adapters.ItemListAdapter
 import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Data.Room.Item
+import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
 import com.exampl3.flashlight.Presentation.adapters.draganddrop.DragItemTouchHelperCallback
+import com.exampl3.flashlight.R
 import com.exampl3.flashlight.databinding.FragmentListBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -50,6 +51,8 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
 
     @Inject
     lateinit var db: Database
+    @Inject
+    lateinit var pref: SettingsSharedPreference
 
     @Inject
     lateinit var voiceIntent: Intent
@@ -71,6 +74,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+
         binding = FragmentListBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -103,7 +107,9 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
                             Item(
                                 null,
                                 text[0],
-                                category = modelFlashLight.categoryItemLD.value!!
+                                category = modelFlashLight.categoryItemLD.value!!,
+                                sort = modelFlashLight.maxSorted.value?:0,
+                                alarmTime = 0,
                             )
                         )
 
@@ -209,7 +215,8 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
             onOrderChanged = { updatedList ->
                 modelFlashLight.updateItemsOrder(updatedList)
             },
-            touchHelper = null
+            touchHelper = null,
+            pref
         )
         rcView.layoutManager = LinearLayoutManager(requireContext())
         rcView.adapter = adapter
@@ -220,7 +227,6 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
         }
 
         modelFlashLight.listItemLD.observe(viewLifecycleOwner) { list ->
-            Log.d("MyLog", "upgrate")
             scrollInStartAdapter() // это чтобы при создании жлемента, был скролл наверх
             if (modelFlashLight.getSort() == SORT_STANDART) {
                 adapter.submitList(list.sortedBy { it.id }.reversed().sortedBy { it.alarmTime }

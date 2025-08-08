@@ -1,16 +1,21 @@
 package com.exampl3.flashlight.Presentation
 
 
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
 
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.annotation.ColorRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -51,11 +56,11 @@ import java.util.Calendar
 import java.util.UUID
 import javax.inject.Inject
 
+
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -150,10 +155,6 @@ class MainActivity : AppCompatActivity() {
 //
        // }
     }
-
-
-
-
 //    private fun initYaBaner() {
 //        bannerAd = BannerAdView(this)
 //        binding.yaBaner.setAdUnitId(Const.BANER)
@@ -390,3 +391,4 @@ class MainActivity : AppCompatActivity() {
 //        }
 //    } // обновление ПРЕМИУМ версии
 }
+

@@ -26,10 +26,9 @@ import com.exampl3.flashlight.Const.CHANGE
 import com.exampl3.flashlight.Const.CHANGE_ITEM
 import com.exampl3.flashlight.Const.DELETE
 import com.exampl3.flashlight.Const.IMAGE
-import com.exampl3.flashlight.Const.SORT_STANDART
-import com.exampl3.flashlight.Const.SORT_USER
 import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Data.Room.Item
+import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
 
 import com.exampl3.flashlight.Presentation.adapters.ItemListAdapter
 import com.exampl3.flashlight.Presentation.adapters.draganddrop.DragItemTouchHelperCallback
@@ -52,6 +51,8 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
 
     @Inject
     lateinit var db: Database
+    @Inject
+    lateinit var pref: SettingsSharedPreference
 
     private lateinit var calendar: Calendar
     private lateinit var calendarZero: Calendar
@@ -226,18 +227,12 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
         adapter = ItemListAdapter(
             onLongClickListener = this,
             onClickListener = this,
-            onOrderChanged = { updatedList ->
-                modelFlashLight.updateItemsOrder(updatedList)
-            },
-            touchHelper = null
+            onOrderChanged = null,
+            touchHelper = null,
+            pref
         )
         rcView.layoutManager = LinearLayoutManager(requireContext())
         rcView.adapter = adapter
-        val touchHelper = ItemTouchHelper(DragItemTouchHelperCallback(adapter))
-        if (modelFlashLight.getSort() == SORT_USER) {
-            touchHelper.attachToRecyclerView(rcView)
-            adapter.touchHelper = touchHelper
-        }
 
 
     } // инициализировал ресайклер

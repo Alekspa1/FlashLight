@@ -13,6 +13,8 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.activityViewModels
+import com.exampl3.flashlight.Const.THEME_ZABOR
+import com.exampl3.flashlight.R
 import com.exampl3.flashlight.databinding.FragmentNotebookBinding
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -37,6 +39,7 @@ class FragmentNotebook : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        theme(binding,requireContext())
         val launcher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
                 if (result.resultCode == RESULT_OK) {
@@ -62,6 +65,13 @@ class FragmentNotebook : Fragment() {
                     Toast.LENGTH_SHORT
                 ).show()
             }
+        }
+    }
+
+    private fun theme(binding: FragmentNotebookBinding, context: Context){
+        if (modelFlashLight.getTheme() == THEME_ZABOR){
+            binding.edotebook.setBackgroundColor(context.getColor(R.color.YellowNotebook))
+            binding.edotebook.setTextColor(context.getColor(R.color.black))
         }
     }
 

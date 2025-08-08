@@ -27,6 +27,7 @@ import com.exampl3.flashlight.Const.ONE_YEAR
 import com.exampl3.flashlight.Const.PURCHASE_LIST
 import com.exampl3.flashlight.Const.RUSTORE
 import com.exampl3.flashlight.Const.SIX_MONTH
+import com.exampl3.flashlight.Const.THEME_ZABOR
 import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Data.Room.ListCategory
 import com.exampl3.flashlight.Presentation.adapters.ListMenuAdapter
@@ -84,12 +85,10 @@ class FragmentMain : Fragment(), ListMenuAdapter.onClick {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initAll()
+        theme()
         pLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()){}
 
         if (!modelFlashLight.getPremium()) initYaBaner()
-//        if (savedInstanceState == null) {
-//            billingClient.onNewIntent(intent)
-//        }
 
         with(binding) {
             if (modelFlashLight.getPremium()) bBuyPremium.text =
@@ -108,26 +107,6 @@ class FragmentMain : Fragment(), ListMenuAdapter.onClick {
                     Toast.makeText(requireActivity(), "Ошибка", Toast.LENGTH_SHORT).show()
                 }
             } // Проверить обновления
-            bCallbackCard.setOnClickListener {
-                try {
-                    startActivity(
-                        Intent(
-                            Intent.ACTION_VIEW,
-                            Uri.parse("mailto:apereverzev47@gmail.com")
-                        )
-                    )
-                } catch (e: Exception) {
-                    Toast.makeText(requireActivity(), "Ошибка", Toast.LENGTH_SHORT).show()
-                }
-            } // Обратная связь
-            bDonateCard.setOnClickListener {
-                try {
-                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(DONATE)))
-                } catch (e: Exception) {
-                    Toast.makeText(requireActivity(), "Ошибка", Toast.LENGTH_SHORT).show()
-                }
-                drawer.closeDrawer(GravityCompat.START)
-            } // Донат
             tvCardMenu.setOnClickListener {
                 modelFlashLight.updateCategory("Повседневные")
                 binding.tabLayout.selectTab(binding.tabLayout.getTabAt(1))
@@ -233,6 +212,13 @@ class FragmentMain : Fragment(), ListMenuAdapter.onClick {
 
 
     } // Инициализирую все
+
+    private fun theme(){
+        if (modelFlashLight.getTheme() == THEME_ZABOR) {
+            binding.drawer.setBackgroundResource(R.drawable.zabor)
+            binding.navView.setBackgroundResource(R.drawable.zabor)
+        }
+    }
 
 
 
