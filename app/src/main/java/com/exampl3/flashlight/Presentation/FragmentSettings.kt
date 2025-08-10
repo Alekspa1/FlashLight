@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.GravityCompat
@@ -26,6 +27,8 @@ import com.exampl3.flashlight.R
 import com.exampl3.flashlight.databinding.FragmentSettingsBinding
 import kotlin.getValue
 import androidx.core.net.toUri
+import androidx.navigation.fragment.findNavController
+import com.yandex.mobile.ads.impl.li
 
 class FragmentSettings : Fragment() {
 
@@ -43,7 +46,8 @@ class FragmentSettings : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        theme()
+        val listTextViewSettings = listOf(binding.bSort,binding.bTextSize,binding.bAlarmSound,binding.bTheme,binding.bDonate,binding.bCallback)
+        theme(listTextViewSettings)
 
         with(binding){
             bCallbackCard.setOnClickListener {
@@ -67,7 +71,7 @@ class FragmentSettings : Fragment() {
                 }
             } // Донат
             imBack.setOnClickListener {
-                requireActivity().onBackPressedDispatcher.onBackPressed()
+                findNavController().popBackStack()
             }
             bSetSort.setOnClickListener {
                 DialogItemList.settingSort(requireActivity(), object : DialogItemList.ActionInt {
@@ -94,22 +98,23 @@ class FragmentSettings : Fragment() {
 
                 })
             }
+            bSize.setOnClickListener { size(listTextViewSettings) }
         }
 
 
     }
-    private fun theme(){
+    private fun theme(listTextViewSettings: List<TextView>){
+        with(binding){
         if (modelFlashLight.getTheme() == THEME_ZABOR) {
-            with(binding){
                 parentSettings.setBackgroundResource(R.drawable.zabor)
                 tvSettings.setTextAppearance(R.style.StyleMenuZabor)
-                val listTextViewSettings = listOf(bSort,bTextSize,bAlarmSound,bTheme,bDonate,bCallback)
                 listTextViewSettings.forEach {
                     it.setTextAppearance(R.style.StyleButtonZabor)
                 }
             }
-
-
         }
+    }
+    private fun size(listTextViewSettings: List<TextView>){
+        listTextViewSettings.forEach { it.textSize = 25f }
     }
 }

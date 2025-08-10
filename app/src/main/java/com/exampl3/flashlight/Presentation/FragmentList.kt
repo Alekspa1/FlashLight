@@ -105,6 +105,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
                 if (it.resultCode == Activity.RESULT_OK) {
                     val text = it.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
                     if (text != null) {
+                        modelFlashLight.getItemMaxSort()
                         modelFlashLight.insertItem(
                             Item(
                                 null,

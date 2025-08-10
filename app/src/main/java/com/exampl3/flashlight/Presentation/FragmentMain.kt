@@ -144,7 +144,6 @@ class FragmentMain : Fragment(), ListMenuAdapter.onClick {
 
             }
             bSettingsCard.setOnClickListener {
-               // stub("Настройки")
                 findNavController().navigate(R.id.action_fragmentMain_to_fragmentSettings)
                 drawer.closeDrawer(GravityCompat.START)
 
