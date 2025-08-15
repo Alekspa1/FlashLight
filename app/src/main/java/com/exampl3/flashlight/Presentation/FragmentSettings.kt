@@ -107,6 +107,7 @@ class FragmentSettings : Fragment() {
         with(binding){
         if (modelFlashLight.getTheme() == THEME_ZABOR) {
                 parentSettings.setBackgroundResource(R.drawable.zabor)
+            imBack.setImageResource(R.drawable.ic_back_zabor)
                 tvSettings.setTextAppearance(R.style.StyleMenuZabor)
                 listTextViewSettings.forEach {
                     it.setTextAppearance(R.style.StyleButtonZabor)

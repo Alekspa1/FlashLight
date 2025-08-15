@@ -112,7 +112,7 @@
                 app:cardCornerRadius="15dp"
                 app:cardElevation="0dp"
                 app:cardMaxElevation="0dp"
-                app:layout_constraintEnd_toStartOf="@+id/imageView3"
+                app:layout_constraintEnd_toStartOf="@+id/imMenuMain"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tvCategoryDrawer"
                 app:strokeColor="#9900E2FF"
@@ -139,7 +139,7 @@
             </com.google.android.material.card.MaterialCardView>
 
             <ImageView
-                android:id="@+id/imageView3"
+                android:id="@+id/imMenuMain"
                 android:layout_width="35dp"
                 android:layout_height="35dp"
                 android:layout_marginEnd="8dp"
@@ -159,7 +159,7 @@
                 app:cardCornerRadius="15dp"
                 app:cardElevation="0dp"
                 app:cardMaxElevation="0dp"
-                app:layout_constraintEnd_toStartOf="@+id/imageView3"
+                app:layout_constraintEnd_toStartOf="@+id/imMenuMain"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tvCardMenu"
                 app:strokeColor="#9900E2FF"
@@ -186,7 +186,7 @@
             </com.google.android.material.card.MaterialCardView>
 
             <ImageView
-                android:id="@+id/tvTitleGeneral"
+                android:id="@+id/imSharedMain"
                 android:layout_width="35dp"
                 android:layout_height="35dp"
                 android:layout_marginEnd="8dp"
@@ -230,116 +230,58 @@
                 app:layout_constraintStart_toStartOf="parent">
 
                 <androidx.cardview.widget.CardView
+                    android:id="@+id/cardZone"
                     android:layout_width="match_parent"
                     android:layout_height="2dp"
                     app:cardBackgroundColor="@color/white">
 
                 </androidx.cardview.widget.CardView>
 
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/bBuyPremiumCard"
+                <TextView
+                    android:id="@+id/tvNewPremium"
+                    style="@style/StyleButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
-                    android:backgroundTint="@color/Dark_Blue"
-                    app:cardBackgroundColor="@color/vPager"
-                    app:cardCornerRadius="15dp"
-                    app:cardElevation="0dp"
-                    app:cardMaxElevation="0dp"
-                    app:strokeColor="@color/Dark_Blue"
-                    app:strokeWidth="3dp">
+                    android:padding="10dp"
+                    android:text="@string/premium_off"
+                    app:drawableStartCompat="@drawable/ic_premium_off"
+                    android:drawablePadding="8dp"
+                    />
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardZone2"
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    app:cardBackgroundColor="@color/white"/>
 
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:padding="5dp">
-
-                        <TextView
-                            android:id="@+id/bBuyPremium"
-                            style="@style/StyleButton"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_margin="5dp"
-                            android:text="@string/premium_off"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
-
-                    </FrameLayout>
-
-                </com.google.android.material.card.MaterialCardView>
-
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/bUpdateCard"
+                <TextView
+                    android:id="@+id/tvNewUpgrate"
+                    style="@style/StyleButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
-                    android:backgroundTint="@color/Dark_Blue"
-                    app:cardBackgroundColor="@color/vPager"
-                    app:cardCornerRadius="15dp"
-                    app:cardElevation="0dp"
-                    app:cardMaxElevation="0dp"
-                    app:strokeColor="@color/Dark_Blue"
-                    app:strokeWidth="3dp">
+                    android:drawablePadding="8dp"
+                    android:padding="10dp"
+                    android:text="Проверить обновление"
+                    app:drawableStartCompat="@drawable/ic_update" />
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardZone3"
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    app:cardBackgroundColor="@color/white"/>
 
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:padding="5dp">
-
-                        <TextView
-                            android:id="@+id/bUpdate"
-                            style="@style/StyleButton"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_margin="5dp"
-                            android:text="Проверить обновления"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
-
-                    </FrameLayout>
-
-                </com.google.android.material.card.MaterialCardView>
-
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/bSettingsCard"
+                <TextView
+                    android:id="@+id/tvNewSettings"
+                    style="@style/StyleButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
-                    android:backgroundTint="@color/Dark_Blue"
-                    app:cardBackgroundColor="@color/vPager"
-                    app:cardCornerRadius="15dp"
-                    app:cardElevation="0dp"
-                    app:cardMaxElevation="0dp"
-                    app:strokeColor="@color/Dark_Blue"
-                    app:strokeWidth="3dp">
-
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:padding="5dp">
-
-                        <TextView
-                            android:id="@+id/bSettings"
-                            style="@style/StyleButton"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_margin="5dp"
-                            android:text="Настройки"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
-
-                    </FrameLayout>
-
-                </com.google.android.material.card.MaterialCardView>
+                    android:drawablePadding="8dp"
+                    android:padding="10dp"
+                    android:text="Настройки"
+                    app:drawableStartCompat="@drawable/ic_settings" />
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardZone4"
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    app:cardBackgroundColor="@color/white"/>
 
 
             </LinearLayout>

@@ -10,7 +10,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
+import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.asLiveData
@@ -19,7 +19,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Const.AUTHORIZED_RUSTORE
 import com.exampl3.flashlight.Const.DELETE
-import com.exampl3.flashlight.Const.DONATE
 import com.exampl3.flashlight.Const.FOREVER
 import com.exampl3.flashlight.Const.NOT_AUTHORIZED
 import com.exampl3.flashlight.Const.ONE_MONTH
@@ -33,8 +32,6 @@ import com.exampl3.flashlight.Data.Room.ListCategory
 import com.exampl3.flashlight.Presentation.adapters.ListMenuAdapter
 import com.exampl3.flashlight.Presentation.adapters.VpAdapter
 import com.exampl3.flashlight.R
-import com.exampl3.flashlight.databinding.ActivityMainBinding
-import com.exampl3.flashlight.databinding.FragmentListBinding
 import com.exampl3.flashlight.databinding.FragmentMainBinding
 import com.google.android.material.tabs.TabLayoutMediator
 import com.yandex.mobile.ads.banner.BannerAdSize
@@ -56,6 +53,7 @@ import java.util.Calendar
 import java.util.UUID
 import javax.inject.Inject
 import androidx.core.net.toUri
+import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
 
 @AndroidEntryPoint
 class FragmentMain : Fragment(), ListMenuAdapter.onClick {
@@ -63,6 +61,9 @@ class FragmentMain : Fragment(), ListMenuAdapter.onClick {
 
     @Inject
     lateinit var db: Database
+
+    @Inject
+    lateinit var pref: SettingsSharedPreference
     private lateinit var binding: FragmentMainBinding
     private lateinit var vpAdapter: VpAdapter
 
@@ -87,21 +88,30 @@ class FragmentMain : Fragment(), ListMenuAdapter.onClick {
         super.onViewCreated(view, savedInstanceState)
         initAll()
         theme()
-        pLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()){}
+        pLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
 
         if (!modelFlashLight.getPremium()) initYaBaner()
 
         with(binding) {
-            if (modelFlashLight.getPremium()) bBuyPremium.text =
-                requireActivity().getString(R.string.premium_on)
+            if (modelFlashLight.getPremium()) tvNewPremium.apply {
+                text =
+                    requireActivity().getString(R.string.premium_on)
+                setCompoundDrawablesRelativeWithIntrinsicBounds(
+                    ContextCompat.getDrawable(requireContext(), R.drawable.ic_premium_on),
+                    null, // Top
+                    null, // End
+                    null  // Bottom
+                )
+
+            }
             imMenu.setOnClickListener {
                 drawer.openDrawer(GravityCompat.START)
             } //  Меню
-            bBuyPremiumCard.setOnClickListener {
+            tvNewPremium.setOnClickListener {
                 getListProduct()
                 drawer.closeDrawer(GravityCompat.START)
             } // ПРЕМИУМ
-            bUpdateCard.setOnClickListener {
+            tvNewUpgrate.setOnClickListener {
                 try {
                     startActivity(Intent(Intent.ACTION_VIEW, RUSTORE.toUri()))
                 } catch (e: Exception) {
@@ -143,7 +153,7 @@ class FragmentMain : Fragment(), ListMenuAdapter.onClick {
 
 
             }
-            bSettingsCard.setOnClickListener {
+            tvNewSettings.setOnClickListener {
                 findNavController().navigate(R.id.action_fragmentMain_to_fragmentSettings)
                 drawer.closeDrawer(GravityCompat.START)
 
@@ -152,6 +162,7 @@ class FragmentMain : Fragment(), ListMenuAdapter.onClick {
         }
 
     }
+
     private fun initYaBaner() {
         bannerAd = BannerAdView(requireActivity())
         binding.yaBaner.setAdUnitId(Const.BANER)
@@ -182,7 +193,7 @@ class FragmentMain : Fragment(), ListMenuAdapter.onClick {
 
         // инициализировал ресайклер
         val rcView = binding.rcView
-        adapter = ListMenuAdapter(this)
+        adapter = ListMenuAdapter(this, pref)
         rcView.layoutManager = LinearLayoutManager(requireActivity())
         rcView.adapter = adapter
 
@@ -213,48 +224,31 @@ class FragmentMain : Fragment(), ListMenuAdapter.onClick {
 
     } // Инициализирую все
 
-    private fun theme(){
-        if (modelFlashLight.getTheme() == THEME_ZABOR) {
-            with(binding){
-                drawer.setBackgroundResource(R.drawable.zabor)
-                navView.setBackgroundResource(R.drawable.zabor)
-                val listTextButtom = listOf(bBuyPremium,bUpdate,bSettings)
-                val listTextItem = listOf(tvTitileMenu,draverTvTitileMenu)
-                listTextButtom.forEach { textView ->
-                    textView.setTextAppearance(R.style.StyleButtonZabor)
-                }
-                listTextItem.forEach { textView ->
-                    textView.setTextAppearance(R.style.StyleItemZabor)
-                }
-                tvCategoryDrawer.setTextAppearance(R.style.StyleMenuZabor)
-            }
-        }
-    }
-
-
 
     //Override функции
-
 
 
     override fun onClick(item: ListCategory, action: Int) {
         when (action) {
             DELETE -> {
-                DialogItemList.AlertDelete(requireActivity(), object : DialogItemList.ActionTrueOrFalse {
-                    override fun onClick(flag: Boolean) {
-                        if (flag) {
-                            CoroutineScope(Dispatchers.IO).launch {
-                                db.CourseDao().getAllNewNoFlow(item.name).forEach { itemList ->
-                                    modelFlashLight.changeAlarm(itemList, Const.DELETE_ALARM)
+                DialogItemList.AlertDelete(
+                    requireActivity(),
+                    object : DialogItemList.ActionTrueOrFalse {
+                        override fun onClick(flag: Boolean) {
+                            if (flag) {
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    db.CourseDao().getAllNewNoFlow(item.name).forEach { itemList ->
+                                        modelFlashLight.changeAlarm(itemList, Const.DELETE_ALARM)
+                                    }
+                                    db.CourseDao()
+                                        .deleteItemInCategory(item.name) // удаляю все из бд
+                                    db.CourseDao().deleteCategoryMenu(item) // удаляю из меню
                                 }
-                                db.CourseDao().deleteItemInCategory(item.name) // удаляю все из бд
-                                db.CourseDao().deleteCategoryMenu(item) // удаляю из меню
-                            }
-                            modelFlashLight.updateCategory(getString(R.string.everyday))
+                                modelFlashLight.updateCategory(getString(R.string.everyday))
 
+                            }
                         }
-                    }
-                })
+                    })
             } // Удаление элемента
             Const.CHANGE_ITEM -> {
                 DialogItemList.AlertList(
@@ -386,9 +380,12 @@ class FragmentMain : Fragment(), ListMenuAdapter.onClick {
     } // Покупка товара
 
 
-
     private fun stub(text: String) {
-        Toast.makeText(requireActivity(), "$text появятся в следующих обновлениях", Toast.LENGTH_SHORT).show()
+        Toast.makeText(
+            requireActivity(),
+            "$text появятся в следующих обновлениях",
+            Toast.LENGTH_SHORT
+        ).show()
     }
 
     private fun updatePremium(premium: Boolean, value: String) {
@@ -396,10 +393,66 @@ class FragmentMain : Fragment(), ListMenuAdapter.onClick {
         Toast.makeText(requireActivity(), value, Toast.LENGTH_SHORT).show()
         if (premium) {
             binding.yaBaner.visibility = View.GONE
-            binding.bBuyPremium.text = requireActivity().getString(R.string.premium_on)
+            binding.tvNewPremium.text = requireActivity().getString(R.string.premium_on)
+            binding.tvNewPremium.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                ContextCompat.getDrawable(requireContext(), R.drawable.ic_premium_on),
+                null, // Top
+                null, // End
+                null  // Bottom
+            )
         } else {
             binding.yaBaner.visibility = View.VISIBLE
-            binding.bBuyPremium.text = requireActivity().getString(R.string.premium_off)
+            binding.tvNewPremium.text = requireActivity().getString(R.string.premium_off)
         }
     } // обновление ПРЕМИУМ версии
+
+    private fun theme() {
+        with(modelFlashLight) {
+            if (getTheme() == THEME_ZABOR) {
+                val icon = if (modelFlashLight.getPremium()) R.drawable.ic_premium_on
+                else R.drawable.ic_premium_off_zabor
+                with(binding) {
+                    val testList = mapOf<Const.Action, Map<View, Int>>(
+                        Const.Action.BACKGROUND_RESOURCE to
+                                mapOf
+                                    (
+                                    drawer to R.drawable.zabor,
+                                    navView to R.drawable.zabor,
+                                    cardZone to R.color.black,
+                                    cardZone2 to R.color.black,
+                                    cardZone3 to R.color.black,
+                                    cardZone4 to R.color.black,
+                                ),
+                        Const.Action.IMAGE_RESOURCE to
+                                mapOf
+                                    (
+                                    imMenuMain to R.drawable.ic_menu_zabor,
+                                    imSharedMain to R.drawable.ic_share_zabor,
+                                    imSharedMain to R.drawable.ic_share_zabor,
+                                    imBAddMenu to R.drawable.ic_add_zabor
+                                ),
+                        Const.Action.TEXT_IMAGE to
+                                mapOf
+                                    (
+                                    tvNewPremium to icon,
+                                    tvNewUpgrate to R.drawable.ic_update_zabor,
+                                    tvNewSettings to R.drawable.ic_settings_zabor
+                                ),
+                        Const.Action.TEXT_STYLE to mapOf
+                            (
+                            tvNewPremium to R.style.StyleButtonZabor,
+                            tvNewUpgrate to R.style.StyleButtonZabor,
+                            tvNewSettings to R.style.StyleButtonZabor,
+                            tvCategoryDrawer to R.style.StyleMenuZabor,
+                            tvTitileMenu to R.style.StyleItemZabor,
+                            draverTvTitileMenu to R.style.StyleItemZabor
+                                    )
+                    )
+                    modelFlashLight.new(testList)
+
+                }
+            }
+        }
+
+    }
 }

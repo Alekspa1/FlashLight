@@ -13,6 +13,7 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.activityViewModels
+import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Const.THEME_ZABOR
 import com.exampl3.flashlight.R
 import com.exampl3.flashlight.databinding.FragmentNotebookBinding
@@ -39,7 +40,8 @@ class FragmentNotebook : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        theme(binding,requireContext())
+        theme()
+
         val launcher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
                 if (result.resultCode == RESULT_OK) {
@@ -55,7 +57,7 @@ class FragmentNotebook : Fragment() {
         binding.imDelete.setOnClickListener {
             delete(view.context)
         }
-        binding.imageView2.setOnClickListener {
+        binding.imMicroNotebook.setOnClickListener {
             try {
                 launcher.launch(voiceIntent)
             } catch (e: Exception) {
@@ -68,11 +70,25 @@ class FragmentNotebook : Fragment() {
         }
     }
 
-    private fun theme(binding: FragmentNotebookBinding, context: Context){
-        if (modelFlashLight.getTheme() == THEME_ZABOR){
-            binding.edotebook.setBackgroundColor(context.getColor(R.color.YellowNotebook))
-            binding.edotebook.setTextColor(context.getColor(R.color.black))
+
+    private fun theme() {
+        with(modelFlashLight) {
+            if (getTheme() == THEME_ZABOR) {
+                with(binding) {
+                    val list = mapOf<Const.Action, Map<View, Int>>(
+                        Const.Action.BACKGROUND_COLOR to mapOf(edotebook to R.color.YellowNotebook),
+                        Const.Action.TEXT_COLOR to mapOf(edotebook to R.color.black),
+                        Const.Action.IMAGE_RESOURCE to mapOf(
+                            imDelete to R.drawable.ic_de_zabor,
+                            imMicroNotebook to R.drawable.ic_micto_zabor
+                        )
+                    )
+                    modelFlashLight.new(list)
+                }
+
+            }
         }
+
     }
 
     override fun onStop() {
@@ -94,9 +110,4 @@ class FragmentNotebook : Fragment() {
         binding.edotebook.setText(modelFlashLight.getNotebook())
     } // Заполнение из бд
 
-
-    companion object {
-        fun newInstance() = FragmentNotebook()
-
-    }
 }

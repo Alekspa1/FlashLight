@@ -7,6 +7,8 @@ import android.icu.util.Calendar
 import androidx.core.content.ContextCompat
 
 object Const {
+    enum class Action{TEXT_STYLE,TEXT_COLOR,TEXT_IMAGE,BACKGROUND_COLOR,IMAGE_RESOURCE,BACKGROUND_RESOURCE,}
+
     const val RUSTORE = "https://apps.rustore.ru/app/com.exampl3.flashlight"
     const val AUTHORIZED_RUSTORE = "rustore://auth/"
     const val APP_GALERY = "https://flashlightandtodolist.drru.agconnect.link/d6zW"

@@ -44,6 +44,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Calendar
 import javax.inject.Inject
+import kotlin.Int
+import kotlin.collections.Map
 
 @AndroidEntryPoint
 open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.onLongClick {
@@ -82,8 +84,10 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initRcView()
         theme()
+        initRcView()
+
+
 
 
         modelFlashLight.categoryItemLD.observe(viewLifecycleOwner) { value ->
@@ -103,6 +107,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
         val launcher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
                 if (it.resultCode == Activity.RESULT_OK) {
+                    modelFlashLight.getItemMaxSort()
                     val text = it.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
                     if (text != null) {
                         modelFlashLight.getItemMaxSort()
@@ -382,16 +387,24 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
     }
 
     private fun theme(){
-        if (modelFlashLight.getTheme() == THEME_ZABOR) {
-            with(binding){
-             tvCategory.setTextAppearance(R.style.StyleMenuZabor)
+        with(modelFlashLight){
+            if (getTheme() == THEME_ZABOR) {
+                with(binding){
+                    val list = mapOf<Const.Action, Map<View, Int>>(
+                        Const.Action.IMAGE_RESOURCE to mapOf(
+                            imBAddFrag to R.drawable.ic_add_zabor,
+                            imVoiceFrag to R.drawable.ic_micto_zabor
+                        ),
+                        Const.Action.TEXT_STYLE to mapOf(tvCategory to R.style.StyleMenuZabor )
+                    )
+                    modelFlashLight.new(list)
+                }
+
             }
         }
+
     }
 
 
-    companion object {
-        fun newInstance() = FragmentList()
-    }
 }
 

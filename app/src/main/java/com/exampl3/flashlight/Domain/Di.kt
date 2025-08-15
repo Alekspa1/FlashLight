@@ -9,8 +9,10 @@ import androidx.room.Room
 import com.exampl3.flashlight.Data.InsertDateAndTimeImpl
 import com.exampl3.flashlight.Data.ChangeAlarmImp
 import com.exampl3.flashlight.Data.Room.Database
+import com.exampl3.flashlight.Data.ThemeImp
 import com.exampl3.flashlight.Domain.repository.InsertDateAndTimeRepository
 import com.exampl3.flashlight.Domain.repository.InsertOrDeleteAlarmReository
+import com.exampl3.flashlight.Domain.repository.ThemeRepository
 
 import dagger.Module
 import dagger.Provides
@@ -27,6 +29,12 @@ object Di {
     @Singleton
     fun provedesTimeRepository(): InsertDateAndTimeRepository {
         return InsertDateAndTimeImpl()
+    }
+
+    @Provides
+    @Singleton
+    fun provedesThemeRepository(context: Application): ThemeRepository {
+        return ThemeImp(context)
     }
 
     @Provides

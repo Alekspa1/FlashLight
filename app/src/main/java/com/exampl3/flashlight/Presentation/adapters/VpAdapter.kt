@@ -8,9 +8,9 @@ import com.exampl3.flashlight.Presentation.FragmentList
 import com.exampl3.flashlight.Presentation.FragmentNotebook
 
 private val listFrag = listOf(
-    FragmentNotebook.newInstance(),
-    FragmentList.newInstance(),
-    FragmentCalendar.newInstance()
+    FragmentNotebook(),
+    FragmentList(),
+    FragmentCalendar()
 )
 
 class VpAdapter(fragment: FragmentActivity) : FragmentStateAdapter(fragment) {

@@ -15,7 +15,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.applandeo.materialcalendarview.CalendarDay
@@ -26,12 +25,12 @@ import com.exampl3.flashlight.Const.CHANGE
 import com.exampl3.flashlight.Const.CHANGE_ITEM
 import com.exampl3.flashlight.Const.DELETE
 import com.exampl3.flashlight.Const.IMAGE
+import com.exampl3.flashlight.Const.THEME_ZABOR
 import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Data.Room.Item
 import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
 
 import com.exampl3.flashlight.Presentation.adapters.ItemListAdapter
-import com.exampl3.flashlight.Presentation.adapters.draganddrop.DragItemTouchHelperCallback
 import com.exampl3.flashlight.R
 import com.exampl3.flashlight.databinding.FragmentCalendarBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -42,6 +41,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Calendar
 import javax.inject.Inject
+import kotlin.Int
+import kotlin.collections.Map
 
 
 @AndroidEntryPoint
@@ -83,9 +84,11 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
         initRcView()
         calendarDayB = Calendar.getInstance()
 
+
         pLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
 
         binding.imBAddCalendar.setOnClickListener {
+            modelFlashLight.getItemMaxSort()
             if (modelFlashLight.getPremium())
                 if (getDateNow(calendarDayB) >= getDateNow(calendarZero)) DialogItemList.alertItem(
                     requireContext(),
@@ -178,6 +181,7 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
 
     override fun onResume() {
         super.onResume()
+        theme()
         calendarZero = Calendar.getInstance()
         if (modelFlashLight.getPremium()) {
 
@@ -247,9 +251,6 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
         })
     }
 
-    companion object {
-        fun newInstance() = FragmentCalendar()
-    }
 
     override fun onLongClick(item: Item, action: Int) {
         modelFlashLight.insertStringAndAlarm(item, requireContext(), false)
@@ -372,6 +373,23 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
         calendar.set(Calendar.SECOND, 0)
         calendar.set(Calendar.MILLISECOND, 0)
         return calendar.timeInMillis
+    }
+
+    private fun theme(){
+        with(modelFlashLight){
+            if (getTheme() == THEME_ZABOR) {
+                with(binding){
+                    val list = mapOf<Const.Action, Map<View, Int>>(
+                        Const.Action.IMAGE_RESOURCE to mapOf(
+                            imBAddCalendar to R.drawable.ic_add_zabor
+                        ),
+                        Const.Action.TEXT_COLOR to mapOf(tvDela to R.color.black )
+                    )
+                    modelFlashLight.new(list)
+                }
+            }
+        }
+
     }
 
 

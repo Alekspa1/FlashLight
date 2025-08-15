@@ -76,7 +76,9 @@ class ItemListAdapter(
                 else {
                     imDeleteList.setImageResource(R.drawable.ic_de_zabor)
                     textItem.setTextColor(context.resources.getColor(R.color.black) )
-                    tvDesc.setTextColor(context.resources.getColor(R.color.white) )
+                    tvDesc.setTextColor(context.resources.getColor(R.color.black) )
+                    tvAlarm.setTextColor(context.resources.getColor(R.color.white) )
+                    imPhotoView.setImageResource(R.drawable.ic_image_zabor)
                     when (item.change) {
                         true -> {
                             imStatus.setImageResource(R.drawable.ic_item_true_zabor)

@@ -7,6 +7,7 @@
     <color name="NoActiveNew">#CC595959</color>
     <color name="Active">#6623BD00</color>
     <color name="NoActive">#80F30404</color>
+    <color name="no">#2F0101</color>
 
     <color name="vPager">#9900BCD4</color>
     <color name="vPager2_осн">#006F7E</color>
@@ -20,4 +21,5 @@
     <color name="Grey3">#5E5F61</color>
     <color name="Light_Grey">#B6B6B6</color>
     <color name="Dark_Blue">#001491</color>
+    <color name="GPT">#E0E0E0</color>
 </resources>

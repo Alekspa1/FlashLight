@@ -2,7 +2,11 @@ package com.exampl3.flashlight.Presentation
 
 
 import android.content.Context
+import android.graphics.Color
 import android.net.Uri
+import android.view.View
+import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.net.toUri
 import androidx.lifecycle.MutableLiveData
@@ -12,6 +16,7 @@ import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Data.Room.Item
 import com.exampl3.flashlight.Data.Room.ListCategory
+import com.exampl3.flashlight.Data.ThemeImp
 import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
 import com.exampl3.flashlight.Data.sharedPreference.SharedPreferenceImpl
 import com.exampl3.flashlight.Domain.InsertDateAndAlarm
@@ -31,11 +36,19 @@ class ViewModelFlashLight @Inject constructor(
     private val db: Database,
     private val insertDateAndTime: InsertDateAndAlarm,
     private val changeAlarm: ChangeAlarmUseCase,
+    private val theme: ThemeImp
 ) : ViewModel() {
 
 
     fun savePremium(flag: Boolean) = pref.savePremium(flag)
     fun getPremium() = pref.getPremium()
+
+
+
+    fun new(map: Map<Const.Action, Map<View, Int>>){
+        theme.view(map)
+    }
+
 
     fun saveNoteBook(value: String) = pref.saveStringNoteBook(value)
     fun getNotebook() = pref.getStringNoteBook()
@@ -121,8 +134,8 @@ class ViewModelFlashLight @Inject constructor(
 
     }
 
- fun saveNewOrder(newList: List<Item>) {
-        newList.forEach { newItem->
+    fun saveNewOrder(newList: List<Item>) {
+        newList.forEach { newItem ->
             updateItem(newItem)
         }
     }
