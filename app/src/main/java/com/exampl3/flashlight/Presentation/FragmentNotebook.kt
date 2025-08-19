@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -77,16 +78,18 @@ class FragmentNotebook : Fragment() {
                 with(binding) {
                     val list = mapOf<Const.Action, Map<View, Int>>(
                         Const.Action.BACKGROUND_COLOR to mapOf(edotebook to R.color.YellowNotebook),
-                        Const.Action.TEXT_COLOR to mapOf(edotebook to R.color.black),
+                        Const.Action.TEXT_STYLE to mapOf(edotebook to R.style.StyleNotebookZabor),
                         Const.Action.IMAGE_RESOURCE to mapOf(
                             imDelete to R.drawable.ic_de_zabor,
                             imMicroNotebook to R.drawable.ic_micto_zabor
                         )
                     )
-                    modelFlashLight.new(list)
+                    modelFlashLight.setView(list)
                 }
 
             }
+            val listTextView = listOf(binding.edotebook as TextView)
+            setSizeTextIsList(listTextView)
         }
 
     }

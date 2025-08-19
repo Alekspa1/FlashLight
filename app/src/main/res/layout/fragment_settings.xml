@@ -40,210 +40,77 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_settings">
 
-        <com.google.android.material.card.MaterialCardView
+        <TextView
             android:id="@+id/bSetSort"
+            style="@style/StyleItem"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:backgroundTint="@color/Dark_Blue"
-            app:cardBackgroundColor="@color/vPager"
-            app:cardCornerRadius="15dp"
-            app:cardElevation="0dp"
-            app:cardMaxElevation="0dp"
-            app:strokeColor="@color/Dark_Blue"
-            app:strokeWidth="3dp">
+            android:layout_marginStart="3dp"
+            android:layout_marginEnd="3dp"
+            android:layout_marginBottom="3dp"
+            android:background="@drawable/button_background_item_category"
+            android:padding="8dp"
+            android:text="Сортировка" />
 
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/bSort"
-                    style="@style/StyleButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-
-                    android:layout_margin="10dp"
-                    android:text="Сортировка"
-                    app:drawableStartCompat="@drawable/ic_sort"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-            </FrameLayout>
-
-        </com.google.android.material.card.MaterialCardView>
-
-        <com.google.android.material.card.MaterialCardView
+        <TextView
             android:id="@+id/bSize"
+            style="@style/StyleItem"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:backgroundTint="@color/Dark_Blue"
-            app:cardBackgroundColor="@color/vPager"
-            app:cardCornerRadius="15dp"
-            app:cardElevation="0dp"
-            app:cardMaxElevation="0dp"
-            app:strokeColor="@color/Dark_Blue"
-            app:strokeWidth="3dp">
+            android:layout_marginStart="3dp"
+            android:layout_marginEnd="3dp"
+            android:layout_marginBottom="3dp"
+            android:background="@drawable/button_background_item_category"
+            android:padding="8dp"
+            android:text="Размер шрифта" />
 
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/bTextSize"
-                    style="@style/StyleButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_margin="10dp"
-                    android:text="Размер шрифта"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-            </FrameLayout>
-
-        </com.google.android.material.card.MaterialCardView>
-
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/bSetSort3"
+        <TextView
+            android:id="@+id/bAlarm"
+            style="@style/StyleItem"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:backgroundTint="@color/Dark_Blue"
-            app:cardBackgroundColor="@color/vPager"
-            app:cardCornerRadius="15dp"
-            app:cardElevation="0dp"
-            app:cardMaxElevation="0dp"
-            app:strokeColor="@color/Dark_Blue"
-            app:strokeWidth="3dp">
+            android:layout_marginStart="3dp"
+            android:layout_marginEnd="3dp"
+            android:layout_marginBottom="3dp"
+            android:background="@drawable/button_background_item_category"
+            android:padding="8dp"
+            android:text="Звук будильника" />
 
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/bAlarmSound"
-                    style="@style/StyleButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_margin="10dp"
-                    android:text="Звук будильника"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-            </FrameLayout>
-
-        </com.google.android.material.card.MaterialCardView>
-
-        <com.google.android.material.card.MaterialCardView
+        <TextView
             android:id="@+id/bSetTheme"
+            style="@style/StyleItem"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:backgroundTint="@color/Dark_Blue"
-            app:cardBackgroundColor="@color/vPager"
-            app:cardCornerRadius="15dp"
-            app:cardElevation="0dp"
-            app:cardMaxElevation="0dp"
-            app:strokeColor="@color/Dark_Blue"
-            app:strokeWidth="3dp">
+            android:layout_marginStart="3dp"
+            android:layout_marginEnd="3dp"
+            android:layout_marginBottom="3dp"
+            android:background="@drawable/button_background_item_category"
+            android:padding="8dp"
+            android:text="Тема" />
 
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/bTheme"
-                    style="@style/StyleButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_margin="10dp"
-                    android:text="Тема"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-            </FrameLayout>
-
-        </com.google.android.material.card.MaterialCardView>
-
-        <com.google.android.material.card.MaterialCardView
+        <TextView
             android:id="@+id/bDonateCard"
+            style="@style/StyleItem"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:backgroundTint="@color/Dark_Blue"
-            app:cardBackgroundColor="@color/vPager"
-            app:cardCornerRadius="15dp"
-            app:cardElevation="0dp"
-            app:cardMaxElevation="0dp"
-            app:strokeColor="@color/Dark_Blue"
-            app:strokeWidth="3dp">
+            android:layout_marginStart="3dp"
+            android:layout_marginEnd="3dp"
+            android:layout_marginBottom="3dp"
+            android:background="@drawable/button_background_item_category"
+            android:padding="8dp"
+            android:text="Поддержать разработчика" />
 
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/bDonate"
-                    style="@style/StyleButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_margin="10dp"
-                    android:text="Поддержать разработчика"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-            </FrameLayout>
-
-        </com.google.android.material.card.MaterialCardView>
-
-        <com.google.android.material.card.MaterialCardView
+        <TextView
             android:id="@+id/bCallbackCard"
+            style="@style/StyleItem"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:backgroundTint="@color/Dark_Blue"
-            app:cardBackgroundColor="@color/vPager"
-            app:cardCornerRadius="15dp"
-            app:cardElevation="0dp"
-            app:cardMaxElevation="0dp"
-            app:strokeColor="@color/Dark_Blue"
-            app:strokeWidth="3dp">
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/bCallback"
-                    style="@style/StyleButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_margin="10dp"
-                    android:text="Обратная связь"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-            </FrameLayout>
-
-        </com.google.android.material.card.MaterialCardView>
+            android:layout_marginStart="3dp"
+            android:layout_marginEnd="3dp"
+            android:layout_marginBottom="3dp"
+            android:background="@drawable/button_background_item_category"
+            android:padding="8dp"
+            android:text="Обратная связь" />
 
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

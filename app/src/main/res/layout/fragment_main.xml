@@ -102,97 +102,51 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/tvCardMenu"
+            <TextView
+                android:id="@+id/tvTitileMenu"
+                style="@style/StyleItem"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_margin="5dp"
-                android:backgroundTint="@color/vPager"
-                app:cardBackgroundColor="@color/vPager"
-                app:cardCornerRadius="15dp"
-                app:cardElevation="0dp"
-                app:cardMaxElevation="0dp"
+                android:layout_margin="3dp"
+                android:background="@drawable/button_background_item_category"
+                android:padding="8dp"
+                android:text="@string/everyday"
                 app:layout_constraintEnd_toStartOf="@+id/imMenuMain"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tvCategoryDrawer"
-                app:strokeColor="#9900E2FF"
-                app:strokeWidth="3dp">
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:padding="3dp">
-
-                    <TextView
-                        android:id="@+id/tvTitileMenu"
-                        style="@style/StyleItem"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:text="@string/everyday"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-            </com.google.android.material.card.MaterialCardView>
+                app:layout_constraintTop_toBottomOf="@+id/tvCategoryDrawer" />
 
             <ImageView
                 android:id="@+id/imMenuMain"
                 android:layout_width="35dp"
                 android:layout_height="35dp"
                 android:layout_marginEnd="8dp"
-                app:layout_constraintBottom_toBottomOf="@+id/tvCardMenu"
+                app:layout_constraintBottom_toBottomOf="@+id/tvTitileMenu"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/tvCardMenu"
                 app:srcCompat="@drawable/ic_menu" />
 
 
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/tvCardShare"
+            <TextView
+                android:id="@+id/draverTvTitileMenu"
+                style="@style/StyleItem"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_margin="5dp"
-                android:backgroundTint="@color/vPager"
-                app:cardBackgroundColor="@color/vPager"
-                app:cardCornerRadius="15dp"
-                app:cardElevation="0dp"
-                app:cardMaxElevation="0dp"
-                app:layout_constraintEnd_toStartOf="@+id/imMenuMain"
+                android:layout_margin="3dp"
+                android:background="@drawable/button_background_item_category"
+                android:padding="8dp"
+                android:text="Общие"
+                app:layout_constraintEnd_toStartOf="@+id/imSharedMain"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tvCardMenu"
-                app:strokeColor="#9900E2FF"
-                app:strokeWidth="3dp">
+                app:layout_constraintTop_toBottomOf="@+id/tvTitileMenu" />
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:padding="3dp">
-
-                    <TextView
-                        android:id="@+id/draverTvTitileMenu"
-                        style="@style/StyleItem"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:text="Общие"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-            </com.google.android.material.card.MaterialCardView>
 
             <ImageView
                 android:id="@+id/imSharedMain"
                 android:layout_width="35dp"
                 android:layout_height="35dp"
                 android:layout_marginEnd="8dp"
-                app:layout_constraintBottom_toBottomOf="@+id/tvCardShare"
+                app:layout_constraintBottom_toBottomOf="@+id/draverTvTitileMenu"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/tvCardShare"
+                app:layout_constraintTop_toTopOf="@+id/draverTvTitileMenu"
                 app:srcCompat="@drawable/ic_share_24" />
 
 
@@ -200,11 +154,11 @@
                 android:id="@+id/rcView"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:layout_marginTop="5dp"
+                android:layout_marginTop="3dp"
                 app:layout_constraintBottom_toTopOf="@+id/imBAddMenu"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tvCardShare" />
+                app:layout_constraintTop_toBottomOf="@+id/draverTvTitileMenu" />
 
             <ImageButton
                 android:id="@+id/imBAddMenu"

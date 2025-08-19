@@ -8,24 +8,24 @@
         android:layout_height="match_parent"
         tools:context=".Presentation.FragmentNotebook">
 
-        <EditText
-            android:id="@+id/edotebook"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginBottom="8dp"
-            android:background="@drawable/notebook_background"
-            android:ems="10"
-            android:gravity="start|top"
-            android:inputType="textMultiLine"
-            android:padding="8dp"
-            android:textColor="@color/white"
-            app:layout_constraintBottom_toTopOf="@+id/imDelete"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+    <EditText
+        android:id="@+id/edotebook"
+        style="@style/StyleNotebook"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/notebook_background"
+        android:ems="10"
+        android:gravity="start|top"
+        android:inputType="textMultiLine"
+        android:padding="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/imDelete"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
             android:id="@+id/imDelete"

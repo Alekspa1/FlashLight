@@ -28,6 +28,7 @@ import com.exampl3.flashlight.Const.IMAGE
 import com.exampl3.flashlight.Const.THEME_ZABOR
 import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Data.Room.Item
+import com.exampl3.flashlight.Data.ThemeImp
 import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
 
 import com.exampl3.flashlight.Presentation.adapters.ItemListAdapter
@@ -54,6 +55,9 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
     lateinit var db: Database
     @Inject
     lateinit var pref: SettingsSharedPreference
+    @Inject
+
+    lateinit var themeImp: ThemeImp
 
     private lateinit var calendar: Calendar
     private lateinit var calendarZero: Calendar
@@ -81,6 +85,7 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        theme()
         initRcView()
         calendarDayB = Calendar.getInstance()
 
@@ -181,7 +186,6 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
 
     override fun onResume() {
         super.onResume()
-        theme()
         calendarZero = Calendar.getInstance()
         if (modelFlashLight.getPremium()) {
 
@@ -233,7 +237,8 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
             onClickListener = this,
             onOrderChanged = null,
             touchHelper = null,
-            pref
+            pref,
+            themeImp
         )
         rcView.layoutManager = LinearLayoutManager(requireContext())
         rcView.adapter = adapter
@@ -377,16 +382,17 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
 
     private fun theme(){
         with(modelFlashLight){
-            if (getTheme() == THEME_ZABOR) {
-                with(binding){
-                    val list = mapOf<Const.Action, Map<View, Int>>(
-                        Const.Action.IMAGE_RESOURCE to mapOf(
-                            imBAddCalendar to R.drawable.ic_add_zabor
-                        ),
-                        Const.Action.TEXT_COLOR to mapOf(tvDela to R.color.black )
-                    )
-                    modelFlashLight.new(list)
-                }
+            with(binding) {
+                val list = mapOf<Const.Action, Map<View, Int>>(
+                    Const.Action.IMAGE_RESOURCE to mapOf(
+                        imBAddCalendar to R.drawable.ic_add_zabor
+                    ),
+                    Const.Action.TEXT_COLOR to mapOf(tvDela to R.color.black )
+                )
+
+
+                if (getTheme() == THEME_ZABOR) modelFlashLight.setView(list)
+                setSize(list)
             }
         }
 

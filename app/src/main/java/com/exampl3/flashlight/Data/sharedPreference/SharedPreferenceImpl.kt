@@ -37,6 +37,7 @@ class SharedPreferenceImpl @Inject constructor(
     private val prefNotebook: SharedPreferences =
         context.getSharedPreferences("TABLE", Context.MODE_PRIVATE)
     private val editNotebook: SharedPreferences.Editor = prefNotebook.edit()
+
     fun getStringNoteBook(): String? {
         return prefNotebook.getString(Const.KEY_NOTE_BOOK, greetings)
     }

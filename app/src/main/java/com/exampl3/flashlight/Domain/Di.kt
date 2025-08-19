@@ -10,6 +10,7 @@ import com.exampl3.flashlight.Data.InsertDateAndTimeImpl
 import com.exampl3.flashlight.Data.ChangeAlarmImp
 import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Data.ThemeImp
+import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
 import com.exampl3.flashlight.Domain.repository.InsertDateAndTimeRepository
 import com.exampl3.flashlight.Domain.repository.InsertOrDeleteAlarmReository
 import com.exampl3.flashlight.Domain.repository.ThemeRepository
@@ -33,8 +34,14 @@ object Di {
 
     @Provides
     @Singleton
-    fun provedesThemeRepository(context: Application): ThemeRepository {
-        return ThemeImp(context)
+    fun provedesSettingsRepository(context: Application): SettingsSharedPreference {
+        return SettingsSharedPreference(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provedesThemeRepository(context: Application, setting:SettingsSharedPreference ): ThemeRepository {
+        return ThemeImp(context, setting)
     }
 
     @Provides

@@ -7,4 +7,6 @@ import com.exampl3.flashlight.Const
 interface ThemeRepository {
 
     fun view(map: Map<Const.Action, Map<View, Int>>)
+
+    fun setTextSize(map: Map<Const.Action, Map<View, Int>>)
 }

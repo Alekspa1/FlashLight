@@ -3,6 +3,7 @@ package com.exampl3.flashlight.Presentation
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -21,7 +22,9 @@ object DialogItemList {
 
     private val insertAlarmList =
         arrayOf("Один раз", "Каждый день", "Каждую неделю", "Каждый месяц", "Каждый год")
-
+    val listTheme = arrayOf("Неоновая","Деревянная")
+    val listSort = arrayOf("По умолчанию","Пользовательская (Можно вручную сортировать дела)")
+    val listSize = arrayOf("Малый", "Обычный", "Крупный")
 
 
     fun AlertList(context: Context, listener: Listener, name: String?) {
@@ -252,8 +255,36 @@ object DialogItemList {
 
     }
 
+    fun insertAlarmSound(context: Context, billing: ActionInt, product: Array<String>) {
+        var result = 0
+        val builred = AlertDialog.Builder(context)
+
+        builred.setTitle("Выберите")
+        builred.setSingleChoiceItems(
+            product, 0
+        ) { e, id ->
+            result = id
+            Log.d("MyLog", id.toString())
+
+        }
+            .setPositiveButton(
+                "OK"
+            ) { window, _ ->
+                billing.onClick(result)
+                window.dismiss()
+            }
+            .setNegativeButton("Отмена") { window, _ ->
+                window.cancel()
+            }
+        builred.create()
+
+        val dialog = builred.create()
+        dialog.show()
+
+    }
+
     fun settingSort(context: Context, sort: ActionInt) {
-        val listSort = arrayOf("По умолчанию","Пользовательская (Можно вручную сортировать дела)")
+
         var result = 0
         val builred = AlertDialog.Builder(context)
 
@@ -280,13 +311,39 @@ object DialogItemList {
     }
 
     fun settingTheme(context: Context, sort: ActionInt) {
-        val listSort = arrayOf("Неоновая","Деревянная")
+
         var result = 0
         val builred = AlertDialog.Builder(context)
 
         builred.setTitle("Выберите тему")
         builred.setSingleChoiceItems(
-            listSort, 0
+            listTheme, 0
+        ) { _, id ->
+            result = id
+        }
+            .setPositiveButton(
+                "OK"
+            ) { window, _ ->
+                sort.onClick(result)
+                window.dismiss()
+            }
+            .setNegativeButton("Отмена") { window, _ ->
+                window.cancel()
+            }
+        builred.create()
+
+        val dialog = builred.create()
+        dialog.show()
+
+    }
+
+    fun settingSize(context: Context, sort: ActionInt) {
+        var result = 0
+        val builred = AlertDialog.Builder(context)
+
+        builred.setTitle("Выберите размер шрифта")
+        builred.setSingleChoiceItems(
+            listSize, 0
         ) { _, id ->
             result = id
         }

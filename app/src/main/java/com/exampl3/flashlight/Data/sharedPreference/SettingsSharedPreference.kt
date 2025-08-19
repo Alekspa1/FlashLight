@@ -3,6 +3,8 @@ package com.exampl3.flashlight.Data.sharedPreference
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
+import com.exampl3.flashlight.Const.SIZE_SETTINGS
+import com.exampl3.flashlight.Const.SIZE_STANDART
 
 
 import com.exampl3.flashlight.Const.SORT_SETTINGS
@@ -31,6 +33,13 @@ class SettingsSharedPreference @Inject constructor(
 
     fun saveTheme(value: String){
         editPremium.putString(THEME_SETTINGS, value)
+        editPremium.apply()
+    }
+
+    fun getSize(): String? = prefSettings.getString(SIZE_SETTINGS, SIZE_STANDART)
+
+    fun saveSize(value: String){
+        editPremium.putString(SIZE_SETTINGS, value)
         editPremium.apply()
     }
 }

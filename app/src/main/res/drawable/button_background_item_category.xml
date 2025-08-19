@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="@color/vPagerCant">  <!-- Цвет волны при нажатии -->
+
+    <item>
+
+
+<shape>
+    <solid android:color="#6500BCD4" />
+    <stroke android:width="3dp"
+        android:color="@color/vPagerCant" />
+    <corners
+        android:radius="10dp"   >
+    </corners>
+</shape>
+
+    </item>
+
+</ripple>

@@ -1,7 +1,6 @@
 package com.exampl3.flashlight.Presentation
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -53,6 +52,12 @@ import java.util.Calendar
 import java.util.UUID
 import javax.inject.Inject
 import androidx.core.net.toUri
+import com.exampl3.flashlight.Const.CHANGE
+import com.exampl3.flashlight.Const.CHANGE_ITEM
+import com.exampl3.flashlight.Const.SIZE_LARGE
+import com.exampl3.flashlight.Const.SIZE_SMALL
+import com.exampl3.flashlight.Const.SIZE_STANDART
+import com.exampl3.flashlight.Data.ThemeImp
 import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
 
 @AndroidEntryPoint
@@ -64,6 +69,8 @@ class FragmentMain : Fragment(), ListMenuAdapter.onClick {
 
     @Inject
     lateinit var pref: SettingsSharedPreference
+    @Inject
+    lateinit var theme: ThemeImp
     private lateinit var binding: FragmentMainBinding
     private lateinit var vpAdapter: VpAdapter
 
@@ -118,7 +125,7 @@ class FragmentMain : Fragment(), ListMenuAdapter.onClick {
                     Toast.makeText(requireActivity(), "Ошибка", Toast.LENGTH_SHORT).show()
                 }
             } // Проверить обновления
-            tvCardMenu.setOnClickListener {
+            tvTitileMenu.setOnClickListener {
                 modelFlashLight.updateCategory("Повседневные")
                 binding.tabLayout.selectTab(binding.tabLayout.getTabAt(1))
                 drawer.closeDrawer(GravityCompat.START)
@@ -148,7 +155,7 @@ class FragmentMain : Fragment(), ListMenuAdapter.onClick {
 
             }
 
-            tvCardShare.setOnClickListener {
+            draverTvTitileMenu.setOnClickListener {
                 stub("Общие дела")
 
 
@@ -193,7 +200,7 @@ class FragmentMain : Fragment(), ListMenuAdapter.onClick {
 
         // инициализировал ресайклер
         val rcView = binding.rcView
-        adapter = ListMenuAdapter(this, pref)
+        adapter = ListMenuAdapter(this, pref, theme)
         rcView.layoutManager = LinearLayoutManager(requireActivity())
         rcView.adapter = adapter
 
@@ -250,7 +257,7 @@ class FragmentMain : Fragment(), ListMenuAdapter.onClick {
                         }
                     })
             } // Удаление элемента
-            Const.CHANGE_ITEM -> {
+            CHANGE_ITEM -> {
                 DialogItemList.AlertList(
                     requireActivity(),
                     object : DialogItemList.Listener {
@@ -275,7 +282,7 @@ class FragmentMain : Fragment(), ListMenuAdapter.onClick {
                 )
 
             } // Изменение имени элемента
-            Const.CHANGE -> {
+            CHANGE -> {
                 if (modelFlashLight.getPremium()) {
                     modelFlashLight.updateCategory(item.name)
                     binding.drawer.closeDrawer(GravityCompat.START)
@@ -328,7 +335,7 @@ class FragmentMain : Fragment(), ListMenuAdapter.onClick {
                                             startActivity(
                                                 Intent(
                                                     Intent.ACTION_VIEW,
-                                                    Uri.parse(AUTHORIZED_RUSTORE)
+                                                    AUTHORIZED_RUSTORE.toUri()
                                                 )
                                             )
                                         } catch (e: Exception) {
@@ -406,53 +413,64 @@ class FragmentMain : Fragment(), ListMenuAdapter.onClick {
         }
     } // обновление ПРЕМИУМ версии
 
+
     private fun theme() {
+
         with(modelFlashLight) {
-            if (getTheme() == THEME_ZABOR) {
+            with(binding) {
                 val icon = if (modelFlashLight.getPremium()) R.drawable.ic_premium_on
                 else R.drawable.ic_premium_off_zabor
-                with(binding) {
-                    val testList = mapOf<Const.Action, Map<View, Int>>(
-                        Const.Action.BACKGROUND_RESOURCE to
-                                mapOf
-                                    (
-                                    drawer to R.drawable.zabor,
-                                    navView to R.drawable.zabor,
-                                    cardZone to R.color.black,
-                                    cardZone2 to R.color.black,
-                                    cardZone3 to R.color.black,
-                                    cardZone4 to R.color.black,
-                                ),
-                        Const.Action.IMAGE_RESOURCE to
-                                mapOf
-                                    (
-                                    imMenuMain to R.drawable.ic_menu_zabor,
-                                    imSharedMain to R.drawable.ic_share_zabor,
-                                    imSharedMain to R.drawable.ic_share_zabor,
-                                    imBAddMenu to R.drawable.ic_add_zabor
-                                ),
-                        Const.Action.TEXT_IMAGE to
-                                mapOf
-                                    (
-                                    tvNewPremium to icon,
-                                    tvNewUpgrate to R.drawable.ic_update_zabor,
-                                    tvNewSettings to R.drawable.ic_settings_zabor
-                                ),
-                        Const.Action.TEXT_STYLE to mapOf
-                            (
-                            tvNewPremium to R.style.StyleButtonZabor,
-                            tvNewUpgrate to R.style.StyleButtonZabor,
-                            tvNewSettings to R.style.StyleButtonZabor,
-                            tvCategoryDrawer to R.style.StyleMenuZabor,
-                            tvTitileMenu to R.style.StyleItemZabor,
-                            draverTvTitileMenu to R.style.StyleItemZabor
-                                    )
-                    )
-                    modelFlashLight.new(testList)
 
-                }
+            val listView = mapOf<Const.Action, Map<View, Int>>(
+                Const.Action.BACKGROUND_RESOURCE to
+                        mapOf
+                            (
+                            drawer to R.drawable.zabor,
+                            navView to R.drawable.zabor,
+                            cardZone to R.color.black,
+                            cardZone2 to R.color.black,
+                            cardZone3 to R.color.black,
+                            cardZone4 to R.color.black,
+                            tvTitileMenu to R.drawable.button_background_item_category_zabor,
+                            draverTvTitileMenu to R.drawable.button_background_item_category_zabor
+                        ),
+                Const.Action.IMAGE_RESOURCE to
+                        mapOf
+                            (
+                            imMenuMain to R.drawable.ic_menu_zabor,
+                            imSharedMain to R.drawable.ic_share_zabor,
+                            imSharedMain to R.drawable.ic_share_zabor,
+                            imBAddMenu to R.drawable.ic_add_zabor
+                        ),
+                Const.Action.TEXT_IMAGE to
+                        mapOf
+                            (
+                            tvNewPremium to icon,
+                            tvNewUpgrate to R.drawable.ic_update_zabor,
+                            tvNewSettings to R.drawable.ic_settings_zabor
+                        ),
+                Const.Action.TEXT_STYLE to mapOf
+                    (
+                    tvNewPremium to R.style.StyleButtonZabor,
+                    tvNewUpgrate to R.style.StyleButtonZabor,
+                    tvNewSettings to R.style.StyleButtonZabor,
+                    tvCategoryDrawer to R.style.StyleMenuZabor,
+                    tvTitileMenu to R.style.StyleItemZabor,
+                    draverTvTitileMenu to R.style.StyleItemZabor
+                )
+            )
+
+            if (getTheme() == THEME_ZABOR) {
+                modelFlashLight.setView(listView)
+            }
+                modelFlashLight.setSize(listView)
+
+
             }
         }
+
+
+
 
     }
 }

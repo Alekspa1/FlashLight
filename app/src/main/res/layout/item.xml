@@ -44,23 +44,21 @@
 
             <TextView
                 android:id="@+id/textItem"
+                style="@style/StyleItem"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_margin="5dp"
                 android:text="Молоко"
-                android:textColor="@color/white"
-                android:textSize="20sp"
                 app:layout_constraintEnd_toStartOf="@+id/imStatus"
                 app:layout_constraintStart_toEndOf="@+id/im_photoView"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/tvDesc"
+                style="@style/StyleItemDesc"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:textColor="@color/Light_Grey"
-                android:textSize="12sp"
                 android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="@+id/textItem"
                 app:layout_constraintStart_toStartOf="@+id/textItem"
@@ -69,12 +67,11 @@
 
             <TextView
                 android:id="@+id/tvAlarm"
+                style="@style/StyleItem.Alarm"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:text="TextView"
-                android:textColor="@color/Yellow"
-                android:textSize="12sp"
                 android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="@+id/tvDesc"
                 app:layout_constraintStart_toStartOf="@+id/tvDesc"

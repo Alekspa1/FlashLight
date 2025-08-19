@@ -2,10 +2,8 @@ package com.exampl3.flashlight.Presentation
 
 
 import android.content.Context
-import android.graphics.Color
 import android.net.Uri
 import android.view.View
-import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.net.toUri
@@ -45,8 +43,16 @@ class ViewModelFlashLight @Inject constructor(
 
 
 
-    fun new(map: Map<Const.Action, Map<View, Int>>){
+    fun setView(map: Map<Const.Action, Map<View, Int>>){
         theme.view(map)
+    }
+
+    fun setSize(map: Map<Const.Action, Map<View, Int>>){
+        theme.setTextSize(map)
+    }
+
+    fun setSizeTextIsList(list: List<TextView>){
+    theme.setSizeTextIsList(list)
     }
 
 
@@ -72,6 +78,9 @@ class ViewModelFlashLight @Inject constructor(
 
     fun saveTheme(value: String) = settingsPref.saveTheme(value)
     fun getTheme() = settingsPref.getTheme()
+
+    fun saveSize(value: String) = settingsPref.saveSize(value)
+    fun getSize() = settingsPref.getSize()
 
     fun saveImagePermanently(context: Context, uri: Uri): Uri {
         try {

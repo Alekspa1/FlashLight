@@ -32,6 +32,7 @@ import com.exampl3.flashlight.Const.THEME_ZABOR
 import com.exampl3.flashlight.Presentation.adapters.ItemListAdapter
 import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Data.Room.Item
+import com.exampl3.flashlight.Data.ThemeImp
 import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
 import com.exampl3.flashlight.Presentation.adapters.draganddrop.DragItemTouchHelperCallback
 import com.exampl3.flashlight.R
@@ -56,6 +57,9 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
     lateinit var db: Database
     @Inject
     lateinit var pref: SettingsSharedPreference
+
+    @Inject
+    lateinit var themeImp: ThemeImp
 
     @Inject
     lateinit var voiceIntent: Intent
@@ -224,7 +228,8 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
                 modelFlashLight.updateItemsOrder(updatedList)
             },
             touchHelper = null,
-            pref
+            pref,
+            themeImp
         )
         rcView.layoutManager = LinearLayoutManager(requireContext())
         rcView.adapter = adapter
@@ -397,7 +402,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
                         ),
                         Const.Action.TEXT_STYLE to mapOf(tvCategory to R.style.StyleMenuZabor )
                     )
-                    modelFlashLight.new(list)
+                    modelFlashLight.setView(list)
                 }
 
             }

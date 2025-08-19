@@ -58,6 +58,11 @@ object Const {
     const val THEME_SETTINGS = "THEME_SETTINGS"
     const val THEME_FUTURE = "THEME_FUTURE"
     const val THEME_ZABOR = "THEME_ZABOR"
+    const val SIZE_SETTINGS = "SIZE_SETTINGS"
+    const val SIZE_SMALL = "SIZE_SMALL"
+    const val SIZE_STANDART = "SIZE_STANDART"
+    const val SIZE_LARGE = "SIZE_LARGE"
+
 
 
 

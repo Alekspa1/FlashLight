@@ -1,24 +1,24 @@
 package com.exampl3.flashlight.Presentation
 
-import android.content.Context
+import android.Manifest
+import android.content.ContentResolver
 import android.content.Intent
-import android.net.Uri
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
-import android.util.Log
+import android.provider.MediaStore
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.view.GravityCompat
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import com.exampl3.flashlight.Const.DONATE
-import com.exampl3.flashlight.Const.FOREVER
-import com.exampl3.flashlight.Const.ONE_MONTH
-import com.exampl3.flashlight.Const.ONE_YEAR
-import com.exampl3.flashlight.Const.SIX_MONTH
 import com.exampl3.flashlight.Const.SORT_STANDART
 import com.exampl3.flashlight.Const.SORT_USER
 import com.exampl3.flashlight.Const.THEME_FUTURE
@@ -28,14 +28,18 @@ import com.exampl3.flashlight.databinding.FragmentSettingsBinding
 import kotlin.getValue
 import androidx.core.net.toUri
 import androidx.navigation.fragment.findNavController
-import com.yandex.mobile.ads.impl.li
+import com.exampl3.flashlight.Const
+import com.exampl3.flashlight.Const.SIZE_LARGE
+import com.exampl3.flashlight.Const.SIZE_SMALL
+import com.exampl3.flashlight.Const.SIZE_STANDART
+
 
 class FragmentSettings : Fragment() {
 
 
     private lateinit var binding: FragmentSettingsBinding
     val modelFlashLight: ViewModelFlashLight by activityViewModels()
-
+    private lateinit var pLauncher: ActivityResultLauncher<String>
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -44,11 +48,11 @@ class FragmentSettings : Fragment() {
         return binding.root
     }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val listTextViewSettings = listOf(binding.bSort,binding.bTextSize,binding.bAlarmSound,binding.bTheme,binding.bDonate,binding.bCallback)
-        theme(listTextViewSettings)
-
+        theme()
+        pLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
         with(binding){
             bCallbackCard.setOnClickListener {
                 val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
@@ -98,24 +102,135 @@ class FragmentSettings : Fragment() {
 
                 })
             }
-            bSize.setOnClickListener { size(listTextViewSettings) }
-        }
 
+            bAlarm.setOnClickListener {
+                val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    Manifest.permission.READ_MEDIA_AUDIO
+                } else {
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                }
 
-    }
-    private fun theme(listTextViewSettings: List<TextView>){
-        with(binding){
-        if (modelFlashLight.getTheme() == THEME_ZABOR) {
-                parentSettings.setBackgroundResource(R.drawable.zabor)
-            imBack.setImageResource(R.drawable.ic_back_zabor)
-                tvSettings.setTextAppearance(R.style.StyleMenuZabor)
-                listTextViewSettings.forEach {
-                    it.setTextAppearance(R.style.StyleButtonZabor)
+                if (ContextCompat.checkSelfPermission(requireActivity(), permission) == PackageManager.PERMISSION_GRANTED) {
+                    val sounds = getSystemSounds(requireActivity().contentResolver)
+                    DialogItemList.insertAlarmSound(requireActivity(), object : DialogItemList.ActionInt {
+                        override fun onClick(action: Int) {
+                            when (action) {
+
+                            }
+                        }
+
+                    }, sounds)
+                } else {
+                    val permissionsToRequest = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        arrayOf(Manifest.permission.READ_MEDIA_AUDIO)
+                    } else {
+                        arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+                    }
+
+                    permissionsToRequest.forEach {
+                        pLauncher.launch(it)
+                    }
                 }
             }
+            bSize.setOnClickListener {
+                DialogItemList.settingSize(requireActivity(), object : DialogItemList.ActionInt {
+                    override fun onClick(action: Int) {
+                        when (action) {
+                            0 -> modelFlashLight.saveSize(SIZE_SMALL)
+                            1 -> modelFlashLight.saveSize(SIZE_STANDART)
+                            2 -> modelFlashLight.saveSize(SIZE_LARGE)
+                        }
+                        Toast.makeText(requireContext(), "Изменения вступят в силу после перезапуска приложения", Toast.LENGTH_SHORT).show()
+                    }
+
+                })
+            }
+        }
+
+
+    }
+    private fun theme(){
+        with(binding){
+            val listView = mapOf<Const.Action, Map<View, Int>>(
+                Const.Action.BACKGROUND_RESOURCE to
+                        mapOf(
+                            parentSettings to R.drawable.zabor,
+                            bSetSort to R.drawable.button_background_item_category_zabor,
+                            bSize to R.drawable.button_background_item_category_zabor,
+                            bAlarm to R.drawable.button_background_item_category_zabor,
+                            bSetTheme to R.drawable.button_background_item_category_zabor,
+                            bDonateCard to R.drawable.button_background_item_category_zabor,
+                            bCallbackCard to R.drawable.button_background_item_category_zabor,
+                        ),
+                Const.Action.IMAGE_RESOURCE to mapOf(imBack to R.drawable.ic_back_zabor),
+                Const.Action.TEXT_STYLE
+                        to mapOf(
+                    tvSettings to R.style.StyleMenuZabor,
+                    bSetSort to R.style.StyleItemZabor,
+                    bSize to R.style.StyleItemZabor,
+                    bAlarm to R.style.StyleItemZabor,
+                    bSetTheme to R.style.StyleItemZabor,
+                    bDonateCard to R.style.StyleItemZabor,
+                    bCallbackCard to R.style.StyleItemZabor,
+                ),
+
+                )
+        if (modelFlashLight.getTheme() == THEME_ZABOR) {
+            modelFlashLight.setView(listView)
+            }
+            modelFlashLight.setSize(listView)
         }
     }
-    private fun size(listTextViewSettings: List<TextView>){
-        listTextViewSettings.forEach { it.textSize = 25f }
+
+
+    fun getSystemSounds(contentResolver: ContentResolver): Array<String> {
+        val systemSounds = mutableListOf<String>()
+
+        // URI для системных звуков (уведомления, рингтоны, алармы)
+        val soundUri = when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
+                MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_INTERNAL)
+            }
+            else -> {
+                "content://media/internal/audio/media".toUri()
+            }
+        }
+
+        // Фильтр только для системных звуков
+        val selection = """
+        ${MediaStore.Audio.Media.IS_NOTIFICATION} = 1 OR 
+        ${MediaStore.Audio.Media.IS_RINGTONE} = 1 OR 
+        ${MediaStore.Audio.Media.IS_ALARM} = 1
+    """.trimIndent()
+
+        contentResolver.query(
+            soundUri,
+            arrayOf(
+                MediaStore.Audio.Media.TITLE,
+                MediaStore.Audio.Media.DATA,
+                MediaStore.Audio.Media.DISPLAY_NAME
+            ),
+            selection,
+            null,
+            "${MediaStore.Audio.Media.TITLE} ASC"
+        )?.use { cursor ->
+            val titleIdx = cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)
+            val dataIdx = cursor.getColumnIndex(MediaStore.Audio.Media.DATA)
+            val nameIdx = cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME)
+
+            while (cursor.moveToNext()) {
+                val title = when {
+                    titleIdx >= 0 -> cursor.getString(titleIdx)
+                    nameIdx >= 0 -> cursor.getString(nameIdx)
+                    else -> "System Sound"
+                }
+                val path = if (dataIdx >= 0) cursor.getString(dataIdx) else ""
+
+                systemSounds.add("$title: $path")
+            }
+        }
+
+        return systemSounds.toTypedArray()
     }
+
 }
