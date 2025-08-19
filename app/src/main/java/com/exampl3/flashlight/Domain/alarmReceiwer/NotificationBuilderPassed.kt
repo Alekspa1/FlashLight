@@ -29,6 +29,7 @@ class NotificationBuilderPassed @Inject constructor(private val context: Applica
             AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).build()
         val notificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val mChannel = NotificationChannel(
                 Const.CHANNEL_ID_PASSED,

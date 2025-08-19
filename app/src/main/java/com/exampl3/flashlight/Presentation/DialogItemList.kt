@@ -3,6 +3,8 @@ package com.exampl3.flashlight.Presentation
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
+import android.media.MediaPlayer
+import android.net.Uri
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -16,9 +18,11 @@ import androidx.lifecycle.LifecycleOwner
 import com.bumptech.glide.Glide
 import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Data.Room.Item
+import com.exampl3.flashlight.Domain.useCase.SoundPlayer
 import com.exampl3.flashlight.R
 
 object DialogItemList {
+
 
     private val insertAlarmList =
         arrayOf("Один раз", "Каждый день", "Каждую неделю", "Каждый месяц", "Каждый год")
@@ -255,25 +259,30 @@ object DialogItemList {
 
     }
 
-    fun insertAlarmSound(context: Context, billing: ActionInt, product: Array<String>) {
+    fun insertAlarmSound(context: Context, click: ActioinUri, listSound: Map<String, Uri>, soundPlayer: SoundPlayer) {
+
+        val arrayListSoundName = listSound.keys.toTypedArray()
+        val arrayListSoundUri = listSound.values.toTypedArray()
         var result = 0
         val builred = AlertDialog.Builder(context)
 
         builred.setTitle("Выберите")
         builred.setSingleChoiceItems(
-            product, 0
+            arrayListSoundName, 0
         ) { e, id ->
+            soundPlayer.playSound(arrayListSoundUri[id])
             result = id
-            Log.d("MyLog", id.toString())
 
         }
             .setPositiveButton(
                 "OK"
             ) { window, _ ->
-                billing.onClick(result)
+                click.onClick(arrayListSoundUri[result])
+                soundPlayer.stop()
                 window.dismiss()
             }
             .setNegativeButton("Отмена") { window, _ ->
+                soundPlayer.stop()
                 window.cancel()
             }
         builred.create()
@@ -281,6 +290,20 @@ object DialogItemList {
         val dialog = builred.create()
         dialog.show()
 
+    }
+
+    fun playSound(context: Context,uri: Uri) {
+        try {
+            val mediaPlayer = MediaPlayer().apply {
+                setDataSource(context, uri)
+                setOnPreparedListener { it.start() }
+                setOnCompletionListener { it.release() }
+                prepareAsync() // Асинхронная подготовка
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(context, "Ошибка воспроизведения", Toast.LENGTH_SHORT).show()
+        }
     }
 
     fun settingSort(context: Context, sort: ActionInt) {
@@ -341,7 +364,7 @@ object DialogItemList {
         var result = 0
         val builred = AlertDialog.Builder(context)
 
-        builred.setTitle("Выберите размер шрифта")
+        builred.setTitle("Выберите размер текста")
         builred.setSingleChoiceItems(
             listSize, 0
         ) { _, id ->
@@ -388,6 +411,10 @@ object DialogItemList {
 
     interface ActionInt {
         fun onClick(action: Int)
+    }
+
+    interface ActioinUri{
+        fun onClick(uri: Uri)
     }
 
 

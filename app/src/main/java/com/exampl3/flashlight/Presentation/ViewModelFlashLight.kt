@@ -11,6 +11,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.exampl3.flashlight.Const
+import com.exampl3.flashlight.Data.GetSystemSoundImp
 import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Data.Room.Item
 import com.exampl3.flashlight.Data.Room.ListCategory
@@ -24,6 +25,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileNotFoundException
+import java.net.URI
 import java.util.Calendar
 import javax.inject.Inject
 
@@ -34,7 +36,8 @@ class ViewModelFlashLight @Inject constructor(
     private val db: Database,
     private val insertDateAndTime: InsertDateAndAlarm,
     private val changeAlarm: ChangeAlarmUseCase,
-    private val theme: ThemeImp
+    private val theme: ThemeImp,
+    private val getSystemSoundImp: GetSystemSoundImp
 ) : ViewModel() {
 
 
@@ -53,6 +56,10 @@ class ViewModelFlashLight @Inject constructor(
 
     fun setSizeTextIsList(list: List<TextView>){
     theme.setSizeTextIsList(list)
+    }
+
+    fun getAllSound() : Map<String, Uri> {
+       return getSystemSoundImp.getSound()
     }
 
 
@@ -80,7 +87,10 @@ class ViewModelFlashLight @Inject constructor(
     fun getTheme() = settingsPref.getTheme()
 
     fun saveSize(value: String) = settingsPref.saveSize(value)
-    fun getSize() = settingsPref.getSize()
+
+    fun saveUriAlarm(uri: Uri) = settingsPref.saveUriAlarm(uri)
+    fun getUriAlarm() = settingsPref.getUriAlarm()?.toUri()
+
 
     fun saveImagePermanently(context: Context, uri: Uri): Uri {
         try {

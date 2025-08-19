@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.speech.RecognizerIntent
+import android.util.Log
 
 import android.view.LayoutInflater
 import android.view.View
@@ -90,7 +91,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
         super.onViewCreated(view, savedInstanceState)
         theme()
         initRcView()
-
+        Log.d("MyLog", modelFlashLight.getUriAlarm().toString())
 
 
 

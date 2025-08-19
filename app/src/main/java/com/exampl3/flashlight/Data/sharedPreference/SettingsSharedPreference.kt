@@ -3,6 +3,8 @@ package com.exampl3.flashlight.Data.sharedPreference
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
+import android.net.Uri
+import com.exampl3.flashlight.Const.ALARM_SETTINGS
 import com.exampl3.flashlight.Const.SIZE_SETTINGS
 import com.exampl3.flashlight.Const.SIZE_STANDART
 
@@ -11,6 +13,8 @@ import com.exampl3.flashlight.Const.SORT_SETTINGS
 import com.exampl3.flashlight.Const.SORT_STANDART
 import com.exampl3.flashlight.Const.THEME_FUTURE
 import com.exampl3.flashlight.Const.THEME_SETTINGS
+import com.exampl3.flashlight.Const.URI_STANDART
+import java.net.URI
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -40,6 +44,13 @@ class SettingsSharedPreference @Inject constructor(
 
     fun saveSize(value: String){
         editPremium.putString(SIZE_SETTINGS, value)
+        editPremium.apply()
+    }
+
+    fun getUriAlarm(): String? = prefSettings.getString(ALARM_SETTINGS, URI_STANDART)
+
+    fun saveUriAlarm(uri: Uri){
+        editPremium.putString(ALARM_SETTINGS, uri.toString())
         editPremium.apply()
     }
 }

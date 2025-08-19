@@ -1,17 +1,17 @@
 package com.exampl3.flashlight.Presentation
 
 import android.Manifest
-import android.content.ContentResolver
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.media.RingtoneManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.provider.MediaStore
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -32,14 +32,24 @@ import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Const.SIZE_LARGE
 import com.exampl3.flashlight.Const.SIZE_SMALL
 import com.exampl3.flashlight.Const.SIZE_STANDART
+import com.exampl3.flashlight.Domain.useCase.SoundPlayer
+import com.yandex.mobile.ads.impl.st
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
-
+@AndroidEntryPoint
 class FragmentSettings : Fragment() {
 
 
     private lateinit var binding: FragmentSettingsBinding
     val modelFlashLight: ViewModelFlashLight by activityViewModels()
     private lateinit var pLauncher: ActivityResultLauncher<String>
+
+    @Inject
+    lateinit var soundPlayer: SoundPlayer
+
+    lateinit var allSounds: Map<String, Uri>
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -48,7 +58,6 @@ class FragmentSettings : Fragment() {
         return binding.root
     }
 
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         theme()
@@ -111,15 +120,14 @@ class FragmentSettings : Fragment() {
                 }
 
                 if (ContextCompat.checkSelfPermission(requireActivity(), permission) == PackageManager.PERMISSION_GRANTED) {
-                    val sounds = getSystemSounds(requireActivity().contentResolver)
-                    DialogItemList.insertAlarmSound(requireActivity(), object : DialogItemList.ActionInt {
-                        override fun onClick(action: Int) {
-                            when (action) {
+                    val allSounds = modelFlashLight.getAllSound()
+                    DialogItemList.insertAlarmSound(requireActivity(), object : DialogItemList.ActioinUri {
+                        override fun onClick(uri: Uri) {
+                            modelFlashLight.saveUriAlarm(uri)
 
-                            }
                         }
 
-                    }, sounds)
+                    }, allSounds, soundPlayer)
                 } else {
                     val permissionsToRequest = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                         arrayOf(Manifest.permission.READ_MEDIA_AUDIO)
@@ -183,54 +191,5 @@ class FragmentSettings : Fragment() {
     }
 
 
-    fun getSystemSounds(contentResolver: ContentResolver): Array<String> {
-        val systemSounds = mutableListOf<String>()
-
-        // URI для системных звуков (уведомления, рингтоны, алармы)
-        val soundUri = when {
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
-                MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_INTERNAL)
-            }
-            else -> {
-                "content://media/internal/audio/media".toUri()
-            }
-        }
-
-        // Фильтр только для системных звуков
-        val selection = """
-        ${MediaStore.Audio.Media.IS_NOTIFICATION} = 1 OR 
-        ${MediaStore.Audio.Media.IS_RINGTONE} = 1 OR 
-        ${MediaStore.Audio.Media.IS_ALARM} = 1
-    """.trimIndent()
-
-        contentResolver.query(
-            soundUri,
-            arrayOf(
-                MediaStore.Audio.Media.TITLE,
-                MediaStore.Audio.Media.DATA,
-                MediaStore.Audio.Media.DISPLAY_NAME
-            ),
-            selection,
-            null,
-            "${MediaStore.Audio.Media.TITLE} ASC"
-        )?.use { cursor ->
-            val titleIdx = cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)
-            val dataIdx = cursor.getColumnIndex(MediaStore.Audio.Media.DATA)
-            val nameIdx = cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME)
-
-            while (cursor.moveToNext()) {
-                val title = when {
-                    titleIdx >= 0 -> cursor.getString(titleIdx)
-                    nameIdx >= 0 -> cursor.getString(nameIdx)
-                    else -> "System Sound"
-                }
-                val path = if (dataIdx >= 0) cursor.getString(dataIdx) else ""
-
-                systemSounds.add("$title: $path")
-            }
-        }
-
-        return systemSounds.toTypedArray()
-    }
 
 }

@@ -10,37 +10,58 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.media.AudioAttributes
 import android.media.RingtoneManager
+import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.net.toUri
 import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Data.Room.Item
+import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
+import com.exampl3.flashlight.Presentation.FragmentSettings
 import com.exampl3.flashlight.Presentation.MainActivity
 import com.exampl3.flashlight.R
 import javax.inject.Inject
 
 
 class NotificationBuilder @Inject constructor(
-    private val context: Application) {
+    private val context: Application,
+    private val settings: SettingsSharedPreference) {
+
+    val ringtoneUri = settings.getUriAlarm()?.toUri() ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+
     fun input(item: Item){
         alarmPush().notify(item.id!!, notificationBuilder(item).build())
     }
-     fun alarmPush(): NotificationManager {
-        val ringtone = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
-        val atrubute = AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).build()
-        val notificationManager =
-            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    fun alarmPush(): NotificationManager {
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        val attributes = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_ALARM)
+            .build()
+
+        // Удаляем старый канал если существует
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // Удаляем старый канал если существует
+            notificationManager.deleteNotificationChannel(Const.CHANNEL_ID)
+
+            // Создаем новый канал с выбранным звуком
             val mChannel = NotificationChannel(
                 Const.CHANNEL_ID,
-                context.getString(R.string.app_name), NotificationManager.IMPORTANCE_HIGH
+                context.getString(R.string.app_name),
+                NotificationManager.IMPORTANCE_HIGH
             )
-            mChannel.setSound(ringtone, atrubute)
-            notificationManager.createNotificationChannel(mChannel)
-        }
-        return notificationManager
 
+            // Устанавливаем выбранный звук или звук по умолчанию
+            mChannel.setSound(ringtoneUri, attributes)
+            mChannel.enableVibration(true)
+
+            notificationManager.createNotificationChannel(mChannel)
+            Log.d("NotificationBuilder", "Notification channel created with ID: ${Const.CHANNEL_ID} and sound URI: $ringtoneUri")
+        }
+
+        return notificationManager
     }
     private fun notificationBuilder(item: Item): NotificationCompat.Builder {
 
@@ -93,6 +114,7 @@ class NotificationBuilder @Inject constructor(
                 .setPriority(NotificationManager.IMPORTANCE_HIGH)
                 .setStyle(bigIcon)
                 .setContentIntent(contentIntent)
+                .setSound(ringtoneUri)
                 .addAction(0, "Готово", canselIntent)
                 .addAction(0, "Отложить", postponeIntent)
                 .setAutoCancel(true)
