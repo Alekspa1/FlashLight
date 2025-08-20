@@ -1,7 +1,6 @@
 package com.exampl3.flashlight.Domain.alarmReceiwer
 
 import android.app.Application
-import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -11,58 +10,56 @@ import android.graphics.Bitmap
 import android.media.AudioAttributes
 import android.media.RingtoneManager
 import android.net.Uri
-import android.os.Build
 import android.provider.MediaStore
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.net.toUri
 import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Data.Room.Item
 import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
-import com.exampl3.flashlight.Presentation.FragmentSettings
 import com.exampl3.flashlight.Presentation.MainActivity
 import com.exampl3.flashlight.R
 import javax.inject.Inject
 
 
+
+
 class NotificationBuilder @Inject constructor(
     private val context: Application,
-    private val settings: SettingsSharedPreference) {
-
-    val ringtoneUri = settings.getUriAlarm()?.toUri() ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+    val settings: SettingsSharedPreference) {
+    val newRingtoneUri: Uri? = settings.getUriAlarm()?.toUri() ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+    val oldRingtoneUri = settings.getOldUriAlarm()?.toUri() ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+    val notificationManager =
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     fun input(item: Item){
         alarmPush().notify(item.id!!, notificationBuilder(item).build())
     }
     fun alarmPush(): NotificationManager {
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        val attributes = AudioAttributes.Builder()
-            .setUsage(AudioAttributes.USAGE_ALARM)
-            .build()
-
-        // Удаляем старый канал если существует
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            // Удаляем старый канал если существует
+        if (notificationManager.getNotificationChannel(Const.CHANNEL_ID) != null) {
             notificationManager.deleteNotificationChannel(Const.CHANNEL_ID)
-
-            // Создаем новый канал с выбранным звуком
-            val mChannel = NotificationChannel(
-                Const.CHANNEL_ID,
-                context.getString(R.string.app_name),
-                NotificationManager.IMPORTANCE_HIGH
-            )
-
-            // Устанавливаем выбранный звук или звук по умолчанию
-            mChannel.setSound(ringtoneUri, attributes)
-            mChannel.enableVibration(true)
-
-            notificationManager.createNotificationChannel(mChannel)
-            Log.d("NotificationBuilder", "Notification channel created with ID: ${Const.CHANNEL_ID} and sound URI: $ringtoneUri")
         }
+        if (newRingtoneUri != oldRingtoneUri ) {
+            notificationManager.deleteNotificationChannel(oldRingtoneUri.toString())
+        }
+
+        val atrubute =
+            AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).build()
+
+        val mChannel = NotificationChannel(
+            newRingtoneUri.toString(),
+            context.getString(R.string.app_name),
+            NotificationManager.IMPORTANCE_HIGH
+        )
+        mChannel.setSound(newRingtoneUri, atrubute)
+        mChannel.enableVibration(true)
+        mChannel.lightColor = context.getColor(R.color.NoActive)
+        notificationManager.createNotificationChannel(mChannel)
+        settings.saveOldUriAlarm(newRingtoneUri!!)
+
 
         return notificationManager
     }
+
     private fun notificationBuilder(item: Item): NotificationCompat.Builder {
 
         val intentCancel = Intent(context, AlarmReceiwer::class.java)
@@ -102,7 +99,7 @@ class NotificationBuilder @Inject constructor(
             .bigPicture(bitmap)
 
 
-
+        val vibrationPattern = longArrayOf(0, 1000, 500, 1000, 500, 1000, 500, 1000, 500, 1000, 500, 1000, 500, 1000, 500, 1000)
 
 
         return context.let {
@@ -110,14 +107,15 @@ class NotificationBuilder @Inject constructor(
                 .setSmallIcon(R.drawable.icon)
                 .setContentTitle(item.name)
                 .setContentText(item.desc)
-                .setChannelId(Const.CHANNEL_ID)
+                .setChannelId(newRingtoneUri.toString())
+                .setVibrate(vibrationPattern)
                 .setPriority(NotificationManager.IMPORTANCE_HIGH)
                 .setStyle(bigIcon)
                 .setContentIntent(contentIntent)
-                .setSound(ringtoneUri)
                 .addAction(0, "Готово", canselIntent)
                 .addAction(0, "Отложить", postponeIntent)
                 .setAutoCancel(true)
+                .setLights(context.getColor(R.color.NoActive), 1000, 1000) // Установка цвета света и его мигания
 
         }
     }

@@ -46,7 +46,7 @@ class ItemListAdapter(
         fun bind(item: Item, onLongClickListener: onLongClick, onClick: onClick) {
             with(binding) {
 
-                textItem.text = item.name
+                tvTextItem.text = item.name
                 tvAlarm.text = alarmText(item) ?: "".trim()
                 tvDesc.text = item.desc
                 if (tvDesc.text !== "") tvDesc.visibility = View.VISIBLE
@@ -54,6 +54,9 @@ class ItemListAdapter(
                 else imPhotoView.visibility = View.GONE
                 //настройка темы
                 if (settingPref.getTheme() == THEME_FUTURE){
+                    tvTextItem.setTextAppearance(R.style.StyleItem)
+                    tvDesc.setTextAppearance(R.style.StyleItemDesc)
+                    tvAlarm.setTextAppearance(R.style.StyleItem_Alarm)
                     when (item.changeAlarm) {
                         true -> {
                             cardView.setBackgroundResource(R.drawable.button_background_alarm)
@@ -80,7 +83,7 @@ class ItemListAdapter(
                 }
                 else {
                     imDeleteList.setImageResource(R.drawable.ic_de_zabor)
-                    textItem.setTextAppearance(R.style.StyleItemZabor)
+                    tvTextItem.setTextAppearance(R.style.StyleItemZabor)
                     tvDesc.setTextAppearance(R.style.StyleItemDescZabor)
                     tvAlarm.setTextAppearance(R.style.StyleItem_AlarmZabor)
                     imPhotoView.setImageResource(R.drawable.ic_image_zabor)
@@ -108,7 +111,7 @@ class ItemListAdapter(
                     }
                 }
                 //настройка шрифта
-                val listTextView = listOf(textItem,tvAlarm,tvDesc)
+                val listTextView = listOf(tvTextItem,tvAlarm,tvDesc)
                 theme.setSizeTextIsList(listTextView)
 
                 cardView.setOnClickListener {
@@ -138,7 +141,7 @@ class ItemListAdapter(
             val time = SimpleDateFormat(timeFormat, Locale.US)
             val resultTime = time.format(item.alarmTime)
             val resultDate = getFormattedDate(item.alarmTime)
-            val alarmText = "Напомнит: $resultDate в $resultTime"
+            val alarmText = "Напомнит $resultDate в $resultTime"
 
             when (item.interval) {
                 Const.ALARM_ONE -> {

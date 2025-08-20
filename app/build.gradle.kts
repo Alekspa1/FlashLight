@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "com.exampl3.flashlight"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 35
         versionCode = 24
         versionName = "8.7"

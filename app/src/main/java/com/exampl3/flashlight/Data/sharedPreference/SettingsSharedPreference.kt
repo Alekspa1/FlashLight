@@ -13,6 +13,7 @@ import com.exampl3.flashlight.Const.SORT_SETTINGS
 import com.exampl3.flashlight.Const.SORT_STANDART
 import com.exampl3.flashlight.Const.THEME_FUTURE
 import com.exampl3.flashlight.Const.THEME_SETTINGS
+import com.exampl3.flashlight.Const.URI_OLD
 import com.exampl3.flashlight.Const.URI_STANDART
 import java.net.URI
 import javax.inject.Inject
@@ -51,6 +52,13 @@ class SettingsSharedPreference @Inject constructor(
 
     fun saveUriAlarm(uri: Uri){
         editPremium.putString(ALARM_SETTINGS, uri.toString())
+        editPremium.apply()
+    }
+
+    fun getOldUriAlarm(): String? = prefSettings.getString(URI_OLD, URI_STANDART)
+
+    fun saveOldUriAlarm(uri: Uri){
+        editPremium.putString(URI_OLD, uri.toString())
         editPremium.apply()
     }
 }

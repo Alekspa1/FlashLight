@@ -27,20 +27,23 @@ class ListMenuAdapter(
         fun bind(item: ListCategory, onClick: onClick) {
             if (settingPref.getTheme() == THEME_ZABOR) {
                 binding.imDeleteList.setImageResource(R.drawable.ic_de_zabor)
-                binding.textItem.setBackgroundResource(R.drawable.button_background_item_category_zabor)
-                binding.textItem.setTextAppearance(R.style.StyleItemZabor)
+                binding.tvTextItem.setBackgroundResource(R.drawable.button_background_item_category_zabor)
+                binding.tvTextItem.setTextAppearance(R.style.StyleItemZabor)
+            } else {
+                binding.tvTextItem.setBackgroundResource(R.drawable.button_background_item_category)
+                binding.tvTextItem.setTextAppearance(R.style.StyleItem)
             }
-            val listText = listOf(binding.textItem)
+            val listText = listOf(binding.tvTextItem)
             theme.setSizeTextIsList(listText)
-            binding.textItem.text = item.name
+            binding.tvTextItem.text = item.name
 
-            binding.textItem.setOnClickListener {
+            binding.tvTextItem.setOnClickListener {
                 onClick.onClick(item, Const.CHANGE)
             }
             binding.imDeleteList.setOnClickListener {
                 onClick.onClick(item, Const.DELETE)
             }
-            binding.textItem.setOnLongClickListener {
+            binding.tvTextItem.setOnLongClickListener {
                 onClick.onClick(item, Const.CHANGE_ITEM)
                 true
             }

@@ -91,7 +91,6 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
         super.onViewCreated(view, savedInstanceState)
         theme()
         initRcView()
-        Log.d("MyLog", modelFlashLight.getUriAlarm().toString())
 
 
 

@@ -43,7 +43,7 @@
                 tools:visibility="gone" />
 
             <TextView
-                android:id="@+id/textItem"
+                android:id="@+id/tvTextItem"
                 style="@style/StyleItem"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -60,9 +60,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:visibility="gone"
-                app:layout_constraintEnd_toEndOf="@+id/textItem"
-                app:layout_constraintStart_toStartOf="@+id/textItem"
-                app:layout_constraintTop_toBottomOf="@+id/textItem"
+                app:layout_constraintEnd_toEndOf="@+id/tvTextItem"
+                app:layout_constraintStart_toStartOf="@+id/tvTextItem"
+                app:layout_constraintTop_toBottomOf="@+id/tvTextItem"
                 tools:visibility="visible" />
 
             <TextView

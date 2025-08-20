@@ -64,6 +64,7 @@ object Const {
     const val SIZE_LARGE = "SIZE_LARGE"
     const val ALARM_SETTINGS = "ALARM_SETTINGS"
     const val URI_STANDART = "content://settings/system/alarm_alert"
+    const val URI_OLD = "URI_OLD"
 
 
 
