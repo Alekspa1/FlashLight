@@ -112,5 +112,17 @@
             android:padding="8dp"
             android:text="Обратная связь" />
 
+        <TextView
+            android:id="@+id/bFaq"
+            style="@style/StyleItem"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="3dp"
+            android:layout_marginEnd="3dp"
+            android:layout_marginBottom="3dp"
+            android:background="@drawable/button_background_item_category"
+            android:padding="8dp"
+            android:text="Инструкция" />
+
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

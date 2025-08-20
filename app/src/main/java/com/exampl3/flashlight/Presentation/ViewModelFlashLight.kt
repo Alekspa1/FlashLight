@@ -89,7 +89,7 @@ class ViewModelFlashLight @Inject constructor(
     fun saveSize(value: String) = settingsPref.saveSize(value)
 
     fun saveUriAlarm(uri: Uri) = settingsPref.saveUriAlarm(uri)
-    fun getUriAlarm() = settingsPref.getUriAlarm()?.toUri()
+
 
 
     fun saveImagePermanently(context: Context, uri: Uri): Uri {
@@ -143,6 +143,34 @@ class ViewModelFlashLight @Inject constructor(
         }
 
 
+    }
+
+    fun insertCategory(name: String, context: Context){
+        viewModelScope.launch {
+        if (isCategoryNameExists(name)) Toast.makeText(context, "Такая категория уже есть", Toast.LENGTH_SHORT).show()
+        else db.CourseDao().insertCategory(ListCategory(null, name))
+        }
+    }
+    fun upgrateCategory(item: ListCategory,name: String, context: Context){
+        viewModelScope.launch {
+            val newitem = item.copy(name = name)
+            if (isCategoryNameExists(name)) Toast.makeText(context, "Такая категория уже есть", Toast.LENGTH_SHORT).show()
+            else {
+                db.CourseDao().updateCategory(newitem)
+                db.CourseDao().getAllNewNoFlow(item.name).forEach {
+                    db.CourseDao().updateItem(it.copy(category = name))
+                }
+                updateCategory(item.name)
+            }
+        }
+    }
+    suspend fun isCategoryNameExists(name: String): Boolean {
+        return try {
+            val count = db.CourseDao().isCategoryExists(name)
+            count > 0
+        } catch (e: Exception) {
+            false
+        }
     }
 
     fun updateItemsOrder(newList: List<Item>) {

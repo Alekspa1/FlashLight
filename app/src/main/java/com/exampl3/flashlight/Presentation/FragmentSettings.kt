@@ -153,6 +153,9 @@ class FragmentSettings : Fragment() {
 
                 })
             }
+            bFaq.setOnClickListener {
+                findNavController().navigate(R.id.action_fragmentSettings_to_fragmentFaq)
+            }
         }
 
 
@@ -169,6 +172,7 @@ class FragmentSettings : Fragment() {
                             bSetTheme to R.drawable.button_background_item_category_zabor,
                             bDonateCard to R.drawable.button_background_item_category_zabor,
                             bCallbackCard to R.drawable.button_background_item_category_zabor,
+                            bFaq to R.drawable.button_background_item_category_zabor,
                         ),
                 Const.Action.IMAGE_RESOURCE to mapOf(imBack to R.drawable.ic_back_zabor),
                 Const.Action.TEXT_STYLE

@@ -9,7 +9,14 @@
         android:id="@+id/fragmentSettings"
         android:name="com.exampl3.flashlight.Presentation.FragmentSettings"
         android:label="Настройки"
-        tools:layout="@layout/fragment_settings" />
+        tools:layout="@layout/fragment_settings" >
+        <action
+            android:id="@+id/action_fragmentSettings_to_fragmentFaq"
+            app:destination="@id/fragmentFaq"
+            app:enterAnim="@anim/enter"
+            app:exitAnim="@anim/exit"
+            app:popExitAnim="@anim/pop_exit" />
+    </fragment>
     <fragment
         android:id="@+id/fragmentMain"
         android:name="com.exampl3.flashlight.Presentation.FragmentMain"
@@ -22,4 +29,9 @@
             app:exitAnim="@anim/exit"
             app:popExitAnim="@anim/pop_exit" />
     </fragment>
+    <fragment
+        android:id="@+id/fragmentFaq"
+        android:name="com.exampl3.flashlight.Presentation.FragmentFaq"
+        android:label="fragment_faq"
+        tools:layout="@layout/fragment_faq" />
 </navigation>

@@ -3,9 +3,7 @@ package com.exampl3.flashlight.Presentation
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
-import android.media.MediaPlayer
 import android.net.Uri
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -32,15 +30,22 @@ object DialogItemList {
 
 
     fun AlertList(context: Context, listener: Listener, name: String?) {
-        val builred = AlertDialog.Builder(context)
-        val edName = EditText(context)
-        edName.setText(name)
-        edName.inputType
-        builred.setView(edName)
-        val dialog = builred.create()
-        dialog.setTitle("Введите название категории")
-        dialog.setButton(AlertDialog.BUTTON_POSITIVE, "Готово") { _, _ ->
+        val builder = AlertDialog.Builder(context)
+        val inflater = LayoutInflater.from(context)
+        val dialogLayout = inflater.inflate(R.layout.dialog_layout_list_item, null)
+        val edName = dialogLayout.findViewById<EditText>(R.id.itemNameList)
 
+        edName.setText(name)
+        builder.setView(edName)
+        builder.setTitle("Введите название категории")
+        if (name == null){
+            edName.requestFocus()
+            edName.postDelayed({
+                val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.showSoftInput(edName, InputMethodManager.SHOW_IMPLICIT)
+            }, 300)
+        }
+        builder.setPositiveButton ("Готово") { dialog, _ ->
             if (name == null) {
                 if (edName.text.isEmpty()) {
                     Toast.makeText(context, "Поле должно быть заполнено", Toast.LENGTH_SHORT).show()
@@ -55,11 +60,12 @@ object DialogItemList {
             }
 
         }
-        dialog.setButton(AlertDialog.BUTTON_NEGATIVE, "Назад") { _, _ ->
+        builder.setNegativeButton("Назад") { dialog, _ ->
             dialog.dismiss()
         }
 
-        dialog.show()
+        builder.setView(dialogLayout)
+        builder.show()
 
     }
 
@@ -123,10 +129,6 @@ object DialogItemList {
         addPhoto.setOnClickListener {
             pick.launch("image/*")
         }
-
-
-
-
 
         builder.setTitle("Сфокусироваться")
         var input1: String
@@ -292,19 +294,6 @@ object DialogItemList {
 
     }
 
-    fun playSound(context: Context,uri: Uri) {
-        try {
-            val mediaPlayer = MediaPlayer().apply {
-                setDataSource(context, uri)
-                setOnPreparedListener { it.start() }
-                setOnCompletionListener { it.release() }
-                prepareAsync() // Асинхронная подготовка
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Toast.makeText(context, "Ошибка воспроизведения", Toast.LENGTH_SHORT).show()
-        }
-    }
 
     fun settingSort(context: Context, sort: ActionInt) {
 

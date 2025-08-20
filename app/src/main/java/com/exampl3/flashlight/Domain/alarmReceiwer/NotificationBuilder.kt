@@ -52,7 +52,6 @@ class NotificationBuilder @Inject constructor(
         )
         mChannel.setSound(newRingtoneUri, atrubute)
         mChannel.enableVibration(true)
-        mChannel.lightColor = context.getColor(R.color.NoActive)
         notificationManager.createNotificationChannel(mChannel)
         settings.saveOldUriAlarm(newRingtoneUri!!)
 
@@ -99,7 +98,7 @@ class NotificationBuilder @Inject constructor(
             .bigPicture(bitmap)
 
 
-        val vibrationPattern = longArrayOf(0, 1000, 500, 1000, 500, 1000, 500, 1000, 500, 1000, 500, 1000, 500, 1000, 500, 1000)
+        val vibrationPattern = longArrayOf(0, 1000, 500, 1000, 500)
 
 
         return context.let {
@@ -115,7 +114,6 @@ class NotificationBuilder @Inject constructor(
                 .addAction(0, "Готово", canselIntent)
                 .addAction(0, "Отложить", postponeIntent)
                 .setAutoCancel(true)
-                .setLights(context.getColor(R.color.NoActive), 1000, 1000) // Установка цвета света и его мигания
 
         }
     }

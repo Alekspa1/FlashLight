@@ -46,6 +46,9 @@ interface CourseDao {
 
 
     //MENU
+    @Query("SELECT COUNT(*) FROM ListCategory WHERE name = :name")
+    suspend fun isCategoryExists(name: String): Int
+
     @Query("SELECT * FROM ListCategory")
     fun getAllListCategory(): Flow<List<ListCategory>>
 
@@ -59,7 +62,7 @@ interface CourseDao {
     fun deleteCategoryMenu(Course: ListCategory)
 
     @Update
-    fun updateCategory(Course: ListCategory)
+    suspend fun updateCategory(Course: ListCategory)
 
 
 }

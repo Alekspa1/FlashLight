@@ -190,26 +190,28 @@ class ItemListAdapter(
                 1 -> "завтра"
                 2 -> "послезавтра"
                 in 3..6 -> {
-                    val dayOfWeek = getDayOfWeekInAccusative(millis)
-                    "в $dayOfWeek"
+                    getDayOfWeekWithPreposition(millis)
                 }
                 else -> SimpleDateFormat("dd.MM.yyyy", locale).format(Date(millis))
             }
         }
 
-        private fun getDayOfWeekInAccusative(millis: Long): String {
+        private fun getDayOfWeekWithPreposition(millis: Long): String {
             val calendar = Calendar.getInstance().apply { timeInMillis = millis }
             val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
 
             return when (dayOfWeek) {
-                Calendar.MONDAY -> "понедельник"
-                Calendar.TUESDAY -> "вторник"
-                Calendar.WEDNESDAY -> "среду"
-                Calendar.THURSDAY -> "четверг"
-                Calendar.FRIDAY -> "пятницу"
-                Calendar.SATURDAY -> "субботу"
-                Calendar.SUNDAY -> "воскресенье"
-                else -> SimpleDateFormat("EEEE", Locale("ru")).format(Date(millis)).lowercase()
+                Calendar.MONDAY -> "в понедельник"
+                Calendar.TUESDAY -> "во вторник"
+                Calendar.WEDNESDAY -> "в среду"
+                Calendar.THURSDAY -> "в четверг"
+                Calendar.FRIDAY -> "в пятницу"
+                Calendar.SATURDAY -> "в субботу"
+                Calendar.SUNDAY -> "в воскресенье"
+                else -> {
+                    val dayName = SimpleDateFormat("EEEE", Locale("ru")).format(Date(millis)).lowercase()
+                    "в $dayName"
+                }
             }
         }
 

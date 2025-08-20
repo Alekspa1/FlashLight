@@ -141,9 +141,7 @@ class FragmentMain : Fragment(), ListMenuAdapter.onClick {
                             desc: String?,
                             uri: String?
                         ) {
-                            CoroutineScope(Dispatchers.IO).launch {
-                                db.CourseDao().insertCategory(ListCategory(null, name))
-                            }
+                            modelFlashLight.insertCategory(name,requireActivity())
                         }
                     }, null)
                 } else Toast.makeText(
@@ -268,14 +266,15 @@ class FragmentMain : Fragment(), ListMenuAdapter.onClick {
                             desc: String?,
                             uri: String?
                         ) {
-                            CoroutineScope(Dispatchers.IO).launch {
-                                val newitem = item.copy(name = name)
-                                db.CourseDao().updateCategory(newitem)
-                                db.CourseDao().getAllNewNoFlow(item.name).forEach {
-                                    db.CourseDao().updateItem(it.copy(category = name))
-                                }
-                            }
-                            modelFlashLight.updateCategory(name)
+                            modelFlashLight.upgrateCategory(item, name, requireActivity())
+//                            CoroutineScope(Dispatchers.IO).launch {
+//                                val newitem = item.copy(name = name)
+//                                db.CourseDao().updateCategory(newitem)
+//                                db.CourseDao().getAllNewNoFlow(item.name).forEach {
+//                                    db.CourseDao().updateItem(it.copy(category = name))
+//                                }
+//                            }
+//                            modelFlashLight.updateCategory(name)
                         }
                     },
                     item.name
