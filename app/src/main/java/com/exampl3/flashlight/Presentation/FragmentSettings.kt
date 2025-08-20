@@ -3,11 +3,9 @@ package com.exampl3.flashlight.Presentation
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -15,7 +13,6 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import com.exampl3.flashlight.Const.DONATE
@@ -33,7 +30,6 @@ import com.exampl3.flashlight.Const.SIZE_LARGE
 import com.exampl3.flashlight.Const.SIZE_SMALL
 import com.exampl3.flashlight.Const.SIZE_STANDART
 import com.exampl3.flashlight.Domain.useCase.SoundPlayer
-import com.yandex.mobile.ads.impl.st
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -48,7 +44,6 @@ class FragmentSettings : Fragment() {
     @Inject
     lateinit var soundPlayer: SoundPlayer
 
-    lateinit var allSounds: Map<String, Uri>
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

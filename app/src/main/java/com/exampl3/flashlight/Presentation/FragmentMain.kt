@@ -54,9 +54,6 @@ import javax.inject.Inject
 import androidx.core.net.toUri
 import com.exampl3.flashlight.Const.CHANGE
 import com.exampl3.flashlight.Const.CHANGE_ITEM
-import com.exampl3.flashlight.Const.SIZE_LARGE
-import com.exampl3.flashlight.Const.SIZE_SMALL
-import com.exampl3.flashlight.Const.SIZE_STANDART
 import com.exampl3.flashlight.Data.ThemeImp
 import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
 

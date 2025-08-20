@@ -15,7 +15,6 @@ import com.exampl3.flashlight.Const.THEME_FUTURE
 import com.exampl3.flashlight.Const.THEME_SETTINGS
 import com.exampl3.flashlight.Const.URI_OLD
 import com.exampl3.flashlight.Const.URI_STANDART
-import java.net.URI
 import javax.inject.Inject
 import javax.inject.Singleton
 

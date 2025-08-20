@@ -7,7 +7,6 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.speech.RecognizerIntent
-import android.util.Log
 
 import android.view.LayoutInflater
 import android.view.View
@@ -348,7 +347,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
                                 permanentFile = modelFlashLight.saveImagePermanently(requireContext(), uri!!.toUri()).toString()
 
                             }
-                            val newitem = item.copy(name = name, desc = desc, alarmText = permanentFile.toString())
+                            val newitem = item.copy(name = name, desc = desc, alarmText = permanentFile)
                             if (item.changeAlarm) modelFlashLight.changeAlarm(
                                 newitem,
                                 newitem.interval
