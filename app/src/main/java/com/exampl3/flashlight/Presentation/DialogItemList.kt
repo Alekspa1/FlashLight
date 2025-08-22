@@ -25,7 +25,7 @@ object DialogItemList {
     private val insertAlarmList =
         arrayOf("Один раз", "Каждый день", "Каждую неделю", "Каждый месяц", "Каждый год")
     val listTheme = arrayOf("Неоновая","Деревянная")
-    val listSort = arrayOf("По умолчанию","Пользовательская (Можно вручную сортировать дела)")
+    val listSort = arrayOf("По умолчанию","Пользовательская")
     val listSize = arrayOf("Малый", "Обычный", "Крупный")
 
 

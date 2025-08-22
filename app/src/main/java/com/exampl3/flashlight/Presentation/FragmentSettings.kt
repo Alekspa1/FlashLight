@@ -179,6 +179,7 @@ class FragmentSettings : Fragment() {
                     bSetTheme to R.style.StyleItemZabor,
                     bDonateCard to R.style.StyleItemZabor,
                     bCallbackCard to R.style.StyleItemZabor,
+                    bFaq to R.style.StyleItemZabor,
                 ),
 
                 )

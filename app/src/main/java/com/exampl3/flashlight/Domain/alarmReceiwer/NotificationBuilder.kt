@@ -11,11 +11,13 @@ import android.media.AudioAttributes
 import android.media.RingtoneManager
 import android.net.Uri
 import android.provider.MediaStore
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.net.toUri
 import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Data.Room.Item
 import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
+import com.exampl3.flashlight.Domain.LogText
 import com.exampl3.flashlight.Presentation.MainActivity
 import com.exampl3.flashlight.R
 import javax.inject.Inject
@@ -27,36 +29,52 @@ class NotificationBuilder @Inject constructor(
     private val context: Application,
     val settings: SettingsSharedPreference) {
     val newRingtoneUri: Uri? = settings.getUriAlarm()?.toUri() ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
-    val oldRingtoneUri = settings.getOldUriAlarm()?.toUri() ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+    val oldRingtoneUri: Uri? = settings.getOldUriAlarm()?.toUri() ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
     val notificationManager =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    val atrubute =
+        AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).build()
+
 
     fun input(item: Item){
         alarmPush().notify(item.id!!, notificationBuilder(item).build())
     }
+
     fun alarmPush(): NotificationManager {
         if (notificationManager.getNotificationChannel(Const.CHANNEL_ID) != null) {
             notificationManager.deleteNotificationChannel(Const.CHANNEL_ID)
         }
-        if (newRingtoneUri != oldRingtoneUri ) {
+
+        if (newRingtoneUri != oldRingtoneUri) {
+
+        if (notificationManager.getNotificationChannel(oldRingtoneUri.toString()) != null ) {
             notificationManager.deleteNotificationChannel(oldRingtoneUri.toString())
+            LogText("Удаление канала если он есть")
+        }
+            notificationManager.createNotificationChannel(createChanel(atrubute))
+            LogText("Создание канала если звук был изменен")
         }
 
-        val atrubute =
-            AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).build()
+        if (notificationManager.getNotificationChannel(newRingtoneUri.toString()) == null ) {
+            notificationManager.createNotificationChannel(createChanel(atrubute))
+            LogText("Создание канала если его нет например для первого запуска")
+        }
 
-        val mChannel = NotificationChannel(
-            newRingtoneUri.toString(),
-            context.getString(R.string.app_name),
-            NotificationManager.IMPORTANCE_HIGH
-        )
-        mChannel.setSound(newRingtoneUri, atrubute)
-        mChannel.enableVibration(true)
-        notificationManager.createNotificationChannel(mChannel)
+
         settings.saveOldUriAlarm(newRingtoneUri!!)
 
-
         return notificationManager
+    }
+
+    private fun createChanel(atrubute: AudioAttributes): NotificationChannel {
+    return  NotificationChannel(
+        newRingtoneUri.toString(),
+        context.getString(R.string.app_name),
+        NotificationManager.IMPORTANCE_HIGH
+    ).apply {
+        setSound(newRingtoneUri, atrubute)
+        enableVibration(true)
+    }
     }
 
     private fun notificationBuilder(item: Item): NotificationCompat.Builder {
@@ -102,11 +120,10 @@ class NotificationBuilder @Inject constructor(
 
 
         return context.let {
-            NotificationCompat.Builder(it, Const.CHANNEL_ID)
+            NotificationCompat.Builder(it, newRingtoneUri.toString())
                 .setSmallIcon(R.drawable.icon)
                 .setContentTitle(item.name)
                 .setContentText(item.desc)
-                .setChannelId(newRingtoneUri.toString())
                 .setVibrate(vibrationPattern)
                 .setPriority(NotificationManager.IMPORTANCE_HIGH)
                 .setStyle(bigIcon)
