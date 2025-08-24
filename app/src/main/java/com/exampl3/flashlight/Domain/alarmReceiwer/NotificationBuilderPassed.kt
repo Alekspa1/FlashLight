@@ -9,9 +9,11 @@ import android.content.Intent
 import android.media.AudioAttributes
 import android.media.RingtoneManager
 import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Data.Room.Item
+import com.exampl3.flashlight.Domain.LogText
 import com.exampl3.flashlight.Presentation.MainActivity
 import com.exampl3.flashlight.R
 import javax.inject.Inject
@@ -19,27 +21,33 @@ import javax.inject.Inject
 
 class NotificationBuilderPassed @Inject constructor(private val context: Application) {
 
+    val ringtone = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+    val atrubute =
+        AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).build()
+    val notificationManager =
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     fun input(item: Item){
         alarmPushPassed().notify(item.id!!, notificationBuilderPassed(item).build())
     }
-    fun alarmPushPassed(): NotificationManager {
-        val ringtone = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-        val atrubute =
-            AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).build()
-        val notificationManager =
-            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val mChannel = NotificationChannel(
-                Const.CHANNEL_ID_PASSED,
-                "Пропущеный", NotificationManager.IMPORTANCE_HIGH
-            )
-            mChannel.setSound(ringtone, atrubute)
-            notificationManager.createNotificationChannel(mChannel)
+    fun alarmPushPassed(): NotificationManager {
+        if (notificationManager.getNotificationChannel(Const.CHANNEL_ID_PASSED) == null){
+            notificationManager.createNotificationChannel(createChanel())
         }
+
         return notificationManager
 
+    }
+
+    fun createChanel(): NotificationChannel {
+        return NotificationChannel(
+            Const.CHANNEL_ID_PASSED,
+            "Пропущеный", NotificationManager.IMPORTANCE_HIGH
+        ).apply {
+            setSound(ringtone, atrubute)
+            enableVibration(true)
+        }
     }
 
     fun notificationBuilderPassed(item: Item): NotificationCompat.Builder {
@@ -58,7 +66,6 @@ class NotificationBuilderPassed @Inject constructor(private val context: Applica
                 .setSmallIcon(R.drawable.icon)
                 .setContentTitle("Вы пропустили уведомление")
                 .setContentText(item.name)
-                .setChannelId(Const.CHANNEL_ID_PASSED)
                 .setPriority(NotificationManager.IMPORTANCE_HIGH)
                 .setStyle(bigTextStyle)
                 .setContentIntent(contentIntent)

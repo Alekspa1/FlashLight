@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:elevation="25dp">
+    tools:background="@color/Dark_Blue"
+  >
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cardView"
@@ -19,6 +20,7 @@
         app:cardElevation="0dp"
         app:cardMaxElevation="0dp"
 
+
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/imDeleteList"
         app:layout_constraintStart_toEndOf="@+id/imAlarm"
@@ -27,6 +29,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            tools:background="@color/vPager2"
             android:padding="3dp">
 
             <ImageView
@@ -63,6 +66,7 @@
                 app:layout_constraintEnd_toEndOf="@+id/tvTextItem"
                 app:layout_constraintStart_toStartOf="@+id/tvTextItem"
                 app:layout_constraintTop_toBottomOf="@+id/tvTextItem"
+                android:autoLink="all"
                 tools:visibility="visible" />
 
             <TextView

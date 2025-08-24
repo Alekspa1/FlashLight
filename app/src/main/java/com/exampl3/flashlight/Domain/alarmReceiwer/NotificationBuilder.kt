@@ -30,6 +30,7 @@ class NotificationBuilder @Inject constructor(
     val settings: SettingsSharedPreference) {
     val newRingtoneUri: Uri? = settings.getUriAlarm()?.toUri() ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
     val oldRingtoneUri: Uri? = settings.getOldUriAlarm()?.toUri() ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+
     val notificationManager =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     val atrubute =
@@ -49,17 +50,13 @@ class NotificationBuilder @Inject constructor(
 
         if (notificationManager.getNotificationChannel(oldRingtoneUri.toString()) != null ) {
             notificationManager.deleteNotificationChannel(oldRingtoneUri.toString())
-            LogText("Удаление канала если он есть")
         }
             notificationManager.createNotificationChannel(createChanel(atrubute))
-            LogText("Создание канала если звук был изменен")
         }
 
         if (notificationManager.getNotificationChannel(newRingtoneUri.toString()) == null ) {
             notificationManager.createNotificationChannel(createChanel(atrubute))
-            LogText("Создание канала если его нет например для первого запуска")
         }
-
 
         settings.saveOldUriAlarm(newRingtoneUri!!)
 
