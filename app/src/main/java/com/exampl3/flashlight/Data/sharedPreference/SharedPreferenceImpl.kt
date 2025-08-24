@@ -18,24 +18,27 @@ class SharedPreferenceImpl @Inject constructor(
                 " включить автозапуск приложения или разрешить приложению работать в фоновом режиме. " +
                 "Либо повторно входить в приложение после перезагрузки, чтобы напоминания обновились." +
                 "Если вам понравится мое приложение, то буду рад если оставите хороший отзыв," +
-                " также если у вас будут предложения по улучшению приложения в меню есть кнопка обратная связь."
+                " также если у вас будут вопросы или предложения по улучшению приложения в настройках есть кнопка обратной связи и инструкция " +
+                "к приложению."
 
 
     private var prefPremium: SharedPreferences =
         context.getSharedPreferences("PREMIUM", Context.MODE_PRIVATE)
     private val editPremium: SharedPreferences.Editor = prefPremium.edit()
-    fun getPremium(): Boolean {
-        return prefPremium.getBoolean(Const.PREMIUM_KEY, false)
-    }
+
+    fun getPremium(): Boolean = prefPremium.getBoolean(Const.PREMIUM_KEY, false)
 
     fun savePremium(flag: Boolean) {
         editPremium.putBoolean(Const.PREMIUM_KEY, flag)
         editPremium.apply()
     }
 
+
+
     private val prefNotebook: SharedPreferences =
         context.getSharedPreferences("TABLE", Context.MODE_PRIVATE)
     private val editNotebook: SharedPreferences.Editor = prefNotebook.edit()
+
     fun getStringNoteBook(): String? {
         return prefNotebook.getString(Const.KEY_NOTE_BOOK, greetings)
     }

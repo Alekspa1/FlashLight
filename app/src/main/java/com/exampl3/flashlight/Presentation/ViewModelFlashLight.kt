@@ -3,15 +3,20 @@ package com.exampl3.flashlight.Presentation
 
 import android.content.Context
 import android.net.Uri
+import android.view.View
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.net.toUri
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.exampl3.flashlight.Const
+import com.exampl3.flashlight.Data.GetSystemSoundImp
 import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Data.Room.Item
 import com.exampl3.flashlight.Data.Room.ListCategory
+import com.exampl3.flashlight.Data.ThemeImp
+import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
 import com.exampl3.flashlight.Data.sharedPreference.SharedPreferenceImpl
 import com.exampl3.flashlight.Domain.InsertDateAndAlarm
 import com.exampl3.flashlight.Domain.useCase.insertOrDeleteAlarm.ChangeAlarmUseCase
@@ -26,14 +31,36 @@ import javax.inject.Inject
 @HiltViewModel
 class ViewModelFlashLight @Inject constructor(
     private val pref: SharedPreferenceImpl,
+    private val settingsPref: SettingsSharedPreference,
     private val db: Database,
     private val insertDateAndTime: InsertDateAndAlarm,
     private val changeAlarm: ChangeAlarmUseCase,
+    private val theme: ThemeImp,
+    private val getSystemSoundImp: GetSystemSoundImp
 ) : ViewModel() {
 
 
     fun savePremium(flag: Boolean) = pref.savePremium(flag)
     fun getPremium() = pref.getPremium()
+
+
+
+    fun setView(map: Map<Const.Action, Map<View, Int>>){
+        theme.view(map)
+    }
+
+    fun setSize(map: Map<Const.Action, Map<View, Int>>){
+        theme.setTextSize(map)
+    }
+
+    fun setSizeTextIsList(list: List<TextView>){
+    theme.setSizeTextIsList(list)
+    }
+
+    fun getAllSound() : Map<String, Uri> {
+       return getSystemSoundImp.getSound()
+    }
+
 
     fun saveNoteBook(value: String) = pref.saveStringNoteBook(value)
     fun getNotebook() = pref.getStringNoteBook()
@@ -46,41 +73,49 @@ class ViewModelFlashLight @Inject constructor(
 
     val uriPhoto = MutableLiveData<String>()
 
+    val maxSorted = MutableLiveData<Int?>()
+
     fun getAllListCategory(): Flow<List<ListCategory>> {
         return db.CourseDao().getAllListCategory()
     }
 
+    fun saveSort(value: String) = settingsPref.saveSort(value)
+    fun getSort() = settingsPref.getSort()
 
+    fun saveTheme(value: String) = settingsPref.saveTheme(value)
+    fun getTheme() = settingsPref.getTheme()
 
-     fun saveImagePermanently(context: Context, uri: Uri): Uri {
-         try {
-             val imagesDir = File(context.filesDir, "images")
-             if (!imagesDir.exists()) {
-                 imagesDir.mkdirs() // Создаем директорию, если она не существует
-             }
-             val file = File(imagesDir, "${System.currentTimeMillis()}.jpg")
+    fun saveSize(value: String) = settingsPref.saveSize(value)
 
-             context.contentResolver.openInputStream(uri)?.use { input ->
-                 file.outputStream().use { output ->
-                     input.copyTo(output)
-                 }
-             }
-
-             if (file.exists()) {
-                 return Uri.fromFile(file)
-             } else {
-                 Toast.makeText(context, "Произошла ошибка сохранения", Toast.LENGTH_SHORT).show()
-                 return "".toUri()
-             }
-         }
-         catch (_: FileNotFoundException){
-             return "".toUri()
-         }
-
-     }
+    fun saveUriAlarm(uri: Uri) = settingsPref.saveUriAlarm(uri)
 
 
 
+    fun saveImagePermanently(context: Context, uri: Uri): Uri {
+        try {
+            val imagesDir = File(context.filesDir, "images")
+            if (!imagesDir.exists()) {
+                imagesDir.mkdirs() // Создаем директорию, если она не существует
+            }
+            val file = File(imagesDir, "${System.currentTimeMillis()}.jpg")
+
+            context.contentResolver.openInputStream(uri)?.use { input ->
+                file.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+
+            if (file.exists()) {
+                return Uri.fromFile(file)
+            } else {
+                Toast.makeText(context, "Произошла ошибка сохранения", Toast.LENGTH_SHORT).show()
+                return "".toUri()
+            }
+        } catch (_: FileNotFoundException) {
+            return "".toUri()
+        }
+
+    }
 
     fun deleteSavedImage(imageUri: Uri) {
         try {
@@ -107,6 +142,54 @@ class ViewModelFlashLight @Inject constructor(
         }
 
 
+    }
+
+    fun insertCategory(name: String, context: Context){
+        viewModelScope.launch {
+        if (isCategoryNameExists(name)) Toast.makeText(context, "Такая категория уже есть", Toast.LENGTH_SHORT).show()
+        else db.CourseDao().insertCategory(ListCategory(null, name))
+        }
+    }
+    fun upgrateCategory(item: ListCategory,name: String, context: Context){
+        viewModelScope.launch {
+            val newitem = item.copy(name = name)
+            if (isCategoryNameExists(name)) Toast.makeText(context, "Такая категория уже есть", Toast.LENGTH_SHORT).show()
+            else {
+                db.CourseDao().updateCategory(newitem)
+                db.CourseDao().getAllNewNoFlow(item.name).forEach {
+                    db.CourseDao().updateItem(it.copy(category = name))
+                }
+                updateCategory(item.name)
+            }
+        }
+    }
+    suspend fun isCategoryNameExists(name: String): Boolean {
+        return try {
+            val count = db.CourseDao().isCategoryExists(name)
+            count > 0
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    fun updateItemsOrder(newList: List<Item>) {
+        viewModelScope.launch {
+            saveNewOrder(newList)
+            listItemLD.value = newList
+        }
+
+    }
+
+    fun saveNewOrder(newList: List<Item>) {
+        newList.forEach { newItem ->
+            updateItem(newItem)
+        }
+    }
+
+    fun getItemMaxSort() {
+        viewModelScope.launch {
+            maxSorted.value = (db.CourseDao().getItemWithMaxSort()?.sort?.minus(1))
+        }
     }
 
     fun insertItem(item: Item) {

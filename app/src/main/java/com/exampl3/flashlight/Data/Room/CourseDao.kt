@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
@@ -14,7 +15,7 @@ interface CourseDao {
 
     //ITEM
     @Query("SELECT * FROM Item")
-    fun getAll(): Flow<List<Item>>
+    fun getAll(): LiveData<List<Item>>
 
     @Query("SELECT * FROM Item WHERE category == :value")
     suspend fun getAllNewNoFlow(value: String): List<Item>
@@ -34,11 +35,20 @@ interface CourseDao {
     @Update
     suspend fun updateItem(item: Item)
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertItem(item: Item)
+
+    @Query("SELECT * FROM Item WHERE sort = (SELECT MIN(sort) FROM Item)")
+    suspend fun getItemWithMaxSort(): Item?
+
+    @Update
+    suspend fun updateItems(items: List<Item>)
 
 
     //MENU
+    @Query("SELECT COUNT(*) FROM ListCategory WHERE name = :name")
+    suspend fun isCategoryExists(name: String): Int
+
     @Query("SELECT * FROM ListCategory")
     fun getAllListCategory(): Flow<List<ListCategory>>
 
@@ -52,7 +62,7 @@ interface CourseDao {
     fun deleteCategoryMenu(Course: ListCategory)
 
     @Update
-    fun updateCategory(Course: ListCategory)
+    suspend fun updateCategory(Course: ListCategory)
 
 
 }

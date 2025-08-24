@@ -17,17 +17,25 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.asLiveData
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Const.ALARM
 import com.exampl3.flashlight.Const.CHANGE
 import com.exampl3.flashlight.Const.CHANGE_ITEM
 import com.exampl3.flashlight.Const.DELETE
 import com.exampl3.flashlight.Const.IMAGE
+import com.exampl3.flashlight.Const.SORT_STANDART
+import com.exampl3.flashlight.Const.SORT_USER
+import com.exampl3.flashlight.Const.THEME_ZABOR
 import com.exampl3.flashlight.Presentation.adapters.ItemListAdapter
 import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Data.Room.Item
+import com.exampl3.flashlight.Data.ThemeImp
+import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
+import com.exampl3.flashlight.Presentation.adapters.draganddrop.DragItemTouchHelperCallback
+import com.exampl3.flashlight.R
 import com.exampl3.flashlight.databinding.FragmentListBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -35,10 +43,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
-import java.io.FileNotFoundException
 import java.util.Calendar
 import javax.inject.Inject
+import kotlin.Int
+import kotlin.collections.Map
 
 @AndroidEntryPoint
 open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.onLongClick {
@@ -47,12 +55,16 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
 
     @Inject
     lateinit var db: Database
+    @Inject
+    lateinit var pref: SettingsSharedPreference
+
+    @Inject
+    lateinit var themeImp: ThemeImp
 
     @Inject
     lateinit var voiceIntent: Intent
     private val modelFlashLight: ViewModelFlashLight by activityViewModels()
     private lateinit var pLauncher: ActivityResultLauncher<String>
-
 
 
     private val pickImageLauncher = registerForActivityResult(
@@ -69,13 +81,16 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+
         binding = FragmentListBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        theme()
         initRcView()
+
 
 
         modelFlashLight.categoryItemLD.observe(viewLifecycleOwner) { value ->
@@ -83,17 +98,8 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
 
         }
 
-        modelFlashLight.listItemLD.observe(viewLifecycleOwner) { list ->
 
-            adapter.submitList(list.sortedBy { it.id }.reversed().sortedBy { it.alarmTime }
-                .reversed().sortedBy { it.change }
-                .reversed().sortedBy { it.changeAlarm }
-                .reversed())
-
-
-        }
-
-        db.CourseDao().getAll().asLiveData().observe(viewLifecycleOwner) {
+        db.CourseDao().getAll().observe(viewLifecycleOwner) {
             modelFlashLight.categoryItemLD.value?.let { it1 ->
                 modelFlashLight.updateCategory(it1)
 
@@ -104,13 +110,17 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
         val launcher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
                 if (it.resultCode == Activity.RESULT_OK) {
+                    modelFlashLight.getItemMaxSort()
                     val text = it.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
                     if (text != null) {
+                        modelFlashLight.getItemMaxSort()
                         modelFlashLight.insertItem(
                             Item(
                                 null,
                                 text[0],
-                                category = modelFlashLight.categoryItemLD.value!!
+                                category = modelFlashLight.categoryItemLD.value!!,
+                                sort = modelFlashLight.maxSorted.value?:0,
+                                alarmTime = 0,
                             )
                         )
 
@@ -121,7 +131,9 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
 
             }
 
+
         binding.imBAddFrag.setOnClickListener {
+            modelFlashLight.getItemMaxSort()
             DialogItemList.alertItem(requireContext(), object : DialogItemList.Listener {
                 override fun onClickItem(name: String, action: Int?, id: Int?, desc: String?, uri: String?) {
                     var item: Item
@@ -131,7 +143,6 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
                             modelFlashLight.saveImagePermanently(requireContext(), uri.toUri()).toString()
                     }
 
-
                     modelFlashLight.insertItem(
                         Item(
                             null,
@@ -139,7 +150,8 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
                             category = modelFlashLight.categoryItemLD.value!!,
                             desc = desc,
                             alarmTime = 0,
-                            alarmText = permanentFile
+                            alarmText = permanentFile,
+                            sort = modelFlashLight.maxSorted.value?:0
                         )
                     )
 
@@ -207,11 +219,55 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
 
     private fun initRcView() {
         val rcView = binding.rcView
-        adapter = ItemListAdapter(this, this)
+
+        adapter = ItemListAdapter(
+            onLongClickListener = this,
+            onClickListener = this,
+            onOrderChanged = { updatedList ->
+                modelFlashLight.updateItemsOrder(updatedList)
+            },
+            touchHelper = null,
+            pref,
+            themeImp
+        )
         rcView.layoutManager = LinearLayoutManager(requireContext())
         rcView.adapter = adapter
+        val touchHelper = ItemTouchHelper(DragItemTouchHelperCallback(adapter))
+        if (modelFlashLight.getSort() == SORT_USER) {
+            touchHelper.attachToRecyclerView(rcView)
+            adapter.touchHelper = touchHelper
+        }
+
+        modelFlashLight.listItemLD.observe(viewLifecycleOwner) { list ->
+            scrollInStartAdapter() // это чтобы при создании жлемента, был скролл наверх
+            if (modelFlashLight.getSort() == SORT_STANDART) {
+                adapter.submitList(list.sortedBy { it.id }.reversed().sortedBy { it.alarmTime }
+                    .reversed().sortedBy { it.change }
+                    .reversed().sortedBy { it.changeAlarm }
+                    .reversed())
+            }
+            else {
+                adapter.submitList(list.sortedBy { it.sort })
+            }
+
+
+
+        }
 
     } // инициализировал ресайклер
+
+    private fun scrollInStartAdapter(){
+        adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                if (positionStart == 0) {  // Элементы добавились в начало (верх списка)
+                    binding.rcView.scrollToPosition(0)
+                    adapter.unregisterAdapterDataObserver(this)
+                }
+            }
+        })
+    }
+
+
 
     override fun onLongClick(item: Item, action: Int) {
         modelFlashLight.insertStringAndAlarm(item, requireContext(), false)
@@ -291,7 +347,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
                                 permanentFile = modelFlashLight.saveImagePermanently(requireContext(), uri!!.toUri()).toString()
 
                             }
-                            val newitem = item.copy(name = name, desc = desc, alarmText = permanentFile.toString())
+                            val newitem = item.copy(name = name, desc = desc, alarmText = permanentFile)
                             if (item.changeAlarm) modelFlashLight.changeAlarm(
                                 newitem,
                                 newitem.interval
@@ -334,9 +390,25 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
         calendarZero = Calendar.getInstance()
     }
 
+    private fun theme(){
+        with(modelFlashLight){
+            if (getTheme() == THEME_ZABOR) {
+                with(binding){
+                    val list = mapOf<Const.Action, Map<View, Int>>(
+                        Const.Action.IMAGE_RESOURCE to mapOf(
+                            imBAddFrag to R.drawable.ic_add_zabor,
+                            imVoiceFrag to R.drawable.ic_micto_zabor
+                        ),
+                        Const.Action.TEXT_STYLE to mapOf(tvCategory to R.style.StyleMenuZabor )
+                    )
+                    modelFlashLight.setView(list)
+                }
 
-    companion object {
-        fun newInstance() = FragmentList()
+            }
+        }
+
     }
+
+
 }
 

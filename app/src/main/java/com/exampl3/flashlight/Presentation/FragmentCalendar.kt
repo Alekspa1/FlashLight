@@ -15,8 +15,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.applandeo.materialcalendarview.CalendarDay
 import com.applandeo.materialcalendarview.listeners.OnCalendarDayClickListener
 import com.exampl3.flashlight.Const
@@ -25,8 +25,11 @@ import com.exampl3.flashlight.Const.CHANGE
 import com.exampl3.flashlight.Const.CHANGE_ITEM
 import com.exampl3.flashlight.Const.DELETE
 import com.exampl3.flashlight.Const.IMAGE
+import com.exampl3.flashlight.Const.THEME_ZABOR
 import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Data.Room.Item
+import com.exampl3.flashlight.Data.ThemeImp
+import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
 
 import com.exampl3.flashlight.Presentation.adapters.ItemListAdapter
 import com.exampl3.flashlight.R
@@ -39,6 +42,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Calendar
 import javax.inject.Inject
+import kotlin.Int
+import kotlin.collections.Map
 
 
 @AndroidEntryPoint
@@ -48,6 +53,11 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
 
     @Inject
     lateinit var db: Database
+    @Inject
+    lateinit var pref: SettingsSharedPreference
+    @Inject
+
+    lateinit var themeImp: ThemeImp
 
     private lateinit var calendar: Calendar
     private lateinit var calendarZero: Calendar
@@ -75,12 +85,15 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        theme()
         initRcView()
         calendarDayB = Calendar.getInstance()
+
 
         pLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
 
         binding.imBAddCalendar.setOnClickListener {
+            modelFlashLight.getItemMaxSort()
             if (modelFlashLight.getPremium())
                 if (getDateNow(calendarDayB) >= getDateNow(calendarZero)) DialogItemList.alertItem(
                     requireContext(),
@@ -105,7 +118,8 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
                                     category = requireContext().getString(R.string.everyday),
                                     desc = desc,
                                     alarmTime = calendarDayB.timeInMillis,
-                                    alarmText = permanentFile
+                                    alarmText = permanentFile,
+                                    sort = modelFlashLight.maxSorted.value?:0
                                 )
                             )
 
@@ -178,11 +192,12 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
             modelFlashLight.getListItemByCalendar(getDateNow(calendarDayB))
 
             modelFlashLight.listItemLDCalendar.observe(viewLifecycleOwner) {
+                scrollInStartAdapter()
                 adapter.submitList(it)
                 if (it.isNotEmpty()) binding.tvDela.visibility = View.GONE
                 else binding.tvDela.visibility = View.VISIBLE
             }
-            db.CourseDao().getAll().asLiveData().observe(viewLifecycleOwner) { list ->
+            db.CourseDao().getAll().observe(viewLifecycleOwner) { list ->
                 val calendarDays = mutableListOf<CalendarDay>()
                 modelFlashLight.getListItemByCalendar(getDateNow(calendarDayB))
 
@@ -216,15 +231,31 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
 
     private fun initRcView() {
         val rcView = binding.rcViewItem
-        adapter = ItemListAdapter(this, this)
+
+        adapter = ItemListAdapter(
+            onLongClickListener = this,
+            onClickListener = this,
+            onOrderChanged = null,
+            touchHelper = null,
+            pref,
+            themeImp
+        )
         rcView.layoutManager = LinearLayoutManager(requireContext())
         rcView.adapter = adapter
+
+
     } // инициализировал ресайклер
-
-
-    companion object {
-        fun newInstance() = FragmentCalendar()
+    private fun scrollInStartAdapter(){
+        adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                if (positionStart == 0) {  // Элементы добавились в начало (верх списка)
+                    binding.rcViewItem.scrollToPosition(0)
+                    adapter.unregisterAdapterDataObserver(this)
+                }
+            }
+        })
     }
+
 
     override fun onLongClick(item: Item, action: Int) {
         modelFlashLight.insertStringAndAlarm(item, requireContext(), false)
@@ -347,6 +378,24 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
         calendar.set(Calendar.SECOND, 0)
         calendar.set(Calendar.MILLISECOND, 0)
         return calendar.timeInMillis
+    }
+
+    private fun theme(){
+        with(modelFlashLight){
+            with(binding) {
+                val list = mapOf<Const.Action, Map<View, Int>>(
+                    Const.Action.IMAGE_RESOURCE to mapOf(
+                        imBAddCalendar to R.drawable.ic_add_zabor
+                    ),
+                    Const.Action.TEXT_COLOR to mapOf(tvDela to R.color.black )
+                )
+
+
+                if (getTheme() == THEME_ZABOR) modelFlashLight.setView(list)
+                setSize(list)
+            }
+        }
+
     }
 
 

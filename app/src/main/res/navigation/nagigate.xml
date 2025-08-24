@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nagigate"
+    app:startDestination="@id/fragmentMain">
+
+    <fragment
+        android:id="@+id/fragmentSettings"
+        android:name="com.exampl3.flashlight.Presentation.FragmentSettings"
+        android:label="Настройки"
+        tools:layout="@layout/fragment_settings" >
+        <action
+            android:id="@+id/action_fragmentSettings_to_fragmentFaq"
+            app:destination="@id/fragmentFaq"
+            app:enterAnim="@anim/enter"
+            app:exitAnim="@anim/exit"
+            app:popExitAnim="@anim/pop_exit" />
+    </fragment>
+    <fragment
+        android:id="@+id/fragmentMain"
+        android:name="com.exampl3.flashlight.Presentation.FragmentMain"
+        android:label="fragment_main"
+        tools:layout="@layout/fragment_main" >
+        <action
+            android:id="@+id/action_fragmentMain_to_fragmentSettings"
+            app:destination="@id/fragmentSettings"
+            app:enterAnim="@anim/enter"
+            app:exitAnim="@anim/exit"
+            app:popExitAnim="@anim/pop_exit" />
+    </fragment>
+    <fragment
+        android:id="@+id/fragmentFaq"
+        android:name="com.exampl3.flashlight.Presentation.FragmentFaq"
+        android:label="fragment_faq"
+        tools:layout="@layout/fragment_faq" />
+</navigation>

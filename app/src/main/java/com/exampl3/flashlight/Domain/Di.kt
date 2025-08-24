@@ -2,15 +2,21 @@ package com.exampl3.flashlight.Domain
 
 import android.app.AlarmManager
 import android.app.Application
+import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.speech.RecognizerIntent
 import androidx.room.Room
 import com.exampl3.flashlight.Data.InsertDateAndTimeImpl
 import com.exampl3.flashlight.Data.ChangeAlarmImp
+import com.exampl3.flashlight.Data.GetSystemSoundImp
 import com.exampl3.flashlight.Data.Room.Database
+import com.exampl3.flashlight.Data.ThemeImp
+import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
+import com.exampl3.flashlight.Domain.repository.GetSystemSoundRepository
 import com.exampl3.flashlight.Domain.repository.InsertDateAndTimeRepository
 import com.exampl3.flashlight.Domain.repository.InsertOrDeleteAlarmReository
+import com.exampl3.flashlight.Domain.repository.ThemeRepository
 
 import dagger.Module
 import dagger.Provides
@@ -27,6 +33,38 @@ object Di {
     @Singleton
     fun provedesTimeRepository(): InsertDateAndTimeRepository {
         return InsertDateAndTimeImpl()
+    }
+
+    @Provides
+    @Singleton
+    fun provideContentResolver(application: Application): ContentResolver {
+        return application.contentResolver
+    }
+
+    @Provides
+    @Singleton
+    fun provideGetSystemSoundRepository(contentResolver: ContentResolver): GetSystemSoundRepository {
+        return GetSystemSoundImp(contentResolver)
+    }
+
+
+
+
+    @Provides
+    @Singleton
+    fun provedesSettingsRepository(context: Application): SettingsSharedPreference {
+        return SettingsSharedPreference(context)
+    }
+
+    @Provides
+    fun provideApplicationContext(application: Application): Context {
+        return application.applicationContext
+    }
+
+    @Provides
+    @Singleton
+    fun provedesThemeRepository(context: Application, setting:SettingsSharedPreference ): ThemeRepository {
+        return ThemeImp(context, setting)
     }
 
     @Provides

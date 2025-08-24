@@ -6,38 +6,74 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.media.AudioAttributes
 import android.media.RingtoneManager
-import android.os.Build
+import android.net.Uri
+import android.provider.MediaStore
+import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.core.net.toUri
 import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Data.Room.Item
+import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
+import com.exampl3.flashlight.Domain.LogText
 import com.exampl3.flashlight.Presentation.MainActivity
 import com.exampl3.flashlight.R
 import javax.inject.Inject
 
 
+
+
 class NotificationBuilder @Inject constructor(
-    private val context: Application) {
+    private val context: Application,
+    val settings: SettingsSharedPreference) {
+    val newRingtoneUri: Uri? = settings.getUriAlarm()?.toUri() ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+    val oldRingtoneUri: Uri? = settings.getOldUriAlarm()?.toUri() ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+
+    val notificationManager =
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    val atrubute =
+        AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).build()
+
+
     fun input(item: Item){
         alarmPush().notify(item.id!!, notificationBuilder(item).build())
     }
-     fun alarmPush(): NotificationManager {
-        val ringtone = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
-        val atrubute = AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).build()
-        val notificationManager =
-            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val mChannel = NotificationChannel(
-                Const.CHANNEL_ID,
-                context.getString(R.string.app_name), NotificationManager.IMPORTANCE_HIGH
-            )
-            mChannel.setSound(ringtone, atrubute)
-            notificationManager.createNotificationChannel(mChannel)
-        }
-        return notificationManager
 
+    fun alarmPush(): NotificationManager {
+        if (notificationManager.getNotificationChannel(Const.CHANNEL_ID) != null) {
+            notificationManager.deleteNotificationChannel(Const.CHANNEL_ID)
+        }
+
+        if (newRingtoneUri != oldRingtoneUri) {
+
+        if (notificationManager.getNotificationChannel(oldRingtoneUri.toString()) != null ) {
+            notificationManager.deleteNotificationChannel(oldRingtoneUri.toString())
+        }
+            notificationManager.createNotificationChannel(createChanel(atrubute))
+        }
+
+        if (notificationManager.getNotificationChannel(newRingtoneUri.toString()) == null ) {
+            notificationManager.createNotificationChannel(createChanel(atrubute))
+        }
+
+        settings.saveOldUriAlarm(newRingtoneUri!!)
+
+        return notificationManager
     }
+
+    private fun createChanel(atrubute: AudioAttributes): NotificationChannel {
+    return  NotificationChannel(
+        newRingtoneUri.toString(),
+        context.getString(R.string.app_name),
+        NotificationManager.IMPORTANCE_HIGH
+    ).apply {
+        setSound(newRingtoneUri, atrubute)
+        enableVibration(true)
+    }
+    }
+
     private fun notificationBuilder(item: Item): NotificationCompat.Builder {
 
         val intentCancel = Intent(context, AlarmReceiwer::class.java)
@@ -68,21 +104,32 @@ class NotificationBuilder @Inject constructor(
                 context, item.id!!, intentPush,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
+        val bitmap:Bitmap? = try {
+            MediaStore.Images.Media.getBitmap(context.contentResolver, item.alarmText.toUri())
+        } catch (_: Exception){
+            null
+        }
+        val bigIcon = NotificationCompat.BigPictureStyle()
+            .bigPicture(bitmap)
 
-        val bigTextStyle = NotificationCompat.BigTextStyle()
+
+        val vibrationPattern = longArrayOf(0, 1000, 500, 1000, 500)
+
 
         return context.let {
-            NotificationCompat.Builder(it, Const.CHANNEL_ID)
+            NotificationCompat.Builder(it, newRingtoneUri.toString())
                 .setSmallIcon(R.drawable.icon)
                 .setContentTitle(item.name)
                 .setContentText(item.desc)
-                .setChannelId(Const.CHANNEL_ID)
+                .setVibrate(vibrationPattern)
                 .setPriority(NotificationManager.IMPORTANCE_HIGH)
-                .setStyle(bigTextStyle)
+                .setStyle(bigIcon)
                 .setContentIntent(contentIntent)
                 .addAction(0, "Готово", canselIntent)
                 .addAction(0, "Отложить", postponeIntent)
                 .setAutoCancel(true)
+
         }
     }
+
 }

@@ -7,5 +7,7 @@
     <string name="timeHasPassed">Вы выбрали время которое уже прошло</string>
     <string name="repeadAlarmOff">Повторяющиеся напоминания, доступны в PREMIUM версии</string>
     <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <!-- TODO: Remove or change this placeholder text -->
 
 </resources>
