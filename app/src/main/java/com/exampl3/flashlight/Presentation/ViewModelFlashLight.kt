@@ -48,6 +48,8 @@ class ViewModelFlashLight @Inject constructor(
         viewModelScope.launch {
             val listCategory = mutableListOf("Повседневные")
             listCategory.addAll(db.CourseDao().getAllCategories())
+            listCategory.remove(categoryItemLD.value)
+            listCategory.add(0,categoryItemLD.value.toString())
             onResult(listCategory)
         }
     }
