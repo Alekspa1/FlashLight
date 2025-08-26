@@ -93,7 +93,8 @@ object DialogItemList {
     fun alertItem(context: Context, listener: Listener, item: Item?,
                   model: ViewModelFlashLight,
                   lifecycleOwner: LifecycleOwner,
-                  pick:  ActivityResultLauncher<String>) {
+                  pick:  ActivityResultLauncher<String>,
+                  calendar: Boolean) {
 
         val builder = AlertDialog.Builder(context)
         val inflater = LayoutInflater.from(context)
@@ -106,10 +107,10 @@ object DialogItemList {
         val spiner = dialogLayout.findViewById<Spinner>(R.id.spinner2)
         var category = ""
 
-        model.getAllCategories {
+        model.getAllCategories( {
             list-> spinerInput(spiner,context,
             {selected -> category = selected},list)
-        }
+        }, item, calendar)
 
         model.uriPhoto.value = ""
         var uriString = ""

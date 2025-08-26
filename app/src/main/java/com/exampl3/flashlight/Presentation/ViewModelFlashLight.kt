@@ -43,15 +43,31 @@ class ViewModelFlashLight @Inject constructor(
     fun savePremium(flag: Boolean) = pref.savePremium(flag)
     fun getPremium() = pref.getPremium()
 
-    fun getAllCategories(onResult: (List<String>) -> Unit) {
-
+    fun getAllCategories(onResult: (List<String>) -> Unit, item: Item?,calendar: Boolean) {
+        val listCategory = mutableListOf("Повседневные")
         viewModelScope.launch {
-            val listCategory = mutableListOf("Повседневные")
             listCategory.addAll(db.CourseDao().getAllCategories())
-            listCategory.remove(categoryItemLD.value)
-            listCategory.add(0,categoryItemLD.value.toString())
-            onResult(listCategory)
+                if (!calendar){
+                    if (item == null) {
+                        listCategory.remove(categoryItemLD.value)
+                        listCategory.add(0, categoryItemLD.value.toString())
+                    }
+                    else {
+                        listCategory.remove(item.category)
+                        listCategory.add(0, item.category)
+                    }
+                } else {
+                    if (item != null) {
+                        listCategory.remove(item.category)
+                        listCategory.add(0, item.category)
+                    }
+
+                }
+
+
+
         }
+        onResult(listCategory)
     }
 
 
@@ -205,9 +221,7 @@ class ViewModelFlashLight @Inject constructor(
     fun insertItem(item: Item) {
         viewModelScope.launch { db.CourseDao().insertItem(item) }
     }
-//    fun insertItem(name: String,category: String,desc: String?,alarmTime: Long,alarmText: String,sort: Int) {
-//        viewModelScope.launch { db.CourseDao().insertItem(item) }
-//    }
+
 
     fun updateItem(item: Item) {
         viewModelScope.launch { db.CourseDao().updateItem(item) }

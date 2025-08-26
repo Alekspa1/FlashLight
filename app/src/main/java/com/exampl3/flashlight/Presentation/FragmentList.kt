@@ -123,6 +123,7 @@ open class FragmentList : Fragment() {
                     val text = it.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
                     if (text != null) {
                         modelFlashLight.getItemMaxSort()
+
                         modelFlashLight.insertItem(
                             Item(
                                 null,
@@ -151,15 +152,6 @@ open class FragmentList : Fragment() {
                         permanentFile =
                             modelFlashLight.saveImagePermanently(requireContext(), uri.toUri()).toString()
                     }
-//                    modelFlashLight.insertItem(
-//                            name,
-//                            category = category.toString(),
-//                            desc = desc,
-//                            alarmTime = 0,
-//                            alarmText = permanentFile,
-//                            sort = modelFlashLight.maxSorted.value?:0
-//
-//                    )
                     modelFlashLight.insertItem(
                         Item(
                             null,
@@ -214,7 +206,7 @@ open class FragmentList : Fragment() {
 
                     }
                 }
-            }, null,  model = modelFlashLight, lifecycleOwner = this,pick = pickImageLauncher)
+            }, null,  model = modelFlashLight, lifecycleOwner = this,pick = pickImageLauncher,false)
 
         }
 

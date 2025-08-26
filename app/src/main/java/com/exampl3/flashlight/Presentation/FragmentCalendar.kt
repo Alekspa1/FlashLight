@@ -178,7 +178,7 @@ class FragmentCalendar : Fragment() {
                         }
                     },
                     null,
-                      model = modelFlashLight, lifecycleOwner = this,pickImageLauncher
+                      model = modelFlashLight, lifecycleOwner = this,pickImageLauncher,true
                 )
                 else Toast.makeText(
                     requireContext(),

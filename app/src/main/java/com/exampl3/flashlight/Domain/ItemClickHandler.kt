@@ -115,7 +115,8 @@ class ItemClickHandler (
                     item,
                     model = modelFlashLight,
                     lifecycleOwner = lifecycleOwner,
-                    pick = pickImageLauncher
+                    pick = pickImageLauncher,
+                    false
                 )
             }
 
