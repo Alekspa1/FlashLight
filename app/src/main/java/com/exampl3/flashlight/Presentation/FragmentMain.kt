@@ -136,7 +136,8 @@ class FragmentMain : Fragment(), ListMenuAdapter.onClick {
                             action: Int?,
                             id: Int?,
                             desc: String?,
-                            uri: String?
+                            uri: String?,
+                            category: String?
                         ) {
                             modelFlashLight.insertCategory(name,requireActivity())
                         }
@@ -261,7 +262,8 @@ class FragmentMain : Fragment(), ListMenuAdapter.onClick {
                             action: Int?,
                             id: Int?,
                             desc: String?,
-                            uri: String?
+                            uri: String?,
+                            category: String?
                         ) {
                             modelFlashLight.upgrateCategory(item, name, requireActivity())
 //                            CoroutineScope(Dispatchers.IO).launch {

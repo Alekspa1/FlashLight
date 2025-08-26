@@ -17,6 +17,9 @@ interface CourseDao {
     @Query("SELECT * FROM Item")
     fun getAll(): LiveData<List<Item>>
 
+    @Query("SELECT name FROM ListCategory")
+    suspend fun getAllCategories(): List<String>
+
     @Query("SELECT * FROM Item WHERE category == :value")
     suspend fun getAllNewNoFlow(value: String): List<Item>
 

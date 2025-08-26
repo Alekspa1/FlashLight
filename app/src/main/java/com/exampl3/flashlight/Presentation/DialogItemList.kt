@@ -7,15 +7,20 @@ import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.LifecycleOwner
 import com.bumptech.glide.Glide
 import com.exampl3.flashlight.Const
+import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Data.Room.Item
+import com.exampl3.flashlight.Domain.LogText
 import com.exampl3.flashlight.Domain.useCase.SoundPlayer
 import com.exampl3.flashlight.R
 
@@ -27,6 +32,7 @@ object DialogItemList {
     val listTheme = arrayOf("Неоновая","Деревянная")
     val listSort = arrayOf("По умолчанию","Пользовательская")
     val listSize = arrayOf("Малый", "Обычный", "Крупный")
+
 
 
     fun AlertList(context: Context, listener: Listener, name: String?) {
@@ -50,12 +56,12 @@ object DialogItemList {
                 if (edName.text.isEmpty()) {
                     Toast.makeText(context, "Поле должно быть заполнено", Toast.LENGTH_SHORT).show()
                 } else {
-                    listener.onClickItem(edName.text.toString().trim(), null, null, null, null)
+                    listener.onClickItem(edName.text.toString().trim(), null, null, null, null, null)
                     dialog.dismiss()
                 }
 
             } else {
-                listener.onClickItem(edName.text.toString().trim(), null, null, null, null)
+                listener.onClickItem(edName.text.toString().trim(), null, null, null, null, null)
                 dialog.dismiss()
             }
 
@@ -88,6 +94,7 @@ object DialogItemList {
                   model: ViewModelFlashLight,
                   lifecycleOwner: LifecycleOwner,
                   pick:  ActivityResultLauncher<String>) {
+
         val builder = AlertDialog.Builder(context)
         val inflater = LayoutInflater.from(context)
         val dialogLayout = inflater.inflate(R.layout.dialog_layout, null)
@@ -96,6 +103,13 @@ object DialogItemList {
         val imView = dialogLayout.findViewById<ImageView>(R.id.imPhoto)
         val deleteText = dialogLayout.findViewById<TextView>(R.id.tvDel)
         val addPhoto = dialogLayout.findViewById<TextView>(R.id.tvAddPhoto)
+        val spiner = dialogLayout.findViewById<Spinner>(R.id.spinner2)
+        var category = ""
+
+        model.getAllCategories {
+            list-> spinerInput(spiner,context,
+            {selected -> category = selected},list)
+        }
 
         model.uriPhoto.value = ""
         var uriString = ""
@@ -140,12 +154,12 @@ object DialogItemList {
                 if (input1.isEmpty()) {
                     Toast.makeText(context, "Название не должно быть пустым", Toast.LENGTH_SHORT).show()
                 } else {
-                    listener.onClickItem(input1.trim(), null, null, input2.trim(), uriString)
+                    listener.onClickItem(input1.trim(), null, null, input2.trim(), uriString, category)
                     dialog.dismiss()
                 }
 
             } else {
-                listener.onClickItem(input1.trim(), null, item.id, input2.trim(), uriString)
+                listener.onClickItem(input1.trim(), null, item.id, input2.trim(), uriString, category)
                 dialog.dismiss()
             }
         }
@@ -156,12 +170,12 @@ object DialogItemList {
                 if (input1.isEmpty()) {
                     Toast.makeText(context, "Название не должно быть пустым", Toast.LENGTH_SHORT).show()
                 } else {
-                    listener.onClickItem(input1.trim(), Const.ALARM, null, input2.trim(), uriString)
+                    listener.onClickItem(input1.trim(), Const.ALARM, null, input2.trim(), uriString, category)
                     dialog.dismiss()
                 }
 
             } else {
-                listener.onClickItem(input1.trim(), Const.ALARM, item.id, input2.trim(), uriString)
+                listener.onClickItem(input1.trim(), Const.ALARM, item.id, input2.trim(), uriString, category)
                 dialog.dismiss()
             }
 
@@ -169,6 +183,28 @@ object DialogItemList {
         builder.setNegativeButton("Отмена") { dialog, _ -> dialog.cancel() }
         builder.setView(dialogLayout)
         builder.show()
+    }
+
+    private fun spinerInput(
+        spinner: Spinner,
+        context: Context,
+        onItemSelected: (String) -> Unit,
+        list: List<String>
+    ) {
+        val adapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, list)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinner.adapter = adapter
+
+        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                val selectedWord = parent.getItemAtPosition(position) as String
+                onItemSelected(selectedWord)
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {
+                //onItemSelected("Повседневные")
+            }
+        }
     }
 
 
@@ -391,7 +427,7 @@ object DialogItemList {
     }
 
     interface Listener {
-        fun onClickItem(name: String, action: Int?, id: Int?, desc: String?, uri: String?)
+        fun onClickItem(name: String, action: Int?, id: Int?, desc: String?, uri: String?,category : String?)
     }
 
     interface ActionTrueOrFalse {

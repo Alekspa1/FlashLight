@@ -13,6 +13,7 @@ import com.exampl3.flashlight.Const.THEME_FUTURE
 import com.exampl3.flashlight.Data.Room.Item
 import com.exampl3.flashlight.Data.ThemeImp
 import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
+import com.exampl3.flashlight.Domain.ItemClickHandler
 import com.exampl3.flashlight.Presentation.adapters.draganddrop.ItemTouchHelperAdapter
 import com.exampl3.flashlight.R
 import com.exampl3.flashlight.databinding.ItemBinding
@@ -23,8 +24,7 @@ import java.util.Date
 import java.util.Locale
 
 class ItemListAdapter(
-    private val onLongClickListener: onLongClick,
-    private val onClickListener: onClick,
+    private val onClickListener: ItemClickHandler,
     private val onOrderChanged: ((List<Item>) -> Unit)?,
     var touchHelper: ItemTouchHelper?,
     val settingPref: SettingsSharedPreference,
@@ -43,7 +43,7 @@ class ItemListAdapter(
             }
         }
 
-        fun bind(item: Item, onLongClickListener: onLongClick, onClick: onClick) {
+        fun bind(item: Item, onClick: ItemClickHandler) {
             with(binding) {
 
                 tvTextItem.text = item.name
@@ -127,7 +127,7 @@ class ItemListAdapter(
                     onClick.onClick(item, Const.ALARM)
                 }
                 imAlarm.setOnLongClickListener {
-                    onLongClickListener.onLongClick(item, Const.ALARM)
+                    onClick.onLongClick(item)
                     true
                 }
                 imPhotoView.setOnClickListener {
@@ -224,7 +224,7 @@ class ItemListAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(getItem(position), onLongClickListener, onClickListener)
+        holder.bind(getItem(position), onClickListener)
     }
 
     override fun onItemMove(fromPosition: Int, toPosition: Int) {
@@ -241,13 +241,5 @@ class ItemListAdapter(
         onOrderChanged?.invoke(itemsWithNewOrder)
     }
 
-    interface onLongClick {
-        fun onLongClick(item: Item, action: Int)
-
-    }
-
-    interface onClick {
-        fun onClick(item: Item, action: Int)
-    }
 
 }
