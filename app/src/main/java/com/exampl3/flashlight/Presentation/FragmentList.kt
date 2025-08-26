@@ -7,7 +7,6 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.speech.RecognizerIntent
-
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,19 +21,15 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Const.ALARM
-import com.exampl3.flashlight.Const.CHANGE
-import com.exampl3.flashlight.Const.CHANGE_ITEM
-import com.exampl3.flashlight.Const.DELETE
-import com.exampl3.flashlight.Const.IMAGE
 import com.exampl3.flashlight.Const.SORT_STANDART
 import com.exampl3.flashlight.Const.SORT_USER
 import com.exampl3.flashlight.Const.THEME_ZABOR
-import com.exampl3.flashlight.Presentation.adapters.ItemListAdapter
 import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Data.Room.Item
 import com.exampl3.flashlight.Data.ThemeImp
 import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
 import com.exampl3.flashlight.Domain.ItemClickHandler
+import com.exampl3.flashlight.Presentation.adapters.ItemListAdapter
 import com.exampl3.flashlight.Presentation.adapters.draganddrop.DragItemTouchHelperCallback
 import com.exampl3.flashlight.R
 import com.exampl3.flashlight.databinding.FragmentListBinding
@@ -46,8 +41,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Calendar
 import javax.inject.Inject
-import kotlin.Int
-import kotlin.collections.Map
 
 @AndroidEntryPoint
 open class FragmentList : Fragment() {
@@ -123,7 +116,6 @@ open class FragmentList : Fragment() {
                     val text = it.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
                     if (text != null) {
                         modelFlashLight.getItemMaxSort()
-
                         modelFlashLight.insertItem(
                             Item(
                                 null,
@@ -133,6 +125,7 @@ open class FragmentList : Fragment() {
                                 alarmTime = 0,
                             )
                         )
+
 
                     }
 

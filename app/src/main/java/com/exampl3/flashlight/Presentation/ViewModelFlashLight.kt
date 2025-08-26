@@ -19,6 +19,7 @@ import com.exampl3.flashlight.Data.ThemeImp
 import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
 import com.exampl3.flashlight.Data.sharedPreference.SharedPreferenceImpl
 import com.exampl3.flashlight.Domain.InsertDateAndAlarm
+import com.exampl3.flashlight.Domain.LogText
 import com.exampl3.flashlight.Domain.useCase.insertOrDeleteAlarm.ChangeAlarmUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
@@ -65,9 +66,9 @@ class ViewModelFlashLight @Inject constructor(
                 }
 
 
-
+            onResult(listCategory)
         }
-        onResult(listCategory)
+
     }
 
 
