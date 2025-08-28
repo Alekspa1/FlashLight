@@ -8,6 +8,8 @@
     <string name="repeadAlarmOff">Повторяющиеся напоминания, доступны в PREMIUM версии</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="deleteImageInDialog">Удалить изображение</string>
+    <string name="addImageInDialog">Добавить изображение</string>
     <!-- TODO: Remove or change this placeholder text -->
 
 </resources>

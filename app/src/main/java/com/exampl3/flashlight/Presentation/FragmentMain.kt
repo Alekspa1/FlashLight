@@ -2,7 +2,6 @@ package com.exampl3.flashlight.Presentation
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,14 +9,15 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.core.view.GravityCompat
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.asLiveData
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Const.AUTHORIZED_RUSTORE
-import com.exampl3.flashlight.Const.DELETE
 import com.exampl3.flashlight.Const.FOREVER
 import com.exampl3.flashlight.Const.NOT_AUTHORIZED
 import com.exampl3.flashlight.Const.ONE_MONTH
@@ -27,7 +27,10 @@ import com.exampl3.flashlight.Const.RUSTORE
 import com.exampl3.flashlight.Const.SIX_MONTH
 import com.exampl3.flashlight.Const.THEME_ZABOR
 import com.exampl3.flashlight.Data.Room.Database
-import com.exampl3.flashlight.Data.Room.ListCategory
+import com.exampl3.flashlight.Data.ThemeImp
+import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
+import com.exampl3.flashlight.Domain.ItemListClickHandler
+import com.exampl3.flashlight.Domain.UpgrateRustore
 import com.exampl3.flashlight.Presentation.adapters.ListMenuAdapter
 import com.exampl3.flashlight.Presentation.adapters.VpAdapter
 import com.exampl3.flashlight.R
@@ -37,9 +40,7 @@ import com.yandex.mobile.ads.banner.BannerAdSize
 import com.yandex.mobile.ads.banner.BannerAdView
 import com.yandex.mobile.ads.common.AdRequest
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import ru.rustore.sdk.appupdate.manager.factory.RuStoreAppUpdateManagerFactory
 import ru.rustore.sdk.billingclient.RuStoreBillingClient
 import ru.rustore.sdk.billingclient.RuStoreBillingClientFactory
 import ru.rustore.sdk.billingclient.model.product.Product
@@ -51,14 +52,9 @@ import ru.rustore.sdk.billingclient.usecase.PurchasesUseCase
 import java.util.Calendar
 import java.util.UUID
 import javax.inject.Inject
-import androidx.core.net.toUri
-import com.exampl3.flashlight.Const.CHANGE
-import com.exampl3.flashlight.Const.CHANGE_ITEM
-import com.exampl3.flashlight.Data.ThemeImp
-import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
 
 @AndroidEntryPoint
-class FragmentMain : Fragment(), ListMenuAdapter.onClick {
+class FragmentMain : Fragment() {
     private var bannerAd: BannerAdView? = null
 
     @Inject
@@ -68,6 +64,11 @@ class FragmentMain : Fragment(), ListMenuAdapter.onClick {
     lateinit var pref: SettingsSharedPreference
     @Inject
     lateinit var theme: ThemeImp
+
+    @Inject
+    lateinit var upgrare : UpgrateRustore
+
+    private lateinit var itemListClickHandler: ItemListClickHandler
     private lateinit var binding: FragmentMainBinding
     private lateinit var vpAdapter: VpAdapter
 
@@ -91,6 +92,7 @@ class FragmentMain : Fragment(), ListMenuAdapter.onClick {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initAll()
+        upgrare(binding.tvNewUpgrate)
         theme()
         pLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
 
@@ -136,7 +138,8 @@ class FragmentMain : Fragment(), ListMenuAdapter.onClick {
                             action: Int?,
                             id: Int?,
                             desc: String?,
-                            uri: String?
+                            uri: String?,
+                            category: String?
                         ) {
                             modelFlashLight.insertCategory(name,requireActivity())
                         }
@@ -194,8 +197,9 @@ class FragmentMain : Fragment(), ListMenuAdapter.onClick {
         }.attach()
 
         // инициализировал ресайклер
+        itemListClickHandler = ItemListClickHandler(requireContext(),modelFlashLight,binding.drawer,binding.tabLayout,db)
         val rcView = binding.rcView
-        adapter = ListMenuAdapter(this, pref, theme)
+        adapter = ListMenuAdapter(itemListClickHandler, pref, theme)
         rcView.layoutManager = LinearLayoutManager(requireActivity())
         rcView.adapter = adapter
 
@@ -229,71 +233,6 @@ class FragmentMain : Fragment(), ListMenuAdapter.onClick {
 
     //Override функции
 
-
-    override fun onClick(item: ListCategory, action: Int) {
-        when (action) {
-            DELETE -> {
-                DialogItemList.AlertDelete(
-                    requireActivity(),
-                    object : DialogItemList.ActionTrueOrFalse {
-                        override fun onClick(flag: Boolean) {
-                            if (flag) {
-                                CoroutineScope(Dispatchers.IO).launch {
-                                    db.CourseDao().getAllNewNoFlow(item.name).forEach { itemList ->
-                                        modelFlashLight.changeAlarm(itemList, Const.DELETE_ALARM)
-                                    }
-                                    db.CourseDao()
-                                        .deleteItemInCategory(item.name) // удаляю все из бд
-                                    db.CourseDao().deleteCategoryMenu(item) // удаляю из меню
-                                }
-                                modelFlashLight.updateCategory(getString(R.string.everyday))
-
-                            }
-                        }
-                    })
-            } // Удаление элемента
-            CHANGE_ITEM -> {
-                DialogItemList.AlertList(
-                    requireActivity(),
-                    object : DialogItemList.Listener {
-                        override fun onClickItem(
-                            name: String,
-                            action: Int?,
-                            id: Int?,
-                            desc: String?,
-                            uri: String?
-                        ) {
-                            modelFlashLight.upgrateCategory(item, name, requireActivity())
-//                            CoroutineScope(Dispatchers.IO).launch {
-//                                val newitem = item.copy(name = name)
-//                                db.CourseDao().updateCategory(newitem)
-//                                db.CourseDao().getAllNewNoFlow(item.name).forEach {
-//                                    db.CourseDao().updateItem(it.copy(category = name))
-//                                }
-//                            }
-//                            modelFlashLight.updateCategory(name)
-                        }
-                    },
-                    item.name
-                )
-
-            } // Изменение имени элемента
-            CHANGE -> {
-                if (modelFlashLight.getPremium()) {
-                    modelFlashLight.updateCategory(item.name)
-                    binding.drawer.closeDrawer(GravityCompat.START)
-                    binding.tabLayout.selectTab(binding.tabLayout.getTabAt(1))
-                } else
-                    Toast.makeText(
-                        requireActivity(),
-                        "Категории доступны в PREMIUM версии",
-                        Toast.LENGTH_SHORT
-                    ).show()
-            } // Простое нажатие
-        }
-
-
-    }
 
     private fun getListProduct() {
         productsUseCase.getProducts(productIds = PURCHASE_LIST)

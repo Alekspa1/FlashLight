@@ -10,12 +10,13 @@ import com.exampl3.flashlight.Const.THEME_ZABOR
 import com.exampl3.flashlight.Data.Room.ListCategory
 import com.exampl3.flashlight.Data.ThemeImp
 import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
+import com.exampl3.flashlight.Domain.ItemListClickHandler
 import com.exampl3.flashlight.R
 import com.exampl3.flashlight.databinding.ItemCategoryBinding
 
 
 class ListMenuAdapter(
-    private val onClickListener: onClick,
+    private val itemListClickHandler: ItemListClickHandler,
     val settingPref: SettingsSharedPreference,
     val theme: ThemeImp
 ) : ListAdapter<ListCategory, ListMenuAdapter.ViewHolder>(DiffCallbackListCategory()) {
@@ -24,7 +25,7 @@ class ListMenuAdapter(
 
         private val binding = ItemCategoryBinding.bind(view)
 
-        fun bind(item: ListCategory, onClick: onClick) {
+        fun bind(item: ListCategory, itemListClickHandler: ItemListClickHandler) {
             if (settingPref.getTheme() == THEME_ZABOR) {
                 binding.imDeleteList.setImageResource(R.drawable.ic_de_zabor)
                 binding.tvTextItem.setBackgroundResource(R.drawable.button_background_item_category_zabor)
@@ -38,13 +39,13 @@ class ListMenuAdapter(
             binding.tvTextItem.text = item.name
 
             binding.tvTextItem.setOnClickListener {
-                onClick.onClick(item, Const.CHANGE)
+                itemListClickHandler.onClick(item, Const.CHANGE)
             }
             binding.imDeleteList.setOnClickListener {
-                onClick.onClick(item, Const.DELETE)
+                itemListClickHandler.onClick(item, Const.DELETE)
             }
             binding.tvTextItem.setOnLongClickListener {
-                onClick.onClick(item, Const.CHANGE_ITEM)
+                itemListClickHandler.onClick(item, Const.CHANGE_ITEM)
                 true
             }
         }
@@ -57,11 +58,7 @@ class ListMenuAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(getItem(position), onClickListener)
-    }
-
-    interface onClick {
-        fun onClick(item: ListCategory, action: Int)
+        holder.bind(getItem(position), itemListClickHandler)
     }
 
 }

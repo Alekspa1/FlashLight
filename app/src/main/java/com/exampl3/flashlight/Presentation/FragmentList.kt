@@ -7,7 +7,6 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.speech.RecognizerIntent
-
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,18 +21,15 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Const.ALARM
-import com.exampl3.flashlight.Const.CHANGE
-import com.exampl3.flashlight.Const.CHANGE_ITEM
-import com.exampl3.flashlight.Const.DELETE
-import com.exampl3.flashlight.Const.IMAGE
 import com.exampl3.flashlight.Const.SORT_STANDART
 import com.exampl3.flashlight.Const.SORT_USER
 import com.exampl3.flashlight.Const.THEME_ZABOR
-import com.exampl3.flashlight.Presentation.adapters.ItemListAdapter
 import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Data.Room.Item
 import com.exampl3.flashlight.Data.ThemeImp
 import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
+import com.exampl3.flashlight.Domain.ItemClickHandler
+import com.exampl3.flashlight.Presentation.adapters.ItemListAdapter
 import com.exampl3.flashlight.Presentation.adapters.draganddrop.DragItemTouchHelperCallback
 import com.exampl3.flashlight.R
 import com.exampl3.flashlight.databinding.FragmentListBinding
@@ -45,11 +41,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Calendar
 import javax.inject.Inject
-import kotlin.Int
-import kotlin.collections.Map
 
 @AndroidEntryPoint
-open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.onLongClick {
+open class FragmentList : Fragment() {
     private lateinit var binding: FragmentListBinding
     private lateinit var adapter: ItemListAdapter
 
@@ -65,6 +59,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
     lateinit var voiceIntent: Intent
     private val modelFlashLight: ViewModelFlashLight by activityViewModels()
     private lateinit var pLauncher: ActivityResultLauncher<String>
+    private lateinit var itemClickHandler : ItemClickHandler
 
 
     private val pickImageLauncher = registerForActivityResult(
@@ -88,6 +83,14 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        pLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
+        itemClickHandler = ItemClickHandler(
+            context = requireContext(),
+            modelFlashLight = modelFlashLight,
+            lifecycleOwner = viewLifecycleOwner,
+            pickImageLauncher = pickImageLauncher,
+            pLauncher = pLauncher
+        )
         theme()
         initRcView()
 
@@ -105,7 +108,6 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
 
             }
         }
-        pLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
 
         val launcher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -124,6 +126,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
                             )
                         )
 
+
                     }
 
 
@@ -135,19 +138,18 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
         binding.imBAddFrag.setOnClickListener {
             modelFlashLight.getItemMaxSort()
             DialogItemList.alertItem(requireContext(), object : DialogItemList.Listener {
-                override fun onClickItem(name: String, action: Int?, id: Int?, desc: String?, uri: String?) {
+                override fun onClickItem(name: String, action: Int?, id: Int?, desc: String?, uri: String?, category: String?) {
                     var item: Item
                     var permanentFile = ""
                     if(uri!!.isNotEmpty()){
                         permanentFile =
                             modelFlashLight.saveImagePermanently(requireContext(), uri.toUri()).toString()
                     }
-
                     modelFlashLight.insertItem(
                         Item(
                             null,
                             name,
-                            category = modelFlashLight.categoryItemLD.value!!,
+                            category = category.toString(),
                             desc = desc,
                             alarmTime = 0,
                             alarmText = permanentFile,
@@ -197,7 +199,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
 
                     }
                 }
-            }, null,  model = modelFlashLight, lifecycleOwner = this,pick = pickImageLauncher)
+            }, null,  model = modelFlashLight, lifecycleOwner = this,pick = pickImageLauncher,false)
 
         }
 
@@ -221,8 +223,7 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
         val rcView = binding.rcView
 
         adapter = ItemListAdapter(
-            onLongClickListener = this,
-            onClickListener = this,
+            onClickListener = itemClickHandler,
             onOrderChanged = { updatedList ->
                 modelFlashLight.updateItemsOrder(updatedList)
             },
@@ -267,123 +268,6 @@ open class FragmentList : Fragment(), ItemListAdapter.onClick, ItemListAdapter.o
         })
     }
 
-
-
-    override fun onLongClick(item: Item, action: Int) {
-        modelFlashLight.insertStringAndAlarm(item, requireContext(), false)
-
-    }
-
-    override fun onClick(item: Item, action: Int) {
-        when (action) {
-            CHANGE -> {
-                modelFlashLight.updateItem(item.copy(change = !item.change))
-                if (item.changeAlarm) {
-                    modelFlashLight.updateItem(
-                        item.copy(
-                            changeAlarm = false,
-                            change = !item.change
-                        )
-                    )
-                }
-                modelFlashLight.changeAlarm(item, Const.DELETE_ALARM)
-
-            } // Изменение состояния элемента(активный/неактивный)
-
-            DELETE -> {
-                if (item.change) {
-                    modelFlashLight.deleteItem(item)
-                    modelFlashLight.changeAlarm(item, Const.DELETE_ALARM)
-
-                } else {
-                    DialogItemList.AlertDelete(
-                        requireContext(),
-                        object : DialogItemList.ActionTrueOrFalse {
-                            override fun onClick(flag: Boolean) {
-                                if (flag) {
-                                    modelFlashLight.deleteItem(item)
-                                    modelFlashLight.changeAlarm(item, Const.DELETE_ALARM)
-                                }
-                            }
-                        })
-
-                }
-
-
-
-            } // Удаления элемента
-
-            ALARM -> {
-
-                if (view?.let {
-                        Const.isPermissionGranted(
-                            it.context,
-                            Manifest.permission.POST_NOTIFICATIONS
-                        )
-                    } == true) {
-
-                    modelFlashLight.insertDateAndAlarm(item, null, requireContext())
-                } else {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        pLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                    }
-                }
-            } // Установка будильника
-
-            CHANGE_ITEM -> {
-                DialogItemList.alertItem(
-                    requireContext(),
-                    object : DialogItemList.Listener {
-                        override fun onClickItem(
-                            name: String,
-                            action: Int?,
-                            id: Int?,
-                            desc: String?,
-                            uri: String?
-                        ) {
-                            var permanentFile = uri
-                            if (item.alarmText != uri) {
-                                modelFlashLight.deleteSavedImage(item.alarmText.toUri())
-                                permanentFile = modelFlashLight.saveImagePermanently(requireContext(), uri!!.toUri()).toString()
-
-                            }
-                            val newitem = item.copy(name = name, desc = desc, alarmText = permanentFile)
-                            if (item.changeAlarm) modelFlashLight.changeAlarm(
-                                newitem,
-                                newitem.interval
-                            )
-
-                            modelFlashLight.updateItem(newitem)   // если у item был установлен будильник то, тут мы перезаписываем будильник
-                            if (action == ALARM) {
-                                if (view.let {
-                                        it?.let { it1 ->
-                                            Const.isPermissionGranted(
-                                                it1.context,
-                                                Manifest.permission.POST_NOTIFICATIONS
-                                            )
-                                        } == true
-                                    }) {
-                                    modelFlashLight.insertDateAndAlarm(
-                                        newitem,
-                                        null,
-                                        requireContext()
-                                    )
-                                }
-                            } // это если из окна изменения нажал установка будильника
-
-                        }
-                    },
-                    item, model = modelFlashLight, lifecycleOwner = this, pickImageLauncher
-                )
-
-            } // Изменение имени элемента
-
-            IMAGE -> {
-                DialogItemList.showExpandedImage(item.alarmText, requireContext())
-            } // Открыть картинку
-        }
-
-    }
 
     override fun onResume() {
         super.onResume()

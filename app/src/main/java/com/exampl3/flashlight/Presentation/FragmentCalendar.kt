@@ -30,6 +30,7 @@ import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Data.Room.Item
 import com.exampl3.flashlight.Data.ThemeImp
 import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
+import com.exampl3.flashlight.Domain.ItemClickHandler
 
 import com.exampl3.flashlight.Presentation.adapters.ItemListAdapter
 import com.exampl3.flashlight.R
@@ -47,7 +48,7 @@ import kotlin.collections.Map
 
 
 @AndroidEntryPoint
-class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.onLongClick {
+class FragmentCalendar : Fragment() {
     private lateinit var binding: FragmentCalendarBinding
     private val modelFlashLight: ViewModelFlashLight by activityViewModels()
 
@@ -65,7 +66,7 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
     private lateinit var calendarDayB: Calendar
     private lateinit var adapter: ItemListAdapter
     private lateinit var pLauncher: ActivityResultLauncher<String>
-
+    private lateinit var itemClickHandler : ItemClickHandler
     private val pickImageLauncher = registerForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri ->
@@ -73,6 +74,7 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
             modelFlashLight.uriPhoto.value = it.toString()
         }
     }
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -86,11 +88,19 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         theme()
+        pLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
+        itemClickHandler = ItemClickHandler(
+            context = requireContext(),
+            modelFlashLight = modelFlashLight,
+            lifecycleOwner = viewLifecycleOwner,
+            pickImageLauncher = pickImageLauncher,
+            pLauncher = pLauncher
+        )
         initRcView()
         calendarDayB = Calendar.getInstance()
 
 
-        pLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
+
 
         binding.imBAddCalendar.setOnClickListener {
             modelFlashLight.getItemMaxSort()
@@ -103,7 +113,8 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
                             action: Int?,
                             id: Int?,
                             desc: String?,
-                            uri: String?
+                            uri: String?,
+                            category: String?
                         ) {
                             var item: Item
                             var permanentFile = ""
@@ -115,7 +126,7 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
                                 Item(
                                     null,
                                     name,
-                                    category = requireContext().getString(R.string.everyday),
+                                    category = category.toString(),
                                     desc = desc,
                                     alarmTime = calendarDayB.timeInMillis,
                                     alarmText = permanentFile,
@@ -167,7 +178,7 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
                         }
                     },
                     null,
-                      model = modelFlashLight, lifecycleOwner = this,pickImageLauncher
+                      model = modelFlashLight, lifecycleOwner = this,pickImageLauncher,true
                 )
                 else Toast.makeText(
                     requireContext(),
@@ -233,8 +244,7 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
         val rcView = binding.rcViewItem
 
         adapter = ItemListAdapter(
-            onLongClickListener = this,
-            onClickListener = this,
+            onClickListener = itemClickHandler,
             onOrderChanged = null,
             touchHelper = null,
             pref,
@@ -257,120 +267,7 @@ class FragmentCalendar : Fragment(), ItemListAdapter.onClick, ItemListAdapter.on
     }
 
 
-    override fun onLongClick(item: Item, action: Int) {
-        modelFlashLight.insertStringAndAlarm(item, requireContext(), false)
 
-
-    }
-
-    override fun onClick(item: Item, action: Int) {
-        when (action) {
-            CHANGE -> {
-                modelFlashLight.updateItem(item.copy(change = !item.change))
-                if (item.changeAlarm) {
-                    modelFlashLight.updateItem(
-                        item.copy(
-                            changeAlarm = false,
-                            change = !item.change
-                        )
-                    )
-                }
-                modelFlashLight.changeAlarm(item, Const.DELETE_ALARM)
-
-            } // Изменение состояния элемента(активный/неактивный)
-
-            DELETE -> {
-                if (item.change) {
-                    modelFlashLight.deleteItem(item)
-                    modelFlashLight.changeAlarm(item, Const.DELETE_ALARM)
-
-                } else {
-                    DialogItemList.AlertDelete(
-                        requireContext(),
-                        object : DialogItemList.ActionTrueOrFalse {
-                            override fun onClick(flag: Boolean) {
-                                if (flag) {
-                                    modelFlashLight.deleteItem(item)
-                                    modelFlashLight.changeAlarm(item, Const.DELETE_ALARM)
-                                }
-                            }
-                        })
-
-                }
-
-            } // Удаления элемента
-
-            ALARM -> {
-
-                if (view?.let {
-                        Const.isPermissionGranted(
-                            it.context,
-                            Manifest.permission.POST_NOTIFICATIONS
-                        )
-                    } == true) {
-
-                    modelFlashLight.insertDateAndAlarm(item, null, requireContext())
-                } else {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        pLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                    }
-                }
-            } // Установка будильника
-
-            CHANGE_ITEM -> {
-                DialogItemList.alertItem(
-                    requireContext(),
-                    object : DialogItemList.Listener {
-                        override fun onClickItem(
-                            name: String,
-                            action: Int?,
-                            id: Int?,
-                            desc: String?,
-                            uri: String?
-                        ) {
-                            var permanentFile = uri
-                            if (item.alarmText != uri) {
-                                modelFlashLight.deleteSavedImage(item.alarmText.toUri())
-                                permanentFile = modelFlashLight.saveImagePermanently(requireContext(), uri!!.toUri()).toString()
-
-                            }
-                            val newitem = item.copy(name = name, desc = desc, alarmText = permanentFile.toString())
-                            if (item.changeAlarm) modelFlashLight.changeAlarm(
-                                newitem,
-                                newitem.interval
-                            )
-
-                            modelFlashLight.updateItem(newitem)   // если у item был установлен будильник то, тут мы перезаписываем будильник
-                            if (action == ALARM) {
-                                if (view.let {
-                                        it?.let { it1 ->
-                                            Const.isPermissionGranted(
-                                                it1.context,
-                                                Manifest.permission.POST_NOTIFICATIONS
-                                            )
-                                        } == true
-                                    }) {
-                                    modelFlashLight.insertDateAndAlarm(
-                                        newitem,
-                                        null,
-                                        requireContext()
-                                    )
-                                }
-                            } // это если из окна изменения нажал установка будильника
-
-                        }
-                    },
-                    item,  model = modelFlashLight, lifecycleOwner = this,pickImageLauncher
-                )
-
-            } // Изменение имени элемента
-
-            IMAGE -> {
-                DialogItemList.showExpandedImage(item.alarmText, requireContext())
-            } // Открытие картинки
-        }
-
-    }
 
     private fun getDateNow(calendar: Calendar): Long {
         calendar.set(Calendar.HOUR_OF_DAY, 0)

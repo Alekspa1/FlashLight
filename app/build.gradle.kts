@@ -13,8 +13,8 @@ android {
         applicationId = "com.exampl3.flashlight"
         minSdk = 26
         targetSdk = 36
-        versionCode = 25
-        versionName = "9"
+        versionCode = 27
+        versionName = "9.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     kapt {
@@ -44,6 +44,7 @@ android {
 }
 
 dependencies {
+    implementation("ru.rustore.sdk:appupdate:7.0.0")
     implementation("com.applandeo:material-calendar-view:1.9.2")
     implementation ("com.github.bumptech.glide:glide:4.16.0")
     implementation("androidx.navigation:navigation-fragment-ktx:2.9.3")
@@ -57,15 +58,15 @@ dependencies {
     implementation("com.yandex.ads.mediation:mobileads-mytarget:5.27.2.0")
 
     implementation("ru.rustore.sdk:billingclient:7.0.0")
-    implementation ("com.google.dagger:hilt-android:2.57")
+    implementation ("com.google.dagger:hilt-android:2.57.1")
     implementation("androidx.activity:activity-ktx:1.10.1")
-    kapt ("com.google.dagger:hilt-compiler:2.57")
+    kapt ("com.google.dagger:hilt-compiler:2.57.1")
 
     implementation ("androidx.room:room-runtime:2.7.2")
     kapt ("androidx.room:room-compiler:2.7.2")
     implementation ("androidx.room:room-ktx:2.7.2")
 
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.9.2")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.9.3")
     implementation("androidx.fragment:fragment-ktx:1.8.9")
 
 

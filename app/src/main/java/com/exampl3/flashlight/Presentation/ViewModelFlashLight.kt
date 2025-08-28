@@ -19,6 +19,7 @@ import com.exampl3.flashlight.Data.ThemeImp
 import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
 import com.exampl3.flashlight.Data.sharedPreference.SharedPreferenceImpl
 import com.exampl3.flashlight.Domain.InsertDateAndAlarm
+import com.exampl3.flashlight.Domain.LogText
 import com.exampl3.flashlight.Domain.useCase.insertOrDeleteAlarm.ChangeAlarmUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
@@ -43,6 +44,32 @@ class ViewModelFlashLight @Inject constructor(
     fun savePremium(flag: Boolean) = pref.savePremium(flag)
     fun getPremium() = pref.getPremium()
 
+    fun getAllCategories(onResult: (List<String>) -> Unit, item: Item?,calendar: Boolean) {
+        val listCategory = mutableListOf("Повседневные")
+        viewModelScope.launch {
+            listCategory.addAll(db.CourseDao().getAllCategories())
+                if (!calendar){
+                    if (item == null) {
+                        listCategory.remove(categoryItemLD.value)
+                        listCategory.add(0, categoryItemLD.value.toString())
+                    }
+                    else {
+                        listCategory.remove(item.category)
+                        listCategory.add(0, item.category)
+                    }
+                } else {
+                    if (item != null) {
+                        listCategory.remove(item.category)
+                        listCategory.add(0, item.category)
+                    }
+
+                }
+
+
+            onResult(listCategory)
+        }
+
+    }
 
 
     fun setView(map: Map<Const.Action, Map<View, Int>>){
@@ -195,6 +222,7 @@ class ViewModelFlashLight @Inject constructor(
     fun insertItem(item: Item) {
         viewModelScope.launch { db.CourseDao().insertItem(item) }
     }
+
 
     fun updateItem(item: Item) {
         viewModelScope.launch { db.CourseDao().updateItem(item) }

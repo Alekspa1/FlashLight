@@ -4,10 +4,10 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    layout_height=""
-    layout_width=""
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    tools:background="@color/Grey"
+    >
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -54,22 +54,24 @@
                 android:id="@+id/tvAddPhoto"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="right"
-                android:text="Добавить изображение"
+                android:layout_gravity="end"
+                android:layout_marginTop="10dp"
+                android:text="@string/addImageInDialog"
                 android:textColor="@color/white"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toBottomOf="@+id/spinner2" />
 
             <ImageView
                 android:id="@+id/imPhoto"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
+                android:layout_marginTop="10dp"
                 android:layout_weight="1"
                 android:scaleType="fitXY"
                 android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/spinner2"
                 app:srcCompat="@drawable/ic_launcher_foreground"
                 tools:visibility="visible" />
 
@@ -78,14 +80,23 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:gravity="right"
-                android:text="Удалить изображение"
+                android:gravity="end"
+                android:text="@string/deleteImageInDialog"
                 android:textColor="@color/white"
                 android:textSize="14sp"
                 android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 tools:visibility="visible" />
+
+            <Spinner
+                android:id="@+id/spinner2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:entries="@array/vp_title_main"
+                />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
 
