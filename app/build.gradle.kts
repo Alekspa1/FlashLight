@@ -58,15 +58,15 @@ dependencies {
     implementation("com.yandex.ads.mediation:mobileads-mytarget:5.27.2.0")
 
     implementation("ru.rustore.sdk:billingclient:7.0.0")
-    implementation ("com.google.dagger:hilt-android:2.57")
+    implementation ("com.google.dagger:hilt-android:2.57.1")
     implementation("androidx.activity:activity-ktx:1.10.1")
-    kapt ("com.google.dagger:hilt-compiler:2.57")
+    kapt ("com.google.dagger:hilt-compiler:2.57.1")
 
     implementation ("androidx.room:room-runtime:2.7.2")
     kapt ("androidx.room:room-compiler:2.7.2")
     implementation ("androidx.room:room-ktx:2.7.2")
 
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.9.2")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.9.3")
     implementation("androidx.fragment:fragment-ktx:1.8.9")
 
 
