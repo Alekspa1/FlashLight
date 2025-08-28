@@ -29,6 +29,7 @@ import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Const.SIZE_LARGE
 import com.exampl3.flashlight.Const.SIZE_SMALL
 import com.exampl3.flashlight.Const.SIZE_STANDART
+import com.exampl3.flashlight.Domain.toastFun
 import com.exampl3.flashlight.Domain.useCase.SoundPlayer
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -58,6 +59,7 @@ class FragmentSettings : Fragment() {
         theme()
         pLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
         with(binding){
+
             bCallbackCard.setOnClickListener {
                 val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
                     data = "mailto:".toUri()
@@ -71,6 +73,7 @@ class FragmentSettings : Fragment() {
                     Toast.makeText(requireActivity(), "Ошибка", Toast.LENGTH_SHORT).show()
                 }
             } // Обратная связь
+
             bDonateCard.setOnClickListener {
                 try {
                     startActivity(Intent(Intent.ACTION_VIEW, DONATE.toUri()))
@@ -78,21 +81,27 @@ class FragmentSettings : Fragment() {
                     Toast.makeText(requireActivity(), "Ошибка", Toast.LENGTH_SHORT).show()
                 }
             } // Донат
+
             imBack.setOnClickListener {
                 findNavController().popBackStack()
-            }
-            bSetSort.setOnClickListener {
-                DialogItemList.settingSort(requireActivity(), object : DialogItemList.ActionInt {
-                    override fun onClick(action: Int) {
-                        when (action) {
-                            0 -> modelFlashLight.saveSort(SORT_STANDART)
-                            1 -> modelFlashLight.saveSort(SORT_USER)
-                        }
-                        Toast.makeText(requireContext(), "Изменения вступят в силу после перезапуска приложения", Toast.LENGTH_SHORT).show()
-                    }
+            } // Назад
 
-                })
-            }
+            bSetSort.setOnClickListener {
+                if (modelFlashLight.getPremium()){
+                    DialogItemList.settingSort(requireActivity(), object : DialogItemList.ActionInt {
+                        override fun onClick(action: Int) {
+                            when (action) {
+                                0 -> modelFlashLight.saveSort(SORT_STANDART)
+                                1 -> modelFlashLight.saveSort(SORT_USER)
+                            }
+                            Toast.makeText(requireContext(), "Изменения вступят в силу после перезапуска приложения", Toast.LENGTH_SHORT).show()
+                        }
+
+                    })
+                }
+                else toastFun(requireContext(), "Доступно в PREMIUM версии")
+
+            } // Сортировка
 
             bSetTheme.setOnClickListener {
                 DialogItemList.settingTheme(requireActivity(), object : DialogItemList.ActionInt {
@@ -105,7 +114,7 @@ class FragmentSettings : Fragment() {
                     }
 
                 })
-            }
+            } // Тема
 
             bAlarm.setOnClickListener {
                 val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -115,14 +124,16 @@ class FragmentSettings : Fragment() {
                 }
 
                 if (ContextCompat.checkSelfPermission(requireActivity(), permission) == PackageManager.PERMISSION_GRANTED) {
-                    val allSounds = modelFlashLight.getAllSound()
-                    DialogItemList.insertAlarmSound(requireActivity(), object : DialogItemList.ActioinUri {
-                        override fun onClick(uri: Uri) {
-                            modelFlashLight.saveUriAlarm(uri)
+                    if (modelFlashLight.getPremium()){
+                        val allSounds = modelFlashLight.getAllSound()
+                        DialogItemList.insertAlarmSound(requireActivity(), object : DialogItemList.ActioinUri {
+                            override fun onClick(uri: Uri) {
+                                modelFlashLight.saveUriAlarm(uri)
+                            }
 
-                        }
+                        }, allSounds, soundPlayer)
+                    } else toastFun(requireContext(), "Доступно в PREMIUM версии")
 
-                    }, allSounds, soundPlayer)
                 } else {
                     val permissionsToRequest = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                         arrayOf(Manifest.permission.READ_MEDIA_AUDIO)
@@ -134,7 +145,8 @@ class FragmentSettings : Fragment() {
                         pLauncher.launch(it)
                     }
                 }
-            }
+            } // Звук будильника
+
             bSize.setOnClickListener {
                 DialogItemList.settingSize(requireActivity(), object : DialogItemList.ActionInt {
                     override fun onClick(action: Int) {
@@ -147,10 +159,11 @@ class FragmentSettings : Fragment() {
                     }
 
                 })
-            }
+            } // Размер текста
+
             bFaq.setOnClickListener {
                 findNavController().navigate(R.id.action_fragmentSettings_to_fragmentFaq)
-            }
+            } // Инструкция
         }
 
 
