@@ -214,7 +214,7 @@
                     android:layout_height="wrap_content"
                     android:drawablePadding="8dp"
                     android:padding="10dp"
-                    android:text="Проверить обновление"
+                    android:text="Обновлений нет"
                     app:drawableStartCompat="@drawable/ic_update" />
                 <androidx.cardview.widget.CardView
                     android:id="@+id/cardZone3"

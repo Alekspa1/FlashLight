@@ -13,8 +13,8 @@ android {
         applicationId = "com.exampl3.flashlight"
         minSdk = 26
         targetSdk = 36
-        versionCode = 25
-        versionName = "9"
+        versionCode = 26
+        versionName = "9.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     kapt {
@@ -44,6 +44,7 @@ android {
 }
 
 dependencies {
+    implementation("ru.rustore.sdk:appupdate:7.0.0")
     implementation("com.applandeo:material-calendar-view:1.9.2")
     implementation ("com.github.bumptech.glide:glide:4.16.0")
     implementation("androidx.navigation:navigation-fragment-ktx:2.9.3")
