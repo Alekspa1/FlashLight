@@ -3,6 +3,7 @@ package com.exampl3.flashlight.Domain
 import android.content.Context
 import android.widget.Toast
 import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Const.CHANGE
 import com.exampl3.flashlight.Const.CHANGE_ITEM
@@ -12,7 +13,7 @@ import com.exampl3.flashlight.Data.Room.ListCategory
 import com.exampl3.flashlight.Presentation.DialogItemList
 import com.exampl3.flashlight.Presentation.ViewModelFlashLight
 import com.exampl3.flashlight.R
-import com.exampl3.flashlight.databinding.FragmentMainBinding
+import com.google.android.material.tabs.TabLayout
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -21,7 +22,8 @@ import kotlinx.coroutines.launch
 class ItemListClickHandler(
     private val context: Context,
     private val modelFlashLight: ViewModelFlashLight,
-    private val binding: FragmentMainBinding,
+    private val drawer: DrawerLayout,
+    private val tabLayout: TabLayout,
     private val db: Database
 ) {
 
@@ -69,8 +71,8 @@ class ItemListClickHandler(
             CHANGE -> {
                 if (modelFlashLight.getPremium()) {
                     modelFlashLight.updateCategory(item.name)
-                    binding.drawer.closeDrawer(GravityCompat.START)
-                    binding.tabLayout.selectTab(binding.tabLayout.getTabAt(1))
+                    drawer.closeDrawer(GravityCompat.START)
+                    tabLayout.selectTab(tabLayout.getTabAt(1))
                 } else
                     Toast.makeText(
                         context,

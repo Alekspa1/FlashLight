@@ -197,7 +197,7 @@ class FragmentMain : Fragment() {
         }.attach()
 
         // инициализировал ресайклер
-        itemListClickHandler = ItemListClickHandler(requireContext(),modelFlashLight,binding,db)
+        itemListClickHandler = ItemListClickHandler(requireContext(),modelFlashLight,binding.drawer,binding.tabLayout,db)
         val rcView = binding.rcView
         adapter = ListMenuAdapter(itemListClickHandler, pref, theme)
         rcView.layoutManager = LinearLayoutManager(requireActivity())
