@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:context=".Presentation.FragmentCalendar">
+
+
+        <com.applandeo.materialcalendarview.CalendarView
+            android:id="@+id/calendarView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:verticalScrollbarPosition="defaultPosition"
+            app:abbreviationsBarColor="@color/white"
+            app:abbreviationsLabelsColor="@color/black"
+            app:anotherMonthsDaysLabelsColor="@color/Grey"
+            app:daysLabelsColor="@color/black"
+            app:eventsEnabled="true"
+            app:headerColor="@color/Grey2"
+            app:headerLabelColor="@color/white"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:pagesColor="#CCFFFFFF"
+            app:selectionColor="@color/black"
+            app:selectionLabelColor="#CCFFFFFF"
+            app:todayLabelColor="@color/black"
+            app:type="one_day_picker"
+            tools:visibility="visible">
+
+        </com.applandeo.materialcalendarview.CalendarView>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rcViewItem"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="2dp"
+            app:layout_constraintBottom_toTopOf="@+id/imBAddCalendar"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/calendarView"
+            tools:visibility="visible" />
+
+        <TextView
+            android:id="@+id/tvDela"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Список дел пуст"
+            android:textColor="@color/white"
+            android:textSize="34sp"
+            app:layout_constraintBottom_toBottomOf="@+id/rcViewItem"
+            app:layout_constraintEnd_toEndOf="@+id/rcViewItem"
+            app:layout_constraintStart_toStartOf="@+id/rcViewItem"
+            app:layout_constraintTop_toBottomOf="@+id/calendarView" />
+
+        <ImageButton
+            android:id="@+id/imBAddCalendar"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="@null"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_add"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

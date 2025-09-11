@@ -13,8 +13,8 @@ android {
         applicationId = "com.exampl3.flashlight"
         minSdk = 26
         targetSdk = 36
-        versionCode = 27
-        versionName = "9.1"
+        versionCode = 29
+        versionName = "9.2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     kapt {

@@ -9,7 +9,7 @@
     android:layout_gravity="start"
     android:background="@drawable/img"
     tools:context=".Presentation.MainActivity"
-    tools:openDrawer="start">
+    >
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/content"
@@ -19,7 +19,7 @@
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabLayout"
             android:layout_width="0dp"
-            android:layout_height="35dp"
+            android:layout_height="wrap_content"
             android:background="@color/black"
             android:clipToPadding="false"
             app:layout_constraintEnd_toEndOf="parent"

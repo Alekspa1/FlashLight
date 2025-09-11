@@ -21,10 +21,6 @@ import com.applandeo.materialcalendarview.CalendarDay
 import com.applandeo.materialcalendarview.listeners.OnCalendarDayClickListener
 import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Const.ALARM
-import com.exampl3.flashlight.Const.CHANGE
-import com.exampl3.flashlight.Const.CHANGE_ITEM
-import com.exampl3.flashlight.Const.DELETE
-import com.exampl3.flashlight.Const.IMAGE
 import com.exampl3.flashlight.Const.THEME_ZABOR
 import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Data.Room.Item
@@ -35,6 +31,7 @@ import com.exampl3.flashlight.Domain.ItemClickHandler
 import com.exampl3.flashlight.Presentation.adapters.ItemListAdapter
 import com.exampl3.flashlight.R
 import com.exampl3.flashlight.databinding.FragmentCalendarBinding
+import com.exampl3.flashlight.databinding.FragmentCalendarZaborBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -50,6 +47,7 @@ import kotlin.collections.Map
 @AndroidEntryPoint
 class FragmentCalendar : Fragment() {
     private lateinit var binding: FragmentCalendarBinding
+    private lateinit var bindingZabor: FragmentCalendarZaborBinding
     private val modelFlashLight: ViewModelFlashLight by activityViewModels()
 
     @Inject
@@ -57,7 +55,6 @@ class FragmentCalendar : Fragment() {
     @Inject
     lateinit var pref: SettingsSharedPreference
     @Inject
-
     lateinit var themeImp: ThemeImp
 
     private lateinit var calendar: Calendar
@@ -80,14 +77,18 @@ class FragmentCalendar : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentCalendarBinding.inflate(inflater, container, false)
+        if (pref.getTheme() == THEME_ZABOR ) {
+            bindingZabor = FragmentCalendarZaborBinding.inflate(inflater, container, false)
+            theme()
+            return bindingZabor.root
+        }
+        else binding = FragmentCalendarBinding.inflate(inflater, container, false)
         return binding.root
 
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        theme()
         pLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
         itemClickHandler = ItemClickHandler(
             context = requireContext(),
@@ -99,171 +100,336 @@ class FragmentCalendar : Fragment() {
         initRcView()
         calendarDayB = Calendar.getInstance()
 
-
-
-
-        binding.imBAddCalendar.setOnClickListener {
-            modelFlashLight.getItemMaxSort()
-            if (modelFlashLight.getPremium())
-                if (getDateNow(calendarDayB) >= getDateNow(calendarZero)) DialogItemList.alertItem(
-                    requireContext(),
-                    object : DialogItemList.Listener {
-                        override fun onClickItem(
-                            name: String,
-                            action: Int?,
-                            id: Int?,
-                            desc: String?,
-                            uri: String?,
-                            category: String?
-                        ) {
-                            var item: Item
-                            var permanentFile = ""
-                            if(uri!!.isNotEmpty()){
-                                permanentFile =
-                                    modelFlashLight.saveImagePermanently(requireContext(), uri.toUri()).toString()
-                            }
-                            modelFlashLight.insertItem(
-                                Item(
-                                    null,
-                                    name,
-                                    category = category.toString(),
-                                    desc = desc,
-                                    alarmTime = calendarDayB.timeInMillis,
-                                    alarmText = permanentFile,
-                                    sort = modelFlashLight.maxSorted.value?:0
+        if (pref.getTheme() == THEME_ZABOR){
+            bindingZabor.imBAddCalendar.setOnClickListener {
+                modelFlashLight.getItemMaxSort()
+                if (modelFlashLight.getPremium())
+                    if (getDateNow(calendarDayB) >= getDateNow(calendarZero)) DialogItemList.alertItem(
+                        requireContext(),
+                        object : DialogItemList.Listener {
+                            override fun onClickItem(
+                                name: String,
+                                action: Int?,
+                                id: Int?,
+                                desc: String?,
+                                uri: String?,
+                                category: String?
+                            ) {
+                                var item: Item
+                                var permanentFile = ""
+                                if(uri!!.isNotEmpty()){
+                                    permanentFile =
+                                        modelFlashLight.saveImagePermanently(requireContext(), uri.toUri()).toString()
+                                }
+                                modelFlashLight.insertItem(
+                                    Item(
+                                        null,
+                                        name,
+                                        category = category.toString(),
+                                        desc = desc,
+                                        alarmTime = calendarDayB.timeInMillis,
+                                        alarmText = permanentFile,
+                                        sort = modelFlashLight.maxSorted.value?:0
+                                    )
                                 )
-                            )
 
 
-                            if (action == ALARM) {
-                                if (view.let {
-                                        Const.isPermissionGranted(
-                                            it.context,
-                                            Manifest.permission.POST_NOTIFICATIONS
-                                        )
-                                    }) {
-                                    CoroutineScope(Dispatchers.IO).launch {
-                                        delay(500)
-                                        item = db.CourseDao().getAllList().last()
-                                        if (item.name == name) {
-                                            withContext(Dispatchers.Main) {
-                                                modelFlashLight.insertDateAndAlarm(
-                                                    item,
-                                                    calendarDayB,
-                                                    requireContext()
-                                                )
-                                            }
-                                        } else {
-                                            delay(1000)
+                                if (action == ALARM) {
+                                    if (view.let {
+                                            Const.isPermissionGranted(
+                                                it.context,
+                                                Manifest.permission.POST_NOTIFICATIONS
+                                            )
+                                        }) {
+                                        CoroutineScope(Dispatchers.IO).launch {
+                                            delay(500)
                                             item = db.CourseDao().getAllList().last()
-                                            withContext(Dispatchers.Main) {
-                                                modelFlashLight.insertDateAndAlarm(
-                                                    item,
-                                                    calendarDayB,
-                                                    requireContext()
-                                                )
+                                            if (item.name == name) {
+                                                withContext(Dispatchers.Main) {
+                                                    modelFlashLight.insertDateAndAlarm(
+                                                        item,
+                                                        calendarDayB,
+                                                        requireContext()
+                                                    )
+                                                }
+                                            } else {
+                                                delay(1000)
+                                                item = db.CourseDao().getAllList().last()
+                                                withContext(Dispatchers.Main) {
+                                                    modelFlashLight.insertDateAndAlarm(
+                                                        item,
+                                                        calendarDayB,
+                                                        requireContext()
+                                                    )
+                                                }
                                             }
+
                                         }
 
+                                    } else {
+                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                            pLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                        }
                                     }
 
-                                } else {
-                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                        pLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                                    }
+
                                 }
-
-
                             }
-                        }
-                    },
-                    null,
-                      model = modelFlashLight, lifecycleOwner = this,pickImageLauncher,true
-                )
+                        },
+                        null,
+                        model = modelFlashLight, lifecycleOwner = this,pickImageLauncher,true
+                    )
+                    else Toast.makeText(
+                        requireContext(),
+                        "Вы выбрали время которое уже прошло",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 else Toast.makeText(
                     requireContext(),
-                    "Вы выбрали время которое уже прошло",
+                    "Отображение дел в календаре доступно в PREMIUM версии",
                     Toast.LENGTH_SHORT
                 ).show()
-            else Toast.makeText(
-                requireContext(),
-                "Отображение дел в календаре доступно в PREMIUM версии",
-                Toast.LENGTH_SHORT
-            ).show()
+            }
         }
+        else {
+            binding.imBAddCalendar.setOnClickListener {
+                modelFlashLight.getItemMaxSort()
+                if (modelFlashLight.getPremium())
+                    if (getDateNow(calendarDayB) >= getDateNow(calendarZero)) DialogItemList.alertItem(
+                        requireContext(),
+                        object : DialogItemList.Listener {
+                            override fun onClickItem(
+                                name: String,
+                                action: Int?,
+                                id: Int?,
+                                desc: String?,
+                                uri: String?,
+                                category: String?
+                            ) {
+                                var item: Item
+                                var permanentFile = ""
+                                if(uri!!.isNotEmpty()){
+                                    permanentFile =
+                                        modelFlashLight.saveImagePermanently(requireContext(), uri.toUri()).toString()
+                                }
+                                modelFlashLight.insertItem(
+                                    Item(
+                                        null,
+                                        name,
+                                        category = category.toString(),
+                                        desc = desc,
+                                        alarmTime = calendarDayB.timeInMillis,
+                                        alarmText = permanentFile,
+                                        sort = modelFlashLight.maxSorted.value?:0
+                                    )
+                                )
+
+
+                                if (action == ALARM) {
+                                    if (view.let {
+                                            Const.isPermissionGranted(
+                                                it.context,
+                                                Manifest.permission.POST_NOTIFICATIONS
+                                            )
+                                        }) {
+                                        CoroutineScope(Dispatchers.IO).launch {
+                                            delay(500)
+                                            item = db.CourseDao().getAllList().last()
+                                            if (item.name == name) {
+                                                withContext(Dispatchers.Main) {
+                                                    modelFlashLight.insertDateAndAlarm(
+                                                        item,
+                                                        calendarDayB,
+                                                        requireContext()
+                                                    )
+                                                }
+                                            } else {
+                                                delay(1000)
+                                                item = db.CourseDao().getAllList().last()
+                                                withContext(Dispatchers.Main) {
+                                                    modelFlashLight.insertDateAndAlarm(
+                                                        item,
+                                                        calendarDayB,
+                                                        requireContext()
+                                                    )
+                                                }
+                                            }
+
+                                        }
+
+                                    } else {
+                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                            pLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                        }
+                                    }
+
+
+                                }
+                            }
+                        },
+                        null,
+                        model = modelFlashLight, lifecycleOwner = this,pickImageLauncher,true
+                    )
+                    else Toast.makeText(
+                        requireContext(),
+                        "Вы выбрали время которое уже прошло",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                else Toast.makeText(
+                    requireContext(),
+                    "Отображение дел в календаре доступно в PREMIUM версии",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+
 
 
     }
 
     override fun onResume() {
         super.onResume()
-        calendarZero = Calendar.getInstance()
-        if (modelFlashLight.getPremium()) {
+        if (pref.getTheme() == THEME_ZABOR) {
+            calendarZero = Calendar.getInstance()
+            if (modelFlashLight.getPremium()) {
 
-            modelFlashLight.getListItemByCalendar(getDateNow(calendarDayB))
-
-            modelFlashLight.listItemLDCalendar.observe(viewLifecycleOwner) {
-                scrollInStartAdapter()
-                adapter.submitList(it)
-                if (it.isNotEmpty()) binding.tvDela.visibility = View.GONE
-                else binding.tvDela.visibility = View.VISIBLE
-            }
-            db.CourseDao().getAll().observe(viewLifecycleOwner) { list ->
-                val calendarDays = mutableListOf<CalendarDay>()
                 modelFlashLight.getListItemByCalendar(getDateNow(calendarDayB))
 
-                list.forEach { item ->
-                    if (item.changeAlarm || !item.change) {
-                        calendar = Calendar.getInstance()
-                        calendar.timeInMillis = item.alarmTime
-                        calendarDay = CalendarDay(calendar)
-                        calendarDay.imageResource = R.drawable.ic_work
-                        calendarDays.add(calendarDay)
-                    }
+                modelFlashLight.listItemLDCalendar.observe(viewLifecycleOwner) {
+                    scrollInStartAdapter()
+                    adapter.submitList(it)
+                    if (it.isNotEmpty()) bindingZabor.tvDela.visibility = View.GONE
+                    else bindingZabor.tvDela.visibility = View.VISIBLE
                 }
-                binding.calendarView.setCalendarDays(calendarDays)
-            }
-            binding.calendarView.setOnCalendarDayClickListener(object : OnCalendarDayClickListener {
-                override fun onClick(calendarDay: CalendarDay) {
-                    calendarDayB = calendarDay.calendar
+                db.CourseDao().getAll().observe(viewLifecycleOwner) { list ->
+                    val calendarDays = mutableListOf<CalendarDay>()
                     modelFlashLight.getListItemByCalendar(getDateNow(calendarDayB))
 
+                    list.forEach { item ->
+                        if (item.changeAlarm || !item.change) {
+                            calendar = Calendar.getInstance()
+                            calendar.timeInMillis = item.alarmTime
+                            calendarDay = CalendarDay(calendar)
+                            calendarDay.imageResource = R.drawable.ic_work
+                            calendarDays.add(calendarDay)
+                        }
+                    }
+                    bindingZabor.calendarView.setCalendarDays(calendarDays)
                 }
+                bindingZabor.calendarView.setOnCalendarDayClickListener(object :
+                    OnCalendarDayClickListener {
+                    override fun onClick(calendarDay: CalendarDay) {
+                        calendarDayB = calendarDay.calendar
+                        modelFlashLight.getListItemByCalendar(getDateNow(calendarDayB))
+
+                    }
 
 
-            })
+                })
 
-        } else Toast.makeText(
-            view?.context,
-            "Отображение дел в календаре доступно в PREMIUM версии",
-            Toast.LENGTH_SHORT
-        ).show()
+            } else Toast.makeText(
+                view?.context,
+                "Отображение дел в календаре доступно в PREMIUM версии",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+        else {
+            calendarZero = Calendar.getInstance()
+            if (modelFlashLight.getPremium()) {
+
+                modelFlashLight.getListItemByCalendar(getDateNow(calendarDayB))
+
+                modelFlashLight.listItemLDCalendar.observe(viewLifecycleOwner) {
+                    scrollInStartAdapter()
+                    adapter.submitList(it)
+                    if (it.isNotEmpty()) binding.tvDela.visibility = View.GONE
+                    else binding.tvDela.visibility = View.VISIBLE
+                }
+                db.CourseDao().getAll().observe(viewLifecycleOwner) { list ->
+                    val calendarDays = mutableListOf<CalendarDay>()
+                    modelFlashLight.getListItemByCalendar(getDateNow(calendarDayB))
+
+                    list.forEach { item ->
+                        if (item.changeAlarm || !item.change) {
+                            calendar = Calendar.getInstance()
+                            calendar.timeInMillis = item.alarmTime
+                            calendarDay = CalendarDay(calendar)
+                            calendarDay.imageResource = R.drawable.ic_work
+                            calendarDays.add(calendarDay)
+                        }
+                    }
+                    binding.calendarView.setCalendarDays(calendarDays)
+                }
+                binding.calendarView.setOnCalendarDayClickListener(object :
+                    OnCalendarDayClickListener {
+                    override fun onClick(calendarDay: CalendarDay) {
+                        calendarDayB = calendarDay.calendar
+                        modelFlashLight.getListItemByCalendar(getDateNow(calendarDayB))
+
+                    }
+
+
+                })
+
+            } else Toast.makeText(
+                view?.context,
+                "Отображение дел в календаре доступно в PREMIUM версии",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
     }
 
     private fun initRcView() {
-        val rcView = binding.rcViewItem
+        if (pref.getTheme() == THEME_ZABOR){
+            val rcView = bindingZabor.rcViewItem
 
-        adapter = ItemListAdapter(
-            onClickListener = itemClickHandler,
-            onOrderChanged = null,
-            touchHelper = null,
-            pref,
-            themeImp
-        )
-        rcView.layoutManager = LinearLayoutManager(requireContext())
-        rcView.adapter = adapter
+            adapter = ItemListAdapter(
+                onClickListener = itemClickHandler,
+                onOrderChanged = null,
+                touchHelper = null,
+                pref,
+                themeImp
+            )
+            rcView.layoutManager = LinearLayoutManager(requireContext())
+            rcView.adapter = adapter
+        }
+        else {
+            val rcView = binding.rcViewItem
+
+            adapter = ItemListAdapter(
+                onClickListener = itemClickHandler,
+                onOrderChanged = null,
+                touchHelper = null,
+                pref,
+                themeImp
+            )
+            rcView.layoutManager = LinearLayoutManager(requireContext())
+            rcView.adapter = adapter
+
+        }
 
 
     } // инициализировал ресайклер
     private fun scrollInStartAdapter(){
-        adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+        if (pref.getTheme() == THEME_ZABOR){
+            adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+                override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                    if (positionStart == 0) {  // Элементы добавились в начало (верх списка)
+                        bindingZabor.rcViewItem.scrollToPosition(0)
+                        adapter.unregisterAdapterDataObserver(this)
+                    }
+                }
+            })
+        }
+        else{adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
             override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
                 if (positionStart == 0) {  // Элементы добавились в начало (верх списка)
                     binding.rcViewItem.scrollToPosition(0)
                     adapter.unregisterAdapterDataObserver(this)
                 }
             }
-        })
+        })}
+
     }
 
 
@@ -279,7 +445,7 @@ class FragmentCalendar : Fragment() {
 
     private fun theme(){
         with(modelFlashLight){
-            with(binding) {
+            with(bindingZabor) {
                 val list = mapOf<Const.Action, Map<View, Int>>(
                     Const.Action.IMAGE_RESOURCE to mapOf(
                         imBAddCalendar to R.drawable.ic_add_zabor
@@ -288,8 +454,10 @@ class FragmentCalendar : Fragment() {
                 )
 
 
-                if (getTheme() == THEME_ZABOR) modelFlashLight.setView(list)
-                setSize(list)
+
+                    modelFlashLight.setView(list)
+                    setSize(list)
+
             }
         }
 

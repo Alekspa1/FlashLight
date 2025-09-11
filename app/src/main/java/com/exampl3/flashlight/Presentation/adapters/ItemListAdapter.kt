@@ -4,7 +4,6 @@ package com.exampl3.flashlight.Presentation.adapters
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -91,17 +90,19 @@ class ItemListAdapter(
                         true -> {
                             imStatus.setImageResource(R.drawable.ic_item_true_zabor)
                             cardView
-                                .setCardBackgroundColor(ContextCompat.getColor(context, R.color.Active))
+                                .setBackgroundResource(R.drawable.button_background_item_category_zabor_true)
                         }
                         false -> {
                             imStatus.setImageResource(R.drawable.ic_item_false_zabor)
                             cardView
-                                .setCardBackgroundColor(ContextCompat.getColor(context, R.color.NoActive))
+                                .setBackgroundResource(R.drawable.button_background_item_category_zabor_false)
                         }
                     }
                     when(item.changeAlarm){
                         true-> {
                             tvAlarm.visibility = View.VISIBLE
+                            cardView
+                                .setBackgroundResource(R.drawable.button_background_item_category_zabor_alarm)
                             imAlarm.setImageResource(R.drawable.ic_alarm_on)
                         }
                         false->{

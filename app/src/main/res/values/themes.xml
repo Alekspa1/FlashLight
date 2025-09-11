@@ -58,7 +58,7 @@
 
     <style name="StyleItem.AlarmZabor">
         <item name="android:textSize">12sp</item>
-        <item name="android:textColor">@color/white</item>
+        <item name="android:textColor">@color/Yellow</item>
     </style>
 
     <style name="StyleMenu">

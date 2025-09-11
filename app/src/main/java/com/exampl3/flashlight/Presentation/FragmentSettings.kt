@@ -29,7 +29,7 @@ import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Const.SIZE_LARGE
 import com.exampl3.flashlight.Const.SIZE_SMALL
 import com.exampl3.flashlight.Const.SIZE_STANDART
-import com.exampl3.flashlight.Domain.toastFun
+import com.exampl3.flashlight.Domain.ToastFun
 import com.exampl3.flashlight.Domain.useCase.SoundPlayer
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -99,7 +99,7 @@ class FragmentSettings : Fragment() {
 
                     })
                 }
-                else toastFun(requireContext(), "Доступно в PREMIUM версии")
+                else ToastFun(requireContext(), "Доступно в PREMIUM версии")
 
             } // Сортировка
 
@@ -132,7 +132,7 @@ class FragmentSettings : Fragment() {
                             }
 
                         }, allSounds, soundPlayer)
-                    } else toastFun(requireContext(), "Доступно в PREMIUM версии")
+                    } else ToastFun(requireContext(), "Доступно в PREMIUM версии")
 
                 } else {
                     val permissionsToRequest = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
