@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -18,6 +19,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.lifecycle.asLiveData
+import androidx.navigation.findNavController
+import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Const.AUTHORIZED_RUSTORE
@@ -33,6 +36,7 @@ import com.exampl3.flashlight.Const.SIX_MONTH
 import com.exampl3.flashlight.Presentation.adapters.VpAdapter
 import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Data.Room.ListCategory
+import com.exampl3.flashlight.Domain.LogText
 import com.exampl3.flashlight.Presentation.adapters.ListMenuAdapter
 import com.exampl3.flashlight.R
 import com.exampl3.flashlight.databinding.ActivityMainBinding
@@ -55,6 +59,7 @@ import ru.rustore.sdk.billingclient.usecase.PurchasesUseCase
 import java.util.Calendar
 import java.util.UUID
 import javax.inject.Inject
+import kotlin.system.exitProcess
 
 
 @AndroidEntryPoint
@@ -65,9 +70,33 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
+        setupBackButtonHandler()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-}
+
+    }
+
+    private fun setupBackButtonHandler() {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                val navController = findNavController(R.id.fragmentContainerView2)
+                val currentFragment = navController.currentDestination?.id
+
+                // Список фрагментов где нужно сворачивать приложение
+                val fragmentsToMinimize = setOf(
+                    R.id.fragmentMain,
+                )
+
+                if (currentFragment in fragmentsToMinimize) {
+                    // Сворачиваем приложение
+                    moveTaskToBack(true)
+                } else {
+                    // Стандартное поведение - назад по навигации
+                    navController.popBackStack()
+                }
+            }
+        })
+    }
 }
 
