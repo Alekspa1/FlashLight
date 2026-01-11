@@ -153,7 +153,8 @@ object DialogItemList {
             input2 = editText2.text.toString()
             if (item == null) {
                 if (input1.isEmpty()) {
-                    Toast.makeText(context, "Название не должно быть пустым", Toast.LENGTH_SHORT).show()
+                    // Toast.makeText(context, "Название не должно быть пустым", Toast.LENGTH_SHORT).show()
+                    listener.onClickItem("(Без названия)", null, null, input2.trim(), uriString, category)
                 } else {
                     listener.onClickItem(input1.trim(), null, null, input2.trim(), uriString, category)
                     dialog.dismiss()
@@ -169,7 +170,9 @@ object DialogItemList {
             input2 = editText2.text.toString()
             if (item == null) {
                 if (input1.isEmpty()) {
-                    Toast.makeText(context, "Название не должно быть пустым", Toast.LENGTH_SHORT).show()
+                   // Toast.makeText(context, "Название не должно быть пустым", Toast.LENGTH_SHORT).show()
+                    listener.onClickItem("(Без названия)", Const.ALARM, null, input2.trim(), uriString, category)
+                    dialog.dismiss()
                 } else {
                     listener.onClickItem(input1.trim(), Const.ALARM, null, input2.trim(), uriString, category)
                     dialog.dismiss()
@@ -298,16 +301,17 @@ object DialogItemList {
 
     }
 
-    fun insertAlarmSound(context: Context, click: ActioinUri, listSound: Map<String, Uri>, soundPlayer: SoundPlayer) {
+    fun insertAlarmSound(context: Context, click: ActioinUri, listSound: Map<String, Uri>, soundPlayer: SoundPlayer, uri: Uri) {
 
         val arrayListSoundName = listSound.keys.toTypedArray()
         val arrayListSoundUri = listSound.values.toTypedArray()
+        val currentIndex = arrayListSoundUri.indexOf(uri)
         var result = 0
         val builred = AlertDialog.Builder(context)
 
         builred.setTitle("Выберите")
         builred.setSingleChoiceItems(
-            arrayListSoundName, 0
+            arrayListSoundName, currentIndex
         ) { e, id ->
             soundPlayer.playSound(arrayListSoundUri[id])
             result = id
@@ -332,14 +336,14 @@ object DialogItemList {
     }
 
 
-    fun settingSort(context: Context, sort: ActionInt) {
+    fun settingSort(context: Context, sort: ActionInt, index: Int) {
 
         var result = 0
         val builred = AlertDialog.Builder(context)
 
         builred.setTitle("Выберите тип сортировки")
         builred.setSingleChoiceItems(
-            listSort, 0
+            listSort, index
         ) { _, id ->
             result = id
         }
@@ -359,14 +363,14 @@ object DialogItemList {
 
     }
 
-    fun settingTheme(context: Context, sort: ActionInt) {
+    fun settingTheme(context: Context, sort: ActionInt, index: Int) {
 
         var result = 0
         val builred = AlertDialog.Builder(context)
 
         builred.setTitle("Выберите тему")
         builred.setSingleChoiceItems(
-            listTheme, 0
+            listTheme, index
         ) { _, id ->
             result = id
         }
@@ -386,13 +390,13 @@ object DialogItemList {
 
     }
 
-    fun settingSize(context: Context, sort: ActionInt) {
+    fun settingSize(context: Context, sort: ActionInt, index: Int) {
         var result = 0
         val builred = AlertDialog.Builder(context)
 
         builred.setTitle("Выберите размер текста")
         builred.setSingleChoiceItems(
-            listSize, 0
+            listSize,index
         ) { _, id ->
             result = id
         }

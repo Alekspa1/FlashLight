@@ -113,8 +113,10 @@ class ViewModelFlashLight @Inject constructor(
     fun getTheme() = settingsPref.getTheme()
 
     fun saveSize(value: String) = settingsPref.saveSize(value)
+    fun getSize() = settingsPref.getSize()
 
     fun saveUriAlarm(uri: Uri) = settingsPref.saveUriAlarm(uri)
+    fun getUriAlarm() = settingsPref.getUriAlarm()
 
 
 

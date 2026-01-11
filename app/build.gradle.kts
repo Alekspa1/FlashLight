@@ -1,7 +1,10 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("kotlin-kapt")
+    id("com.google.devtools.ksp")
+    id("com.google.dagger.hilt.android")
     id ("dagger.hilt.android.plugin")
 }
 
@@ -13,12 +16,12 @@ android {
         applicationId = "com.exampl3.flashlight"
         minSdk = 26
         targetSdk = 36
-        versionCode = 29
-        versionName = "9.2"
+        versionCode = 32
+        versionName = "9.5"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-    kapt {
-        arguments {arg("room.schemaLocation", "$projectDir/schemas")}
+    ksp {
+        arg("room.schemaLocation", "$projectDir/schemas")
     }
 
     buildTypes {
@@ -31,12 +34,14 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "1.8"
-        freeCompilerArgs = listOf("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
+            freeCompilerArgs = listOf("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
+        }
     }
     buildFeatures {
         viewBinding = true
@@ -47,26 +52,26 @@ dependencies {
     implementation("ru.rustore.sdk:appupdate:7.0.0")
     implementation("com.applandeo:material-calendar-view:1.9.2")
     implementation ("com.github.bumptech.glide:glide:5.0.5")
-    implementation("androidx.navigation:navigation-fragment-ktx:2.9.5")
-    implementation("androidx.navigation:navigation-ui-ktx:2.9.5")
+    implementation("androidx.navigation:navigation-fragment-ktx:2.9.6")
+    implementation("androidx.navigation:navigation-ui-ktx:2.9.6")
     implementation("androidx.fragment:fragment:1.8.9")
     implementation("androidx.cardview:cardview:1.0.0")
 
-    kapt ("com.github.bumptech.glide:compiler:5.0.5")
+    ksp ("com.github.bumptech.glide:compiler:5.0.5")
 
-    implementation("com.yandex.android:mobileads:7.16.1")
-    implementation("com.yandex.ads.mediation:mobileads-mytarget:5.27.3.0")
+    implementation("com.yandex.android:mobileads:7.18.1")
+
 
     implementation("ru.rustore.sdk:billingclient:7.0.0")
     implementation ("com.google.dagger:hilt-android:2.57.2")
-    implementation("androidx.activity:activity-ktx:1.11.0")
-    kapt ("com.google.dagger:hilt-compiler:2.57.2")
+    implementation("androidx.activity:activity-ktx:1.12.2")
+    ksp ("com.google.dagger:hilt-compiler:2.57.2")
 
-    implementation ("androidx.room:room-runtime:2.8.3")
-    kapt ("androidx.room:room-compiler:2.8.3")
-    implementation ("androidx.room:room-ktx:2.8.3")
+    implementation ("androidx.room:room-runtime:2.8.4")
+    ksp ("androidx.room:room-compiler:2.8.4")
+    implementation ("androidx.room:room-ktx:2.8.4")
 
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.9.4")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.10.0")
     implementation("androidx.fragment:fragment-ktx:1.8.9")
 
 
