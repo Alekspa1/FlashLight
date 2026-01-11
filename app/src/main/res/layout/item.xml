@@ -74,7 +74,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="TextView"
                 android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="@+id/tvDesc"
                 app:layout_constraintStart_toStartOf="@+id/tvDesc"

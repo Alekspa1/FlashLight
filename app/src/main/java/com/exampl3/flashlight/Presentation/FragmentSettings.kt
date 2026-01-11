@@ -88,6 +88,11 @@ class FragmentSettings : Fragment() {
 
             bSetSort.setOnClickListener {
                 if (modelFlashLight.getPremium()){
+                    val index = when(modelFlashLight.getSort()){
+                        SORT_STANDART -> 0
+                        SORT_USER ->  1
+                        else -> 0
+                    }
                     DialogItemList.settingSort(requireActivity(), object : DialogItemList.ActionInt {
                         override fun onClick(action: Int) {
                             when (action) {
@@ -97,13 +102,18 @@ class FragmentSettings : Fragment() {
                             Toast.makeText(requireContext(), "Изменения вступят в силу после перезапуска приложения", Toast.LENGTH_SHORT).show()
                         }
 
-                    })
+                    },index)
                 }
                 else ToastFun(requireContext(), "Доступно в PREMIUM версии")
 
             } // Сортировка
 
             bSetTheme.setOnClickListener {
+                val index = when(modelFlashLight.getTheme()){
+                    THEME_FUTURE -> 0
+                    THEME_ZABOR ->  1
+                    else -> 0
+                }
                 DialogItemList.settingTheme(requireActivity(), object : DialogItemList.ActionInt {
                     override fun onClick(action: Int) {
                         when (action) {
@@ -113,7 +123,7 @@ class FragmentSettings : Fragment() {
                         Toast.makeText(requireContext(), "Изменения вступят в силу после перезапуска приложения", Toast.LENGTH_SHORT).show()
                     }
 
-                })
+                }, index)
             } // Тема
 
             bAlarm.setOnClickListener {
@@ -131,7 +141,7 @@ class FragmentSettings : Fragment() {
                                 modelFlashLight.saveUriAlarm(uri)
                             }
 
-                        }, allSounds, soundPlayer)
+                        }, allSounds, soundPlayer, modelFlashLight.getUriAlarm()?.toUri() ?: "".toUri())
                     } else ToastFun(requireContext(), "Доступно в PREMIUM версии")
 
                 } else {
@@ -148,6 +158,12 @@ class FragmentSettings : Fragment() {
             } // Звук будильника
 
             bSize.setOnClickListener {
+                val index = when(modelFlashLight.getSize()){
+                    SIZE_SMALL -> 0
+                    SIZE_STANDART ->  1
+                    SIZE_LARGE ->  2
+                    else -> 0
+                }
                 DialogItemList.settingSize(requireActivity(), object : DialogItemList.ActionInt {
                     override fun onClick(action: Int) {
                         when (action) {
@@ -158,7 +174,7 @@ class FragmentSettings : Fragment() {
                         Toast.makeText(requireContext(), "Изменения вступят в силу после перезапуска приложения", Toast.LENGTH_SHORT).show()
                     }
 
-                })
+                }, index)
             } // Размер текста
 
             bFaq.setOnClickListener {
