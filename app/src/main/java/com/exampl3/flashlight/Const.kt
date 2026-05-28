@@ -13,6 +13,7 @@ object Const {
     const val AUTHORIZED_RUSTORE = "rustore://auth/"
     const val APP_GALERY = "https://flashlightandtodolist.drru.agconnect.link/d6zW"
     const val PREMIUM_KEY = "premium_KEY"
+    const val FIRST_ALARM = "FIRST_ALARM"
     private val calendar: Calendar = Calendar.getInstance()
     private val dayInMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
     const val BANER = "R-M-4702196-1"

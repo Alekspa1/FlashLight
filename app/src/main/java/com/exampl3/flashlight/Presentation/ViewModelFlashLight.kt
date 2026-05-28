@@ -44,6 +44,9 @@ class ViewModelFlashLight @Inject constructor(
     fun savePremium(flag: Boolean) = pref.savePremium(flag)
     fun getPremium() = pref.getPremium()
 
+    fun saveFirstAlarm(flag: Boolean) = pref.saveFirstAlarm(flag)
+    fun isFirstAlarm() = pref.isFirstAlarm()
+
     fun getAllCategories(onResult: (List<String>) -> Unit, item: Item?,calendar: Boolean) {
         val listCategory = mutableListOf("Повседневные")
         viewModelScope.launch {

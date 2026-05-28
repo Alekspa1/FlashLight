@@ -33,6 +33,13 @@ class SharedPreferenceImpl @Inject constructor(
         editPremium.apply()
     }
 
+    fun isFirstAlarm(): Boolean = prefPremium.getBoolean(Const.FIRST_ALARM, true)
+
+    fun saveFirstAlarm(flag: Boolean) {
+        editPremium.putBoolean(Const.FIRST_ALARM, flag)
+        editPremium.apply()
+    }
+
 
 
     private val prefNotebook: SharedPreferences =
