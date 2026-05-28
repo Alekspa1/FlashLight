@@ -23,7 +23,7 @@ import java.util.Date
 import java.util.Locale
 
 class ItemListAdapter(
-    private val onClickListener: ItemClickHandler,
+    private val itemClickHandler: ItemClickHandler,
     private val onOrderChanged: ((List<Item>) -> Unit)?,
     var touchHelper: ItemTouchHelper?,
     val settingPref: SettingsSharedPreference,
@@ -32,7 +32,6 @@ class ItemListAdapter(
 
     class ViewHolder(view: View,private val touchHelper: ItemTouchHelper?,val settingPref: SettingsSharedPreference, val theme: ThemeImp) : RecyclerView.ViewHolder(view) {
         private val binding = ItemBinding.bind(view)
-        private val context = view.context
 
 
         init {
@@ -42,7 +41,7 @@ class ItemListAdapter(
             }
         }
 
-        fun bind(item: Item, onClick: ItemClickHandler) {
+        fun bind(item: Item, itemClickHandler: ItemClickHandler) {
             with(binding) {
 
                 tvTextItem.text = item.name
@@ -116,23 +115,23 @@ class ItemListAdapter(
                 theme.setSizeTextIsList(listTextView)
 
                 cardView.setOnClickListener {
-                    onClick.onClick(item, Const.CHANGE_ITEM)
+                    itemClickHandler.onClick(item, Const.CHANGE_ITEM)
                 }
                 imStatus.setOnClickListener {
-                    onClick.onClick(item, Const.CHANGE)
+                    itemClickHandler.onClick(item, Const.CHANGE)
                 }
                 imDeleteList.setOnClickListener {
-                    onClick.onClick(item, Const.DELETE)
+                    itemClickHandler.onClick(item, Const.DELETE)
                 }
                 imAlarm.setOnClickListener {
-                    onClick.onClick(item, Const.ALARM)
+                    itemClickHandler.onClick(item, Const.ALARM)
                 }
                 imAlarm.setOnLongClickListener {
-                    onClick.onLongClick(item)
+                    itemClickHandler.onLongClick(item)
                     true
                 }
                 imPhotoView.setOnClickListener {
-                    onClick.onClick(item, Const.IMAGE )
+                    itemClickHandler.onClick(item, Const.IMAGE )
                 }
             }
         }
@@ -225,7 +224,7 @@ class ItemListAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(getItem(position), onClickListener)
+        holder.bind(getItem(position), itemClickHandler)
     }
 
     override fun onItemMove(fromPosition: Int, toPosition: Int) {

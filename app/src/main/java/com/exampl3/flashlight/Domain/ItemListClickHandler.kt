@@ -30,7 +30,7 @@ class ItemListClickHandler(
   fun onClick(item: ListCategory, action: Int) {
         when (action) {
             DELETE -> {
-                DialogItemList.AlertDelete(
+                DialogItemList.alertDelete(
                     context,
                     object : DialogItemList.ActionTrueOrFalse {
                         override fun onClick(flag: Boolean) {
@@ -50,7 +50,7 @@ class ItemListClickHandler(
                     })
             } // Удаление элемента
             CHANGE_ITEM -> {
-                DialogItemList.AlertList(
+                DialogItemList.alertList(
                     context,
                     object : DialogItemList.Listener {
                         override fun onClickItem(

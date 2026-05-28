@@ -13,6 +13,7 @@ import com.exampl3.flashlight.Const.CHANGE_ITEM
 import com.exampl3.flashlight.Const.DELETE
 import com.exampl3.flashlight.Const.IMAGE
 import com.exampl3.flashlight.Data.Room.Item
+import com.exampl3.flashlight.Domain.useCase.PermissionUseCase
 import com.exampl3.flashlight.Presentation.DialogItemList
 import com.exampl3.flashlight.Presentation.ViewModelFlashLight
 
@@ -23,7 +24,8 @@ class ItemClickHandler (
     private val modelFlashLight: ViewModelFlashLight,
     private val lifecycleOwner: LifecycleOwner,
     private val pickImageLauncher: ActivityResultLauncher<String>,
-    private val pLauncher : ActivityResultLauncher<String>
+    private val pLauncher : ActivityResultLauncher<String>,
+    private val permissionUseCase: PermissionUseCase
 ) {
 
 
@@ -48,7 +50,7 @@ class ItemClickHandler (
                     modelFlashLight.deleteItem(item)
                     modelFlashLight.changeAlarm(item, Const.DELETE_ALARM)
                 } else {
-                    DialogItemList.AlertDelete(
+                    DialogItemList.alertDelete(
                         context,
                         object : DialogItemList.ActionTrueOrFalse {
                             override fun onClick(flag: Boolean) {
@@ -63,13 +65,23 @@ class ItemClickHandler (
 
             ALARM -> {
                 if (Const.isPermissionGranted(context, Manifest.permission.POST_NOTIFICATIONS)) {
+                    // На любом Android: если разрешение есть (или версия старая, где оно дано сразу)
                     modelFlashLight.insertDateAndAlarm(item, null, context)
                 } else {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        // Передайте launcher извне или сделайте его свойством
-                        // например, через конструктор
-                        // тут пример:
-                         pLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        // Android 13+: запускаем вашу цепочку через диалог
+                        DialogItemList.permissonAlert(context, permissionUseCase, pLauncher)
+                    } else {
+                        // Android 12 и ниже: уведомления просить не нужно, но "китайцев" настроить стоит!
+                        if (permissionUseCase.isChinesePhone()) {
+                            context.startActivity(permissionUseCase.getAutostartIntent(context))
+                        }
+                        if (permissionUseCase.isBatteryOptimizationEnabled(context)) {
+                            context.startActivity(permissionUseCase.getBatteryOptimizationIntent(context))
+                        }
+
+                        // И сразу ставим будильник, так как уведомления на старых ОС активны по умолчанию
+                        modelFlashLight.insertDateAndAlarm(item, null, context)
                     }
                 }
             }
@@ -132,4 +144,7 @@ class ItemClickHandler (
     fun onLongClick(item: Item){
         modelFlashLight.insertStringAndAlarm(item, context, false)
     }
+
+
+
 }

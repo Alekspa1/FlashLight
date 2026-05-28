@@ -1,0 +1,33 @@
+name: Code Quality Check
+
+# Робот просыпается при каждом push или Pull Request в ветку main или master
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  check-code:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Скачиваем код репозитория
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 2. Устанавливаем окружение Java
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      # 3. Даем права на выполнение Gradle локально на сервере
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # 4. ТА САМАЯ ОДНА СТРОКА: Запускает синтаксис-чекер, линтеры и Unit-тесты
+      - name: Run Quality Checks and Unit Tests
+        run: ./gradlew check

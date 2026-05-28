@@ -16,6 +16,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -29,6 +30,7 @@ import com.exampl3.flashlight.Data.Room.Item
 import com.exampl3.flashlight.Data.ThemeImp
 import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
 import com.exampl3.flashlight.Domain.ItemClickHandler
+import com.exampl3.flashlight.Domain.useCase.PermissionUseCase
 import com.exampl3.flashlight.Presentation.adapters.ItemListAdapter
 import com.exampl3.flashlight.Presentation.adapters.draganddrop.DragItemTouchHelperCallback
 import com.exampl3.flashlight.R
@@ -57,8 +59,11 @@ open class FragmentList : Fragment() {
 
     @Inject
     lateinit var voiceIntent: Intent
+    @Inject
+    lateinit var permissionUseCase: PermissionUseCase
     private val modelFlashLight: ViewModelFlashLight by activityViewModels()
     private lateinit var pLauncher: ActivityResultLauncher<String>
+
     private lateinit var itemClickHandler : ItemClickHandler
 
 
@@ -83,13 +88,17 @@ open class FragmentList : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        pLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
+        pLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {isGranted->
+
+
+        }
         itemClickHandler = ItemClickHandler(
             context = requireContext(),
             modelFlashLight = modelFlashLight,
             lifecycleOwner = viewLifecycleOwner,
             pickImageLauncher = pickImageLauncher,
-            pLauncher = pLauncher
+            pLauncher = pLauncher,
+            permissionUseCase = permissionUseCase
         )
         theme()
         initRcView()
@@ -165,7 +174,7 @@ open class FragmentList : Fragment() {
                                     Manifest.permission.POST_NOTIFICATIONS
                                 )
                             }) {
-                            CoroutineScope(Dispatchers.IO).launch {
+                            viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
                                 delay(500)
                                 item = db.CourseDao().getAllList().last()
                                 if (item.name == name) {
@@ -192,7 +201,18 @@ open class FragmentList : Fragment() {
 
                         } else {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                pLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                // Android 13+: запускаем вашу цепочку через диалог
+                                DialogItemList.permissonAlert(requireContext(), permissionUseCase, pLauncher)
+                            } else {
+                                // Android 12 и ниже: уведомления просить не нужно, но "китайцев" настроить стоит!
+                                if (permissionUseCase.isChinesePhone()) {
+                                    startActivity(permissionUseCase.getAutostartIntent(requireContext()))
+                                }
+                                if (permissionUseCase.isBatteryOptimizationEnabled(requireContext())) {
+                                    startActivity(permissionUseCase.getBatteryOptimizationIntent(requireContext()))
+                                }
+
+
                             }
                         }
 
@@ -223,7 +243,7 @@ open class FragmentList : Fragment() {
         val rcView = binding.rcView
 
         adapter = ItemListAdapter(
-            onClickListener = itemClickHandler,
+            itemClickHandler = itemClickHandler,
             onOrderChanged = { updatedList ->
                 modelFlashLight.updateItemsOrder(updatedList)
             },

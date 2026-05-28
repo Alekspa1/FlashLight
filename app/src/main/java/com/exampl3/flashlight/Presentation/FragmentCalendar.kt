@@ -27,6 +27,7 @@ import com.exampl3.flashlight.Data.Room.Item
 import com.exampl3.flashlight.Data.ThemeImp
 import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
 import com.exampl3.flashlight.Domain.ItemClickHandler
+import com.exampl3.flashlight.Domain.useCase.PermissionUseCase
 
 import com.exampl3.flashlight.Presentation.adapters.ItemListAdapter
 import com.exampl3.flashlight.R
@@ -56,6 +57,8 @@ class FragmentCalendar : Fragment() {
     lateinit var pref: SettingsSharedPreference
     @Inject
     lateinit var themeImp: ThemeImp
+    @Inject
+    lateinit var permissionUseCase: PermissionUseCase
 
     private lateinit var calendar: Calendar
     private lateinit var calendarZero: Calendar
@@ -95,7 +98,8 @@ class FragmentCalendar : Fragment() {
             modelFlashLight = modelFlashLight,
             lifecycleOwner = viewLifecycleOwner,
             pickImageLauncher = pickImageLauncher,
-            pLauncher = pLauncher
+            pLauncher = pLauncher,
+            permissionUseCase = permissionUseCase
         )
         initRcView()
         calendarDayB = Calendar.getInstance()
@@ -384,7 +388,7 @@ class FragmentCalendar : Fragment() {
             val rcView = bindingZabor.rcViewItem
 
             adapter = ItemListAdapter(
-                onClickListener = itemClickHandler,
+                itemClickHandler = itemClickHandler,
                 onOrderChanged = null,
                 touchHelper = null,
                 pref,
@@ -397,7 +401,7 @@ class FragmentCalendar : Fragment() {
             val rcView = binding.rcViewItem
 
             adapter = ItemListAdapter(
-                onClickListener = itemClickHandler,
+                itemClickHandler = itemClickHandler,
                 onOrderChanged = null,
                 touchHelper = null,
                 pref,

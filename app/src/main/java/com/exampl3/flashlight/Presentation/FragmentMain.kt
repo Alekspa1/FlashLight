@@ -13,7 +13,6 @@ import androidx.core.net.toUri
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.asLiveData
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -41,7 +40,6 @@ import com.yandex.mobile.ads.banner.BannerAdSize
 import com.yandex.mobile.ads.banner.BannerAdView
 import com.yandex.mobile.ads.common.AdRequest
 import dagger.hilt.android.AndroidEntryPoint
-import ru.rustore.sdk.appupdate.manager.factory.RuStoreAppUpdateManagerFactory
 import ru.rustore.sdk.billingclient.RuStoreBillingClient
 import ru.rustore.sdk.billingclient.RuStoreBillingClientFactory
 import ru.rustore.sdk.billingclient.model.product.Product
@@ -98,6 +96,7 @@ class FragmentMain : Fragment() {
         theme()
         pLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
 
+
         if (!modelFlashLight.getPremium()) initYaBaner()
 
         with(binding) {
@@ -134,7 +133,7 @@ class FragmentMain : Fragment() {
 
             imBAddMenu.setOnClickListener {
                 if (modelFlashLight.getPremium()) {
-                    DialogItemList.AlertList(requireActivity(), object : DialogItemList.Listener {
+                    DialogItemList.alertList(requireActivity(), object : DialogItemList.Listener {
                         override fun onClickItem(
                             name: String,
                             action: Int?,
@@ -169,6 +168,7 @@ class FragmentMain : Fragment() {
         }
 
     }
+
 
     private fun initYaBaner() {
         bannerAd = BannerAdView(requireActivity())

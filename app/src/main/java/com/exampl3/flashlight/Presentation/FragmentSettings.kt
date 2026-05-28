@@ -30,6 +30,7 @@ import com.exampl3.flashlight.Const.SIZE_LARGE
 import com.exampl3.flashlight.Const.SIZE_SMALL
 import com.exampl3.flashlight.Const.SIZE_STANDART
 import com.exampl3.flashlight.Domain.ToastFun
+import com.exampl3.flashlight.Domain.useCase.PermissionUseCase
 import com.exampl3.flashlight.Domain.useCase.SoundPlayer
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -44,6 +45,8 @@ class FragmentSettings : Fragment() {
 
     @Inject
     lateinit var soundPlayer: SoundPlayer
+    @Inject
+    lateinit var permissionUseCase: PermissionUseCase
 
 
     override fun onCreateView(
@@ -59,6 +62,27 @@ class FragmentSettings : Fragment() {
         theme()
         pLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
         with(binding){
+
+            if (permissionUseCase.isChinesePhone()) {
+                // Показываем кнопку ТОЛЬКО на Xiaomi/Huawei/Honor
+                bAutoStart.visibility = View.VISIBLE
+               bAutoStart.setOnClickListener {
+                    startActivity(permissionUseCase.getAutostartIntent(requireContext()))
+                }
+            } else {
+                // На Samsung, Pixel и других телефонах кнопка будет полностью СКРЫТА
+                bAutoStart.visibility = View.GONE
+            }
+            //АвтоЗапуск
+            bBatareiOptimozation.setOnClickListener {
+                if (permissionUseCase.isBatteryOptimizationEnabled(requireContext())) {
+
+                    val intent = permissionUseCase.getBatteryOptimizationIntent(requireContext())
+                    startActivity(intent)
+                } else Toast.makeText(requireContext(), "Разрешение уже дано", Toast.LENGTH_SHORT).show()
+
+            }
+            //Работа в фоне
 
             bCallbackCard.setOnClickListener {
                 val emailIntent = Intent(Intent.ACTION_SENDTO).apply {

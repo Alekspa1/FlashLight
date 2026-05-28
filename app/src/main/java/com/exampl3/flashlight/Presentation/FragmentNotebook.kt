@@ -102,7 +102,7 @@ class FragmentNotebook : Fragment() {
 
 
     private fun delete(context: Context) {
-        DialogItemList.AlertDelete(context, object : DialogItemList.ActionTrueOrFalse {
+        DialogItemList.alertDelete(context, object : DialogItemList.ActionTrueOrFalse {
             override fun onClick(flag: Boolean) {
                 if (flag) binding.edotebook.setText("")
             }

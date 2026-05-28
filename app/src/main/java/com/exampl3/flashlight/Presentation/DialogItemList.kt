@@ -1,9 +1,11 @@
 package com.exampl3.flashlight.Presentation
 
+import android.Manifest
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
 import android.net.Uri
+import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -18,9 +20,8 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.LifecycleOwner
 import com.bumptech.glide.Glide
 import com.exampl3.flashlight.Const
-import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Data.Room.Item
-import com.exampl3.flashlight.Domain.LogText
+import com.exampl3.flashlight.Domain.useCase.PermissionUseCase
 import com.exampl3.flashlight.Domain.useCase.SoundPlayer
 import com.exampl3.flashlight.R
 
@@ -35,7 +36,7 @@ object DialogItemList {
 
 
 
-    fun AlertList(context: Context, listener: Listener, name: String?) {
+    fun alertList(context: Context, listener: Listener, name: String?) {
         val builder = AlertDialog.Builder(context)
         val inflater = LayoutInflater.from(context)
         val dialogLayout = inflater.inflate(R.layout.dialog_layout_list_item, null)
@@ -233,7 +234,7 @@ object DialogItemList {
     }
 
 
-    fun AlertDelete(context: Context, delete: ActionTrueOrFalse) {
+    fun alertDelete(context: Context, delete: ActionTrueOrFalse) {
         val builred = AlertDialog.Builder(context)
         val dialog = builred.create()
         dialog.setTitle("Вы уверены что хотите это удалить?")
@@ -429,6 +430,33 @@ object DialogItemList {
         }
         dialog.show()
 
+    }
+
+    fun permissonAlert(context: Context,permissionUseCase: PermissionUseCase,pLauncher: ActivityResultLauncher<String>){
+        AlertDialog.Builder(context)
+            .setTitle("Настройка стабильной работы")
+            .setMessage("Для точной работы будильника необходимо предоставить приложению несколько разрешений. Сейчас откроются системные настройки.")
+            .setPositiveButton("Далее") { _, _ ->
+                // Начинаем цепочку интентов:
+
+                // ШАГ 1: Автозапуск (только для китайцев)
+                if (permissionUseCase.isChinesePhone()) {
+                    context.startActivity(permissionUseCase.getAutostartIntent(context))
+                }
+
+                // ШАГ 2: Батарея (для всех, у кого включена оптимизация)
+                if (permissionUseCase.isBatteryOptimizationEnabled(context)) {
+                    context.startActivity(permissionUseCase.getBatteryOptimizationIntent(context))
+                }
+
+                // ШАГ 3: Финальный аккорд — системный запрос уведомлений прямо на экране
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    pLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+            }
+            .setNegativeButton("Отмена", null)
+            .setCancelable(false)
+            .show()
     }
 
     interface Listener {
