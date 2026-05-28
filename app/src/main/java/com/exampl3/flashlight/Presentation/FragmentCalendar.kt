@@ -3,9 +3,7 @@ package com.exampl3.flashlight.Presentation
 
 import android.Manifest
 import android.os.Build
-
 import android.os.Bundle
-
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -28,7 +26,6 @@ import com.exampl3.flashlight.Data.ThemeImp
 import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
 import com.exampl3.flashlight.Domain.ItemClickHandler
 import com.exampl3.flashlight.Domain.useCase.PermissionUseCase
-
 import com.exampl3.flashlight.Presentation.adapters.ItemListAdapter
 import com.exampl3.flashlight.R
 import com.exampl3.flashlight.databinding.FragmentCalendarBinding
@@ -41,8 +38,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Calendar
 import javax.inject.Inject
-import kotlin.Int
-import kotlin.collections.Map
 
 
 @AndroidEntryPoint
@@ -53,10 +48,13 @@ class FragmentCalendar : Fragment() {
 
     @Inject
     lateinit var db: Database
+
     @Inject
     lateinit var pref: SettingsSharedPreference
+
     @Inject
     lateinit var themeImp: ThemeImp
+
     @Inject
     lateinit var permissionUseCase: PermissionUseCase
 
@@ -66,7 +64,7 @@ class FragmentCalendar : Fragment() {
     private lateinit var calendarDayB: Calendar
     private lateinit var adapter: ItemListAdapter
     private lateinit var pLauncher: ActivityResultLauncher<String>
-    private lateinit var itemClickHandler : ItemClickHandler
+    private lateinit var itemClickHandler: ItemClickHandler
     private val pickImageLauncher = registerForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri ->
@@ -80,12 +78,11 @@ class FragmentCalendar : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        if (pref.getTheme() == THEME_ZABOR ) {
+        if (pref.getTheme() == THEME_ZABOR) {
             bindingZabor = FragmentCalendarZaborBinding.inflate(inflater, container, false)
             theme()
             return bindingZabor.root
-        }
-        else binding = FragmentCalendarBinding.inflate(inflater, container, false)
+        } else binding = FragmentCalendarBinding.inflate(inflater, container, false)
         return binding.root
 
     }
@@ -104,7 +101,7 @@ class FragmentCalendar : Fragment() {
         initRcView()
         calendarDayB = Calendar.getInstance()
 
-        if (pref.getTheme() == THEME_ZABOR){
+        if (pref.getTheme() == THEME_ZABOR) {
             bindingZabor.imBAddCalendar.setOnClickListener {
                 modelFlashLight.getItemMaxSort()
                 if (modelFlashLight.getPremium())
@@ -121,9 +118,12 @@ class FragmentCalendar : Fragment() {
                             ) {
                                 var item: Item
                                 var permanentFile = ""
-                                if(uri!!.isNotEmpty()){
+                                if (uri!!.isNotEmpty()) {
                                     permanentFile =
-                                        modelFlashLight.saveImagePermanently(requireContext(), uri.toUri()).toString()
+                                        modelFlashLight.saveImagePermanently(
+                                            requireContext(),
+                                            uri.toUri()
+                                        ).toString()
                                 }
                                 modelFlashLight.insertItem(
                                     Item(
@@ -133,7 +133,7 @@ class FragmentCalendar : Fragment() {
                                         desc = desc,
                                         alarmTime = calendarDayB.timeInMillis,
                                         alarmText = permanentFile,
-                                        sort = modelFlashLight.maxSorted.value?:0
+                                        sort = modelFlashLight.maxSorted.value ?: 0
                                     )
                                 )
 
@@ -181,7 +181,7 @@ class FragmentCalendar : Fragment() {
                             }
                         },
                         null,
-                        model = modelFlashLight, lifecycleOwner = this,pickImageLauncher,true
+                        model = modelFlashLight, lifecycleOwner = this, pickImageLauncher, true
                     )
                     else Toast.makeText(
                         requireContext(),
@@ -194,8 +194,7 @@ class FragmentCalendar : Fragment() {
                     Toast.LENGTH_SHORT
                 ).show()
             }
-        }
-        else {
+        } else {
             binding.imBAddCalendar.setOnClickListener {
                 modelFlashLight.getItemMaxSort()
                 if (modelFlashLight.getPremium())
@@ -212,9 +211,12 @@ class FragmentCalendar : Fragment() {
                             ) {
                                 var item: Item
                                 var permanentFile = ""
-                                if(uri!!.isNotEmpty()){
+                                if (uri!!.isNotEmpty()) {
                                     permanentFile =
-                                        modelFlashLight.saveImagePermanently(requireContext(), uri.toUri()).toString()
+                                        modelFlashLight.saveImagePermanently(
+                                            requireContext(),
+                                            uri.toUri()
+                                        ).toString()
                                 }
                                 modelFlashLight.insertItem(
                                     Item(
@@ -224,7 +226,7 @@ class FragmentCalendar : Fragment() {
                                         desc = desc,
                                         alarmTime = calendarDayB.timeInMillis,
                                         alarmText = permanentFile,
-                                        sort = modelFlashLight.maxSorted.value?:0
+                                        sort = modelFlashLight.maxSorted.value ?: 0
                                     )
                                 )
 
@@ -272,7 +274,7 @@ class FragmentCalendar : Fragment() {
                             }
                         },
                         null,
-                        model = modelFlashLight, lifecycleOwner = this,pickImageLauncher,true
+                        model = modelFlashLight, lifecycleOwner = this, pickImageLauncher, true
                     )
                     else Toast.makeText(
                         requireContext(),
@@ -286,7 +288,6 @@ class FragmentCalendar : Fragment() {
                 ).show()
             }
         }
-
 
 
     }
@@ -336,8 +337,7 @@ class FragmentCalendar : Fragment() {
                 "Отображение дел в календаре доступно в PREMIUM версии",
                 Toast.LENGTH_SHORT
             ).show()
-        }
-        else {
+        } else {
             calendarZero = Calendar.getInstance()
             if (modelFlashLight.getPremium()) {
 
@@ -384,7 +384,7 @@ class FragmentCalendar : Fragment() {
     }
 
     private fun initRcView() {
-        if (pref.getTheme() == THEME_ZABOR){
+        if (pref.getTheme() == THEME_ZABOR) {
             val rcView = bindingZabor.rcViewItem
 
             adapter = ItemListAdapter(
@@ -396,8 +396,7 @@ class FragmentCalendar : Fragment() {
             )
             rcView.layoutManager = LinearLayoutManager(requireContext())
             rcView.adapter = adapter
-        }
-        else {
+        } else {
             val rcView = binding.rcViewItem
 
             adapter = ItemListAdapter(
@@ -414,8 +413,9 @@ class FragmentCalendar : Fragment() {
 
 
     } // инициализировал ресайклер
-    private fun scrollInStartAdapter(){
-        if (pref.getTheme() == THEME_ZABOR){
+
+    private fun scrollInStartAdapter() {
+        if (pref.getTheme() == THEME_ZABOR) {
             adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
                 override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
                     if (positionStart == 0) {  // Элементы добавились в начало (верх списка)
@@ -424,19 +424,18 @@ class FragmentCalendar : Fragment() {
                     }
                 }
             })
-        }
-        else{adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
-            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
-                if (positionStart == 0) {  // Элементы добавились в начало (верх списка)
-                    binding.rcViewItem.scrollToPosition(0)
-                    adapter.unregisterAdapterDataObserver(this)
+        } else {
+            adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+                override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                    if (positionStart == 0) {  // Элементы добавились в начало (верх списка)
+                        binding.rcViewItem.scrollToPosition(0)
+                        adapter.unregisterAdapterDataObserver(this)
+                    }
                 }
-            }
-        })}
+            })
+        }
 
     }
-
-
 
 
     private fun getDateNow(calendar: Calendar): Long {
@@ -447,21 +446,22 @@ class FragmentCalendar : Fragment() {
         return calendar.timeInMillis
     }
 
-    private fun theme(){
-        with(modelFlashLight){
+    private fun theme() {
+        with(modelFlashLight) {
             with(bindingZabor) {
 
                 val list = mapOf<Const.Action, Map<View, Int>>(
                     Const.Action.IMAGE_RESOURCE to mapOf(
                         imBAddCalendar to R.drawable.ic_add_zabor
                     ),
-                    Const.Action.TEXT_COLOR to mapOf(tvDela to R.color.black )
+                    Const.Action.TEXT_COLOR to mapOf(tvDela to R.color.black)
                 )
 
 
 
-                    modelFlashLight.setView(list)
-                    setSize(list)
+                modelFlashLight.setView(list)
+
+                setSize(list)
 
             }
         }
