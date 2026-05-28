@@ -450,6 +450,7 @@ class FragmentCalendar : Fragment() {
     private fun theme(){
         with(modelFlashLight){
             with(bindingZabor) {
+
                 val list = mapOf<Const.Action, Map<View, Int>>(
                     Const.Action.IMAGE_RESOURCE to mapOf(
                         imBAddCalendar to R.drawable.ic_add_zabor
