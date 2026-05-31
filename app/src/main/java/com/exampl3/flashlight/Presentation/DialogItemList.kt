@@ -30,10 +30,9 @@ object DialogItemList {
 
     private val insertAlarmList =
         arrayOf("Один раз", "Каждый день", "Каждую неделю", "Каждый месяц", "Каждый год")
-    val listTheme = arrayOf("Неоновая","Деревянная")
-    val listSort = arrayOf("По умолчанию","Пользовательская")
+    val listTheme = arrayOf("Неоновая", "Деревянная")
+    val listSort = arrayOf("По умолчанию", "Пользовательская")
     val listSize = arrayOf("Малый", "Обычный", "Крупный")
-
 
 
     fun alertList(context: Context, listener: Listener, name: String?) {
@@ -45,19 +44,27 @@ object DialogItemList {
         edName.setText(name)
         builder.setView(edName)
         builder.setTitle("Введите название категории")
-        if (name == null){
+        if (name == null) {
             edName.requestFocus()
             edName.postDelayed({
-                val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                val imm =
+                    context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                 imm.showSoftInput(edName, InputMethodManager.SHOW_IMPLICIT)
             }, 300)
         }
-        builder.setPositiveButton ("Готово") { dialog, _ ->
+        builder.setPositiveButton("Готово") { dialog, _ ->
             if (name == null) {
                 if (edName.text.isEmpty()) {
                     Toast.makeText(context, "Поле должно быть заполнено", Toast.LENGTH_SHORT).show()
                 } else {
-                    listener.onClickItem(edName.text.toString().trim(), null, null, null, null, null)
+                    listener.onClickItem(
+                        edName.text.toString().trim(),
+                        null,
+                        null,
+                        null,
+                        null,
+                        null
+                    )
                     dialog.dismiss()
                 }
 
@@ -83,19 +90,21 @@ object DialogItemList {
             val image = findViewById<ImageView>(R.id.expandedImage)
 
             Glide.with(context)
-                    .load(uri)
-                    .into(image)
+                .load(uri)
+                .into(image)
 
             image.setOnClickListener { dismiss() } // закрыть по клику
         }
         dialog.show()
     }
 
-    fun alertItem(context: Context, listener: Listener, item: Item?,
-                  model: ViewModelFlashLight,
-                  lifecycleOwner: LifecycleOwner,
-                  pick:  ActivityResultLauncher<String>,
-                  calendar: Boolean) {
+    fun alertItem(
+        context: Context, listener: Listener, item: Item?,
+        model: ViewModelFlashLight,
+        lifecycleOwner: LifecycleOwner,
+        pick: ActivityResultLauncher<String>,
+        calendar: Boolean
+    ) {
 
         val builder = AlertDialog.Builder(context)
         val inflater = LayoutInflater.from(context)
@@ -108,9 +117,11 @@ object DialogItemList {
         val spiner = dialogLayout.findViewById<Spinner>(R.id.spinner2)
         var category = ""
 
-        model.getAllCategories( {
-            list-> spinerInput(spiner,context,
-            {selected -> category = selected},list)
+        model.getAllCategories({ list ->
+            spinerInput(
+                spiner, context,
+                { selected -> category = selected }, list
+            )
         }, item, calendar)
 
         model.uriPhoto.value = ""
@@ -133,7 +144,8 @@ object DialogItemList {
             updateImagePreview(imView, deleteText, addPhoto, "")
             editText1.requestFocus()
             editText1.postDelayed({
-                val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                val imm =
+                    context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                 imm.showSoftInput(editText1, InputMethodManager.SHOW_IMPLICIT)
             }, 200)
         }
@@ -155,14 +167,35 @@ object DialogItemList {
             if (item == null) {
                 if (input1.isEmpty()) {
                     // Toast.makeText(context, "Название не должно быть пустым", Toast.LENGTH_SHORT).show()
-                    listener.onClickItem("(Без названия)", null, null, input2.trim(), uriString, category)
+                    listener.onClickItem(
+                        "(Без названия)",
+                        null,
+                        null,
+                        input2.trim(),
+                        uriString,
+                        category
+                    )
                 } else {
-                    listener.onClickItem(input1.trim(), null, null, input2.trim(), uriString, category)
+                    listener.onClickItem(
+                        input1.trim(),
+                        null,
+                        null,
+                        input2.trim(),
+                        uriString,
+                        category
+                    )
                     dialog.dismiss()
                 }
 
             } else {
-                listener.onClickItem(input1.trim(), null, item.id, input2.trim(), uriString, category)
+                listener.onClickItem(
+                    input1.trim(),
+                    null,
+                    item.id,
+                    input2.trim(),
+                    uriString,
+                    category
+                )
                 dialog.dismiss()
             }
         }
@@ -171,16 +204,37 @@ object DialogItemList {
             input2 = editText2.text.toString()
             if (item == null) {
                 if (input1.isEmpty()) {
-                   // Toast.makeText(context, "Название не должно быть пустым", Toast.LENGTH_SHORT).show()
-                    listener.onClickItem("(Без названия)", Const.ALARM, null, input2.trim(), uriString, category)
+                    // Toast.makeText(context, "Название не должно быть пустым", Toast.LENGTH_SHORT).show()
+                    listener.onClickItem(
+                        "(Без названия)",
+                        Const.ALARM,
+                        null,
+                        input2.trim(),
+                        uriString,
+                        category
+                    )
                     dialog.dismiss()
                 } else {
-                    listener.onClickItem(input1.trim(), Const.ALARM, null, input2.trim(), uriString, category)
+                    listener.onClickItem(
+                        input1.trim(),
+                        Const.ALARM,
+                        null,
+                        input2.trim(),
+                        uriString,
+                        category
+                    )
                     dialog.dismiss()
                 }
 
             } else {
-                listener.onClickItem(input1.trim(), Const.ALARM, item.id, input2.trim(), uriString, category)
+                listener.onClickItem(
+                    input1.trim(),
+                    Const.ALARM,
+                    item.id,
+                    input2.trim(),
+                    uriString,
+                    category
+                )
                 dialog.dismiss()
             }
 
@@ -201,7 +255,12 @@ object DialogItemList {
         spinner.adapter = adapter
 
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+            override fun onItemSelected(
+                parent: AdapterView<*>,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
                 val selectedWord = parent.getItemAtPosition(position) as String
                 onItemSelected(selectedWord)
             }
@@ -302,7 +361,13 @@ object DialogItemList {
 
     }
 
-    fun insertAlarmSound(context: Context, click: ActioinUri, listSound: Map<String, Uri>, soundPlayer: SoundPlayer, uri: Uri) {
+    fun insertAlarmSound(
+        context: Context,
+        click: ActioinUri,
+        listSound: Map<String, Uri>,
+        soundPlayer: SoundPlayer,
+        uri: Uri
+    ) {
 
         val arrayListSoundName = listSound.keys.toTypedArray()
         val arrayListSoundUri = listSound.values.toTypedArray()
@@ -397,7 +462,7 @@ object DialogItemList {
 
         builred.setTitle("Выберите размер текста")
         builred.setSingleChoiceItems(
-            listSize,index
+            listSize, index
         ) { _, id ->
             result = id
         }
@@ -432,27 +497,26 @@ object DialogItemList {
 
     }
 
-    fun permissonAlert(context: Context,permissionUseCase: PermissionUseCase,pLauncher: ActivityResultLauncher<String>){
+    fun permissonAlert(
+        context: Context,
+        permissionUseCase: PermissionUseCase,
+        pLauncher: ActivityResultLauncher<String>
+    ) {
         AlertDialog.Builder(context)
             .setTitle("Настройка стабильной работы")
-            .setMessage("Для точной работы будильника необходимо предоставить приложению несколько разрешений. Сейчас откроются системные настройки.")
+            .setMessage(
+                "Для точной работы будильника необходимо предоставить приложению разрешение на уведомления, " +
+                        "а затем отключить ограничения батареи. После того как вы все разрешите, нажмите на кнопку будильника повторно"
+            )
             .setPositiveButton("Далее") { _, _ ->
-                // Начинаем цепочку интентов:
 
-                // ШАГ 1: Автозапуск (только для китайцев)
-                if (permissionUseCase.isChinesePhone()) {
-                    context.startActivity(permissionUseCase.getAutostartIntent(context))
-                }
-
-                // ШАГ 2: Батарея (для всех, у кого включена оптимизация)
-                if (permissionUseCase.isBatteryOptimizationEnabled(context)) {
-                    context.startActivity(permissionUseCase.getBatteryOptimizationIntent(context))
-                }
-
-                // ШАГ 3: Финальный аккорд — системный запрос уведомлений прямо на экране
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     pLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                } else {
+                    val intent = permissionUseCase.getBatteryOptimizationIntent(context)
+                    context.startActivity(intent)
                 }
+
             }
             .setNegativeButton("Отмена", null)
             .setCancelable(false)
@@ -460,7 +524,14 @@ object DialogItemList {
     }
 
     interface Listener {
-        fun onClickItem(name: String, action: Int?, id: Int?, desc: String?, uri: String?,category : String?)
+        fun onClickItem(
+            name: String,
+            action: Int?,
+            id: Int?,
+            desc: String?,
+            uri: String?,
+            category: String?
+        )
     }
 
     interface ActionTrueOrFalse {
@@ -471,7 +542,7 @@ object DialogItemList {
         fun onClick(action: Int)
     }
 
-    interface ActioinUri{
+    interface ActioinUri {
         fun onClick(uri: Uri)
     }
 

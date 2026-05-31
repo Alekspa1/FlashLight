@@ -4,6 +4,10 @@ import android.app.AlarmManager
 import android.app.Application
 import android.app.PendingIntent
 import android.content.Intent
+import android.net.Uri
+import android.os.Build
+import android.provider.Settings
+import androidx.annotation.RequiresApi
 import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Data.Room.Item
 import com.exampl3.flashlight.Domain.alarmReceiwer.AlarmReceiwer
@@ -19,6 +23,7 @@ class ChangeAlarmImp @Inject constructor(
 
 
     override fun changeAlarm(item: Item, action: Int) {
+
         val alarmtIntent = Intent(context, AlarmReceiwer::class.java).let { intent ->
             intent.putExtra(Const.KEY_INTENT, item)
             intent.setAction(Const.KEY_INTENT_ALARM)

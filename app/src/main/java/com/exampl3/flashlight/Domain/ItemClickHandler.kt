@@ -65,24 +65,11 @@ class ItemClickHandler (
 
             ALARM -> {
                 if (Const.isPermissionGranted(context, Manifest.permission.POST_NOTIFICATIONS)) {
-                    // На любом Android: если разрешение есть (или версия старая, где оно дано сразу)
+                    // Если разрешение на уведомления уже есть — просто ставим будильник
                     modelFlashLight.insertDateAndAlarm(item, null, context)
                 } else {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        // Android 13+: запускаем вашу цепочку через диалог
                         DialogItemList.permissonAlert(context, permissionUseCase, pLauncher)
-                    } else {
-                        // Android 12 и ниже: уведомления просить не нужно, но "китайцев" настроить стоит!
-                        if (permissionUseCase.isChinesePhone()) {
-                            context.startActivity(permissionUseCase.getAutostartIntent(context))
-                        }
-                        if (permissionUseCase.isBatteryOptimizationEnabled(context)) {
-                            context.startActivity(permissionUseCase.getBatteryOptimizationIntent(context))
-                        }
 
-                        // И сразу ставим будильник, так как уведомления на старых ОС активны по умолчанию
-                        modelFlashLight.insertDateAndAlarm(item, null, context)
-                    }
                 }
             }
 

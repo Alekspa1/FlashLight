@@ -1,5 +1,6 @@
 package com.exampl3.flashlight.Domain.useCase
 
+import android.annotation.SuppressLint
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -54,6 +55,7 @@ class PermissionUseCase @Inject constructor() {
     }
 
     // Интент №2: Оптимизация батареи
+    @SuppressLint("BatteryLife")
     fun getBatteryOptimizationIntent(context: Context): Intent {
         return try {
             Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {

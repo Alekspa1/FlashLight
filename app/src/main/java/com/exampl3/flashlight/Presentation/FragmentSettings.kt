@@ -63,17 +63,7 @@ class FragmentSettings : Fragment() {
         pLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
         with(binding){
 
-            if (permissionUseCase.isChinesePhone()) {
-                // Показываем кнопку ТОЛЬКО на Xiaomi/Huawei/Honor
-                bAutoStart.visibility = View.VISIBLE
-               bAutoStart.setOnClickListener {
-                    startActivity(permissionUseCase.getAutostartIntent(requireContext()))
-                }
-            } else {
-                // На Samsung, Pixel и других телефонах кнопка будет полностью СКРЫТА
-                bAutoStart.visibility = View.GONE
-            }
-            //АвтоЗапуск
+
             bBatareiOptimozation.setOnClickListener {
                 if (permissionUseCase.isBatteryOptimizationEnabled(requireContext())) {
 

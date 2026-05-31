@@ -4,8 +4,9 @@ package com.exampl3.flashlight.Presentation
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
-import android.os.Build
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.speech.RecognizerIntent
 import android.view.LayoutInflater
 import android.view.View
@@ -36,7 +37,6 @@ import com.exampl3.flashlight.Presentation.adapters.draganddrop.DragItemTouchHel
 import com.exampl3.flashlight.R
 import com.exampl3.flashlight.databinding.FragmentListBinding
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -51,6 +51,7 @@ open class FragmentList : Fragment() {
 
     @Inject
     lateinit var db: Database
+
     @Inject
     lateinit var pref: SettingsSharedPreference
 
@@ -59,12 +60,13 @@ open class FragmentList : Fragment() {
 
     @Inject
     lateinit var voiceIntent: Intent
+
     @Inject
     lateinit var permissionUseCase: PermissionUseCase
     private val modelFlashLight: ViewModelFlashLight by activityViewModels()
     private lateinit var pLauncher: ActivityResultLauncher<String>
 
-    private lateinit var itemClickHandler : ItemClickHandler
+    private lateinit var itemClickHandler: ItemClickHandler
 
 
     private val pickImageLauncher = registerForActivityResult(
@@ -88,10 +90,26 @@ open class FragmentList : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        pLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {isGranted->
+        val pLauncher =
+            registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+                // Юзер ответил на запрос уведомлений (неважно, разрешил или отказал)
+
+                // Плавный переход к батарее — теперь они не столкнутся лбами!
+                if (permissionUseCase.isBatteryOptimizationEnabled(requireContext())) {
+                    try {
+                        startActivity(permissionUseCase.getBatteryOptimizationIntent(requireContext()))
+                    } catch (e: Exception) {
+                        // Резервный вариант на случай косяков с интентом
+                        val fallbackIntent =
+                            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                data = Uri.fromParts("package", requireContext().packageName, null)
+                            }
+                        startActivity(fallbackIntent)
+                    }
+                }
 
 
-        }
+            }
         itemClickHandler = ItemClickHandler(
             context = requireContext(),
             modelFlashLight = modelFlashLight,
@@ -130,7 +148,7 @@ open class FragmentList : Fragment() {
                                 null,
                                 text[0],
                                 category = modelFlashLight.categoryItemLD.value!!,
-                                sort = modelFlashLight.maxSorted.value?:0,
+                                sort = modelFlashLight.maxSorted.value ?: 0,
                                 alarmTime = 0,
                             )
                         )
@@ -146,80 +164,84 @@ open class FragmentList : Fragment() {
 
         binding.imBAddFrag.setOnClickListener {
             modelFlashLight.getItemMaxSort()
-            DialogItemList.alertItem(requireContext(), object : DialogItemList.Listener {
-                override fun onClickItem(name: String, action: Int?, id: Int?, desc: String?, uri: String?, category: String?) {
-                    var item: Item
-                    var permanentFile = ""
-                    if(uri!!.isNotEmpty()){
-                        permanentFile =
-                            modelFlashLight.saveImagePermanently(requireContext(), uri.toUri()).toString()
-                    }
-                    modelFlashLight.insertItem(
-                        Item(
-                            null,
-                            name,
-                            category = category.toString(),
-                            desc = desc,
-                            alarmTime = 0,
-                            alarmText = permanentFile,
-                            sort = modelFlashLight.maxSorted.value?:0
-                        )
-                    )
-
-
-                    if (action == ALARM) {
-                        if (view.let {
-                                Const.isPermissionGranted(
-                                    it.context,
-                                    Manifest.permission.POST_NOTIFICATIONS
-                                )
-                            }) {
-                            viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-                                delay(500)
-                                item = db.CourseDao().getAllList().last()
-                                if (item.name == name) {
-                                    withContext(Dispatchers.Main) {
-                                        modelFlashLight.insertDateAndAlarm(
-                                            item,
-                                            null,
-                                            requireContext()
-                                        )
-                                    }
-                                } else {
-                                    delay(1000)
-                                    item = db.CourseDao().getAllList().last()
-                                    withContext(Dispatchers.Main) {
-                                        modelFlashLight.insertDateAndAlarm(
-                                            item,
-                                            null,
-                                            requireContext()
-                                        )
-                                    }
-                                }
-
-                            }
-
-                        } else {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                // Android 13+: запускаем вашу цепочку через диалог
-                                DialogItemList.permissonAlert(requireContext(), permissionUseCase, pLauncher)
-                            } else {
-                                // Android 12 и ниже: уведомления просить не нужно, но "китайцев" настроить стоит!
-                                if (permissionUseCase.isChinesePhone()) {
-                                    startActivity(permissionUseCase.getAutostartIntent(requireContext()))
-                                }
-                                if (permissionUseCase.isBatteryOptimizationEnabled(requireContext())) {
-                                    startActivity(permissionUseCase.getBatteryOptimizationIntent(requireContext()))
-                                }
-
-
-                            }
+            DialogItemList.alertItem(
+                requireContext(),
+                object : DialogItemList.Listener {
+                    override fun onClickItem(
+                        name: String,
+                        action: Int?,
+                        id: Int?,
+                        desc: String?,
+                        uri: String?,
+                        category: String?
+                    ) {
+                        var item: Item
+                        var permanentFile = ""
+                        if (uri!!.isNotEmpty()) {
+                            permanentFile =
+                                modelFlashLight.saveImagePermanently(requireContext(), uri.toUri())
+                                    .toString()
                         }
+                        modelFlashLight.insertItem(
+                            Item(
+                                null,
+                                name,
+                                category = category.toString(),
+                                desc = desc,
+                                alarmTime = 0,
+                                alarmText = permanentFile,
+                                sort = modelFlashLight.maxSorted.value ?: 0
+                            )
+                        )
 
 
+                        if (action == ALARM) {
+                            if (view.let {
+                                    Const.isPermissionGranted(
+                                        it.context,
+                                        Manifest.permission.POST_NOTIFICATIONS
+                                    )
+                                }) {
+                                viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+                                    delay(500)
+                                    item = db.CourseDao().getAllList().last()
+                                    if (item.name == name) {
+                                        withContext(Dispatchers.Main) {
+                                            modelFlashLight.insertDateAndAlarm(
+                                                item,
+                                                null,
+                                                requireContext()
+                                            )
+                                        }
+                                    } else {
+                                        delay(1000)
+                                        item = db.CourseDao().getAllList().last()
+                                        withContext(Dispatchers.Main) {
+                                            modelFlashLight.insertDateAndAlarm(
+                                                item,
+                                                null,
+                                                requireContext()
+                                            )
+                                        }
+                                    }
+
+                                }
+
+                            } else {
+                                DialogItemList.permissonAlert(requireContext(),permissionUseCase, pLauncher)
+
+                            }
+
+
+                        }
                     }
-                }
-            }, null,  model = modelFlashLight, lifecycleOwner = this,pick = pickImageLauncher,false)
+                },
+                null,
+                model = modelFlashLight,
+                lifecycleOwner = this,
+                pick = pickImageLauncher,
+                false
+            )
 
         }
 
@@ -266,18 +288,16 @@ open class FragmentList : Fragment() {
                     .reversed().sortedBy { it.change }
                     .reversed().sortedBy { it.changeAlarm }
                     .reversed())
-            }
-            else {
+            } else {
                 adapter.submitList(list.sortedBy { it.sort })
             }
-
 
 
         }
 
     } // инициализировал ресайклер
 
-    private fun scrollInStartAdapter(){
+    private fun scrollInStartAdapter() {
         adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
             override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
                 if (positionStart == 0) {  // Элементы добавились в начало (верх списка)
@@ -294,16 +314,16 @@ open class FragmentList : Fragment() {
         calendarZero = Calendar.getInstance()
     }
 
-    private fun theme(){
-        with(modelFlashLight){
+    private fun theme() {
+        with(modelFlashLight) {
             if (getTheme() == THEME_ZABOR) {
-                with(binding){
+                with(binding) {
                     val list = mapOf<Const.Action, Map<View, Int>>(
                         Const.Action.IMAGE_RESOURCE to mapOf(
                             imBAddFrag to R.drawable.ic_add_zabor,
                             imVoiceFrag to R.drawable.ic_micto_zabor
                         ),
-                        Const.Action.TEXT_STYLE to mapOf(tvCategory to R.style.StyleMenuZabor )
+                        Const.Action.TEXT_STYLE to mapOf(tvCategory to R.style.StyleMenuZabor)
                     )
                     modelFlashLight.setView(list)
                 }
