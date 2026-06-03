@@ -5,6 +5,7 @@ import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.speech.RecognizerIntent
@@ -90,33 +91,14 @@ open class FragmentList : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val pLauncher =
-            registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-                // Юзер ответил на запрос уведомлений (неважно, разрешил или отказал)
-
-                // Плавный переход к батарее — теперь они не столкнутся лбами!
-                if (permissionUseCase.isBatteryOptimizationEnabled(requireContext())) {
-                    try {
-                        startActivity(permissionUseCase.getBatteryOptimizationIntent(requireContext()))
-                    } catch (e: Exception) {
-                        // Резервный вариант на случай косяков с интентом
-                        val fallbackIntent =
-                            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                                data = Uri.fromParts("package", requireContext().packageName, null)
-                            }
-                        startActivity(fallbackIntent)
-                    }
-                }
-
-
-            }
+        pLauncher =
+            registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
         itemClickHandler = ItemClickHandler(
             context = requireContext(),
             modelFlashLight = modelFlashLight,
             lifecycleOwner = viewLifecycleOwner,
             pickImageLauncher = pickImageLauncher,
             pLauncher = pLauncher,
-            permissionUseCase = permissionUseCase
         )
         theme()
         initRcView()
@@ -228,8 +210,9 @@ open class FragmentList : Fragment() {
                                 }
 
                             } else {
-                                DialogItemList.permissonAlert(requireContext(),permissionUseCase, pLauncher)
-
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                    pLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                }
                             }
 
 

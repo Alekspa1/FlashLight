@@ -22,29 +22,53 @@ class ChangeAlarmImp @Inject constructor(
 ) : InsertOrDeleteAlarmReository {
 
 
-    override fun changeAlarm(item: Item, action: Int) {
+//    override fun changeAlarm(item: Item, action: Int) {
+//
+//        val alarmtIntent = Intent(context, AlarmReceiwer::class.java).let { intent ->
+//            intent.putExtra(Const.KEY_INTENT, item)
+//            intent.setAction(Const.KEY_INTENT_ALARM)
+//            PendingIntent.getBroadcast(
+//                context,
+//                item.id!!,
+//                intent,
+//                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+//            )
+//        }
+//        when (action) {
+//            Const.DELETE_ALARM -> alarmManager.cancel(alarmtIntent)
+//            else -> alarmManager.setExactAndAllowWhileIdle(
+//                AlarmManager.RTC_WAKEUP,
+//                item.alarmTime,
+//                alarmtIntent
+//            )
+//
+//        }
+//
+//    }
 
-        val alarmtIntent = Intent(context, AlarmReceiwer::class.java).let { intent ->
-            intent.putExtra(Const.KEY_INTENT, item)
-            intent.setAction(Const.KEY_INTENT_ALARM)
-            PendingIntent.getBroadcast(
-                context,
-                item.id!!,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-        }
-        when (action) {
-            Const.DELETE_ALARM -> alarmManager.cancel(alarmtIntent)
-            else -> alarmManager.setExactAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                item.alarmTime,
-                alarmtIntent
-            )
+override fun changeAlarm(item: Item, action: Int) {
 
-        }
-
+    val alarmtIntent = Intent(context, AlarmReceiwer::class.java).let { intent ->
+        intent.putExtra(Const.KEY_INTENT, item)
+        intent.setAction(Const.KEY_INTENT_ALARM)
+        PendingIntent.getBroadcast(
+            context,
+            item.id!!,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
     }
 
+    when (action) {
+        Const.DELETE_ALARM -> alarmManager.cancel(alarmtIntent)
+        else -> {
+            // 1. Создаем информацию о будильнике (время и интент для клика по системным часам)
+            val clockInfo = AlarmManager.AlarmClockInfo(item.alarmTime, alarmtIntent)
+
+            // 2. Устанавливаем ультимативный точный будильник
+            alarmManager.setAlarmClock(clockInfo, alarmtIntent)
+        }
+    }
+}
 
 }

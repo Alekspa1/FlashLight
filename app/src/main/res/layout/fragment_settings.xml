@@ -126,6 +126,29 @@
             android:text="Работа в фоне" />
 
         <TextView
+            android:id="@+id/bSystemAlertWindow"
+            style="@style/StyleItem"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="3dp"
+            android:layout_marginEnd="3dp"
+            android:layout_marginBottom="3dp"
+            android:background="@drawable/button_background_item_category"
+            android:padding="8dp"
+            android:text="Разрешение поверх других окон" />
+        <TextView
+            android:id="@+id/bWriteSystemSettings"
+            style="@style/StyleItem"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="3dp"
+            android:layout_marginEnd="3dp"
+            android:layout_marginBottom="3dp"
+            android:background="@drawable/button_background_item_category"
+            android:padding="8dp"
+            android:text="Запись системных настроек" />
+
+        <TextView
             android:id="@+id/bDonateCard"
             style="@style/StyleItem"
             android:layout_width="match_parent"

@@ -1,6 +1,7 @@
 package com.exampl3.flashlight.Domain.alarmReceiwer
 
 import android.app.Application
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -38,7 +39,7 @@ class NotificationBuilder @Inject constructor(
 
 
     fun input(item: Item){
-        alarmPush().notify(item.id!!, notificationBuilder(item).build())
+        alarmPush().notify(item.id!!, notificationBuilder(item))
     }
 
     fun alarmPush(): NotificationManager {
@@ -64,17 +65,22 @@ class NotificationBuilder @Inject constructor(
     }
 
     private fun createChanel(atrubute: AudioAttributes): NotificationChannel {
+        val pattern = longArrayOf(0, 1000, 500, 1000, 500)
     return  NotificationChannel(
         newRingtoneUri.toString(),
         context.getString(R.string.app_name),
         NotificationManager.IMPORTANCE_HIGH
     ).apply {
+
         setSound(newRingtoneUri, atrubute)
         enableVibration(true)
+        vibrationPattern = pattern
+        setBypassDnd(true)
+        lockscreenVisibility = Notification.VISIBILITY_PRIVATE
     }
     }
 
-    private fun notificationBuilder(item: Item): NotificationCompat.Builder {
+    private fun notificationBuilder(item: Item): Notification {
 
         val intentCancel = Intent(context, AlarmReceiwer::class.java)
         intentCancel.setAction(Const.KEY_INTENT_CALL_BACKREADY)
@@ -114,22 +120,24 @@ class NotificationBuilder @Inject constructor(
 
 
         val vibrationPattern = longArrayOf(0, 1000, 500, 1000, 500)
+        val builder = NotificationCompat.Builder(context, newRingtoneUri.toString())
+            .setSmallIcon(R.drawable.icon)
+            .setContentTitle(item.name)
+            .setContentText(item.desc)
+            .setVibrate(vibrationPattern)
+            .setPriority(NotificationManager.IMPORTANCE_HIGH)
+            .setStyle(bigIcon)
+            .setContentIntent(contentIntent)
+            .addAction(0, "Готово", canselIntent)
+            .addAction(0, "Отложить", postponeIntent)
+            .setAutoCancel(true)
+            .setFullScreenIntent(contentIntent, true)
 
 
-        return context.let {
-            NotificationCompat.Builder(it, newRingtoneUri.toString())
-                .setSmallIcon(R.drawable.icon)
-                .setContentTitle(item.name)
-                .setContentText(item.desc)
-                .setVibrate(vibrationPattern)
-                .setPriority(NotificationManager.IMPORTANCE_HIGH)
-                .setStyle(bigIcon)
-                .setContentIntent(contentIntent)
-                .addAction(0, "Готово", canselIntent)
-                .addAction(0, "Отложить", postponeIntent)
-                .setAutoCancel(true)
+        val notification = builder.build()
+        notification.flags = notification.flags or Notification.FLAG_INSISTENT
 
-        }
+        return notification
     }
 
 }

@@ -497,32 +497,6 @@ object DialogItemList {
 
     }
 
-    fun permissonAlert(
-        context: Context,
-        permissionUseCase: PermissionUseCase,
-        pLauncher: ActivityResultLauncher<String>
-    ) {
-        AlertDialog.Builder(context)
-            .setTitle("Настройка стабильной работы")
-            .setMessage(
-                "Для точной работы будильника необходимо предоставить приложению разрешение на уведомления, " +
-                        "а затем отключить ограничения батареи. После того как вы все разрешите, нажмите на кнопку будильника повторно"
-            )
-            .setPositiveButton("Далее") { _, _ ->
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    pLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                } else {
-                    val intent = permissionUseCase.getBatteryOptimizationIntent(context)
-                    context.startActivity(intent)
-                }
-
-            }
-            .setNegativeButton("Отмена", null)
-            .setCancelable(false)
-            .show()
-    }
-
     interface Listener {
         fun onClickItem(
             name: String,

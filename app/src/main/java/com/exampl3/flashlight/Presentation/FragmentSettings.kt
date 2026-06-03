@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -71,6 +72,69 @@ class FragmentSettings : Fragment() {
                     startActivity(intent)
                 } else Toast.makeText(requireContext(), "Разрешение уже дано", Toast.LENGTH_SHORT).show()
 
+            }
+
+            // --- КНОПКА: ОТОБРАЖЕНИЕ ПОВЕРХ ДРУГИХ ОКНО ---
+            bSystemAlertWindow.setOnClickListener {
+                val isGranted =
+                    Settings.canDrawOverlays(requireContext())
+
+                if (!isGranted) {
+                    val intent = Intent(
+                        Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                        "package:${requireContext().packageName}".toUri()
+                    ).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+
+                    try {
+                        requireContext().startActivity(intent)
+                    } catch (e: Exception) {
+                        // На случай, если прошивка выдаст ошибку на прямой интент,
+                        // открываем общий список приложений для этого разрешения
+                        val fallbackIntent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION).apply {
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                        try {
+                            requireContext().startActivity(fallbackIntent)
+                        } catch (e2: Exception) {
+                            e2.printStackTrace()
+                        }
+                    }
+                } else {
+                    Toast.makeText(requireContext(), "Разрешение уже дано", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+// --- КНОПКА: ЗАПИСЬ СИСТЕМНЫХ НАСТРОЕК ---
+            bWriteSystemSettings.setOnClickListener {
+                // На Android 6.0 (API 23) и выше проверяем разрешение, на старых версиях оно дано по умолчанию
+                val isGranted =
+                    Settings.System.canWrite(requireContext())
+
+                if (!isGranted) {
+                    val intent = Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS).apply {
+                        data = "package:${requireContext().packageName}".toUri()
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+
+                    try {
+                        requireContext().startActivity(intent)
+                    } catch (e: Exception) {
+                        // Если прошивка "ругается" на прямой интент к приложению,
+                        // открываем общий системный список для этого разрешения
+                        val fallbackIntent = Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS).apply {
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                        try {
+                            requireContext().startActivity(fallbackIntent)
+                        } catch (e2: Exception) {
+                            e2.printStackTrace()
+                        }
+                    }
+                } else {
+                    Toast.makeText(requireContext(), "Разрешение уже дано", Toast.LENGTH_SHORT).show()
+                }
             }
             //Работа в фоне
 
@@ -211,6 +275,9 @@ class FragmentSettings : Fragment() {
                             bDonateCard to R.drawable.button_background_item_category_zabor,
                             bCallbackCard to R.drawable.button_background_item_category_zabor,
                             bFaq to R.drawable.button_background_item_category_zabor,
+                            bBatareiOptimozation to R.drawable.button_background_item_category_zabor,
+                            bSystemAlertWindow to R.drawable.button_background_item_category_zabor,
+                            bWriteSystemSettings to R.drawable.button_background_item_category_zabor,
                         ),
                 Const.Action.IMAGE_RESOURCE to mapOf(imBack to R.drawable.ic_back_zabor),
                 Const.Action.TEXT_STYLE
@@ -223,6 +290,9 @@ class FragmentSettings : Fragment() {
                     bDonateCard to R.style.StyleItemZabor,
                     bCallbackCard to R.style.StyleItemZabor,
                     bFaq to R.style.StyleItemZabor,
+                    bBatareiOptimozation to R.style.StyleItemZabor,
+                    bSystemAlertWindow to R.style.StyleItemZabor,
+                    bWriteSystemSettings to R.style.StyleItemZabor,
                 ),
 
                 )

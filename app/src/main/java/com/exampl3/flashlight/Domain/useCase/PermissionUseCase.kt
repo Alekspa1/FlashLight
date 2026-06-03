@@ -16,13 +16,6 @@ import androidx.core.net.toUri
 
 class PermissionUseCase @Inject constructor() {
 
-    // Проверяем, китаец ли телефон (только им нужен автозапуск)
-    fun isChinesePhone(): Boolean {
-        val manufacturer = Build.MANUFACTURER.lowercase()
-        return manufacturer.contains("xiaomi") ||
-                manufacturer.contains("huawei") ||
-                manufacturer.contains("honor")
-    }
 
     // Проверяем, включена ли оптимизация батареи (нужно ли её отключать)
     fun isBatteryOptimizationEnabled(context: Context): Boolean {
@@ -30,29 +23,6 @@ class PermissionUseCase @Inject constructor() {
         return !powerManager.isIgnoringBatteryOptimizations(context.packageName)
     }
 
-    // Интент №1: Автозапуск
-    fun getAutostartIntent(context: Context): Intent {
-        val manufacturer = Build.MANUFACTURER.lowercase()
-        val intent = Intent()
-        return try {
-            if (manufacturer.contains("xiaomi")) {
-                intent.component = ComponentName(
-                    "com.miui.securitycenter",
-                    "com.miui.permcenter.autostart.AutoStartManagementActivity"
-                )
-            } else {
-                intent.component = ComponentName(
-                    "com.huawei.systemmanager",
-                    "com.huawei.systemmanager.optimize.process.ProtectActivity"
-                )
-            }
-            intent
-        } catch (e: Exception) {
-            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                data = Uri.fromParts("package", context.packageName, null)
-            }
-        }
-    }
 
     // Интент №2: Оптимизация батареи
     @SuppressLint("BatteryLife")
