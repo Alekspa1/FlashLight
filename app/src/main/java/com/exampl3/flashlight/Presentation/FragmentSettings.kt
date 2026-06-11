@@ -38,6 +38,7 @@ import javax.inject.Inject
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.launch
 
 
 @AndroidEntryPoint
@@ -252,8 +253,8 @@ private val importLauncher = registerForActivityResult(ActivityResultContracts.G
                             bCallbackCard to R.drawable.button_background_item_category_zabor,
                             bFaq to R.drawable.button_background_item_category_zabor,
                             bBatareiOptimozation to R.drawable.button_background_item_category_zabor,
-                            bSystemAlertWindow to R.drawable.button_background_item_category_zabor,
-                            bWriteSystemSettings to R.drawable.button_background_item_category_zabor,
+                            saveDb to R.drawable.button_background_item_category_zabor,
+                            loadDb to R.drawable.button_background_item_category_zabor,
                         ),
                 Const.Action.IMAGE_RESOURCE to mapOf(imBack to R.drawable.ic_back_zabor),
                 Const.Action.TEXT_STYLE
@@ -267,8 +268,8 @@ private val importLauncher = registerForActivityResult(ActivityResultContracts.G
                     bCallbackCard to R.style.StyleItemZabor,
                     bFaq to R.style.StyleItemZabor,
                     bBatareiOptimozation to R.style.StyleItemZabor,
-                    bSystemAlertWindow to R.style.StyleItemZabor,
-                    bWriteSystemSettings to R.style.StyleItemZabor,
+                    saveDb to R.style.StyleItemZabor,
+                    loadDb to R.style.StyleItemZabor,
                 ),
 
                 )
