@@ -47,39 +47,41 @@ class AlarmReceiwer : BroadcastReceiver() {
 
         calendarZero = Calendar.getInstance()
 
-        when (intent.action) {
+        val pendingResult = goAsync() // тут я говорю подожди, пока не убивай ресивер, у меня там корутина
+        CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
+            try{
+             when (intent.action) {
 
             KEY_INTENT_ALARM -> {
-                val item = intent.getSerializableExtra(Const.KEY_INTENT) as Item
-                notificationBuilder.input(item)
+                val item = getItemFromIntent(intent, Const.KEY_INTENT) ?: return@launch
+                withContext(Dispatchers.Main){notificationBuilder.input(item)}
+                
                 repeatAlarm(item, "", context)
 
             } // Приход будильника
 
             KEY_INTENT_CALL_BACKREADY -> {
-                val item = intent.getSerializableExtra(KEY_INTENT_CALL_BACKREADY) as Item
+                val item = getItemFromIntent(intent, KEY_INTENT_CALL_BACKREADY) ?: return@launch
+                withContext(Dispatchers.Main){notificationBuilder.alarmPush().cancel(item.id!!)}
                 when (item.interval) {
                     ALARM_ONE -> {
-                        CoroutineScope(Dispatchers.IO).launch {
                             db.CourseDao()
                                 .updateItem(item.copy(change = true, changeAlarm = false))
-                        }
                     }
                 }
-                notificationBuilder.alarmPush().cancel(item.id!!)
+                
 
             } // Когда нажал кнопку готово
 
             KEY_INTENT_CALL_POSTPONE -> {
                 val time = calendarZero.timeInMillis + TEN_MINUTES
-                val item = intent.getSerializableExtra(KEY_INTENT_CALL_POSTPONE) as Item
+                val item = getItemFromIntent(intent, KEY_INTENT_CALL_POSTPONE) ?: return@launch
+                withContext(Dispatchers.Main){notificationBuilder.alarmPush().cancel(item.id!!)}
                 when (item.interval) {
                     ALARM_ONE -> {
                         val newItem = item.copy(changeAlarm = true, alarmTime = time)
-                        CoroutineScope(Dispatchers.IO).launch {
                             db.CourseDao().updateItem(newItem)
-                        }
-                        changeAlarm.exum(newItem, ALARM_ONE)
+                            changeAlarm.exum(newItem, ALARM_ONE)
                     }
 
                     else -> {
@@ -91,30 +93,39 @@ class AlarmReceiwer : BroadcastReceiver() {
                         changeAlarm.exum(newItemFals, ALARM_ONE)
                     }
                 }
-                Toast.makeText(context, "Отложено на 10 минут", Toast.LENGTH_SHORT).show()
-                notificationBuilder.alarmPush().cancel(item.id!!)
+                withContext(Dispatchers.Main){Toast.makeText(context, "Отложено на 10 минут", Toast.LENGTH_SHORT).show()}
+            
+                
             } // Когда нажал кнопку отложить
 
             REBOOT -> {
-                CoroutineScope(Dispatchers.IO).launch {
-                    db.CourseDao().getAllList().forEach { item ->
-                        if (item.changeAlarm && item.alarmTime > calendarZero.timeInMillis) {
+                    db.CourseDao().getActiveAlarms().forEach { item ->
+                        if (item.alarmTime > calendarZero.timeInMillis) {
                             changeAlarm.exum(item, item.interval)
                         }
-                        if (item.changeAlarm && item.alarmTime < calendarZero.timeInMillis) {
-                            notificationBuilderPassed.input(item)
+                        else {
+                            withContext(Dispatchers.Main){notificationBuilderPassed.input(item)}
                             repeatAlarm(item, "(Пропущено)", context)
 
                         }
                     }
-                }
+                
 
             } // После перезагрузки
+        }    
+            }
+            
+            catch(e: Exception){}
+            
+            finally{pendingResult.finish()}
+
+            
         }
+
+        
     }
 
-    private fun repeatAlarm(item: Item, value: String, context: Context) {
-        CoroutineScope(Dispatchers.IO).launch {
+    private suspend fun repeatAlarm(item: Item, value: String, context: Context) {
             when (item.interval) {
                 ALARM_ONE -> {
                     db.CourseDao().updateItem(
@@ -131,9 +142,18 @@ class AlarmReceiwer : BroadcastReceiver() {
                 }
 
             }
-        }
+        
 
     } // Установка повторяющихся будильников
+
+   private fun getItemFromIntent(intent: Intent, key: String): Item? {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        intent.getSerializableExtra(key, Item::class.java)
+    } else {
+        @Suppress("DEPRECATION")
+        intent.getSerializableExtra(key) as? Item
+    }
+}
 
 
 }
