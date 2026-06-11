@@ -78,7 +78,15 @@ private val importLauncher = registerForActivityResult(ActivityResultContracts.G
         theme()
         pLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
         with(binding){
-
+            
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                modelFlashLight.toastEvent.collect { message ->
+                    // Фрагмент САМ показывает тост, используя свой легитимный контекст
+                    ToastFun(requireContext(), message)
+                }
+            }
+        }
 
             bBatareiOptimozation.setOnClickListener {
                 if (permissionUseCase.isBatteryOptimizationEnabled(requireContext())) {
