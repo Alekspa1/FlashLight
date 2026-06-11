@@ -33,24 +33,22 @@ jobs:
       - name: Build Debug APK
         run: ./gradlew assembleDebug
 
-      # 5. Отправляем готовый APK на вашу почту
+        # ДОБАВИТЬ ЭТУ СТРОКУ: Запаковываем APK в ZIP-архив
+      - name: Zip APK
+        run: zip -j app-debug.zip app/build/outputs/apk/debug/app-debug.apk
+
+      # 5. Отправляем письмо с ZIP-архивом
       - name: Send email with APK
         uses: dawidd6/action-send-mail@v4
         with:
-          # Настройки вашего почтового сервера (в примере Яндекс, можно использовать Gmail/Mail.ru)
-          server_address: smtp.gmail.com
+          server_address: ://gmail.com
           server_port: 465
-          # Секреты, которые мы сохраним в настройках GitHub (инструкция ниже)
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
-          
-          # Кому и от кого отправлять письмо
           subject: "Новая сборка приложения: ${{ github.event.head_commit.message }}"
-          to: apereverzev47@gmail.com # Напишите сюда вашу личную почту, куда хотите получать APK
+          to: apereverzev47@gmail.com
           from: "GitHub Actions Robot <${{ secrets.MAIL_USERNAME }}>"
+          body: "Привет! Сборка успешна. Во вложении ZIP-архив с APK-файлом."
           
-          # Текст письма
-          body: "Привет! Ты внес правки в код. Во вложении находится свежий APK-файл для тестирования будильника."
-          
-          # Путь к собранному APK-файлу (у Android он всегда стандартный)
-          attachments: app/build/outputs/apk/debug/app-debug.apk
+          # ИЗМЕНИТЬ ЭТУ СТРОКУ: Отправляем именно созданный ZIP
+          attachments: app-debug.zip 
