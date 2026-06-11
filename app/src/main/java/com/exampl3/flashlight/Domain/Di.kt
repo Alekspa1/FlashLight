@@ -37,15 +37,6 @@ object Di {
 
     @Provides
     @Singleton
-    fun provideBackupManager(
-        context: Application, 
-        database: Database
-    ): BackupManager {
-        return BackupManager(context, database)
-    }
-
-    @Provides
-    @Singleton
     fun provideContentResolver(application: Application): ContentResolver {
         return application.contentResolver
     }
