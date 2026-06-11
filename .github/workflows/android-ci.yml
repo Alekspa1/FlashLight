@@ -33,24 +33,26 @@ jobs:
       - name: Run Quality Checks and Unit Tests
         run: ./gradlew check
 
-      # 5. Собираем дебажный APK (он пропустит ошибку пустых схем Room)
+       # 5. Собираем дебажный APK
       - name: Build Debug APK
         run: ./gradlew assembleDebug
 
-      # 6. Запаковываем APK в ZIP-архив (чтобы Gmail не заблокировал вложение)
-      - name: Zip APK
-        run: zip -j app-debug.zip app/build/outputs/apk/debug/app-debug.apk
+      # ИСПРАВЛЕНО: Просто переименовываем APK в TXT (без сжатия в ZIP)
+      - name: Rename APK to TXT
+        run: cp app/build/outputs/apk/debug/app-debug.apk app-debug.txt
 
-      # 7. Отправляем письмо с ZIP-архивом через ваш аккаунт Gmail
+      # 6. Отправляем письмо с TXT-файлом
       - name: Send email with APK
         uses: dawidd6/action-send-mail@v4
         with:
-          server_address: smtp.gmail.com # ИСПРАВЛЕНО: чистый адрес сервера без ://
+          server_address: ://gmail.com
           server_port: 465
           username: ${{ secrets.MAIL_USERNAME }}
-          password: ${{ secrets.MAIL_PASSWORD }} # Тот самый 16-значный пароль без пробелов
-          subject: "Новая сборка приложения (Debug): ${{ github.event.head_commit.message }}"
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "Сборка приложения (TXT): ${{ github.event.head_commit.message }}"
           to: apereverzev47@gmail.com
           from: "GitHub Actions Robot <${{ secrets.MAIL_USERNAME }}>"
-          body: "Привет! Сборка успешна. Во вложении ZIP-архив с отладочным APK-файлом для тестирования бэкапа в папке Knox."
-          attachments: app-debug.zip
+          body: "Привет! Сборка успешна. Скачай файл app-debug.txt и переименуй его обратно в app-debug.apk перед установкой."
+          
+          # Отправляем именно переименованный TXT
+          attachments: app-debug.txt
