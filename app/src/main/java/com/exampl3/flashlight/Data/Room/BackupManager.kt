@@ -1,6 +1,8 @@
 package com.exampl3.flashlight.Data.Room
+
 import android.app.Application
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import androidx.sqlite.db.SupportSQLiteDatabase
@@ -10,8 +12,6 @@ import java.nio.file.StandardCopyOption
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.system.exitProcess
-import android.net.Uri
-
 
 @Singleton
 class BackupManager @Inject constructor(
@@ -61,7 +61,7 @@ class BackupManager @Inject constructor(
             File("${dbFile.path}-wal").delete()
             File("${dbFile.path}-shm").delete()
 
-            // Перезапуск
+            // Перезапуск приложения
             val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
             intent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
             context.startActivity(intent)
@@ -74,4 +74,3 @@ class BackupManager @Inject constructor(
         }
     }
 }
-    
