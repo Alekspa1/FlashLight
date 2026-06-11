@@ -36,21 +36,21 @@ jobs:
 
       # Все шаги ниже ПОЛНОСТЬЮ ЗАКОММЕНТИРОВАНЫ (знаком # в начале строки).
       # Они больше не выполняются, но сохранены как шаблон на будущее:
-       - name: Build Release APK
-         run: ./gradlew assembleRelease
+      # - name: Build Release APK
+      #   run: ./gradlew assembleRelease
 
-       - name: Zip APK
-         run: zip -j app-release.zip app/build/outputs/apk/release/app-release.apk
+      # - name: Zip APK
+      #   run: zip -j app-release.zip app/build/outputs/apk/release/app-release.apk
 
-       - name: Send email with APK
-         uses: dawidd6/action-send-mail@v4
-         with:
-           server_address: ://gmail.com
-           server_port: 465
-           username: ${{ secrets.MAIL_USERNAME }}
-           password: ${{ secrets.MAIL_PASSWORD }}
-           subject: "Новая РЕЛИЗНАЯ сборка приложения: ${{ github.event.head_commit.message }}"
-           to: apereverzev47@gmail.com
-           from: "GitHub Actions Robot <${{ secrets.MAIL_USERNAME }}>"
-           body: "Привет! Сборка успешна."
-           attachments: app-release.zip 
+      # - name: Send email with APK
+      #   uses: dawidd6/action-send-mail@v4
+      #   with:
+      #     server_address: ://gmail.com
+      #     server_port: 465
+      #     username: ${{ secrets.MAIL_USERNAME }}
+      #     password: ${{ secrets.MAIL_PASSWORD }}
+      #    subject: "Новая РЕЛИЗНАЯ сборка приложения: ${{ github.event.head_commit.message }}"
+      #     to: apereverzev47@gmail.com
+      #     from: "GitHub Actions Robot <${{ secrets.MAIL_USERNAME }}>"
+      #     body: "Привет! Сборка успешна."
+      #     attachments: app-release.zip 
