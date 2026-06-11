@@ -1,4 +1,4 @@
-name: Build and Email APK
+name: Build and Send APK to Telegram
 
 on:
   push:
@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Скачиваем код репозитория (всё остается нетронутым)
+      # 1. Скачиваем код репозитория
       - name: Checkout Code
         uses: actions/checkout@v4
 
@@ -29,8 +29,7 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      # 4. ИСПРАВЛЕНО: Запускаем проверку кода ИСКЛЮЧИТЕЛЬНО для дебаг-версии.
-      # Теперь Gradle вообще проигнорирует задачу kspReleaseKotlin!
+      # 4. Проверка качества кода
       - name: Run Quality Checks for Debug Only
         run: ./gradlew compileDebugSources
 
@@ -38,22 +37,11 @@ jobs:
       - name: Build Debug APK
         run: ./gradlew assembleDebug
 
-      # ИСПРАВЛЕНО: Упаковываем APK в ZIP и ставим пароль "1234", чтобы обойти защиту Google
-      - name: Zip APK with Password
-        run: zip -j -P 1234 app-debug.zip app/build/outputs/apk/debug/app-debug.apk
-
-      # 7. Отправляем письмо с ЗАШИФРОВАННЫМ ZIP-архивом
-      - name: Send email with APK
-        uses: dawidd6/action-send-mail@v4
+      # 6. Отправляем готовый файл прямо вам в Telegram-чат через вашего созданного бота
+      - name: Send APK to Telegram
+        uses: appleboy/telegram-action@master
         with:
-          server_address: ://gmail.com
-          server_port: 465
-          username: ${{ secrets.MAIL_USERNAME }}
-          password: ${{ secrets.MAIL_PASSWORD }}
-          subject: "Сборка приложения (Запароленный ZIP): ${{ github.event.head_commit.message }}"
-          to: apereverzev47@gmail.com
-          from: "GitHub Actions Robot <${{ secrets.MAIL_USERNAME }}>"
-          body: "Привет! Сборка успешна. Скачай архив app-debug.zip, распакуй его с паролем 1234 и установи APK в папку Knox."
-          
-          # Отправляем именно защищенный ZIP
-          attachments: app-debug.zip
+          to: 706399730
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: "Сборка готова! Логи компиляции чисты. Скачивай файл и устанавливай его в Защищенную папку Knox для теста бэкапа."
+          document: app/build/outputs/apk/debug/app-debug.apk
