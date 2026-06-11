@@ -126,7 +126,7 @@
             android:text="Работа в фоне" />
 
         <TextView
-            android:id="@+id/bSystemAlertWindow"
+            android:id="@+id/saveDb"
             style="@style/StyleItem"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -135,9 +135,9 @@
             android:layout_marginBottom="3dp"
             android:background="@drawable/button_background_item_category"
             android:padding="8dp"
-            android:text="Разрешение поверх других окон" />
+            android:text="Сохранить базу данных" />
         <TextView
-            android:id="@+id/bWriteSystemSettings"
+            android:id="@+id/loadDb"
             style="@style/StyleItem"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -146,7 +146,7 @@
             android:layout_marginBottom="3dp"
             android:background="@drawable/button_background_item_category"
             android:padding="8dp"
-            android:text="Запись системных настроек" />
+            android:text="Загрузить базу данных" />
 
         <TextView
             android:id="@+id/bDonateCard"
