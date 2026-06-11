@@ -1,3 +1,4 @@
+package com.exampl3.flashlight.Data.Room
 import android.app.Application
 import android.content.Intent
 import android.os.Build
@@ -9,7 +10,8 @@ import java.nio.file.StandardCopyOption
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.system.exitProcess
-import com.exampl3.flashlight.Data.Room.Database
+import android.net.Uri
+
 
 @Singleton
 class BackupManager @Inject constructor(
