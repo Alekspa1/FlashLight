@@ -40,7 +40,7 @@ class ViewModelFlashLight @Inject constructor(
     private val changeAlarm: ChangeAlarmUseCase,
     private val theme: ThemeImp,
     private val getSystemSoundImp: GetSystemSoundImp,
-    private val backupManager : BackupManager
+    private val backupManager: BackupManager
 ) : ViewModel() {
 
 
