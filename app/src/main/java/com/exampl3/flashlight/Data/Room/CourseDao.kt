@@ -47,6 +47,9 @@ interface CourseDao {
     @Update
     suspend fun updateItems(items: List<Item>)
 
+    @Query("SELECT * FROM Item WHERE changeAlarm = true")
+    suspend fun getActiveAlarms(): List<Item>
+
 
     //MENU
     @Query("SELECT COUNT(*) FROM ListCategory WHERE name = :name")
