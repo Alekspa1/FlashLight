@@ -37,7 +37,8 @@ class ViewModelFlashLight @Inject constructor(
     private val insertDateAndTime: InsertDateAndAlarm,
     private val changeAlarm: ChangeAlarmUseCase,
     private val theme: ThemeImp,
-    private val getSystemSoundImp: GetSystemSoundImp
+    private val getSystemSoundImp: GetSystemSoundImp,
+    private val backupManager : BackupManager
 ) : ViewModel() {
 
 
@@ -46,6 +47,33 @@ class ViewModelFlashLight @Inject constructor(
 
     fun saveFirstAlarm(flag: Boolean) = pref.saveFirstAlarm(flag)
     fun isFirstAlarm() = pref.isFirstAlarm()
+
+     private val _toastEvent = MutableSharedFlow<String>()
+     val toastEvent = _toastEvent.asSharedFlow()
+
+    fun doExport(uri: Uri) { // ИСПРАВЛЕНО: Context больше не принимаем!
+        viewModelScope.launch(Dispatchers.IO) {
+            val success = backupManager.exportDatabase(uri)
+            if (success) {
+                // Шлем событие во фрагмент
+                _toastEvent.emit("Вы успешно сохранили базу данных")
+            } else {
+                _toastEvent.emit("Ошибка при сохранении базы данных")
+            }
+        }
+    }
+}
+
+ fun doImport(uri: Uri) {
+    viewModelScope.launch(Dispatchers.IO) {
+        val success = backupManager.importDatabase(uri)
+        if (!success) {
+            // Если импорт вернул false (например, файл битый), шлем ошибку.
+            // Если успех — метод сам перезапустит приложение, этот блок не понадобится.
+            _toastEvent.emit("Ошибка при восстановлении базы данных")
+        }
+    }
+}
 
     fun getAllCategories(onResult: (List<String>) -> Unit, item: Item?,calendar: Boolean) {
         val listCategory = mutableListOf("Повседневные")
