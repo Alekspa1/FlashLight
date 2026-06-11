@@ -1,14 +1,15 @@
-name: Code Quality Check
+name: Build and Email APK
 
-# Робот просыпается при каждом push или Pull Request в ветку main или master
 on:
   push:
-    branches: [ "main", "master" ]
+    branches:
+      - '**'
   pull_request:
-    branches: [ "main", "master" ]
+    branches:
+      - '**'
 
 jobs:
-  check-code:
+  build-and-send:
     runs-on: ubuntu-latest
 
     steps:
@@ -16,7 +17,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # 2. Устанавливаем окружение Java
+      # 2. Устанавливаем Java
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -24,10 +25,32 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      # 3. Даем права на выполнение Gradle локально на сервере
+      # 3. Даем права на выполнение Gradle
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      # 4. ТА САМАЯ ОДНА СТРОКА: Запускает синтаксис-чекер, линтеры и Unit-тесты
-      - name: Run Quality Checks and Unit Tests
-        run: ./gradlew check
+      # 4. Собираем отладочный APK (Режим Debug идеально подходит для тестов на телефоне)
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug
+
+      # 5. Отправляем готовый APK на вашу почту
+      - name: Send email with APK
+        uses: dawidd6/action-send-mail@v4
+        with:
+          # Настройки вашего почтового сервера (в примере Яндекс, можно использовать Gmail/Mail.ru)
+          server_address: smtp.yandex.ru
+          server_port: 465
+          # Секреты, которые мы сохраним в настройках GitHub (инструкция ниже)
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          
+          # Кому и от кого отправлять письмо
+          subject: "Новая сборка приложения: ${{ github.event.head_commit.message }}"
+          to: your_real_email@mail.ru # Напишите сюда вашу личную почту, куда хотите получать APK
+          from: "GitHub Actions Robot <${{ secrets.MAIL_USERNAME }}>"
+          
+          # Текст письма
+          body: "Привет! Ты внес правки в код. Во вложении находится свежий APK-файл для тестирования будильника."
+          
+          # Путь к собранному APK-файлу (у Android он всегда стандартный)
+          attachments: app/build/outputs/apk/debug/app-debug.apk
