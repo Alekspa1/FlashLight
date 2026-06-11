@@ -43,6 +43,21 @@ class FragmentSettings : Fragment() {
     private lateinit var binding: FragmentSettingsBinding
     val modelFlashLight: ViewModelFlashLight by activityViewModels()
     private lateinit var pLauncher: ActivityResultLauncher<String>
+    
+    private val exportLauncher = registerForActivityResult(ActivityResultContracts.CreateDocument("application/octet-stream")) { uri ->
+    uri?.let {
+        // Пользователь выбрал место и нажал "Сохранить" -> Передаем во ViewModel
+        modelFlashLight.doExport(it)
+    }
+}
+
+// 2. Лаунчер для Импорта (вызывает окно "Выберите файл...")
+private val importLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+    uri?.let {
+        // Пользователь выбрал файл бэкапа -> Передаем во ViewModel
+        modelFlashLight.doImport(it)
+    }
+}
 
     @Inject
     lateinit var soundPlayer: SoundPlayer
@@ -72,71 +87,20 @@ class FragmentSettings : Fragment() {
                     startActivity(intent)
                 } else Toast.makeText(requireContext(), "Разрешение уже дано", Toast.LENGTH_SHORT).show()
 
-            }
+            } //Работа в фоне
 
-            // --- КНОПКА: ОТОБРАЖЕНИЕ ПОВЕРХ ДРУГИХ ОКНО ---
-            bSystemAlertWindow.setOnClickListener {
-                val isGranted =
-                    Settings.canDrawOverlays(requireContext())
+           
+    binding.saveDb.setOnClickListener {
+        // Откроет проводник и предложит сохранить файл с именем backup_alarm.db
+        exportLauncher.launch("backup_alarm.db")
+    } // сохраняю базу данных
 
-                if (!isGranted) {
-                    val intent = Intent(
-                        Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                        "package:${requireContext().packageName}".toUri()
-                    ).apply {
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    }
-
-                    try {
-                        requireContext().startActivity(intent)
-                    } catch (e: Exception) {
-                        // На случай, если прошивка выдаст ошибку на прямой интент,
-                        // открываем общий список приложений для этого разрешения
-                        val fallbackIntent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION).apply {
-                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        }
-                        try {
-                            requireContext().startActivity(fallbackIntent)
-                        } catch (e2: Exception) {
-                            e2.printStackTrace()
-                        }
-                    }
-                } else {
-                    Toast.makeText(requireContext(), "Разрешение уже дано", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-// --- КНОПКА: ЗАПИСЬ СИСТЕМНЫХ НАСТРОЕК ---
-            bWriteSystemSettings.setOnClickListener {
-                // На Android 6.0 (API 23) и выше проверяем разрешение, на старых версиях оно дано по умолчанию
-                val isGranted =
-                    Settings.System.canWrite(requireContext())
-
-                if (!isGranted) {
-                    val intent = Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS).apply {
-                        data = "package:${requireContext().packageName}".toUri()
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    }
-
-                    try {
-                        requireContext().startActivity(intent)
-                    } catch (e: Exception) {
-                        // Если прошивка "ругается" на прямой интент к приложению,
-                        // открываем общий системный список для этого разрешения
-                        val fallbackIntent = Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS).apply {
-                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        }
-                        try {
-                            requireContext().startActivity(fallbackIntent)
-                        } catch (e2: Exception) {
-                            e2.printStackTrace()
-                        }
-                    }
-                } else {
-                    Toast.makeText(requireContext(), "Разрешение уже дано", Toast.LENGTH_SHORT).show()
-                }
-            }
-            //Работа в фоне
+    
+    binding.loadDb.setOnClickListener {
+        // Откроет проводник и покажет только файлы (пользователь сам ищет свой бэкап)
+        importLauncher.launch("*/*")
+    } // загружаю базу данных
+            
 
             bCallbackCard.setOnClickListener {
                 val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
