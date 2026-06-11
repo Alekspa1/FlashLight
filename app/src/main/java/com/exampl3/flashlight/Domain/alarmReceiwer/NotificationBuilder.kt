@@ -125,13 +125,13 @@ class NotificationBuilder @Inject constructor(
             .setContentTitle(item.name)
             .setContentText(item.desc)
             .setVibrate(vibrationPattern)
-            .setPriority(NotificationManager.IMPORTANCE_HIGH)
+            .setPriority(NotificationCompat.PRIORITY_MAX)
             .setStyle(bigIcon)
             .setContentIntent(contentIntent)
             .addAction(0, "Готово", canselIntent)
             .addAction(0, "Отложить", postponeIntent)
             .setAutoCancel(true)
-            .setFullScreenIntent(contentIntent, true)
+            .setCategory(NotificationCompat.CATEGORY_ALARM)
 
 
         val notification = builder.build()
