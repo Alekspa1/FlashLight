@@ -38,7 +38,7 @@ jobs:
         uses: dawidd6/action-send-mail@v4
         with:
           # Настройки вашего почтового сервера (в примере Яндекс, можно использовать Gmail/Mail.ru)
-          server_address: smtp.yandex.ru
+          server_address: smtp.gmail.com
           server_port: 465
           # Секреты, которые мы сохраним в настройках GitHub (инструкция ниже)
           username: ${{ secrets.MAIL_USERNAME }}
@@ -46,7 +46,7 @@ jobs:
           
           # Кому и от кого отправлять письмо
           subject: "Новая сборка приложения: ${{ github.event.head_commit.message }}"
-          to: your_real_email@mail.ru # Напишите сюда вашу личную почту, куда хотите получать APK
+          to: apereverzev47@gmail.com # Напишите сюда вашу личную почту, куда хотите получать APK
           from: "GitHub Actions Robot <${{ secrets.MAIL_USERNAME }}>"
           
           # Текст письма
