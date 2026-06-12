@@ -50,8 +50,7 @@ class ViewModelFlashLight @Inject constructor(
     fun savePremium(flag: Boolean) = pref.savePremium(flag)
     fun getPremium() = pref.getPremium()
 
-    fun saveFirstAlarm(flag: Boolean) = pref.saveFirstAlarm(flag)
-    fun isFirstAlarm() = pref.isFirstAlarm()
+
 
      private val _toastEvent = MutableSharedFlow<String>()
      val toastEvent = _toastEvent.asSharedFlow()
@@ -72,11 +71,10 @@ class ViewModelFlashLight @Inject constructor(
  fun doImport(uri: Uri) {
     viewModelScope.launch(Dispatchers.IO) {
         val success = backupManager.importDatabase(uri)
-        if (!success) {
-            // Если импорт вернул false (например, файл битый), шлем ошибку.
-            // Если успех — метод сам перезапустит приложение, этот блок не понадобится.
-            _toastEvent.emit("Ошибка при восстановлении базы данных")
-        }
+        if (success) {
+           _toastEvent.emit("Вы успешно восстановили базу данных")
+
+        } else {_toastEvent.emit("Ошибка при восстановлении базы данных")}
     }
 }
 

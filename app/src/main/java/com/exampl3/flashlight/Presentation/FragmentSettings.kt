@@ -103,17 +103,36 @@ private val importLauncher = registerForActivityResult(ActivityResultContracts.G
             } //Работа в фоне
 
            
-    binding.saveDb.setOnClickListener {
+    saveDb.setOnClickListener {
         // Откроет проводник и предложит сохранить файл с именем backup_alarm.db
-        exportLauncher.launch("backup_alarm.db")
+        exportLauncher.launch("backup_alarm.zip")
     } // сохраняю базу данных
 
+
+
     
-    binding.loadDb.setOnClickListener {
+    loadDb.setOnClickListener {
         // Откроет проводник и покажет только файлы (пользователь сам ищет свой бэкап)
         importLauncher.launch("*/*")
     } // загружаю базу данных
             
+    bAppSettings.setOnClickListener {
+        try {
+            // Создаем интент, который ведет на карточку настроек нашего приложения
+            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                // Передаем уникальное имя пакета (applicationId) вашего приложения
+                data = Uri.fromParts("package", requireContext().packageName, null)
+                // Добавляем флаг, так как запускаем Activity из контекста, который может быть не-Activity
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            requireContext().startActivity(intent)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            // Страховочный тост на случай непредвиденных аномалий в кастомных китайских прошивках
+            ToastFun(requireContext(), "Не удалось открыть настройки")
+        }
+    }
+
 
             bCallbackCard.setOnClickListener {
                 val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
@@ -255,11 +274,14 @@ private val importLauncher = registerForActivityResult(ActivityResultContracts.G
                             bBatareiOptimozation to R.drawable.button_background_item_category_zabor,
                             saveDb to R.drawable.button_background_item_category_zabor,
                             loadDb to R.drawable.button_background_item_category_zabor,
+                            bAppSettings to R.drawable.button_background_item_category_zabor,
                         ),
                 Const.Action.IMAGE_RESOURCE to mapOf(imBack to R.drawable.ic_back_zabor),
                 Const.Action.TEXT_STYLE
                         to mapOf(
                     tvSettings to R.style.StyleMenuZabor,
+                    tvSettingsPermissions to R.style.StyleMenuZabor,
+                    tvSettingsBackup to R.style.StyleMenuZabor,
                     bSetSort to R.style.StyleItemZabor,
                     bSize to R.style.StyleItemZabor,
                     bAlarm to R.style.StyleItemZabor,
@@ -270,6 +292,8 @@ private val importLauncher = registerForActivityResult(ActivityResultContracts.G
                     bBatareiOptimozation to R.style.StyleItemZabor,
                     saveDb to R.style.StyleItemZabor,
                     loadDb to R.style.StyleItemZabor,
+                    bAppSettings to R.style.StyleItemZabor,
+
                 ),
 
                 )
