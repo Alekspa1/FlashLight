@@ -125,7 +125,7 @@ class FragmentCalendar : Fragment() {
             bindingZabor.imBAddCalendar.setOnClickListener {
                // modelFlashLight.getItemMaxSort()
                 if (modelFlashLight.getPremium())
-                     if (getDateNow(calendarDayB) >= getDateNow(calendarZero)) DialogItemList.alertItem(
+                     if (getDateNow(calendarDayB) >= getDateNow(calendarZero))  DialogItemList.alertItem(
                       requireContext(),
         object : DialogItemList.Listener {
             override fun onClickItem(
@@ -147,7 +147,7 @@ class FragmentCalendar : Fragment() {
                 val isAlarm = (action == ALARM)
 
                 // 3. Просто отдаем всё во ViewModel! Она сделает всё сама, без фризов и задержек
-                modelFlashLight.addNewItem(
+                modelFlashLight.insertItem(
                     name = name,
                     category = category.toString(),
                     desc = desc,
@@ -168,7 +168,7 @@ class FragmentCalendar : Fragment() {
         lifecycleOwner = this,
         pick = pickImageLauncher,
         true
-    )
+    )               // DialogItemList.alertItem(
                     //     requireContext(),
                     //     object : DialogItemList.Listener {
                     //         override fun onClickItem(
@@ -257,86 +257,130 @@ class FragmentCalendar : Fragment() {
             }
         } else {
             binding.imBAddCalendar.setOnClickListener {
-                modelFlashLight.getItemMaxSort()
+               // modelFlashLight.getItemMaxSort()
                 if (modelFlashLight.getPremium())
-                    if (getDateNow(calendarDayB) >= getDateNow(calendarZero)) DialogItemList.alertItem(
-                        requireContext(),
-                        object : DialogItemList.Listener {
-                            override fun onClickItem(
-                                name: String,
-                                action: Int?,
-                                id: Int?,
-                                desc: String?,
-                                uri: String?,
-                                category: String?
-                            ) {
-                                var item: Item
-                                var permanentFile = ""
-                                if (uri!!.isNotEmpty()) {
-                                    permanentFile =
-                                        modelFlashLight.saveImagePermanently(
-                                            requireContext(),
-                                            uri.toUri()
-                                        ).toString()
-                                }
-                                modelFlashLight.insertItem(
-                                    Item(
-                                        null,
-                                        name,
-                                        category = category.toString(),
-                                        desc = desc,
-                                        alarmTime = calendarDayB.timeInMillis,
-                                        alarmText = permanentFile,
-                                        sort = modelFlashLight.maxSorted.value ?: 0
-                                    )
-                                )
+                     if (getDateNow(calendarDayB) >= getDateNow(calendarZero)) DialogItemList.alertItem(
+                      requireContext(),
+        object : DialogItemList.Listener {
+            override fun onClickItem(
+                name: String,
+                action: Int?,
+                id: Int?,
+                desc: String?,
+                uri: String?,
+                category: String?
+            ) {
+                // 1. Подготавливаем картинку
+                var permanentFile = ""
+                if (uri != null && uri.isNotEmpty()) {
+                    permanentFile = modelFlashLight.saveImagePermanently(requireContext(), uri.toUri()).toString()
+                }
+
+                // 2. Проверяем разрешение на уведомления
+                val hasPermission = Const.isPermissionGranted(requireContext(), Manifest.permission.POST_NOTIFICATIONS)
+                val isAlarm = (action == ALARM)
+
+                // 3. Просто отдаем всё во ViewModel! Она сделает всё сама, без фризов и задержек
+                modelFlashLight.insertItem(
+                    name = name,
+                    category = category.toString(),
+                    desc = desc,
+                    alarmText = permanentFile,
+                    hasAlarmPermission = hasPermission,
+                    isAlarmAction = isAlarm,
+                    context = requireContext()
+                )
+
+                // 4. Если пользователь хотел будильник, но разрешения нет — показываем системный запрос
+                if (isAlarm && !hasPermission) {
+                    DialogItemList.permissonAlert(requireContext(), permissionUseCase, pLauncher)
+                }
+            }
+        },
+        null,
+        model = modelFlashLight,
+        lifecycleOwner = this,
+        pick = pickImageLauncher,
+        true
+    )
+                    //DialogItemList.alertItem(
+                    //     requireContext(),
+                    //     object : DialogItemList.Listener {
+                    //         override fun onClickItem(
+                    //             name: String,
+                    //             action: Int?,
+                    //             id: Int?,
+                    //             desc: String?,
+                    //             uri: String?,
+                    //             category: String?
+                    //         ) {
+                    //             var item: Item
+                    //             var permanentFile = ""
+                    //             if (uri!!.isNotEmpty()) {
+                    //                 permanentFile =
+                    //                     modelFlashLight.saveImagePermanently(
+                    //                         requireContext(),
+                    //                         uri.toUri()
+                    //                     ).toString()
+                    //             }
+                    //             modelFlashLight.insertItem(
+                    //                 Item(
+                    //                     null,
+                    //                     name,
+                    //                     category = category.toString(),
+                    //                     desc = desc,
+                    //                     alarmTime = calendarDayB.timeInMillis,
+                    //                     alarmText = permanentFile,
+                    //                     sort = modelFlashLight.maxSorted.value ?: 0
+                    //                 )
+                    //             )
 
 
-                                if (action == ALARM) {
-                                    if (view.let {
-                                            Const.isPermissionGranted(
-                                                it.context,
-                                                Manifest.permission.POST_NOTIFICATIONS
-                                            )
-                                        }) {
-                                        CoroutineScope(Dispatchers.IO).launch {
-                                            delay(500)
-                                            item = db.CourseDao().getAllList().last()
-                                            if (item.name == name) {
-                                                withContext(Dispatchers.Main) {
-                                                    modelFlashLight.insertDateAndAlarm(
-                                                        item,
-                                                        calendarDayB,
-                                                        requireContext()
-                                                    )
-                                                }
-                                            } else {
-                                                delay(1000)
-                                                item = db.CourseDao().getAllList().last()
-                                                withContext(Dispatchers.Main) {
-                                                    modelFlashLight.insertDateAndAlarm(
-                                                        item,
-                                                        calendarDayB,
-                                                        requireContext()
-                                                    )
-                                                }
-                                            }
+                    //             if (action == ALARM) {
+                    //                 if (view.let {
+                    //                         Const.isPermissionGranted(
+                    //                             it.context,
+                    //                             Manifest.permission.POST_NOTIFICATIONS
+                    //                         )
+                    //                     }) {
+                    //                     CoroutineScope(Dispatchers.IO).launch {
+                    //                         delay(500)
+                    //                         item = db.CourseDao().getAllList().last()
+                    //                         if (item.name == name) {
+                    //                             withContext(Dispatchers.Main) {
+                    //                                 modelFlashLight.insertDateAndAlarm(
+                    //                                     item,
+                    //                                     calendarDayB,
+                    //                                     requireContext()
+                    //                                 )
+                    //                             }
+                    //                         } else {
+                    //                             delay(1000)
+                    //                             item = db.CourseDao().getAllList().last()
+                    //                             withContext(Dispatchers.Main) {
+                    //                                 modelFlashLight.insertDateAndAlarm(
+                    //                                     item,
+                    //                                     calendarDayB,
+                    //                                     requireContext()
+                    //                                 )
+                    //                             }
+                    //                         }
 
-                                        }
+                    //                     }
 
-                                    } else {
-                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                            pLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                                        }
-                                    }
+                    //                 } else {
+                    //                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    //                         pLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    //                     }
+                    //                 }
 
 
-                                }
-                            }
-                        },
-                        null,
-                        model = modelFlashLight, lifecycleOwner = this, pickImageLauncher, true
-                    )
+                    //             }
+                    //         }
+                    //     },
+                    //     null,
+                    //     model = modelFlashLight, lifecycleOwner = this, pickImageLauncher, true
+                    // )
                     else Toast.makeText(
                         requireContext(),
                         "Вы выбрали время которое уже прошло",
