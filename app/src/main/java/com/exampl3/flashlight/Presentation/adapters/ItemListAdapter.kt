@@ -47,8 +47,8 @@ class ItemListAdapter(
                 tvTextItem.text = item.name
                 tvAlarm.text = alarmText(item) ?: "".trim()
                 tvDesc.text = item.desc
-               // if (tvDesc.text !== "") tvDesc.visibility = View.VISIBLE
-                if (!item.desc.isNullOrEmpty()) tvDesc.visibility = View.VISIBLE
+                if (tvDesc.text !== "") tvDesc.visibility = View.VISIBLE
+               // if (!item.desc.isNullOrEmpty()) tvDesc.visibility = View.VISIBLE
                 if (item.alarmText.isNotEmpty()) imPhotoView.visibility = View.VISIBLE
                 else imPhotoView.visibility = View.GONE
                 //настройка темы
