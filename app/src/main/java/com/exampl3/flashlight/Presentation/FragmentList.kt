@@ -143,19 +143,32 @@ open class FragmentList : Fragment() {
         val launcher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
                 if (it.resultCode == Activity.RESULT_OK) {
-                    modelFlashLight.getItemMaxSort()
+                   // modelFlashLight.getItemMaxSort()
                     val text = it.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
                     if (text != null) {
-                        modelFlashLight.getItemMaxSort()
-                        modelFlashLight.insertItem(
-                            Item(
-                                null,
-                                text[0],
-                                category = modelFlashLight.categoryItemLD.value!!,
-                                sort = modelFlashLight.maxSorted.value ?: 0,
-                                alarmTime = 0,
-                            )
-                        )
+                      //  modelFlashLight.getItemMaxSort()
+                        // modelFlashLight.insertItem(
+                        //     Item(
+                        //         null,
+                        //         text[0],
+                        //         category = modelFlashLight.categoryItemLD.value!!,
+                        //         sort = modelFlashLight.maxSorted.value ?: 0,
+                        //         alarmTime = 0,
+                        //     )
+                        // )
+
+                        modelFlashLight.insertItem(       
+                    name = text[0], // Текст из голосового ввода
+                    
+                    // БЕРЕМ КАТЕГОРИЮ ИЗ FLOW ЧЕРЕЗ .value (Прямо как раньше из LiveData!)
+                    category = modelFlashLight.categoryItemFlow.value, 
+                    
+                    desc = null,          // У голосовой заметки нет описания
+                    alarmText = "",       // У голосовой заметки нет картинки
+                    hasAlarmPermission = false, // Будильник для голосового ввода выключен
+                    isAlarmAction = false,      // Будильник для голосового ввода выключен
+                    context = requireContext()
+                )
 
 
                     }
@@ -188,7 +201,7 @@ open class FragmentList : Fragment() {
                 val isAlarm = (action == ALARM)
 
                 // 3. Просто отдаем всё во ViewModel! Она сделает всё сама, без фризов и задержек
-                modelFlashLight.addNewItem(
+                modelFlashLight.insertItem(
                     name = name,
                     category = category.toString(),
                     desc = desc,
