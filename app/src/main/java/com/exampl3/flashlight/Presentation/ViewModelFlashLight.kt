@@ -31,6 +31,11 @@ import javax.inject.Inject
 import com.exampl3.flashlight.Const.SORT_STANDART
 import com.exampl3.flashlight.Const.SORT_USER
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 @HiltViewModel
 class ViewModelFlashLight @Inject constructor(
@@ -255,11 +260,11 @@ class ViewModelFlashLight @Inject constructor(
         }
     }
 
-    fun getItemMaxSort() {
-        viewModelScope.launch {
-            maxSorted.value = (db.CourseDao().getItemWithMaxSort()?.sort?.minus(1))
-        }
-    }
+    // fun getItemMaxSort() {
+    //     viewModelScope.launch {
+    //         maxSorted.value = (db.CourseDao().getItemWithMaxSort()?.sort?.minus(1))
+    //     }
+    // }
 
     //fun insertItem(item: Item) {
     //    viewModelScope.launch { db.CourseDao().insertItem(item) }
