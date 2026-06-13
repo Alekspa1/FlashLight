@@ -43,6 +43,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Calendar
 import javax.inject.Inject
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 open class FragmentList : Fragment() {
@@ -161,89 +165,136 @@ open class FragmentList : Fragment() {
 
             }
 
+            binding.imBAddFrag.setOnClickListener {
+    DialogItemList.alertItem(
+        requireContext(),
+        object : DialogItemList.Listener {
+            override fun onClickItem(
+                name: String,
+                action: Int?,
+                id: Int?,
+                desc: String?,
+                uri: String?,
+                category: String?
+            ) {
+                // 1. Подготавливаем картинку
+                var permanentFile = ""
+                if (uri != null && uri.isNotEmpty()) {
+                    permanentFile = modelFlashLight.saveImagePermanently(requireContext(), uri.toUri()).toString()
+                }
 
-        binding.imBAddFrag.setOnClickListener {
-            modelFlashLight.getItemMaxSort()
-            DialogItemList.alertItem(
-                requireContext(),
-                object : DialogItemList.Listener {
-                    override fun onClickItem(
-                        name: String,
-                        action: Int?,
-                        id: Int?,
-                        desc: String?,
-                        uri: String?,
-                        category: String?
-                    ) {
-                        var item: Item
-                        var permanentFile = ""
-                        if (uri!!.isNotEmpty()) {
-                            permanentFile =
-                                modelFlashLight.saveImagePermanently(requireContext(), uri.toUri())
-                                    .toString()
-                        }
-                        modelFlashLight.insertItem(
-                            Item(
-                                null,
-                                name,
-                                category = category.toString(),
-                                desc = desc,
-                                alarmTime = 0,
-                                alarmText = permanentFile,
-                                sort = modelFlashLight.maxSorted.value ?: 0
-                            )
-                        )
+                // 2. Проверяем разрешение на уведомления
+                val hasPermission = Const.isPermissionGranted(requireContext(), Manifest.permission.POST_NOTIFICATIONS)
+                val isAlarm = (action == ALARM)
 
+                // 3. Просто отдаем всё во ViewModel! Она сделает всё сама, без фризов и задержек
+                modelFlashLight.addNewItem(
+                    name = name,
+                    category = category.toString(),
+                    desc = desc,
+                    alarmText = permanentFile,
+                    hasAlarmPermission = hasPermission,
+                    isAlarmAction = isAlarm,
+                    context = requireContext()
+                )
 
-                        if (action == ALARM) {
-                            if (view.let {
-                                    Const.isPermissionGranted(
-                                        it.context,
-                                        Manifest.permission.POST_NOTIFICATIONS
-                                    )
-                                }) {
-                                viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-                                    delay(500)
-                                    item = db.CourseDao().getAllList().last()
-                                    if (item.name == name) {
-                                        withContext(Dispatchers.Main) {
-                                            modelFlashLight.insertDateAndAlarm(
-                                                item,
-                                                null,
-                                                requireContext()
-                                            )
-                                        }
-                                    } else {
-                                        delay(1000)
-                                        item = db.CourseDao().getAllList().last()
-                                        withContext(Dispatchers.Main) {
-                                            modelFlashLight.insertDateAndAlarm(
-                                                item,
-                                                null,
-                                                requireContext()
-                                            )
-                                        }
-                                    }
-
-                                }
-
-                            } else {
-                                DialogItemList.permissonAlert(requireContext(),permissionUseCase, pLauncher)
-
-                            }
+                // 4. Если пользователь хотел будильник, но разрешения нет — показываем системный запрос
+                if (isAlarm && !hasPermission) {
+                    DialogItemList.permissonAlert(requireContext(), permissionUseCase, pLauncher)
+                }
+            }
+        },
+        null,
+        model = modelFlashLight,
+        lifecycleOwner = this,
+        pick = pickImageLauncher,
+        false
+    )
+}
 
 
-                        }
-                    }
-                },
-                null,
-                model = modelFlashLight,
-                lifecycleOwner = this,
-                pick = pickImageLauncher,
-                false
-            )
-
-        }
+       // binding.imBAddFrag.setOnClickListener {
+           // modelFlashLight.getItemMaxSort()
+           // DialogItemList.alertItem(
+              //  requireContext(),
+              //  object : DialogItemList.Listener {
+               //     override fun onClickItem(
+                //        name: String,
+                //        action: Int?,
+                //        id: Int?,
+                //       desc: String?,
+                //        uri: String?,
+                //      category: String?
+               //     ) {
+               //         var item: Item
+               //         var permanentFile = ""
+               //         if (uri!!.isNotEmpty()) {
+               //             permanentFile =
+               //                 modelFlashLight.saveImagePermanently(requireContext(), uri.toUri())
+               //                     .toString()
+               //         }
+               //         modelFlashLight.insertItem(
+               //             Item(
+               //                 null,
+                //                name,
+               //                 category = category.toString(),
+               //                 desc = desc,
+               //                 alarmTime = 0,
+               //                 alarmText = permanentFile,
+               //                 sort = modelFlashLight.maxSorted.value ?: 0
+               //             )
+               //         )
+//
+//
+//                        if (action == ALARM) {
+//                           if (view.let {
+//                                    Const.isPermissionGranted(
+//                                        it.context,
+ //                                       Manifest.permission.POST_NOTIFICATIONS
+//                                    )
+//                                }) {
+//                                viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+//                                    delay(500)
+//                                    item = db.CourseDao().getAllList().last()
+  //                                  if (item.name == name) {
+    //                                    withContext(Dispatchers.Main) {
+      //                                      modelFlashLight.insertDateAndAlarm(
+        //                                        item,
+          //                                      null,
+            //                                    requireContext()
+              //                              )
+                //                        }
+                  //                  } else {
+                    //                    delay(1000)
+                      //                  item = db.CourseDao().getAllList().last()
+                        //                withContext(Dispatchers.Main) {
+                          //                  modelFlashLight.insertDateAndAlarm(
+                            //                    item,
+//                                                null,
+  //                                              requireContext()
+    //                                        )
+      //                                  }
+        //                            }
+//
+  //                              }
+//
+  //                          } else {
+    //                            DialogItemList.permissonAlert(requireContext(),permissionUseCase, pLauncher)
+//
+  //                          }
+//
+//
+  //                      }
+    //                }
+      //          },
+        //        null,
+          //      model = modelFlashLight,
+//                lifecycleOwner = this,
+  //              pick = pickImageLauncher,
+    //            false
+      //      )
+//
+  //      }
 
         binding.imVoiceFrag.setOnClickListener {
             try {
@@ -261,52 +312,99 @@ open class FragmentList : Fragment() {
 
     }
 
+    // private fun initRcView() {
+    //     val rcView = binding.rcView
+
+    //     adapter = ItemListAdapter(
+    //         itemClickHandler = itemClickHandler,
+    //         onOrderChanged = { updatedList ->
+    //             modelFlashLight.updateItemsOrder(updatedList)
+    //         },
+    //         touchHelper = null,
+    //         pref,
+    //         themeImp
+    //     )
+    //     rcView.layoutManager = LinearLayoutManager(requireContext())
+    //     rcView.adapter = adapter
+    //     val touchHelper = ItemTouchHelper(DragItemTouchHelperCallback(adapter))
+    //     if (modelFlashLight.getSort() == SORT_USER) {
+    //         touchHelper.attachToRecyclerView(rcView)
+    //         adapter.touchHelper = touchHelper
+    //     }
+
+    //     modelFlashLight.listItemLD.observe(viewLifecycleOwner) { list ->
+    //         scrollInStartAdapter() // это чтобы при создании жлемента, был скролл наверх
+    //         if (modelFlashLight.getSort() == SORT_STANDART) {
+    //             adapter.submitList(list.sortedBy { it.id }.reversed().sortedBy { it.alarmTime }
+    //                 .reversed().sortedBy { it.change }
+    //                 .reversed().sortedBy { it.changeAlarm }
+    //                 .reversed())
+    //         } else {
+    //             adapter.submitList(list.sortedBy { it.sort })
+    //         }
+
+
+    //     }
+
+    // } // инициализировал ресайклер
+
+    // private fun scrollInStartAdapter() {
+    //     adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+    //         override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+    //             if (positionStart == 0) {  // Элементы добавились в начало (верх списка)
+    //                 binding.rcView.scrollToPosition(0)
+    //                 adapter.unregisterAdapterDataObserver(this)
+    //             }
+    //         }
+    //     })
+    // }
+
     private fun initRcView() {
-        val rcView = binding.rcView
+    val rcView = binding.rcView
 
-        adapter = ItemListAdapter(
-            itemClickHandler = itemClickHandler,
-            onOrderChanged = { updatedList ->
-                modelFlashLight.updateItemsOrder(updatedList)
-            },
-            touchHelper = null,
-            pref,
-            themeImp
-        )
-        rcView.layoutManager = LinearLayoutManager(requireContext())
-        rcView.adapter = adapter
-        val touchHelper = ItemTouchHelper(DragItemTouchHelperCallback(adapter))
-        if (modelFlashLight.getSort() == SORT_USER) {
-            touchHelper.attachToRecyclerView(rcView)
-            adapter.touchHelper = touchHelper
-        }
+    adapter = ItemListAdapter(
+        itemClickHandler = itemClickHandler,
+        onOrderChanged = { updatedList ->
+            modelFlashLight.updateItemsOrder(updatedList)
+        },
+        touchHelper = null,
+        pref,
+        themeImp
+    )
+    rcView.layoutManager = LinearLayoutManager(requireContext())
+    rcView.adapter = adapter
 
-        modelFlashLight.listItemLD.observe(viewLifecycleOwner) { list ->
-            scrollInStartAdapter() // это чтобы при создании жлемента, был скролл наверх
-            if (modelFlashLight.getSort() == SORT_STANDART) {
-                adapter.submitList(list.sortedBy { it.id }.reversed().sortedBy { it.alarmTime }
-                    .reversed().sortedBy { it.change }
-                    .reversed().sortedBy { it.changeAlarm }
-                    .reversed())
-            } else {
-                adapter.submitList(list.sortedBy { it.sort })
-            }
+    val touchHelper = ItemTouchHelper(DragItemTouchHelperCallback(adapter))
 
-
-        }
-
-    } // инициализировал ресайклер
-
-    private fun scrollInStartAdapter() {
-        adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
-            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
-                if (positionStart == 0) {  // Элементы добавились в начало (верх списка)
-                    binding.rcView.scrollToPosition(0)
-                    adapter.unregisterAdapterDataObserver(this)
+    // 1. ПОДПИСКА НА ТИП СОРТИРОВКИ (Включаем/выключаем Drag-and-Drop на лету)
+    viewLifecycleOwner.lifecycleScope.launch {
+        viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            modelFlashLight.sortType.collect { currentSort ->
+                if (currentSort == SORT_USER) {
+                    touchHelper.attachToRecyclerView(rcView)
+                    adapter.touchHelper = touchHelper
+                } else {
+                    touchHelper.attachToRecyclerView(null)
+                    adapter.touchHelper = null
                 }
             }
-        })
+        }
     }
+
+    // 2. ПОДПИСКА НА ОТСОРТИРОВАННЫЙ СПИСОК (Flow)
+    viewLifecycleOwner.lifecycleScope.launch {
+        viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            modelFlashLight.sortedItemsFlow.collect { readyList ->
+                // submitList принимает коллбэк, который сработает строго ПОСЛЕ того,
+                // как DiffUtil посчитает разницу и обновит элементы на экране.
+                adapter.submitList(readyList) {
+                    // Безопасный скролл наверх без бесконечного накопления обсерверов
+                    rcView.scrollToPosition(0)
+                }
+            }
+        }
+    }
+}
 
 
     override fun onResume() {
