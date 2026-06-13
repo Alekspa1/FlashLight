@@ -147,14 +147,15 @@ class FragmentCalendar : Fragment() {
                 val isAlarm = (action == ALARM)
 
                 // 3. Просто отдаем всё во ViewModel! Она сделает всё сама, без фризов и задержек
-                modelFlashLight.insertItem(
+              modelFlashLight.insertItem(
                     name = name,
                     category = category.toString(),
                     desc = desc,
                     alarmText = permanentFile,
                     hasAlarmPermission = hasPermission,
                     isAlarmAction = isAlarm,
-                    context = requireContext()
+                    context = requireContext(),
+                    calendarDay = calendarDayB.timeInMillis,
                 )
 
                 // 4. Если пользователь хотел будильник, но разрешения нет — показываем системный запрос
@@ -288,7 +289,8 @@ class FragmentCalendar : Fragment() {
                     alarmText = permanentFile,
                     hasAlarmPermission = hasPermission,
                     isAlarmAction = isAlarm,
-                    context = requireContext()
+                    context = requireContext(),
+                    calendarDay = calendarDayB.timeInMillis,
                 )
 
                 // 4. Если пользователь хотел будильник, но разрешения нет — показываем системный запрос
