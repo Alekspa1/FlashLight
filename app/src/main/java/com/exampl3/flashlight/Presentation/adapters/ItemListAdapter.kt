@@ -47,7 +47,8 @@ class ItemListAdapter(
                 tvTextItem.text = item.name
                 tvAlarm.text = alarmText(item) ?: "".trim()
                 tvDesc.text = item.desc
-                if (tvDesc.text !== "") tvDesc.visibility = View.VISIBLE
+               // if (tvDesc.text !== "") tvDesc.visibility = View.VISIBLE
+                if (!item.desc.isNullOrEmpty()) tvDesc.visibility = View.VISIBLE
                 if (item.alarmText.isNotEmpty()) imPhotoView.visibility = View.VISIBLE
                 else imPhotoView.visibility = View.GONE
                 //настройка темы
@@ -227,19 +228,58 @@ class ItemListAdapter(
         holder.bind(getItem(position), itemClickHandler)
     }
 
-    override fun onItemMove(fromPosition: Int, toPosition: Int) {
-        val currentList = currentList.toMutableList()
-        Collections.swap(currentList, fromPosition, toPosition)
-        submitList(currentList)
+      // Локальная копия списка для плавного и мгновенного перемещения элементов на экране
+    private var localList: MutableList<Item> = mutableListOf()
+
+    // Переопределяем отправку списка, чтобы синхронизировать данные из БД с локальным списком
+    override fun submitList(list: List<Item>?) {
+        super.submitList(list)
+        localList = list?.toMutableList() ?: mutableListOf()
     }
 
-    override fun onMoveComplete() {
-        val itemsWithNewOrder = currentList.mapIndexed { index, item ->
-            item.copy(sort = index)
+    // Переопределяем отправку списка с коллбэком (для скролла наверх во фрагменте)
+    override fun submitList(list: List<Item>?, commitCallback: Runnable?) {
+        super.submitList(list, commitCallback)
+        localList = list?.toMutableList() ?: mutableListOf()
+    }
+
+       override fun onItemMove(fromPosition: Int, toPosition: Int) {
+        if (fromPosition < 0 || toPosition < 0) return
+        
+        // 1. Меняем элементы местами ТОЛЬКО в локальной копии в памяти
+        Collections.swap(localList, fromPosition, toPosition)
+        
+        // 2. Мгновенно и плавно двигаем карточку на экране БЕЗ вызова submitList() и DiffUtil
+        notifyItemMoved(fromPosition, toPosition)
+    }
+
+      override fun onMoveComplete() {
+        val totalCount = localList.size
+        
+        // Пересчитываем индексы так, чтобы они оставались отрицательными (-5, -4, -3...)
+        // Верхний элемент получает самый маленький индекс, нижний — самый большой
+        val itemsWithNewOrder = localList.mapIndexed { index, item ->
+            val safeSortIndex = index - totalCount
+            item.copy(sort = safeSortIndex)
         }
-        submitList(itemsWithNewOrder)
+
+        // Запись в БД (Flow во ViewModel подхватит изменения, сам обновит базу и вернет список в submitList)
         onOrderChanged?.invoke(itemsWithNewOrder)
     }
+
+    // override fun onItemMove(fromPosition: Int, toPosition: Int) {
+    //     val currentList = currentList.toMutableList()
+    //     Collections.swap(currentList, fromPosition, toPosition)
+    //     submitList(currentList)
+    // }
+
+    // override fun onMoveComplete() {
+    //     val itemsWithNewOrder = currentList.mapIndexed { index, item ->
+    //         item.copy(sort = index)
+    //     }
+    //     submitList(itemsWithNewOrder)
+    //     onOrderChanged?.invoke(itemsWithNewOrder)
+    // }
 
 
 }
