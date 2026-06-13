@@ -28,6 +28,9 @@ import java.io.File
 import java.io.FileNotFoundException
 import java.util.Calendar
 import javax.inject.Inject
+import com.exampl3.flashlight.Const.SORT_STANDART
+import com.exampl3.flashlight.Const.SORT_USER
+import kotlinx.coroutines.flow.combine
 
 @HiltViewModel
 class ViewModelFlashLight @Inject constructor(
@@ -40,12 +43,43 @@ class ViewModelFlashLight @Inject constructor(
     private val getSystemSoundImp: GetSystemSoundImp
 ) : ViewModel() {
 
+    private val _sortType = MutableStateFlow(settingsPref.getSort())
+    val sortType = _sortType.asStateFlow()
+    
+    private val rawItemsFlow: Flow<List<Item>> = db.CourseDao().getAllItemsFlow()
+    
 
     fun savePremium(flag: Boolean) = pref.savePremium(flag)
     fun getPremium() = pref.getPremium()
 
     fun saveFirstAlarm(flag: Boolean) = pref.saveFirstAlarm(flag)
     fun isFirstAlarm() = pref.isFirstAlarm()
+
+     
+    val sortedItemsFlow: Flow<List<Item>> = combine(rawItemsFlow, _sortType) { list, sort ->
+        if (sort == SORT_STANDART) {
+            // --- СТАНДАРТНАЯ СОРТИРОВКА ---
+            list.sortedWith(
+                compareBy<Item> { 
+                    // 1. Выполненные дела уходят в самый низ (false выше, true ниже)
+                    it.change 
+                }.thenBy { 
+                    // 2. Дела с будильником выше, чем дела без будильника
+                    if (it.alarmTime > 0) 0 else 1 
+                }.thenByDescending { 
+                    // 3. Среди будильников — самые поздние даты ставим НАВЕРХ
+                    it.alarmTime 
+                }.thenBy {
+                    // 4. Если оба дела обычные — новое дело (у которого sort меньше) будет ВЫШЕ
+                    it.sort
+                }
+            )
+        } else {
+            // --- ПОЛЬЗОВАТЕЛЬСКАЯ СОРТИРОВКА ---
+            // Новые элементы с меньшим sort автоматически окажутся вверху экрана
+            list.sortedBy { it.sort }
+        }
+    }.flowOn(Dispatchers.Default) // <--- Освобождаем UI-поток. Вся сортировка идет в фоне!
 
     fun getAllCategories(onResult: (List<String>) -> Unit, item: Item?,calendar: Boolean) {
         val listCategory = mutableListOf("Повседневные")
@@ -109,7 +143,10 @@ class ViewModelFlashLight @Inject constructor(
         return db.CourseDao().getAllListCategory()
     }
 
-    fun saveSort(value: String) = settingsPref.saveSort(value)
+    fun saveSort(value: String) {
+        _sortType.value = value
+        settingsPref.saveSort(value)
+    } 
     fun getSort() = settingsPref.getSort()
 
     fun saveTheme(value: String) = settingsPref.saveTheme(value)
@@ -224,9 +261,52 @@ class ViewModelFlashLight @Inject constructor(
         }
     }
 
-    fun insertItem(item: Item) {
-        viewModelScope.launch { db.CourseDao().insertItem(item) }
+    //fun insertItem(item: Item) {
+    //    viewModelScope.launch { db.CourseDao().insertItem(item) }
+   // }
+
+    fun insertItem(
+    name: String,
+    category: String,
+    desc: String?,
+    alarmText: String,
+    hasAlarmPermission: Boolean, // Передаем результат проверки разрешения
+    isAlarmAction: Boolean,      // Был ли выбран будильник в диалоге
+    context: Context
+) {
+    // Запускаем корутину на IO потоке для работы с БД
+    viewModelScope.launch(Dispatchers.IO) {
+        // 1. Ищем МИНИМАЛЬНЫЙ sort в базе. Если база пустая — будет 0
+        val currentMinSort = db.CourseDao().getItemWithMinSort()?.sort ?: 0
+        
+        // 2. Вычитаем 1. Новое дело гарантированно получает самый маленький индекс и идет НАВЕРХ
+        val newSortIndex = currentMinSort - 1 
+
+        val newItem = Item(
+            id = null, // База данных сама сгенерирует ID
+            name = name,
+            category = category,
+            desc = desc,
+            alarmTime = 0,
+            alarmText = alarmText,
+            sort = newSortIndex
+        )
+
+        // 3. Вставляем элемент в БД и СРАЗУ получаем его реальный ID!
+        val insertedId = db.CourseDao().insertItem(newItem)
+
+        // 4. Если пользователь выбрал будильник И разрешение получено
+        if (isAlarmAction && hasAlarmPermission) {
+            // Создаем копию объекта уже с реальным ID из базы
+            val savedItem = newItem.copy(id = insertedId.toInt())
+            
+            // Переключаемся на Главный поток для вызова вашего метода будильника
+            withContext(Dispatchers.Main) {
+                insertDateAndAlarm(savedItem, null, context)
+            }
+        }
     }
+}
 
 
     fun updateItem(item: Item) {
