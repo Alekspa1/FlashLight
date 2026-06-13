@@ -43,5 +43,5 @@ jobs:
         with:
           to: 706399730
           token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: "Сборка готова!
+          message: "Сборка готова!"
           document: app/build/outputs/apk/debug/app-debug.apk
