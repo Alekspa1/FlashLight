@@ -155,7 +155,7 @@ class FragmentCalendar : Fragment() {
                     hasAlarmPermission = hasPermission,
                     isAlarmAction = isAlarm,
                     context = requireContext(),
-                    calendarDay = calendarDayB.timeInMillis,
+                    calendarDay = calendarDayB,
                 )
 
                 // 4. Если пользователь хотел будильник, но разрешения нет — показываем системный запрос
@@ -290,7 +290,7 @@ class FragmentCalendar : Fragment() {
                     hasAlarmPermission = hasPermission,
                     isAlarmAction = isAlarm,
                     context = requireContext(),
-                    calendarDay = calendarDayB.timeInMillis,
+                    calendarDay = calendarDayB,
                 )
 
                 // 4. Если пользователь хотел будильник, но разрешения нет — показываем системный запрос
