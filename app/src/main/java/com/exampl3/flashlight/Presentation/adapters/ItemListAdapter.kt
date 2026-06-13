@@ -227,19 +227,70 @@ class ItemListAdapter(
         holder.bind(getItem(position), itemClickHandler)
     }
 
-    override fun onItemMove(fromPosition: Int, toPosition: Int) {
-        val currentList = currentList.toMutableList()
-        Collections.swap(currentList, fromPosition, toPosition)
-        submitList(currentList)
+    override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: MutableList<Any>) {
+        if (payloads.isNotEmpty()) {
+            // Прилетел сигнал, что изменился только порядок (sort).
+            // Мы ОБЯЗАНЫ вызвать bind, чтобы обновить текст и исключить дубликаты переиспользования,
+            // но благодаря payload система сделает это тихо, без перезапуска анимации полета!
+           // holder.bind(getItem(position), itemClickHandler)
+        } else {
+            // Обычное полное обновление карточки
+            super.onBindViewHolder(holder, position, payloads)
+        }
+    }
+
+      // Локальная копия списка для плавного и мгновенного перемещения элементов на экране
+    private var localList: MutableList<Item> = mutableListOf()
+
+    // Переопределяем отправку списка, чтобы синхронизировать данные из БД с локальным списком
+    override fun submitList(list: List<Item>?) {
+        super.submitList(list)
+        localList = list?.toMutableList() ?: mutableListOf()
+    }
+
+    // Переопределяем отправку списка с коллбэком (для скролла наверх во фрагменте)
+    override fun submitList(list: List<Item>?, commitCallback: Runnable?) {
+        super.submitList(list, commitCallback)
+        localList = list?.toMutableList() ?: mutableListOf()
+    }
+
+       override fun onItemMove(fromPosition: Int, toPosition: Int) {
+        if (fromPosition < 0 || toPosition < 0) return
+        
+        // 1. Меняем элементы местами ТОЛЬКО в локальной копии в памяти
+        Collections.swap(localList, fromPosition, toPosition)
+        
+        // 2. Мгновенно и плавно двигаем карточку на экране БЕЗ вызова submitList() и DiffUtil
+        notifyItemMoved(fromPosition, toPosition)
     }
 
     override fun onMoveComplete() {
-        val itemsWithNewOrder = currentList.mapIndexed { index, item ->
-            item.copy(sort = index)
+        val totalCount = localList.size
+
+        // 1. Рассчитываем новые индексы sort на основе локального списка
+        val itemsWithNewOrder = localList.mapIndexed { index, item ->
+            val safeSortIndex = index - totalCount
+            item.copy(sort = safeSortIndex)
         }
-        submitList(itemsWithNewOrder)
+
+
+        // 3. Отправляем отсортированный список во ViewModel для записи в БД
         onOrderChanged?.invoke(itemsWithNewOrder)
     }
+
+    // override fun onItemMove(fromPosition: Int, toPosition: Int) {
+    //     val currentList = currentList.toMutableList()
+    //     Collections.swap(currentList, fromPosition, toPosition)
+    //     submitList(currentList)
+    // }
+
+    // override fun onMoveComplete() {
+    //     val itemsWithNewOrder = currentList.mapIndexed { index, item ->
+    //         item.copy(sort = index)
+    //     }
+    //     submitList(itemsWithNewOrder)
+    //     onOrderChanged?.invoke(itemsWithNewOrder)
+    // }
 
 
 }

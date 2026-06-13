@@ -17,6 +17,13 @@ interface CourseDao {
     @Query("SELECT * FROM Item")
     fun getAll(): LiveData<List<Item>>
 
+    @Query("SELECT * FROM Item")
+    fun getAllItemsFlow(): Flow<List<Item>>
+    
+    @Query("SELECT * FROM Item ORDER BY sort ASC LIMIT 1")
+    suspend fun getItemWithMinSort(): Item?
+    
+
     @Query("SELECT name FROM ListCategory")
     suspend fun getAllCategories(): List<String>
 
@@ -39,10 +46,10 @@ interface CourseDao {
     suspend fun updateItem(item: Item)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertItem(item: Item)
+    suspend fun insertItem(item: Item) : Long
 
-    @Query("SELECT * FROM Item WHERE sort = (SELECT MIN(sort) FROM Item)")
-    suspend fun getItemWithMaxSort(): Item?
+   // @Query("SELECT * FROM Item WHERE sort = (SELECT MIN(sort) FROM Item)")
+   // suspend fun getItemWithMaxSort(): Item?
 
     @Update
     suspend fun updateItems(items: List<Item>)
