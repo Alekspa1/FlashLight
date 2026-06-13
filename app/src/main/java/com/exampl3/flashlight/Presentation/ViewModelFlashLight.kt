@@ -280,7 +280,8 @@ class ViewModelFlashLight @Inject constructor(
     alarmText: String,
     hasAlarmPermission: Boolean, // Передаем результат проверки разрешения
     isAlarmAction: Boolean,      // Был ли выбран будильник в диалоге
-    context: Context
+    context: Context,
+    calendarDay: Calendar? = null
 ) {
     // Запускаем корутину на IO потоке для работы с БД
     viewModelScope.launch(Dispatchers.IO) {
@@ -295,7 +296,7 @@ class ViewModelFlashLight @Inject constructor(
             name = name,
             category = category,
             desc = desc,
-            alarmTime = 0,
+            alarmTime = calendarDay?.timeInMillis ?: 0, 
             alarmText = alarmText,
             sort = newSortIndex
         )
@@ -310,7 +311,7 @@ class ViewModelFlashLight @Inject constructor(
             
             // Переключаемся на Главный поток для вызова вашего метода будильника
             withContext(Dispatchers.Main) {
-                insertDateAndAlarm(savedItem, null, context)
+                insertDateAndAlarm(savedItem, calendarDay, context)
             }
         }
     }
