@@ -46,7 +46,7 @@ interface CourseDao {
     suspend fun updateItem(item: Item)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertItem(item: Item) : Int
+    suspend fun insertItem(item: Item) : Long
 
    // @Query("SELECT * FROM Item WHERE sort = (SELECT MIN(sort) FROM Item)")
    // suspend fun getItemWithMaxSort(): Item?
