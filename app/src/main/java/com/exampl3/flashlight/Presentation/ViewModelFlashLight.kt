@@ -50,6 +50,9 @@ class ViewModelFlashLight @Inject constructor(
 
     private val _sortType = MutableStateFlow(settingsPref.getSort())
     val sortType = _sortType.asStateFlow()
+
+    private val _categoryItemFlow = MutableStateFlow("Повседневные")
+    val categoryItemFlow = _categoryItemFlow.asStateFlow() 
     
     private val rawItemsFlow: Flow<List<Item>> = db.CourseDao().getAllItemsFlow()
     
