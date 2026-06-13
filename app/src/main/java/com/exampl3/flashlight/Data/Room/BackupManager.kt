@@ -132,7 +132,6 @@ class BackupManager @Inject constructor(
     }
 
     private fun restartApp() {
-        ToastFun(context, "Успешно")
         val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
         intent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
         context.startActivity(intent)
