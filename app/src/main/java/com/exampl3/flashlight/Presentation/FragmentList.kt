@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.speech.RecognizerIntent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -389,34 +390,36 @@ open class FragmentList : Fragment() {
 
     val touchHelper = ItemTouchHelper(DragItemTouchHelperCallback(adapter))
 
-    // 1. ПОДПИСКА НА ТИП СОРТИРОВКИ (Включаем/выключаем Drag-and-Drop на лету)
-    viewLifecycleOwner.lifecycleScope.launch {
-        viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-            modelFlashLight.sortType.collect { currentSort ->
-                if (currentSort == SORT_USER) {
-                    touchHelper.attachToRecyclerView(rcView)
-                    adapter.touchHelper = touchHelper
-                } else {
-                    touchHelper.attachToRecyclerView(null)
-                    adapter.touchHelper = null
-                }
-            }
+        if (modelFlashLight.getSort() == SORT_USER) {
+            touchHelper.attachToRecyclerView(rcView)
+            adapter.touchHelper = touchHelper
         }
-    }
+
+
+    // 1. ПОДПИСКА НА ТИП СОРТИРОВКИ (Включаем/выключаем Drag-and-Drop на лету)
+//    viewLifecycleOwner.lifecycleScope.launch {
+//        viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+//            modelFlashLight.sortType.collect { currentSort ->
+//                if (currentSort == SORT_USER) {
+//                    touchHelper.attachToRecyclerView(rcView)
+//                    adapter.touchHelper = touchHelper
+//                }
+////                else {
+////                    touchHelper.attachToRecyclerView(null)
+////                    adapter.touchHelper = null
+////                }
+//            }
+//        }
+//    }
 
     // 2. ПОДПИСКА НА ОТСОРТИРОВАННЫЙ СПИСОК (Flow)
-    viewLifecycleOwner.lifecycleScope.launch {
-        viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-            modelFlashLight.sortedItemsFlow.collect { readyList ->
-                // submitList принимает коллбэк, который сработает строго ПОСЛЕ того,
-                // как DiffUtil посчитает разницу и обновит элементы на экране.
-                adapter.submitList(readyList) {
-                    // Безопасный скролл наверх без бесконечного накопления обсерверов
-                    rcView.scrollToPosition(0)
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                modelFlashLight.sortedItemsFlow.collect { readyList ->
+                    adapter.submitList(readyList)
                 }
             }
         }
-    }
 }
 
 

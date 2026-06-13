@@ -10,6 +10,7 @@ import androidx.core.net.toUri
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.room.withTransaction
 import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Data.GetSystemSoundImp
 import com.exampl3.flashlight.Data.Room.Database
@@ -250,18 +251,38 @@ class ViewModelFlashLight @Inject constructor(
     }
 
     fun updateItemsOrder(newList: List<Item>) {
-        viewModelScope.launch {
-            saveNewOrder(newList)
-            listItemLD.value = newList
-        }
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                // ИСПОЛЬЗУЕМ withTransaction вместо runInTransaction.
+                // Этот метод сохраняет контекст корутины, и ошибка исчезнет!
+                db.withTransaction {
+                    newList.forEach { newItem ->
+                        db.CourseDao().updateItem(newItem)
+                    }
+                }
 
+                withContext(Dispatchers.Main) {
+                    listItemLD.value = newList
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
-    fun saveNewOrder(newList: List<Item>) {
-        newList.forEach { newItem ->
-            updateItem(newItem)
-        }
-    }
+//    fun updateItemsOrder(newList: List<Item>) {
+//        viewModelScope.launch {
+//            saveNewOrder(newList)
+//            listItemLD.value = newList
+//        }
+//
+//    }
+//
+//    fun saveNewOrder(newList: List<Item>) {
+//        newList.forEach { newItem ->
+//            updateItem(newItem)
+//        }
+//    }
 
     // fun getItemMaxSort() {
     //     viewModelScope.launch {

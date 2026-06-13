@@ -47,8 +47,7 @@ class ItemListAdapter(
                 tvTextItem.text = item.name
                 tvAlarm.text = alarmText(item) ?: "".trim()
                 tvDesc.text = item.desc
-               // if (tvDesc.text !== "") tvDesc.visibility = View.VISIBLE
-                if (!tvDesc.text.isNullOrEmpty()) tvDesc.visibility = View.VISIBLE
+                if (tvDesc.text !== "") tvDesc.visibility = View.VISIBLE
                 if (item.alarmText.isNotEmpty()) imPhotoView.visibility = View.VISIBLE
                 else imPhotoView.visibility = View.GONE
                 //настройка темы
@@ -228,6 +227,18 @@ class ItemListAdapter(
         holder.bind(getItem(position), itemClickHandler)
     }
 
+    override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: MutableList<Any>) {
+        if (payloads.isNotEmpty()) {
+            // Прилетел сигнал, что изменился только порядок (sort).
+            // Мы ОБЯЗАНЫ вызвать bind, чтобы обновить текст и исключить дубликаты переиспользования,
+            // но благодаря payload система сделает это тихо, без перезапуска анимации полета!
+           // holder.bind(getItem(position), itemClickHandler)
+        } else {
+            // Обычное полное обновление карточки
+            super.onBindViewHolder(holder, position, payloads)
+        }
+    }
+
       // Локальная копия списка для плавного и мгновенного перемещения элементов на экране
     private var localList: MutableList<Item> = mutableListOf()
 
@@ -253,17 +264,17 @@ class ItemListAdapter(
         notifyItemMoved(fromPosition, toPosition)
     }
 
-      override fun onMoveComplete() {
+    override fun onMoveComplete() {
         val totalCount = localList.size
-        
-        // Пересчитываем индексы так, чтобы они оставались отрицательными (-5, -4, -3...)
-        // Верхний элемент получает самый маленький индекс, нижний — самый большой
+
+        // 1. Рассчитываем новые индексы sort на основе локального списка
         val itemsWithNewOrder = localList.mapIndexed { index, item ->
             val safeSortIndex = index - totalCount
             item.copy(sort = safeSortIndex)
         }
 
-        // Запись в БД (Flow во ViewModel подхватит изменения, сам обновит базу и вернет список в submitList)
+
+        // 3. Отправляем отсортированный список во ViewModel для записи в БД
         onOrderChanged?.invoke(itemsWithNewOrder)
     }
 
