@@ -20,7 +20,7 @@ interface CourseDao {
     @Query("SELECT * FROM Item")
     fun getAllItemsFlow(): Flow<List<Item>>
     
-    @Query("SELECT * FROM table_name ORDER BY sort ASC LIMIT 1")
+    @Query("SELECT * FROM Item ORDER BY sort ASC LIMIT 1")
     suspend fun getItemWithMinSort(): Item?
     
 
