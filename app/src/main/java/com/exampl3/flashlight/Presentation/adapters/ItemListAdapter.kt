@@ -244,11 +244,16 @@ override fun onViewRecycled(holder: ItemListAdapter.ViewHolder) {
 
 
 private var localList: MutableList<Item> = mutableListOf()
-private var isUserDragging = false // Наш щит от Flow
+private var isUserDragging = false 
 
 override fun submitList(list: List<Item>?) {
-    // Если мы тащим или анимация завершения еще идет — строго игнорируем Flow
     if (isUserDragging) return 
+    
+    // ПРОВЕРКА: Если порядок ID на экране и в базе совпадает, 
+    // игнорируем ответ базы, чтобы не портить анимацию
+    val currentIds = localList.map { it.id }
+    val newIds = list?.map { it.id } ?: emptyList()
+    if (currentIds == newIds && currentIds.isNotEmpty()) return
     
     super.submitList(list)
     localList = list?.toMutableList() ?: mutableListOf()
@@ -257,6 +262,13 @@ override fun submitList(list: List<Item>?) {
 override fun submitList(list: List<Item>?, commitCallback: Runnable?) {
     if (isUserDragging) return
     
+    val currentIds = localList.map { it.id }
+    val newIds = list?.map { it.id } ?: emptyList()
+    if (currentIds == newIds && currentIds.isNotEmpty()) {
+        commitCallback?.run()
+        return 
+    }
+    
     super.submitList(list, commitCallback)
     localList = list?.toMutableList() ?: mutableListOf()
 }
@@ -264,7 +276,7 @@ override fun submitList(list: List<Item>?, commitCallback: Runnable?) {
 override fun onItemMove(fromPosition: Int, toPosition: Int) {
     if (fromPosition < 0 || toPosition < 0 || fromPosition >= localList.size || toPosition >= localList.size) return
 
-    isUserDragging = true // Защита включена, Flow заблокирован
+    isUserDragging = true 
 
     if (fromPosition < toPosition) {
         for (i in fromPosition until toPosition) {
@@ -279,18 +291,14 @@ override fun onItemMove(fromPosition: Int, toPosition: Int) {
 }
 
 override fun onMoveComplete() {
-    // 1. Фиксируем текущее состояние на экране
     super.submitList(localList.toList()) {
         val totalCount = localList.size
         val itemsWithNewOrder = localList.mapIndexed { index, item ->
             item.copy(sort = index - totalCount)
         }
         
-        // 2. Отправляем изменения в вашу рабочую базу данных
         onOrderChanged?.invoke(itemsWithNewOrder)
         
-        // 3. КРИТИЧЕСКИ ВАЖНО: Ждем 300 мс, пока завершатся все анимации UI, 
-        // и только потом открываем шлюз для обновлений из Flow базы данных!
         android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
             isUserDragging = false
         }, 300)
