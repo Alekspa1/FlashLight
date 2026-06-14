@@ -228,16 +228,8 @@ class ItemListAdapter(
     }
 
 
-override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: MutableList<Any>) {
-    if (payloads.isNotEmpty()) {
-        // Прилетел наш сигнал true (изменился только sort).
-        // Мы оставляем этот блок абсолютно ПУСТЫМ и НЕ вызываем super!
-        // Адаптер молча обновит индексы в памяти, карточка замрет как вкопанная, 
-        // а мигание и дубликаты цифр пропадут навсегда.
-    } else {
-        // Если payloads пустой — это обычное изменение (например, юзер отредактировал текст дела)
-        super.onBindViewHolder(holder, position, payloads)
-    }
+override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+    holder.bind(getItem(position), itemClickHandler)
 }
 
   private var localList: MutableList<Item> = mutableListOf()
