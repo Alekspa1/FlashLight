@@ -38,6 +38,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import javax.inject.Inject
+import androidx.recyclerview.widget.SimpleItemAnimator
 
 @AndroidEntryPoint
 open class FragmentList : Fragment() {
