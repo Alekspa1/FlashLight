@@ -232,7 +232,7 @@ class ItemListAdapter(
     return getItem(position).id?.toLong() ?: position.toLong()
 }
   
-  override fun onViewRecycled(holder: ViewHolder) {
+override fun onViewRecycled(holder: ItemListAdapter.ViewHolder) {
     super.onViewRecycled(holder)
     holder.itemView.alpha = 1.0f
     holder.itemView.translationY = 0f
