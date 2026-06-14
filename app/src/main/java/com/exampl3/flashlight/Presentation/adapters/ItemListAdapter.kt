@@ -249,23 +249,38 @@ override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: Mutab
         localList = list?.toMutableList() ?: mutableListOf()
     }
 
-       override fun onItemMove(fromPosition: Int, toPosition: Int) {
-        if (fromPosition < 0 || toPosition < 0) return
-        
-        // 1. Меняем элементы местами ТОЛЬКО в локальной копии в памяти
-        Collections.swap(localList, fromPosition, toPosition)
-        
-        // 2. Мгновенно и плавно двигаем карточку на экране БЕЗ вызова submitList() и DiffUtil
-        notifyItemMoved(fromPosition, toPosition)
+  override fun onItemMove(fromPosition: Int, toPosition: Int) {
+    if (fromPosition < 0 || toPosition < 0) return
+
+    // ИСПРАВЛЕНО: Вместо Collections.swap мы плавно сдвигаем элемент по списку.
+    // Это гарантирует, что localList в памяти будет на 100% совпадать 
+    // с тем, что происходит под вашим пальцем на экране!
+    if (fromPosition < toPosition) {
+        for (i in fromPosition until toPosition) {
+            Collections.swap(localList, i, i + 1)
+        }
+    } else {
+        for (i in fromPosition downTo toPosition + 1) {
+            Collections.swap(localList, i, i - 1)
+        }
     }
 
-  override fun onMoveComplete() {
-    // 1. Просто берем список ID элементов в том порядке, в каком вы их СЕЙЧАС выстроили на экране
-    val orderedIds = localList.mapNotNull { it.id }
+    // Мгновенно обновляем экран
+    notifyItemMoved(fromPosition, toPosition)
+}
 
-    // 2. Отдаем этот список ID во ViewModel. 
-    // Адаптер больше сам ничего не пересчитывает и не вызывает submitList!
-    onOrderChanged?.invoke(localList) 
+override fun onMoveComplete() {
+    // 1. Берем оригинальные индексы sort из базы, которые сейчас лежат в адаптере,
+    // и сортируем их строго по возрастанию (сверху вниз: -15, -14, -13...)
+    val originalSorts = currentList.map { it.sort }.sorted()
+
+    // 2. Раскладываем перетащенные карточки по этим стабильным полкам
+    val itemsWithNewOrder = localList.mapIndexed { index, item ->
+        item.copy(sort = originalSorts[index]) // ID не трогаем, меняем только sort!
+    }
+
+    // 3. Отправляем во ViewModel для записи одной чистой транзакцией withTransaction
+    onOrderChanged?.invoke(itemsWithNewOrder)
 }
 
     // override fun onItemMove(fromPosition: Int, toPosition: Int) {
