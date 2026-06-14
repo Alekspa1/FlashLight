@@ -29,8 +29,11 @@ class ItemListAdapter(
     val settingPref: SettingsSharedPreference,
     val theme: ThemeImp
 ) : ListAdapter<Item, ItemListAdapter.ViewHolder>(DiffCallback()), ItemTouchHelperAdapter {
+     init {
+        setHasStableIds(true) // Теперь компилятор поймет эту команду!
+    }
 
-   inner class ViewHolder(view: View,private val touchHelper: ItemTouchHelper?,val settingPref: SettingsSharedPreference, val theme: ThemeImp) : RecyclerView.ViewHolder(view) {
+    class ViewHolder(view: View,private val touchHelper: ItemTouchHelper?,val settingPref: SettingsSharedPreference, val theme: ThemeImp) : RecyclerView.ViewHolder(view) {
         private val binding = ItemBinding.bind(view)
 
 
@@ -39,7 +42,7 @@ class ItemListAdapter(
                 touchHelper?.startDrag(this)
                 true
             }
-            setHasStableIds(true)
+            
         }
 
         fun bind(item: Item, itemClickHandler: ItemClickHandler) {
