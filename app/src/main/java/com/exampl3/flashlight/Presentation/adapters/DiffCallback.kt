@@ -5,17 +5,19 @@ import com.exampl3.flashlight.Data.Room.Item
 
 class DiffCallback : DiffUtil.ItemCallback<Item>() {
     override fun areItemsTheSame(oldItem: Item, newItem: Item): Boolean {
-        // Сравниваем строго по ID
-        return oldItem.id == newItem.id
+        return oldItem.id == newItem.id // Сравниваем по ID
     }
 
     override fun areContentsTheSame(oldItem: Item, newItem: Item): Boolean {
-        // Проверяем, изменился ли текст или будильник. Поле sort тут проверять НЕ НАДО!
-        // Это защитит карточки от повторной перерисовки и уберет появление дубликатов "15 и 15".
-        return oldItem.name == newItem.name && 
-               oldItem.desc == newItem.desc && 
-               oldItem.alarmTime == newItem.alarmTime &&
-               oldItem.category == newItem.category &&
-               oldItem.change == newItem.change
+        return oldItem == newItem // Проверяем все поля, включая sort
+    }
+
+    // ДОБАВЬТЕ ЭТОТ МЕТОД:
+    override fun getChangePayload(oldItem: Item, newItem: Item): Any? {
+        // Если старый и новый элемент отличаются ТОЛЬКО полем sort (текст, ID и будильники те же)
+        if (oldItem.copy(sort = newItem.sort) == newItem) {
+            return true // Выбрасываем флаг-сигнал: "Изменился только порядок!"
+        }
+        return super.getChangePayload(oldItem, newItem)
     }
 }
