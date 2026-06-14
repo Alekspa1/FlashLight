@@ -4,11 +4,8 @@ package com.exampl3.flashlight.Presentation
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.provider.Settings
 import android.speech.RecognizerIntent
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,17 +15,16 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Const.ALARM
-import com.exampl3.flashlight.Const.SORT_STANDART
 import com.exampl3.flashlight.Const.SORT_USER
 import com.exampl3.flashlight.Const.THEME_ZABOR
 import com.exampl3.flashlight.Data.Room.Database
-import com.exampl3.flashlight.Data.Room.Item
 import com.exampl3.flashlight.Data.ThemeImp
 import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
 import com.exampl3.flashlight.Domain.ItemClickHandler
@@ -38,16 +34,9 @@ import com.exampl3.flashlight.Presentation.adapters.draganddrop.DragItemTouchHel
 import com.exampl3.flashlight.R
 import com.exampl3.flashlight.databinding.FragmentListBinding
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.util.Calendar
 import javax.inject.Inject
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 open class FragmentList : Fragment() {
@@ -95,26 +84,8 @@ open class FragmentList : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val pLauncher =
-            registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-                // Юзер ответил на запрос уведомлений (неважно, разрешил или отказал)
-
-                // Плавный переход к батарее — теперь они не столкнутся лбами!
-                if (permissionUseCase.isBatteryOptimizationEnabled(requireContext())) {
-                    try {
-                        startActivity(permissionUseCase.getBatteryOptimizationIntent(requireContext()))
-                    } catch (e: Exception) {
-                        // Резервный вариант на случай косяков с интентом
-                        val fallbackIntent =
-                            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                                data = Uri.fromParts("package", requireContext().packageName, null)
-                            }
-                        startActivity(fallbackIntent)
-                    }
-                }
-
-
-            }
+         pLauncher =
+            registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
         itemClickHandler = ItemClickHandler(
             context = requireContext(),
             modelFlashLight = modelFlashLight,
@@ -127,18 +98,19 @@ open class FragmentList : Fragment() {
 
 
 
-        modelFlashLight.categoryItemLD.observe(viewLifecycleOwner) { value ->
-            binding.tvCategory.text = value
+//        modelFlashLight.categoryItemLD.observe(viewLifecycleOwner) { value ->
+//            binding.tvCategory.text = value
+//
+//        }
 
-        }
 
 
-        db.CourseDao().getAll().observe(viewLifecycleOwner) {
-            modelFlashLight.categoryItemLD.value?.let { it1 ->
-                modelFlashLight.updateCategory(it1)
-
-            }
-        }
+//        db.CourseDao().getAll().observe(viewLifecycleOwner) {
+//            modelFlashLight.categoryItemLD.value?.let { it1 ->
+//                modelFlashLight.updateCategory(it1)
+//
+//            }
+//        }
 
         val launcher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -417,8 +389,17 @@ open class FragmentList : Fragment() {
                 modelFlashLight.sortedItemsFlow.collect { readyList ->
                     adapter.submitList(readyList)
                 }
+
             }
         }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                modelFlashLight.categoryItemFlow.collect { category ->
+                    binding.tvCategory.text = category
+                }
+            }
+        } // подписка на ui каегорию
 }
 
 

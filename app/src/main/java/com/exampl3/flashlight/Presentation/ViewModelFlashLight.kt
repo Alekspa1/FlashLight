@@ -14,6 +14,7 @@ import androidx.room.withTransaction
 import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Const.SORT_STANDART
 import com.exampl3.flashlight.Data.GetSystemSoundImp
+import com.exampl3.flashlight.Data.Room.BackupManager
 import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Data.Room.Item
 import com.exampl3.flashlight.Data.Room.ListCategory
@@ -21,24 +22,22 @@ import com.exampl3.flashlight.Data.ThemeImp
 import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
 import com.exampl3.flashlight.Data.sharedPreference.SharedPreferenceImpl
 import com.exampl3.flashlight.Domain.InsertDateAndAlarm
-import com.exampl3.flashlight.Domain.LogText
 import com.exampl3.flashlight.Domain.useCase.insertOrDeleteAlarm.ChangeAlarmUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.launch
-import java.io.File
-import java.io.FileNotFoundException
-import java.util.Calendar
-import javax.inject.Inject
-import com.exampl3.flashlight.Data.Room.BackupManager
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileNotFoundException
+import java.util.Calendar
+import javax.inject.Inject
 
 
 @HiltViewModel
@@ -60,7 +59,6 @@ class ViewModelFlashLight @Inject constructor(
     private val _categoryItemFlow = MutableStateFlow("Повседневные")
     val categoryItemFlow = _categoryItemFlow.asStateFlow()
 
-    private val rawItemsFlow: Flow<List<Item>> = db.CourseDao().getAllItemsFlow()
 
 
     fun savePremium(flag: Boolean) = pref.savePremium(flag)
@@ -88,60 +86,55 @@ class ViewModelFlashLight @Inject constructor(
             if (success) {
                 _toastEvent.emit("Вы успешно восстановили базу данных")
 
-            } else {_toastEvent.emit("Ошибка при восстановлении базы данных")}
+            } else {
+                _toastEvent.emit("Ошибка при восстановлении базы данных")
+            }
         }
     }
 
 
+    val sortedItemsFlow: Flow<List<Item>> = combine(
+        db.CourseDao().getAllItemsFlow(), // Поток всех дел
+        sortType,                         // Поток типа сортировки
+        categoryItemFlow                  // Поток выбранной категории
+    ) { list, sort, currentCategory ->
 
+        // 1. СНАЧАЛА ФИЛЬТРУЕМ СПИСОК: оставляем только дела из выбранной категории
+        val filteredList = list.filter { it.category == currentCategory }
 
-
-
-    val sortedItemsFlow: Flow<List<Item>> = combine(rawItemsFlow, sortType) { list, sort ->
+        // 2. ЗАТЕМ СОРТИРУЕМ ОТФИЛЬТРОВАННЫЙ СПИСОК
         if (sort == SORT_STANDART) {
-            // --- СТАНДАРТНАЯ СОРТИРОВКА ---
-            list.sortedWith(
-                compareBy<Item> {
-                    // 1. Выполненные дела уходят в самый низ (false выше, true ниже)
-                    it.change
-                }.thenBy {
-                    // 2. Дела с будильником выше, чем дела без будильника
-                    if (it.alarmTime > 0) 0 else 1
-                }.thenByDescending {
-                    // 3. Среди будильников — самые поздние даты ставим НАВЕРХ
-                    it.alarmTime
-                }.thenBy {
-                    // 4. Если оба дела обычные — новое дело (у которого sort меньше) будет ВЫШЕ
-                    it.sort
-                }
+            filteredList.sortedWith(
+                compareBy<Item> { it.change }
+                    .thenBy { if (it.alarmTime > 0L) 0 else 1 }
+                    .thenByDescending { it.alarmTime }
+                    .thenBy { it.sort }
             )
         } else {
-            // --- ПОЛЬЗОВАТЕЛЬСКАЯ СОРТИРОВКА ---
-            // Новые элементы с меньшим sort автоматически окажутся вверху экрана
-            list.sortedBy { it.sort }
+            filteredList.sortedBy { it.sort }
         }
-    }.flowOn(Dispatchers.Default) // <--- Освобождаем UI-поток. Вся сортировка идет в фоне!
+    }.flowOn(Dispatchers.Default)
 
-    fun getAllCategories(onResult: (List<String>) -> Unit, item: Item?,calendar: Boolean) {
+    fun getAllCategories(onResult: (List<String>) -> Unit, item: Item?, calendar: Boolean) {
         val listCategory = mutableListOf("Повседневные")
         viewModelScope.launch {
             listCategory.addAll(db.CourseDao().getAllCategories())
-                if (!calendar){
-                    if (item == null) {
-                        listCategory.remove(categoryItemLD.value)
-                        listCategory.add(0, categoryItemLD.value.toString())
-                    }
-                    else {
-                        listCategory.remove(item.category)
-                        listCategory.add(0, item.category)
-                    }
+            if (!calendar) {
+                if (item == null) {
+                    val currentCategory = categoryItemFlow.value
+                    listCategory.remove(currentCategory)
+                    listCategory.add(0, currentCategory)
                 } else {
-                    if (item != null) {
-                        listCategory.remove(item.category)
-                        listCategory.add(0, item.category)
-                    }
-
+                    listCategory.remove(item.category)
+                    listCategory.add(0, item.category)
                 }
+            } else {
+                if (item != null) {
+                    listCategory.remove(item.category)
+                    listCategory.add(0, item.category)
+                }
+
+            }
 
 
             onResult(listCategory)
@@ -150,20 +143,20 @@ class ViewModelFlashLight @Inject constructor(
     }
 
 
-    fun setView(map: Map<Const.Action, Map<View, Int>>){
+    fun setView(map: Map<Const.Action, Map<View, Int>>) {
         theme.view(map)
     }
 
-    fun setSize(map: Map<Const.Action, Map<View, Int>>){
+    fun setSize(map: Map<Const.Action, Map<View, Int>>) {
         theme.setTextSize(map)
     }
 
-    fun setSizeTextIsList(list: List<TextView>){
-    theme.setSizeTextIsList(list)
+    fun setSizeTextIsList(list: List<TextView>) {
+        theme.setSizeTextIsList(list)
     }
 
-    fun getAllSound() : Map<String, Uri> {
-       return getSystemSoundImp.getSound()
+    fun getAllSound(): Map<String, Uri> {
+        return getSystemSoundImp.getSound()
     }
 
 
@@ -178,7 +171,6 @@ class ViewModelFlashLight @Inject constructor(
 
     val uriPhoto = MutableLiveData<String>()
 
-    val maxSorted = MutableLiveData<Int?>()
 
     fun getAllListCategory(): Flow<List<ListCategory>> {
         return db.CourseDao().getAllListCategory()
@@ -188,6 +180,7 @@ class ViewModelFlashLight @Inject constructor(
         _sortType.value = value
         settingsPref.saveSort(value)
     }
+
     fun getSort() = settingsPref.getSort()
 
     fun saveTheme(value: String) = settingsPref.saveTheme(value)
@@ -198,7 +191,6 @@ class ViewModelFlashLight @Inject constructor(
 
     fun saveUriAlarm(uri: Uri) = settingsPref.saveUriAlarm(uri)
     fun getUriAlarm() = settingsPref.getUriAlarm()
-
 
 
     fun saveImagePermanently(context: Context, uri: Uri): Uri {
@@ -246,24 +238,28 @@ class ViewModelFlashLight @Inject constructor(
 
 
     fun updateCategory(value: String) {
-        categoryItemLD.value = value
-        viewModelScope.launch {
-            listItemLD.value = db.CourseDao().getAllNewNoFlow(value)
-        }
-
-
+        _categoryItemFlow.value = value
     }
 
-    fun insertCategory(name: String, context: Context){
+    fun insertCategory(name: String, context: Context) {
         viewModelScope.launch {
-        if (isCategoryNameExists(name)) Toast.makeText(context, "Такая категория уже есть", Toast.LENGTH_SHORT).show()
-        else db.CourseDao().insertCategory(ListCategory(null, name))
+            if (isCategoryNameExists(name)) Toast.makeText(
+                context,
+                "Такая категория уже есть",
+                Toast.LENGTH_SHORT
+            ).show()
+            else db.CourseDao().insertCategory(ListCategory(null, name))
         }
     }
-    fun upgrateCategory(item: ListCategory,name: String, context: Context){
+
+    fun upgrateCategory(item: ListCategory, name: String, context: Context) {
         viewModelScope.launch {
             val newitem = item.copy(name = name)
-            if (isCategoryNameExists(name)) Toast.makeText(context, "Такая категория уже есть", Toast.LENGTH_SHORT).show()
+            if (isCategoryNameExists(name)) Toast.makeText(
+                context,
+                "Такая категория уже есть",
+                Toast.LENGTH_SHORT
+            ).show()
             else {
                 db.CourseDao().updateCategory(newitem)
                 db.CourseDao().getAllNewNoFlow(item.name).forEach {
@@ -273,6 +269,7 @@ class ViewModelFlashLight @Inject constructor(
             }
         }
     }
+
     suspend fun isCategoryNameExists(name: String): Boolean {
         return try {
             val count = db.CourseDao().isCategoryExists(name)
@@ -324,51 +321,51 @@ class ViewModelFlashLight @Inject constructor(
 
     //fun insertItem(item: Item) {
     //    viewModelScope.launch { db.CourseDao().insertItem(item) }
-   // }
+    // }
 
     fun insertItem(
-    name: String,
-    category: String,
-    desc: String?,
-    alarmText: String,
-    hasAlarmPermission: Boolean, // Передаем результат проверки разрешения
-    isAlarmAction: Boolean,      // Был ли выбран будильник в диалоге
-    context: Context,
-    calendarDay: Calendar? = null
-) {
-    // Запускаем корутину на IO потоке для работы с БД
-    viewModelScope.launch(Dispatchers.IO) {
-        // 1. Ищем МИНИМАЛЬНЫЙ sort в базе. Если база пустая — будет 0
-        val currentMinSort = db.CourseDao().getItemWithMinSort()?.sort ?: 0
+        name: String,
+        category: String,
+        desc: String?,
+        alarmText: String,
+        hasAlarmPermission: Boolean, // Передаем результат проверки разрешения
+        isAlarmAction: Boolean,      // Был ли выбран будильник в диалоге
+        context: Context,
+        calendarDay: Calendar? = null
+    ) {
+        // Запускаем корутину на IO потоке для работы с БД
+        viewModelScope.launch(Dispatchers.IO) {
+            // 1. Ищем МИНИМАЛЬНЫЙ sort в базе. Если база пустая — будет 0
+            val currentMinSort = db.CourseDao().getItemWithMinSort()?.sort ?: 0
 
-        // 2. Вычитаем 1. Новое дело гарантированно получает самый маленький индекс и идет НАВЕРХ
-        val newSortIndex = currentMinSort - 1
+            // 2. Вычитаем 1. Новое дело гарантированно получает самый маленький индекс и идет НАВЕРХ
+            val newSortIndex = currentMinSort - 1
 
-        val newItem = Item(
-            id = null, // База данных сама сгенерирует ID
-            name = name,
-            category = category,
-            desc = desc,
-            alarmTime = calendarDay?.timeInMillis ?: 0,
-            alarmText = alarmText,
-            sort = newSortIndex
-        )
+            val newItem = Item(
+                id = null, // База данных сама сгенерирует ID
+                name = name,
+                category = category,
+                desc = desc,
+                alarmTime = calendarDay?.timeInMillis ?: 0,
+                alarmText = alarmText,
+                sort = newSortIndex
+            )
 
-        // 3. Вставляем элемент в БД и СРАЗУ получаем его реальный ID!
-        val insertedId = db.CourseDao().insertItem(newItem)
+            // 3. Вставляем элемент в БД и СРАЗУ получаем его реальный ID!
+            val insertedId = db.CourseDao().insertItem(newItem)
 
-        // 4. Если пользователь выбрал будильник И разрешение получено
-        if (isAlarmAction && hasAlarmPermission) {
-            // Создаем копию объекта уже с реальным ID из базы
-            val savedItem = newItem.copy(id = insertedId.toInt())
+            // 4. Если пользователь выбрал будильник И разрешение получено
+            if (isAlarmAction && hasAlarmPermission) {
+                // Создаем копию объекта уже с реальным ID из базы
+                val savedItem = newItem.copy(id = insertedId.toInt())
 
-            // Переключаемся на Главный поток для вызова вашего метода будильника
-            withContext(Dispatchers.Main) {
-                insertDateAndAlarm(savedItem, calendarDay, context)
+                // Переключаемся на Главный поток для вызова вашего метода будильника
+                withContext(Dispatchers.Main) {
+                    insertDateAndAlarm(savedItem, calendarDay, context)
+                }
             }
         }
     }
-}
 
 
     fun updateItem(item: Item) {

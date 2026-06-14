@@ -2,11 +2,7 @@ package com.exampl3.flashlight.Presentation
 
 
 import android.Manifest
-import android.content.Intent
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,7 +20,6 @@ import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Const.ALARM
 import com.exampl3.flashlight.Const.THEME_ZABOR
 import com.exampl3.flashlight.Data.Room.Database
-import com.exampl3.flashlight.Data.Room.Item
 import com.exampl3.flashlight.Data.ThemeImp
 import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
 import com.exampl3.flashlight.Domain.ItemClickHandler
@@ -34,11 +29,6 @@ import com.exampl3.flashlight.R
 import com.exampl3.flashlight.databinding.FragmentCalendarBinding
 import com.exampl3.flashlight.databinding.FragmentCalendarZaborBinding
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.util.Calendar
 import javax.inject.Inject
 
@@ -92,24 +82,7 @@ class FragmentCalendar : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val pLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            // Юзер ответил на запрос уведомлений (неважно, разрешил или отказал)
-
-            // Плавный переход к батарее — теперь они не столкнутся лбами!
-            if (permissionUseCase.isBatteryOptimizationEnabled(requireContext())) {
-                try {
-                    startActivity(permissionUseCase.getBatteryOptimizationIntent(requireContext()))
-                } catch (e: Exception) {
-                    // Резервный вариант на случай косяков с интентом
-                    val fallbackIntent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                        data = Uri.fromParts("package", requireContext().packageName, null)
-                    }
-                    startActivity(fallbackIntent)
-                }
-            }
-
-
-        }
+        pLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
         itemClickHandler = ItemClickHandler(
             context = requireContext(),
             modelFlashLight = modelFlashLight,
@@ -117,59 +90,65 @@ class FragmentCalendar : Fragment() {
             pickImageLauncher = pickImageLauncher,
             pLauncher = pLauncher,
 
-        )
+            )
         initRcView()
         calendarDayB = Calendar.getInstance()
 
         if (pref.getTheme() == THEME_ZABOR) {
             bindingZabor.imBAddCalendar.setOnClickListener {
-               // modelFlashLight.getItemMaxSort()
+                // modelFlashLight.getItemMaxSort()
                 if (modelFlashLight.getPremium())
-                     if (getDateNow(calendarDayB) >= getDateNow(calendarZero))  DialogItemList.alertItem(
-                      requireContext(),
-        object : DialogItemList.Listener {
-            override fun onClickItem(
-                name: String,
-                action: Int?,
-                id: Int?,
-                desc: String?,
-                uri: String?,
-                category: String?
-            ) {
-                // 1. Подготавливаем картинку
-                var permanentFile = ""
-                if (uri != null && uri.isNotEmpty()) {
-                    permanentFile = modelFlashLight.saveImagePermanently(requireContext(), uri.toUri()).toString()
-                }
+                    if (getDateNow(calendarDayB) >= getDateNow(calendarZero)) DialogItemList.alertItem(
+                        requireContext(),
+                        object : DialogItemList.Listener {
+                            override fun onClickItem(
+                                name: String,
+                                action: Int?,
+                                id: Int?,
+                                desc: String?,
+                                uri: String?,
+                                category: String?
+                            ) {
+                                // 1. Подготавливаем картинку
+                                var permanentFile = ""
+                                if (uri != null && uri.isNotEmpty()) {
+                                    permanentFile = modelFlashLight.saveImagePermanently(
+                                        requireContext(),
+                                        uri.toUri()
+                                    ).toString()
+                                }
 
-                // 2. Проверяем разрешение на уведомления
-                val hasPermission = Const.isPermissionGranted(requireContext(), Manifest.permission.POST_NOTIFICATIONS)
-                val isAlarm = (action == ALARM)
+                                // 2. Проверяем разрешение на уведомления
+                                val hasPermission = Const.isPermissionGranted(
+                                    requireContext(),
+                                    Manifest.permission.POST_NOTIFICATIONS
+                                )
+                                val isAlarm = (action == ALARM)
 
-                // 3. Просто отдаем всё во ViewModel! Она сделает всё сама, без фризов и задержек
-              modelFlashLight.insertItem(
-                    name = name,
-                    category = category.toString(),
-                    desc = desc,
-                    alarmText = permanentFile,
-                    hasAlarmPermission = hasPermission,
-                    isAlarmAction = isAlarm,
-                    context = requireContext(),
-                    calendarDay = calendarDayB,
-                )
+                                // 3. Просто отдаем всё во ViewModel! Она сделает всё сама, без фризов и задержек
+                                modelFlashLight.insertItem(
+                                    name = name,
+                                    category = category.toString(),
+                                    desc = desc,
+                                    alarmText = permanentFile,
+                                    hasAlarmPermission = hasPermission,
+                                    isAlarmAction = isAlarm,
+                                    context = requireContext(),
+                                    calendarDay = calendarDayB,
+                                )
 
-                // 4. Если пользователь хотел будильник, но разрешения нет — показываем системный запрос
-                if (isAlarm && !hasPermission) {
-                    pLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                }
-            }
-        },
-        null,
-        model = modelFlashLight,
-        lifecycleOwner = this,
-        pick = pickImageLauncher,
-        true
-    )               // DialogItemList.alertItem(
+                                // 4. Если пользователь хотел будильник, но разрешения нет — показываем системный запрос
+                                if (isAlarm && !hasPermission) {
+                                    pLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                }
+                            }
+                        },
+                        null,
+                        model = modelFlashLight,
+                        lifecycleOwner = this,
+                        pick = pickImageLauncher,
+                        true
+                    )               // DialogItemList.alertItem(
                     //     requireContext(),
                     //     object : DialogItemList.Listener {
                     //         override fun onClickItem(
@@ -258,53 +237,59 @@ class FragmentCalendar : Fragment() {
             }
         } else {
             binding.imBAddCalendar.setOnClickListener {
-               // modelFlashLight.getItemMaxSort()
+                // modelFlashLight.getItemMaxSort()
                 if (modelFlashLight.getPremium())
-                     if (getDateNow(calendarDayB) >= getDateNow(calendarZero)) DialogItemList.alertItem(
-                      requireContext(),
-        object : DialogItemList.Listener {
-            override fun onClickItem(
-                name: String,
-                action: Int?,
-                id: Int?,
-                desc: String?,
-                uri: String?,
-                category: String?
-            ) {
-                // 1. Подготавливаем картинку
-                var permanentFile = ""
-                if (uri != null && uri.isNotEmpty()) {
-                    permanentFile = modelFlashLight.saveImagePermanently(requireContext(), uri.toUri()).toString()
-                }
+                    if (getDateNow(calendarDayB) >= getDateNow(calendarZero)) DialogItemList.alertItem(
+                        requireContext(),
+                        object : DialogItemList.Listener {
+                            override fun onClickItem(
+                                name: String,
+                                action: Int?,
+                                id: Int?,
+                                desc: String?,
+                                uri: String?,
+                                category: String?
+                            ) {
+                                // 1. Подготавливаем картинку
+                                var permanentFile = ""
+                                if (uri != null && uri.isNotEmpty()) {
+                                    permanentFile = modelFlashLight.saveImagePermanently(
+                                        requireContext(),
+                                        uri.toUri()
+                                    ).toString()
+                                }
 
-                // 2. Проверяем разрешение на уведомления
-                val hasPermission = Const.isPermissionGranted(requireContext(), Manifest.permission.POST_NOTIFICATIONS)
-                val isAlarm = (action == ALARM)
+                                // 2. Проверяем разрешение на уведомления
+                                val hasPermission = Const.isPermissionGranted(
+                                    requireContext(),
+                                    Manifest.permission.POST_NOTIFICATIONS
+                                )
+                                val isAlarm = (action == ALARM)
 
-                // 3. Просто отдаем всё во ViewModel! Она сделает всё сама, без фризов и задержек
-                modelFlashLight.insertItem(
-                    name = name,
-                    category = category.toString(),
-                    desc = desc,
-                    alarmText = permanentFile,
-                    hasAlarmPermission = hasPermission,
-                    isAlarmAction = isAlarm,
-                    context = requireContext(),
-                    calendarDay = calendarDayB,
-                )
+                                // 3. Просто отдаем всё во ViewModel! Она сделает всё сама, без фризов и задержек
+                                modelFlashLight.insertItem(
+                                    name = name,
+                                    category = category.toString(),
+                                    desc = desc,
+                                    alarmText = permanentFile,
+                                    hasAlarmPermission = hasPermission,
+                                    isAlarmAction = isAlarm,
+                                    context = requireContext(),
+                                    calendarDay = calendarDayB,
+                                )
 
-                // 4. Если пользователь хотел будильник, но разрешения нет — показываем системный запрос
-                if (isAlarm && !hasPermission) {
-                    pLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                }
-            }
-        },
-        null,
-        model = modelFlashLight,
-        lifecycleOwner = this,
-        pick = pickImageLauncher,
-        true
-    )
+                                // 4. Если пользователь хотел будильник, но разрешения нет — показываем системный запрос
+                                if (isAlarm && !hasPermission) {
+                                    pLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                }
+                            }
+                        },
+                        null,
+                        model = modelFlashLight,
+                        lifecycleOwner = this,
+                        pick = pickImageLauncher,
+                        true
+                    )
                     //DialogItemList.alertItem(
                     //     requireContext(),
                     //     object : DialogItemList.Listener {
