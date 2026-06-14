@@ -280,25 +280,33 @@ class ViewModelFlashLight @Inject constructor(
         }
     }
 
-    fun updateItemsOrder(newList: List<Item>) {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                // ИСПОЛЬЗУЕМ withTransaction вместо runInTransaction.
-                // Этот метод сохраняет контекст корутины, и ошибка исчезнет!
-                db.withTransaction {
-                    newList.forEach { newItem ->
-                        db.CourseDao().updateItem(newItem)
-                    }
-                }
-
-                withContext(Dispatchers.Main) {
-                    listItemLD.value = newList
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
+ fun updateItemsOrder(newList: List<Item>) {
+    viewModelScope.launch(Dispatchers.IO) {
+        try {
+            // Вычисляем новые индексы на основе размера списка
+            val totalCount = newList.size
+            val itemsWithNewSort = newList.mapIndexed { index, item ->
+                // Верхний элемент получает самый маленький индекс, нижний — самый большой
+                item.copy(sort = index - totalCount) 
             }
+
+            // Запускаем транзакцию базы данных. 
+            // Room обновит всю сетку индексов за один микро-шаг!
+            db.withTransaction {
+                itemsWithNewSort.forEach { item ->
+                    db.CourseDao().updateItem(item) // Обновляем строго в базе
+                }
+            }
+            
+            // Синхронизируем LiveData на главном потоке, если она используется
+            withContext(Dispatchers.Main) {
+                listItemLD.value = itemsWithNewSort
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
+}
 
 //    fun updateItemsOrder(newList: List<Item>) {
 //        viewModelScope.launch {
