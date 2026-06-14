@@ -280,27 +280,13 @@ class ViewModelFlashLight @Inject constructor(
         }
     }
 
- fun updateItemsOrder(newList: List<Item>) {
+fun updateItemsOrder(newList: List<Item>) {
     viewModelScope.launch(Dispatchers.IO) {
         try {
-            // Вычисляем новые индексы на основе размера списка
-            val totalCount = newList.size
-            val itemsWithNewSort = newList.mapIndexed { index, item ->
-                // Верхний элемент получает самый маленький индекс, нижний — самый большой
-                item.copy(sort = index - totalCount) 
-            }
-
-            // Запускаем транзакцию базы данных. 
-            // Room обновит всю сетку индексов за один микро-шаг!
             db.withTransaction {
-                itemsWithNewSort.forEach { item ->
-                    db.CourseDao().updateItem(item) // Обновляем строго в базе
+                newList.forEach { item ->
+                    db.CourseDao().updateItem(item)
                 }
-            }
-            
-            // Синхронизируем LiveData на главном потоке, если она используется
-            withContext(Dispatchers.Main) {
-                listItemLD.value = itemsWithNewSort
             }
         } catch (e: Exception) {
             e.printStackTrace()
