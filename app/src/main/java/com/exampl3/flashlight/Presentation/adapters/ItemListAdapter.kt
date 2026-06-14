@@ -259,18 +259,13 @@ override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: Mutab
         notifyItemMoved(fromPosition, toPosition)
     }
 
-    override fun onMoveComplete() {
-    // 1. Берем оригинальные индексы sort из базы, которые УЖЕ лежат в адаптере,
-    // и сортируем их строго по возрастанию (сверху вниз: -6, -5, -4...)
-    val originalSorts = currentList.map { it.sort }.sorted()
+  override fun onMoveComplete() {
+    // 1. Просто берем список ID элементов в том порядке, в каком вы их СЕЙЧАС выстроили на экране
+    val orderedIds = localList.mapNotNull { it.id }
 
-    // 2. Раскладываем перетащенные карточки по этим стабильным полкам
-    val itemsWithNewOrder = localList.mapIndexed { index, item ->
-        item.copy(sort = originalSorts[index]) // ID и будильники не трогаем, меняем только sort!
-    }
-
-    // 3. Отправляем во ViewModel. withTransaction обновит всё одним щелчком.
-    onOrderChanged?.invoke(itemsWithNewOrder)
+    // 2. Отдаем этот список ID во ViewModel. 
+    // Адаптер больше сам ничего не пересчитывает и не вызывает submitList!
+    onOrderChanged?.invoke(localList) 
 }
 
     // override fun onItemMove(fromPosition: Int, toPosition: Int) {
