@@ -228,26 +228,30 @@ class ItemListAdapter(
     }
 
 
-override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-    holder.bind(getItem(position), itemClickHandler)
-}
-
-  private var localList: MutableList<Item> = mutableListOf()
+private var localList: MutableList<Item> = mutableListOf()
+private var isUserDragging = false // Флаг-щит от преждевременных обновлений Flow
 
 override fun submitList(list: List<Item>?) {
+    // Если пользователь сейчас в процессе перетаскивания, 
+    // игнорируем любые фоновые обновления из Flow базы данных
+    if (isUserDragging) return 
+    
     super.submitList(list)
     localList = list?.toMutableList() ?: mutableListOf()
 }
 
 override fun submitList(list: List<Item>?, commitCallback: Runnable?) {
+    if (isUserDragging) return
+    
     super.submitList(list, commitCallback)
     localList = list?.toMutableList() ?: mutableListOf()
 }
 
 override fun onItemMove(fromPosition: Int, toPosition: Int) {
-    if (fromPosition < 0 || toPosition < 0) return
+    if (fromPosition < 0 || toPosition < 0 || fromPosition >= localList.size || toPosition >= localList.size) return
 
-    // Просто плавно сдвигаем элементы в локальном буфере, пока ведем палец
+    isUserDragging = true // Пользователь начал тащить элемент
+
     if (fromPosition < toPosition) {
         for (i in fromPosition until toPosition) {
             Collections.swap(localList, i, i + 1)
@@ -257,16 +261,25 @@ override fun onItemMove(fromPosition: Int, toPosition: Int) {
             Collections.swap(localList, i, i - 1)
         }
     }
-    notifyItemMoved(fromPosition, toPosition) // Красивая анимация под пальцем
+    notifyItemMoved(fromPosition, toPosition) // Красивая анимация сдвига под пальцем
 }
 
 override fun onMoveComplete() {
-    val totalCount = localList.size
-    
-    // 1. Рассчитываем новые индексы sort для выстроенного на экране списка
-    val itemsWithNewOrder = localList.mapIndexed { index, item ->
-        item.copy(sort = index - totalCount)
+    // 1. Насильно синхронизируем внутреннее состояние ListAdapter с тем, что сейчас на экране.
+    // Передаем ему копию локального списка.
+    super.submitList(localList.toList()) {
+        // Этот блок кода выполнится ТОЛЬКО тогда, когда ListAdapter полностью примет список
+        isUserDragging = false // Теперь можно безопасно принимать новые данные из Flow
+        
+        val totalCount = localList.size
+        val itemsWithNewOrder = localList.mapIndexed { index, item ->
+            item.copy(sort = index - totalCount)
+        }
+        
+        // 2. Отправляем финальный список во ViewModel для записи в Room транзакцией
+        onOrderChanged(itemsWithNewOrder)
     }
+}
 
     // 2. ВЫПОЛНЯЕМ ВАШУ ИДЕЮ: Синхронизируем внутренний currentList адаптера с экраном!
     submitList(itemsWithNewOrder)
