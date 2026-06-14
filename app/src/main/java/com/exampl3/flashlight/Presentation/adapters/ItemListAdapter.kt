@@ -227,17 +227,12 @@ class ItemListAdapter(
         holder.bind(getItem(position), itemClickHandler)
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: MutableList<Any>) {
-        if (payloads.isNotEmpty()) {
-            // Прилетел сигнал, что изменился только порядок (sort).
-            // Мы ОБЯЗАНЫ вызвать bind, чтобы обновить текст и исключить дубликаты переиспользования,
-            // но благодаря payload система сделает это тихо, без перезапуска анимации полета!
-           // holder.bind(getItem(position), itemClickHandler)
-        } else {
-            // Обычное полное обновление карточки
-            super.onBindViewHolder(holder, position, payloads)
-        }
-    }
+
+override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: MutableList<Any>) {
+    // ВСЕГДА вызываем bind(), чтобы RecyclerView при переиспользовании ячеек 
+    // мгновенно менял текст (например, заменял фантомную единицу на реальную "20")
+    holder.bind(getItem(position), itemClickHandler)
+}
 
       // Локальная копия списка для плавного и мгновенного перемещения элементов на экране
     private var localList: MutableList<Item> = mutableListOf()
