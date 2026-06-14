@@ -229,32 +229,33 @@ class ItemListAdapter(
 
 
 override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: MutableList<Any>) {
-    // ВСЕГДА вызываем bind(), чтобы RecyclerView при переиспользовании ячеек 
-    // мгновенно менял текст (например, заменял фантомную единицу на реальную "20")
-    holder.bind(getItem(position), itemClickHandler)
+    if (payloads.isNotEmpty()) {
+        // Прилетел наш сигнал true (изменился только sort).
+        // Мы оставляем этот блок абсолютно ПУСТЫМ и НЕ вызываем super!
+        // Адаптер молча обновит индексы в памяти, карточка замрет как вкопанная, 
+        // а мигание и дубликаты цифр пропадут навсегда.
+    } else {
+        // Если payloads пустой — это обычное изменение (например, юзер отредактировал текст дела)
+        super.onBindViewHolder(holder, position, payloads)
+    }
 }
 
-      // Локальная копия списка для плавного и мгновенного перемещения элементов на экране
-    private var localList: MutableList<Item> = mutableListOf()
+  private var localList: MutableList<Item> = mutableListOf()
 
-    // Переопределяем отправку списка, чтобы синхронизировать данные из БД с локальным списком
-    override fun submitList(list: List<Item>?) {
-        super.submitList(list)
-        localList = list?.toMutableList() ?: mutableListOf()
-    }
+override fun submitList(list: List<Item>?) {
+    super.submitList(list)
+    localList = list?.toMutableList() ?: mutableListOf()
+}
 
-    // Переопределяем отправку списка с коллбэком (для скролла наверх во фрагменте)
-    override fun submitList(list: List<Item>?, commitCallback: Runnable?) {
-        super.submitList(list, commitCallback)
-        localList = list?.toMutableList() ?: mutableListOf()
-    }
+override fun submitList(list: List<Item>?, commitCallback: Runnable?) {
+    super.submitList(list, commitCallback)
+    localList = list?.toMutableList() ?: mutableListOf()
+}
 
-  override fun onItemMove(fromPosition: Int, toPosition: Int) {
+override fun onItemMove(fromPosition: Int, toPosition: Int) {
     if (fromPosition < 0 || toPosition < 0) return
 
-    // ИСПРАВЛЕНО: Вместо Collections.swap мы плавно сдвигаем элемент по списку.
-    // Это гарантирует, что localList в памяти будет на 100% совпадать 
-    // с тем, что происходит под вашим пальцем на экране!
+    // Просто плавно сдвигаем элементы в локальном буфере, пока ведем палец
     if (fromPosition < toPosition) {
         for (i in fromPosition until toPosition) {
             Collections.swap(localList, i, i + 1)
@@ -264,22 +265,21 @@ override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: Mutab
             Collections.swap(localList, i, i - 1)
         }
     }
-
-    // Мгновенно обновляем экран
-    notifyItemMoved(fromPosition, toPosition)
+    notifyItemMoved(fromPosition, toPosition) // Красивая анимация под пальцем
 }
 
 override fun onMoveComplete() {
-    // 1. Берем оригинальные индексы sort из базы, которые сейчас лежат в адаптере,
-    // и сортируем их строго по возрастанию (сверху вниз: -15, -14, -13...)
-    val originalSorts = currentList.map { it.sort }.sorted()
-
-    // 2. Раскладываем перетащенные карточки по этим стабильным полкам
+    val totalCount = localList.size
+    
+    // 1. Рассчитываем новые индексы sort для выстроенного на экране списка
     val itemsWithNewOrder = localList.mapIndexed { index, item ->
-        item.copy(sort = originalSorts[index]) // ID не трогаем, меняем только sort!
+        item.copy(sort = index - totalCount)
     }
 
-    // 3. Отправляем во ViewModel для записи одной чистой транзакцией withTransaction
+    // 2. ВЫПОЛНЯЕМ ВАШУ ИДЕЮ: Синхронизируем внутренний currentList адаптера с экраном!
+    submitList(itemsWithNewOrder)
+
+    // 3. Отдаем список во ViewModel для записи в базу данных
     onOrderChanged?.invoke(itemsWithNewOrder)
 }
 
