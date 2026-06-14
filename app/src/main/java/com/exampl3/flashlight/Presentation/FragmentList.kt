@@ -347,7 +347,7 @@ open class FragmentList : Fragment() {
 
     private fun initRcView() {
     val rcView = binding.rcView
-
+    (rcView.itemAnimator as? SimpleItemAnimator)?.supportsChangeAnimations = false
     adapter = ItemListAdapter(
         itemClickHandler = itemClickHandler,
         onOrderChanged = { updatedList ->
