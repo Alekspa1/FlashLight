@@ -120,8 +120,7 @@ open class FragmentList : Fragment() {
             modelFlashLight = modelFlashLight,
             lifecycleOwner = viewLifecycleOwner,
             pickImageLauncher = pickImageLauncher,
-            pLauncher = pLauncher,
-            permissionUseCase = permissionUseCase
+            pLauncher = pLauncher
         )
         theme()
         initRcView()
@@ -214,7 +213,7 @@ open class FragmentList : Fragment() {
 
                 // 4. Если пользователь хотел будильник, но разрешения нет — показываем системный запрос
                 if (isAlarm && !hasPermission) {
-                    DialogItemList.permissonAlert(requireContext(), permissionUseCase, pLauncher)
+                    pLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                 }
             }
         },
