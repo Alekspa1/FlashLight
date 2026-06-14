@@ -228,13 +228,12 @@ class ItemListAdapter(
         holder.bind(getItem(position), itemClickHandler)
     }
 
-    override fun getItemId(position: Int): Long {
-    // Просто приводим ваш Int ID к типу Long, так как этого требует RecyclerView
-    return getItem(position).id.toLong() 
+  override fun getItemId(position: Int): Long {
+    return getItem(position).id?.toLong() ?: position.toLong()
 }
-    override fun onViewRecycled(holder: RecyclerView.ViewHolder) {
+  
+  override fun onViewRecycled(holder: ViewHolder) {
     super.onViewRecycled(holder)
-    // Замените RecyclerView.ViewHolder на имя вашего класса ViewHolder, если нужно
     holder.itemView.alpha = 1.0f
     holder.itemView.translationY = 0f
     holder.itemView.translationX = 0f
@@ -294,20 +293,6 @@ override fun onMoveComplete() {
         }, 300)
     }
 }
-
-    // override fun onItemMove(fromPosition: Int, toPosition: Int) {
-    //     val currentList = currentList.toMutableList()
-    //     Collections.swap(currentList, fromPosition, toPosition)
-    //     submitList(currentList)
-    // }
-
-    // override fun onMoveComplete() {
-    //     val itemsWithNewOrder = currentList.mapIndexed { index, item ->
-    //         item.copy(sort = index)
-    //     }
-    //     submitList(itemsWithNewOrder)
-    //     onOrderChanged?.invoke(itemsWithNewOrder)
-    // }
 
 
 }
