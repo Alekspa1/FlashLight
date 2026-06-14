@@ -368,23 +368,6 @@ open class FragmentList : Fragment() {
             adapter.touchHelper = touchHelper
         }
 
-
-    // 1. ПОДПИСКА НА ТИП СОРТИРОВКИ (Включаем/выключаем Drag-and-Drop на лету)
-//    viewLifecycleOwner.lifecycleScope.launch {
-//        viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-//            modelFlashLight.sortType.collect { currentSort ->
-//                if (currentSort == SORT_USER) {
-//                    touchHelper.attachToRecyclerView(rcView)
-//                    adapter.touchHelper = touchHelper
-//                }
-////                else {
-////                    touchHelper.attachToRecyclerView(null)
-////                    adapter.touchHelper = null
-////                }
-//            }
-//        }
-//    }
-
         val scrollObserver = object : RecyclerView.AdapterDataObserver() {
             override fun onItemRangeInserted(positionStart: Int, javaItemCount: Int) {
                 // Если элемент добавился в самое начало списка (позиция 0)
