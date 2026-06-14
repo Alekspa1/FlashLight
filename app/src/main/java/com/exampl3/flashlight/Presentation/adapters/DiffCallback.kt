@@ -9,9 +9,8 @@ class DiffCallback : DiffUtil.ItemCallback<Item>() {
     }
 
     override fun areContentsTheSame(oldItem: Item, newItem: Item): Boolean {
-        // Жесткое сравнение ВСЕХ полей, включая sort.
-        // Теперь DiffUtil сразу заметит, что sort изменился, и принудительно 
-        // заставит ячейку обновить свой текст через bind()!
-        return oldItem == newItem 
+        // Игнорируем поле sort при сравнении контента ячейки.
+        // Если текст/картинки те же, то перерисовывать (делать bind) элемент не нужно!
+        return oldItem.copy(sort = newItem.sort) == newItem
     }
 }
