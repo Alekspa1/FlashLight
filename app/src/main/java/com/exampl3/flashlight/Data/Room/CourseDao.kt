@@ -45,6 +45,9 @@ interface CourseDao {
     @Update
     suspend fun updateItem(item: Item)
 
+    @Update
+    suspend fun updateItemsOrder(items: List<Item>)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertItem(item: Item) : Long
 

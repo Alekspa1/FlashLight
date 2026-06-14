@@ -1,6 +1,8 @@
 package com.exampl3.flashlight.Presentation.adapters
 
 
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,6 +15,7 @@ import com.exampl3.flashlight.Data.Room.Item
 import com.exampl3.flashlight.Data.ThemeImp
 import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
 import com.exampl3.flashlight.Domain.ItemClickHandler
+import com.exampl3.flashlight.Domain.LogText
 import com.exampl3.flashlight.Presentation.adapters.draganddrop.ItemTouchHelperAdapter
 import com.exampl3.flashlight.R
 import com.exampl3.flashlight.databinding.ItemBinding
@@ -29,9 +32,8 @@ class ItemListAdapter(
     val settingPref: SettingsSharedPreference,
     val theme: ThemeImp
 ) : ListAdapter<Item, ItemListAdapter.ViewHolder>(DiffCallback()), ItemTouchHelperAdapter {
-     init {
-        setHasStableIds(true) // Теперь компилятор поймет эту команду!
-    }
+
+
 
     class ViewHolder(view: View,private val touchHelper: ItemTouchHelper?,val settingPref: SettingsSharedPreference, val theme: ThemeImp) : RecyclerView.ViewHolder(view) {
         private val binding = ItemBinding.bind(view)
@@ -230,80 +232,38 @@ class ItemListAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(getItem(position), itemClickHandler)
     }
-
-  override fun getItemId(position: Int): Long {
-    return getItem(position).id?.toLong() ?: position.toLong()
-}
-  
-override fun onViewRecycled(holder: ItemListAdapter.ViewHolder) {
-    super.onViewRecycled(holder)
-    holder.itemView.alpha = 1.0f
-    holder.itemView.translationY = 0f
-    holder.itemView.translationX = 0f
-}
+    // 👇 ДОБАВЬ ЭТО
+    private var currentListCopy: MutableList<Item> = mutableListOf()
 
 
-private var localList: MutableList<Item> = mutableListOf()
-private var isUserDragging = false 
-
-override fun submitList(list: List<Item>?) {
-    if (isUserDragging) return 
-    
-    // ПРОВЕРКА: Если порядок ID на экране и в базе совпадает, 
-    // игнорируем ответ базы, чтобы не портить анимацию
-    val currentIds = localList.map { it.id }
-    val newIds = list?.map { it.id } ?: emptyList()
-    if (currentIds == newIds && currentIds.isNotEmpty()) return
-    
-    super.submitList(list)
-    localList = list?.toMutableList() ?: mutableListOf()
-}
-
-override fun submitList(list: List<Item>?, commitCallback: Runnable?) {
-    if (isUserDragging) return
-    
-    val currentIds = localList.map { it.id }
-    val newIds = list?.map { it.id } ?: emptyList()
-    if (currentIds == newIds && currentIds.isNotEmpty()) {
-        commitCallback?.run()
-        return 
+    override fun submitList(list: List<Item>?) {
+        super.submitList(list)
+        // 👇 ДОБАВЬ ЭТО
+        currentListCopy = list?.toMutableList() ?: mutableListOf()
     }
-    
-    super.submitList(list, commitCallback)
-    localList = list?.toMutableList() ?: mutableListOf()
-}
 
-override fun onItemMove(fromPosition: Int, toPosition: Int) {
-    if (fromPosition < 0 || toPosition < 0 || fromPosition >= localList.size || toPosition >= localList.size) return
+    // 👇 ИСПРАВЬ ЭТОТ МЕТОД
+    override fun onItemMove(fromPosition: Int, toPosition: Int) {
+        if (fromPosition < 0 || toPosition < 0 ||
+            fromPosition >= currentListCopy.size || toPosition >= currentListCopy.size) return
 
-    isUserDragging = true 
-
-    if (fromPosition < toPosition) {
-        for (i in fromPosition until toPosition) {
-            Collections.swap(localList, i, i + 1)
-        }
-    } else {
-        for (i in fromPosition downTo toPosition + 1) {
-            Collections.swap(localList, i, i - 1)
-        }
+        Collections.swap(currentListCopy, fromPosition, toPosition)
+        notifyItemMoved(fromPosition, toPosition)
     }
-    notifyItemMoved(fromPosition, toPosition)
-}
 
-override fun onMoveComplete() {
-    super.submitList(localList.toList()) {
-        val totalCount = localList.size
-        val itemsWithNewOrder = localList.mapIndexed { index, item ->
-            item.copy(sort = index - totalCount)
+    // 👇 ДОБАВЬ ЭТОТ МЕТОД
+    override fun onMoveComplete() {
+        val updatedList = currentListCopy.mapIndexed { index, item ->
+            item.copy(sort = index)
         }
-        
-        onOrderChanged?.invoke(itemsWithNewOrder)
-        
-        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-            isUserDragging = false
-        }, 300)
+        onOrderChanged?.invoke(updatedList)
     }
+
+    // Остальной код (onBindViewHolder, onCreateViewHolder и т.д.)
 }
 
 
-}
+
+
+
+

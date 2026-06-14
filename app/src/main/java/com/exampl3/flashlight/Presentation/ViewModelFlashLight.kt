@@ -280,19 +280,15 @@ class ViewModelFlashLight @Inject constructor(
         }
     }
 
-fun updateItemsOrder(newList: List<Item>) {
-    viewModelScope.launch(Dispatchers.IO) {
-        try {
-            db.withTransaction {
-                newList.forEach { item ->
-                    db.CourseDao().updateItem(item)
-                }
+    fun updateItemsOrder(newList: List<Item>) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                db.CourseDao().updateItemsOrder(newList)  // Один запрос, одна транзакция
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
         }
     }
-}
 
 //    fun updateItemsOrder(newList: List<Item>) {
 //        viewModelScope.launch {
