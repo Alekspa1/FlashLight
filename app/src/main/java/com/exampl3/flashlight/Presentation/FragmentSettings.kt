@@ -7,7 +7,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,30 +14,30 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
+import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Const.DONATE
+import com.exampl3.flashlight.Const.SIZE_LARGE
+import com.exampl3.flashlight.Const.SIZE_SMALL
+import com.exampl3.flashlight.Const.SIZE_STANDART
 import com.exampl3.flashlight.Const.SORT_STANDART
 import com.exampl3.flashlight.Const.SORT_USER
 import com.exampl3.flashlight.Const.THEME_FUTURE
 import com.exampl3.flashlight.Const.THEME_ZABOR
-import com.exampl3.flashlight.R
-import com.exampl3.flashlight.databinding.FragmentSettingsBinding
-import kotlin.getValue
-import androidx.core.net.toUri
-import androidx.navigation.fragment.findNavController
-import com.exampl3.flashlight.Const
-import com.exampl3.flashlight.Const.SIZE_LARGE
-import com.exampl3.flashlight.Const.SIZE_SMALL
-import com.exampl3.flashlight.Const.SIZE_STANDART
 import com.exampl3.flashlight.Domain.ToastFun
 import com.exampl3.flashlight.Domain.useCase.PermissionUseCase
 import com.exampl3.flashlight.Domain.useCase.SoundPlayer
+import com.exampl3.flashlight.R
+import com.exampl3.flashlight.databinding.FragmentSettingsBinding
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 
 @AndroidEntryPoint
@@ -48,24 +47,27 @@ class FragmentSettings : Fragment() {
     private lateinit var binding: FragmentSettingsBinding
     val modelFlashLight: ViewModelFlashLight by activityViewModels()
     private lateinit var pLauncher: ActivityResultLauncher<String>
-    
-    private val exportLauncher = registerForActivityResult(ActivityResultContracts.CreateDocument("application/octet-stream")) { uri ->
-    uri?.let {
-        // Пользователь выбрал место и нажал "Сохранить" -> Передаем во ViewModel
-        modelFlashLight.doExport(it)
-    }
-}
 
-// 2. Лаунчер для Импорта (вызывает окно "Выберите файл...")
-private val importLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-    uri?.let {
-        // Пользователь выбрал файл бэкапа -> Передаем во ViewModel
-        modelFlashLight.doImport(it)
-    }
-}
+    private val exportLauncher =
+        registerForActivityResult(ActivityResultContracts.CreateDocument("application/octet-stream")) { uri ->
+            uri?.let {
+                // Пользователь выбрал место и нажал "Сохранить" -> Передаем во ViewModel
+                modelFlashLight.doExport(it)
+            }
+        }
+
+    // 2. Лаунчер для Импорта (вызывает окно "Выберите файл...")
+    private val importLauncher =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            uri?.let {
+                // Пользователь выбрал файл бэкапа -> Передаем во ViewModel
+                modelFlashLight.doImport(it)
+            }
+        }
 
     @Inject
     lateinit var soundPlayer: SoundPlayer
+
     @Inject
     lateinit var permissionUseCase: PermissionUseCase
 
@@ -82,56 +84,75 @@ private val importLauncher = registerForActivityResult(ActivityResultContracts.G
         super.onViewCreated(view, savedInstanceState)
         theme()
         pLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
-        with(binding){
-            
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                modelFlashLight.toastEvent.collect { message ->
-                    // Фрагмент САМ показывает тост, используя свой легитимный контекст
-                    ToastFun(requireContext(), message)
+        with(binding) {
+
+            viewLifecycleOwner.lifecycleScope.launch {
+                viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    modelFlashLight.toastEvent.collect { message ->
+                        ToastFun(requireContext(), message)
+                    }
                 }
             }
-        }
 
             bBatareiOptimozation.setOnClickListener {
                 if (permissionUseCase.isBatteryOptimizationEnabled(requireContext())) {
 
                     val intent = permissionUseCase.getBatteryOptimizationIntent(requireContext())
                     startActivity(intent)
-                } else Toast.makeText(requireContext(), "Разрешение уже дано", Toast.LENGTH_SHORT).show()
+                } else Toast.makeText(requireContext(), "Разрешение уже дано", Toast.LENGTH_SHORT)
+                    .show()
 
             } //Работа в фоне
 
-           
-    saveDb.setOnClickListener {
-        // Откроет проводник и предложит сохранить файл с именем backup_alarm.db
-        exportLauncher.launch("backup_alarm.zip")
-    } // сохраняю базу данных
+
+            saveDb.setOnClickListener {
+                DialogItemList.alertBackup(
+                    requireActivity(),
+                    object : DialogItemList.ActionTrueOrFalse {
+                        override fun onClick(flag: Boolean) {
+                            if (flag) {
+                                try {
+                                    exportLauncher.launch("backup_alarm.zip")
+                                } catch (e: Exception) {}
+                            }
+                        }
+                    })
+
+            } // сохраняю базу данных
 
 
+            loadDb.setOnClickListener {
+                DialogItemList.alertBackup(
+                    requireActivity(),
+                    object : DialogItemList.ActionTrueOrFalse {
+                        override fun onClick(flag: Boolean) {
+                            if (flag) {
+                                try {
+                                    importLauncher.launch("*/*")
+                                } catch (e: Exception) {}
+                            }
+                        }
+                    })
+                // Откроет проводник и покажет только файлы (пользователь сам ищет свой бэкап)
 
-    
-    loadDb.setOnClickListener {
-        // Откроет проводник и покажет только файлы (пользователь сам ищет свой бэкап)
-        importLauncher.launch("*/*")
-    } // загружаю базу данных
-            
-    bAppSettings.setOnClickListener {
-        try {
-            // Создаем интент, который ведет на карточку настроек нашего приложения
-            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                // Передаем уникальное имя пакета (applicationId) вашего приложения
-                data = Uri.fromParts("package", requireContext().packageName, null)
-                // Добавляем флаг, так как запускаем Activity из контекста, который может быть не-Activity
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            } // загружаю базу данных
+
+            bAppSettings.setOnClickListener {
+                try {
+                    // Создаем интент, который ведет на карточку настроек нашего приложения
+                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                        // Передаем уникальное имя пакета (applicationId) вашего приложения
+                        data = Uri.fromParts("package", requireContext().packageName, null)
+                        // Добавляем флаг, так как запускаем Activity из контекста, который может быть не-Activity
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    requireContext().startActivity(intent)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    // Страховочный тост на случай непредвиденных аномалий в кастомных китайских прошивках
+                    ToastFun(requireContext(), "Не удалось открыть настройки")
+                }
             }
-            requireContext().startActivity(intent)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            // Страховочный тост на случай непредвиденных аномалий в кастомных китайских прошивках
-            ToastFun(requireContext(), "Не удалось открыть настройки")
-        }
-    }
 
 
             bCallbackCard.setOnClickListener {
@@ -161,31 +182,38 @@ private val importLauncher = registerForActivityResult(ActivityResultContracts.G
             } // Назад
 
             bSetSort.setOnClickListener {
-                if (modelFlashLight.getPremium()){
-                    val index = when(modelFlashLight.getSort()){
+                if (modelFlashLight.getPremium()) {
+                    val index = when (modelFlashLight.getSort()) {
                         SORT_STANDART -> 0
-                        SORT_USER ->  1
+                        SORT_USER -> 1
                         else -> 0
                     }
-                    DialogItemList.settingSort(requireActivity(), object : DialogItemList.ActionInt {
-                        override fun onClick(action: Int) {
-                            when (action) {
-                                0 -> modelFlashLight.saveSort(SORT_STANDART)
-                                1 -> modelFlashLight.saveSort(SORT_USER)
+                    DialogItemList.settingSort(
+                        requireActivity(),
+                        object : DialogItemList.ActionInt {
+                            override fun onClick(action: Int) {
+                                when (action) {
+                                    0 -> modelFlashLight.saveSort(SORT_STANDART)
+                                    1 -> modelFlashLight.saveSort(SORT_USER)
+                                }
+                                Toast.makeText(
+                                    requireContext(),
+                                    "Изменения вступят в силу после перезапуска приложения",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
-                            Toast.makeText(requireContext(), "Изменения вступят в силу после перезапуска приложения", Toast.LENGTH_SHORT).show()
-                        }
 
-                    },index)
-                }
-                else ToastFun(requireContext(), "Доступно в PREMIUM версии")
+                        },
+                        index
+                    )
+                } else ToastFun(requireContext(), "Доступно в PREMIUM версии")
 
             } // Сортировка
 
             bSetTheme.setOnClickListener {
-                val index = when(modelFlashLight.getTheme()){
+                val index = when (modelFlashLight.getTheme()) {
                     THEME_FUTURE -> 0
-                    THEME_ZABOR ->  1
+                    THEME_ZABOR -> 1
                     else -> 0
                 }
                 DialogItemList.settingTheme(requireActivity(), object : DialogItemList.ActionInt {
@@ -194,7 +222,11 @@ private val importLauncher = registerForActivityResult(ActivityResultContracts.G
                             0 -> modelFlashLight.saveTheme(THEME_FUTURE)
                             1 -> modelFlashLight.saveTheme(THEME_ZABOR)
                         }
-                        Toast.makeText(requireContext(), "Изменения вступят в силу после перезапуска приложения", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            requireContext(),
+                            "Изменения вступят в силу после перезапуска приложения",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
 
                 }, index)
@@ -207,23 +239,34 @@ private val importLauncher = registerForActivityResult(ActivityResultContracts.G
                     Manifest.permission.READ_EXTERNAL_STORAGE
                 }
 
-                if (ContextCompat.checkSelfPermission(requireActivity(), permission) == PackageManager.PERMISSION_GRANTED) {
-                    if (modelFlashLight.getPremium()){
+                if (ContextCompat.checkSelfPermission(
+                        requireActivity(),
+                        permission
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
+                    if (modelFlashLight.getPremium()) {
                         val allSounds = modelFlashLight.getAllSound()
-                        DialogItemList.insertAlarmSound(requireActivity(), object : DialogItemList.ActioinUri {
-                            override fun onClick(uri: Uri) {
-                                modelFlashLight.saveUriAlarm(uri)
-                            }
+                        DialogItemList.insertAlarmSound(
+                            requireActivity(),
+                            object : DialogItemList.ActioinUri {
+                                override fun onClick(uri: Uri) {
+                                    modelFlashLight.saveUriAlarm(uri)
+                                }
 
-                        }, allSounds, soundPlayer, modelFlashLight.getUriAlarm()?.toUri() ?: "".toUri())
+                            },
+                            allSounds,
+                            soundPlayer,
+                            modelFlashLight.getUriAlarm()?.toUri() ?: "".toUri()
+                        )
                     } else ToastFun(requireContext(), "Доступно в PREMIUM версии")
 
                 } else {
-                    val permissionsToRequest = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        arrayOf(Manifest.permission.READ_MEDIA_AUDIO)
-                    } else {
-                        arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
-                    }
+                    val permissionsToRequest =
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            arrayOf(Manifest.permission.READ_MEDIA_AUDIO)
+                        } else {
+                            arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+                        }
 
                     permissionsToRequest.forEach {
                         pLauncher.launch(it)
@@ -232,10 +275,10 @@ private val importLauncher = registerForActivityResult(ActivityResultContracts.G
             } // Звук будильника
 
             bSize.setOnClickListener {
-                val index = when(modelFlashLight.getSize()){
+                val index = when (modelFlashLight.getSize()) {
                     SIZE_SMALL -> 0
-                    SIZE_STANDART ->  1
-                    SIZE_LARGE ->  2
+                    SIZE_STANDART -> 1
+                    SIZE_LARGE -> 2
                     else -> 0
                 }
                 DialogItemList.settingSize(requireActivity(), object : DialogItemList.ActionInt {
@@ -245,7 +288,11 @@ private val importLauncher = registerForActivityResult(ActivityResultContracts.G
                             1 -> modelFlashLight.saveSize(SIZE_STANDART)
                             2 -> modelFlashLight.saveSize(SIZE_LARGE)
                         }
-                        Toast.makeText(requireContext(), "Изменения вступят в силу после перезапуска приложения", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            requireContext(),
+                            "Изменения вступят в силу после перезапуска приложения",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
 
                 }, index)
@@ -258,8 +305,9 @@ private val importLauncher = registerForActivityResult(ActivityResultContracts.G
 
 
     }
-    private fun theme(){
-        with(binding){
+
+    private fun theme() {
+        with(binding) {
             val listView = mapOf<Const.Action, Map<View, Int>>(
                 Const.Action.BACKGROUND_RESOURCE to
                         mapOf(
@@ -294,16 +342,15 @@ private val importLauncher = registerForActivityResult(ActivityResultContracts.G
                     loadDb to R.style.StyleItemZabor,
                     bAppSettings to R.style.StyleItemZabor,
 
-                ),
+                    ),
 
                 )
-        if (modelFlashLight.getTheme() == THEME_ZABOR) {
-            modelFlashLight.setView(listView)
+            if (modelFlashLight.getTheme() == THEME_ZABOR) {
+                modelFlashLight.setView(listView)
             }
             modelFlashLight.setSize(listView)
         }
     }
-
 
 
 }

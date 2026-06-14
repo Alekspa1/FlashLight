@@ -67,14 +67,16 @@ class ViewModelFlashLight @Inject constructor(
     private val _toastEvent = MutableSharedFlow<String>()
     val toastEvent = _toastEvent.asSharedFlow()
 
+    suspend fun sendEvent(value: String) = _toastEvent.emit(value)
+
     fun doExport(uri: Uri) { // ИСПРАВЛЕНО: Context больше не принимаем!
         viewModelScope.launch(Dispatchers.IO) {
             val success = backupManager.exportDatabase(uri)
             if (success) {
                 // Шлем событие во фрагмент
-                _toastEvent.emit("Вы успешно сохранили базу данных")
+                sendEvent("Вы успешно сохранили базу данных")
             } else {
-                _toastEvent.emit("Ошибка при сохранении базы данных")
+                sendEvent("Ошибка при сохранении базы данных")
             }
         }
     }
@@ -84,10 +86,10 @@ class ViewModelFlashLight @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             val success = backupManager.importDatabase(uri)
             if (success) {
-                _toastEvent.emit("Вы успешно восстановили базу данных")
+                sendEvent("Вы успешно восстановили базу данных")
 
             } else {
-                _toastEvent.emit("Ошибка при восстановлении базы данных")
+                sendEvent("Ошибка при восстановлении базы данных")
             }
         }
     }
@@ -163,7 +165,6 @@ class ViewModelFlashLight @Inject constructor(
     fun saveNoteBook(value: String) = pref.saveStringNoteBook(value)
     fun getNotebook() = pref.getStringNoteBook()
 
-    val categoryItemLD = MutableLiveData<String>()
 
     val listItemLD = MutableLiveData<List<Item>>()
 

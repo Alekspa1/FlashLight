@@ -20,6 +20,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Const.ALARM
 import com.exampl3.flashlight.Const.SORT_USER
@@ -359,8 +360,8 @@ open class FragmentList : Fragment() {
     rcView.layoutManager = LinearLayoutManager(requireContext())
     rcView.adapter = adapter
 
-    val touchHelper = ItemTouchHelper(DragItemTouchHelperCallback(adapter))
 
+        val touchHelper = ItemTouchHelper(DragItemTouchHelperCallback(adapter))
         if (modelFlashLight.getSort() == SORT_USER) {
             touchHelper.attachToRecyclerView(rcView)
             adapter.touchHelper = touchHelper
@@ -382,6 +383,18 @@ open class FragmentList : Fragment() {
 //            }
 //        }
 //    }
+
+        val scrollObserver = object : RecyclerView.AdapterDataObserver() {
+            override fun onItemRangeInserted(positionStart: Int, javaItemCount: Int) {
+                // Если элемент добавился в самое начало списка (позиция 0)
+                if (positionStart == 0) {
+                    // Мягко скроллим RecyclerView на самый верх к новой карточке
+                    rcView.scrollToPosition(0)
+                }
+            }
+        }
+
+        adapter.registerAdapterDataObserver(scrollObserver)
 
     // 2. ПОДПИСКА НА ОТСОРТИРОВАННЫЙ СПИСОК (Flow)
         viewLifecycleOwner.lifecycleScope.launch {

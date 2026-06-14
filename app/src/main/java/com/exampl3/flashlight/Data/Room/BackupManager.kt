@@ -1,18 +1,13 @@
 package com.exampl3.flashlight.Data.Room
 
-import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
-import android.os.Environment
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.exampl3.flashlight.Domain.ToastFun
+import com.exampl3.flashlight.Const
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.nio.file.Files
-import java.nio.file.StandardCopyOption
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
@@ -33,7 +28,6 @@ class BackupManager @Inject constructor(
     // ЭКСПОРТ: База + Картинки + Один конкретный XML-файл настроек
     fun exportDatabase(outputStreamUri: Uri): Boolean {
         return try {
-            ToastFun(context, "Началось копирование базы данных")
             val supportDb: SupportSQLiteDatabase = db.openHelper.writableDatabase
             supportDb.query("PRAGMA wal_checkpoint(FULL)").close()
             db.close()
@@ -77,7 +71,6 @@ class BackupManager @Inject constructor(
     fun importDatabase(inputStreamUri: Uri): Boolean {
         return try {
             db.close()
-            ToastFun(context, "Началась загрузка базы данных")
             val dbFile = context.getDatabasePath(databaseName)
             val imagesDir = File(context.filesDir, "images")
             if (!imagesDir.exists()) imagesDir.mkdirs()
@@ -134,7 +127,10 @@ class BackupManager @Inject constructor(
     private fun restartApp() {
         val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
         intent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        intent?.putExtra(Const.REBOOT, "Успешно")
         context.startActivity(intent)
         exitProcess(0)
     }
+
+
 }

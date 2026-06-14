@@ -1,11 +1,9 @@
 package com.exampl3.flashlight.Presentation
 
-import android.Manifest
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
 import android.net.Uri
-import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -21,7 +19,6 @@ import androidx.lifecycle.LifecycleOwner
 import com.bumptech.glide.Glide
 import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Data.Room.Item
-import com.exampl3.flashlight.Domain.useCase.PermissionUseCase
 import com.exampl3.flashlight.Domain.useCase.SoundPlayer
 import com.exampl3.flashlight.R
 
@@ -495,6 +492,20 @@ object DialogItemList {
         }
         dialog.show()
 
+    }
+
+    fun alertBackup(context: Context, action: ActionTrueOrFalse){
+        val builred = AlertDialog.Builder(context)
+        val dialog = builred.create()
+        dialog.setTitle("Внимание")
+        dialog.setMessage("Это может занять некоторое время, обязательно дождитесь перезапуска приложения")
+        dialog.setButton(AlertDialog.BUTTON_POSITIVE, "Начать") { _, _ ->
+            action.onClick(true)
+        }
+        dialog.setButton(AlertDialog.BUTTON_NEGATIVE, "Отмена") { _, _ ->
+            action.onClick(false)
+        }
+        dialog.show()
     }
 
     interface Listener {
