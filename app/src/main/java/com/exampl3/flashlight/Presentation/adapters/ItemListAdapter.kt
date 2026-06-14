@@ -39,6 +39,7 @@ class ItemListAdapter(
                 touchHelper?.startDrag(this)
                 true
             }
+            setHasStableIds(true)
         }
 
         fun bind(item: Item, itemClickHandler: ItemClickHandler) {
@@ -227,13 +228,24 @@ class ItemListAdapter(
         holder.bind(getItem(position), itemClickHandler)
     }
 
+    override fun getItemId(position: Int): Long {
+    // Просто приводим ваш Int ID к типу Long, так как этого требует RecyclerView
+    return getItem(position).id.toLong() 
+}
+    override fun onViewRecycled(holder: RecyclerView.ViewHolder) {
+    super.onViewRecycled(holder)
+    // Замените RecyclerView.ViewHolder на имя вашего класса ViewHolder, если нужно
+    holder.itemView.alpha = 1.0f
+    holder.itemView.translationY = 0f
+    holder.itemView.translationX = 0f
+}
+
 
 private var localList: MutableList<Item> = mutableListOf()
-private var isUserDragging = false // Флаг-щит от преждевременных обновлений Flow
+private var isUserDragging = false // Наш щит от Flow
 
 override fun submitList(list: List<Item>?) {
-    // Если пользователь сейчас в процессе перетаскивания, 
-    // игнорируем любые фоновые обновления из Flow базы данных
+    // Если мы тащим или анимация завершения еще идет — строго игнорируем Flow
     if (isUserDragging) return 
     
     super.submitList(list)
@@ -250,7 +262,7 @@ override fun submitList(list: List<Item>?, commitCallback: Runnable?) {
 override fun onItemMove(fromPosition: Int, toPosition: Int) {
     if (fromPosition < 0 || toPosition < 0 || fromPosition >= localList.size || toPosition >= localList.size) return
 
-    isUserDragging = true // Пользователь начал тащить элемент
+    isUserDragging = true // Защита включена, Flow заблокирован
 
     if (fromPosition < toPosition) {
         for (i in fromPosition until toPosition) {
@@ -261,22 +273,25 @@ override fun onItemMove(fromPosition: Int, toPosition: Int) {
             Collections.swap(localList, i, i - 1)
         }
     }
-    notifyItemMoved(fromPosition, toPosition) // Красивая анимация сдвига под пальцем
+    notifyItemMoved(fromPosition, toPosition)
 }
 
 override fun onMoveComplete() {
-    // 1. Насильно синхронизируем внутреннее состояние ListAdapter с тем, что сейчас на экране.
+    // 1. Фиксируем текущее состояние на экране
     super.submitList(localList.toList()) {
-        // Этот блок кода выполнится ТОЛЬКО тогда, когда ListAdapter полностью примет список
-        isUserDragging = false // Теперь можно безопасно принимать новые данные из Flow
-        
         val totalCount = localList.size
         val itemsWithNewOrder = localList.mapIndexed { index, item ->
             item.copy(sort = index - totalCount)
         }
         
-        // 2. Отправляем финальный список во ViewModel (с безопасным вызовом ?.invoke)
+        // 2. Отправляем изменения в вашу рабочую базу данных
         onOrderChanged?.invoke(itemsWithNewOrder)
+        
+        // 3. КРИТИЧЕСКИ ВАЖНО: Ждем 300 мс, пока завершатся все анимации UI, 
+        // и только потом открываем шлюз для обновлений из Flow базы данных!
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+            isUserDragging = false
+        }, 300)
     }
 }
 
