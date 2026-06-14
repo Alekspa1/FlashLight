@@ -266,7 +266,6 @@ override fun onItemMove(fromPosition: Int, toPosition: Int) {
 
 override fun onMoveComplete() {
     // 1. Насильно синхронизируем внутреннее состояние ListAdapter с тем, что сейчас на экране.
-    // Передаем ему копию локального списка.
     super.submitList(localList.toList()) {
         // Этот блок кода выполнится ТОЛЬКО тогда, когда ListAdapter полностью примет список
         isUserDragging = false // Теперь можно безопасно принимать новые данные из Flow
@@ -276,16 +275,9 @@ override fun onMoveComplete() {
             item.copy(sort = index - totalCount)
         }
         
-        // 2. Отправляем финальный список во ViewModel для записи в Room транзакцией
-        onOrderChanged(itemsWithNewOrder)
+        // 2. Отправляем финальный список во ViewModel (с безопасным вызовом ?.invoke)
+        onOrderChanged?.invoke(itemsWithNewOrder)
     }
-}
-
-    // 2. ВЫПОЛНЯЕМ ВАШУ ИДЕЮ: Синхронизируем внутренний currentList адаптера с экраном!
-    submitList(itemsWithNewOrder)
-
-    // 3. Отдаем список во ViewModel для записи в базу данных
-    onOrderChanged?.invoke(itemsWithNewOrder)
 }
 
     // override fun onItemMove(fromPosition: Int, toPosition: Int) {
