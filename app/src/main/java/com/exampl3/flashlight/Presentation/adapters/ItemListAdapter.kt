@@ -246,7 +246,7 @@ class ItemListAdapter(
             item.copy(sort = index)
         }
      //    submitList(itemsWithNewOrder)
-      //  onOrderChanged?.invoke(itemsWithNewOrder)
+        onOrderChanged?.invoke(itemsWithNewOrder)
      }
 }
 
