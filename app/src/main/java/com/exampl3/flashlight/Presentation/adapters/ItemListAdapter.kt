@@ -232,35 +232,33 @@ class ItemListAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(getItem(position), itemClickHandler)
     }
-    // 👇 ДОБАВЬ ЭТО
-    private var currentListCopy: MutableList<Item> = mutableListOf()
-
+    
+   private var modifiableList: MutableList<Item> = mutableListOf()
 
     override fun submitList(list: List<Item>?) {
-        super.submitList(list)
-        // 👇 ДОБАВЬ ЭТО
-        currentListCopy = list?.toMutableList() ?: mutableListOf()
+        modifiableList = list?.toMutableList() ?: mutableListOf()
+        super.submitList(modifiableList.toList())
     }
 
-    // 👇 ИСПРАВЬ ЭТОТ МЕТОД
     override fun onItemMove(fromPosition: Int, toPosition: Int) {
         if (fromPosition < 0 || toPosition < 0 ||
-            fromPosition >= currentListCopy.size || toPosition >= currentListCopy.size) return
+            fromPosition >= modifiableList.size || toPosition >= modifiableList.size) return
 
-        Collections.swap(currentListCopy, fromPosition, toPosition)
+        Collections.swap(modifiableList, fromPosition, toPosition)
         notifyItemMoved(fromPosition, toPosition)
     }
 
-    // 👇 ДОБАВЬ ЭТОТ МЕТОД
     override fun onMoveComplete() {
-        val updatedList = currentListCopy.mapIndexed { index, item ->
+        val updatedList = modifiableList.mapIndexed { index, item ->
             item.copy(sort = index)
         }
         onOrderChanged?.invoke(updatedList)
+        submitList(updatedList)  // ← теперь ДОЛЖНО быть, чтобы sort обновились
     }
 
-    // Остальной код (onBindViewHolder, onCreateViewHolder и т.д.)
+    // DiffCallback как обычно (areContentsTheSame без sort)
 }
+
 
 
 
