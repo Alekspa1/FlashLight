@@ -233,30 +233,21 @@ class ItemListAdapter(
         holder.bind(getItem(position), itemClickHandler)
     }
     
-   private var modifiableList: MutableList<Item> = mutableListOf()
-
-    override fun submitList(list: List<Item>?) {
-        modifiableList = list?.toMutableList() ?: mutableListOf()
-        super.submitList(modifiableList.toList())
-    }
 
     override fun onItemMove(fromPosition: Int, toPosition: Int) {
-        if (fromPosition < 0 || toPosition < 0 ||
-            fromPosition >= modifiableList.size || toPosition >= modifiableList.size) return
+         val currentList = currentList.toMutableList()
+         Collections.swap(currentList, fromPosition, toPosition)
+    //   submitList(currentList)
+       notifyItemMoved(fromPosition , toPosition )
+     }
 
-        Collections.swap(modifiableList, fromPosition, toPosition)
-        notifyItemMoved(fromPosition, toPosition)
-    }
-
-    override fun onMoveComplete() {
-        val updatedList = modifiableList.mapIndexed { index, item ->
+     override fun onMoveComplete() {
+         val itemsWithNewOrder = currentList.mapIndexed { index, item ->
             item.copy(sort = index)
         }
-        onOrderChanged?.invoke(updatedList)
-        submitList(updatedList)  // ← теперь ДОЛЖНО быть, чтобы sort обновились
-    }
-
-    // DiffCallback как обычно (areContentsTheSame без sort)
+     //    submitList(itemsWithNewOrder)
+      //  onOrderChanged?.invoke(itemsWithNewOrder)
+     }
 }
 
 
