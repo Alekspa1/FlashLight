@@ -2,6 +2,7 @@ package com.exampl3.flashlight.Presentation
 
 
 import android.Manifest
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -89,14 +90,14 @@ class FragmentCalendar : Fragment() {
             lifecycleOwner = viewLifecycleOwner,
             pickImageLauncher = pickImageLauncher,
             pLauncher = pLauncher,
-
             )
-        initRcView()
+        calendar = Calendar.getInstance()
         calendarDayB = Calendar.getInstance()
+        initRcView()
 
-        if (pref.getTheme() == THEME_ZABOR) {
+
+         if (pref.getTheme() == THEME_ZABOR) {
             bindingZabor.imBAddCalendar.setOnClickListener {
-                // modelFlashLight.getItemMaxSort()
                 if (modelFlashLight.getPremium())
                     if (getDateNow(calendarDayB) >= getDateNow(calendarZero)) DialogItemList.alertItem(
                         requireContext(),
@@ -139,7 +140,9 @@ class FragmentCalendar : Fragment() {
 
                                 // 4. Если пользователь хотел будильник, но разрешения нет — показываем системный запрос
                                 if (isAlarm && !hasPermission) {
-                                    pLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                        pLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                    }
                                 }
                             }
                         },
@@ -148,82 +151,7 @@ class FragmentCalendar : Fragment() {
                         lifecycleOwner = this,
                         pick = pickImageLauncher,
                         true
-                    )               // DialogItemList.alertItem(
-                    //     requireContext(),
-                    //     object : DialogItemList.Listener {
-                    //         override fun onClickItem(
-                    //             name: String,
-                    //             action: Int?,
-                    //             id: Int?,
-                    //             desc: String?,
-                    //             uri: String?,
-                    //             category: String?
-                    //         ) {
-                    //             var item: Item
-                    //             var permanentFile = ""
-                    //             if (uri!!.isNotEmpty()) {
-                    //                 permanentFile =
-                    //                     modelFlashLight.saveImagePermanently(
-                    //                         requireContext(),
-                    //                         uri.toUri()
-                    //                     ).toString()
-                    //             }
-                    //             modelFlashLight.insertItem(
-                    //                 Item(
-                    //                     null,
-                    //                     name,
-                    //                     category = category.toString(),
-                    //                     desc = desc,
-                    //                     alarmTime = calendarDayB.timeInMillis,
-                    //                     alarmText = permanentFile,
-                    //                     sort = modelFlashLight.maxSorted.value ?: 0
-                    //                 )
-                    //             )
-
-
-                    //             if (action == ALARM) {
-                    //                 if (view.let {
-                    //                         Const.isPermissionGranted(
-                    //                             it.context,
-                    //                             Manifest.permission.POST_NOTIFICATIONS
-                    //                         )
-                    //                     }) {
-                    //                     CoroutineScope(Dispatchers.IO).launch {
-                    //                         delay(500)
-                    //                         item = db.CourseDao().getAllList().last()
-                    //                         if (item.name == name) {
-                    //                             withContext(Dispatchers.Main) {
-                    //                                 modelFlashLight.insertDateAndAlarm(
-                    //                                     item,
-                    //                                     calendarDayB,
-                    //                                     requireContext()
-                    //                                 )
-                    //                             }
-                    //                         } else {
-                    //                             delay(1000)
-                    //                             item = db.CourseDao().getAllList().last()
-                    //                             withContext(Dispatchers.Main) {
-                    //                                 modelFlashLight.insertDateAndAlarm(
-                    //                                     item,
-                    //                                     calendarDayB,
-                    //                                     requireContext()
-                    //                                 )
-                    //                             }
-                    //                         }
-
-                    //                     }
-
-                    //                 } else {
-                    //                     DialogItemList.permissonAlert(requireContext(),permissionUseCase, pLauncher)
-                    //                 }
-
-
-                    //             }
-                    //         }
-                    //     },
-                    //     null,
-                    //     model = modelFlashLight, lifecycleOwner = this, pickImageLauncher, true
-                    // )
+                    )
                     else Toast.makeText(
                         requireContext(),
                         "Вы выбрали время которое уже прошло",
@@ -235,9 +163,10 @@ class FragmentCalendar : Fragment() {
                     Toast.LENGTH_SHORT
                 ).show()
             }
-        } else {
+             if (modelFlashLight.getPremium()) createAlarmInCalendarnZabor()
+        }
+         else {
             binding.imBAddCalendar.setOnClickListener {
-                // modelFlashLight.getItemMaxSort()
                 if (modelFlashLight.getPremium())
                     if (getDateNow(calendarDayB) >= getDateNow(calendarZero)) DialogItemList.alertItem(
                         requireContext(),
@@ -290,84 +219,6 @@ class FragmentCalendar : Fragment() {
                         pick = pickImageLauncher,
                         true
                     )
-                    //DialogItemList.alertItem(
-                    //     requireContext(),
-                    //     object : DialogItemList.Listener {
-                    //         override fun onClickItem(
-                    //             name: String,
-                    //             action: Int?,
-                    //             id: Int?,
-                    //             desc: String?,
-                    //             uri: String?,
-                    //             category: String?
-                    //         ) {
-                    //             var item: Item
-                    //             var permanentFile = ""
-                    //             if (uri!!.isNotEmpty()) {
-                    //                 permanentFile =
-                    //                     modelFlashLight.saveImagePermanently(
-                    //                         requireContext(),
-                    //                         uri.toUri()
-                    //                     ).toString()
-                    //             }
-                    //             modelFlashLight.insertItem(
-                    //                 Item(
-                    //                     null,
-                    //                     name,
-                    //                     category = category.toString(),
-                    //                     desc = desc,
-                    //                     alarmTime = calendarDayB.timeInMillis,
-                    //                     alarmText = permanentFile,
-                    //                     sort = modelFlashLight.maxSorted.value ?: 0
-                    //                 )
-                    //             )
-
-
-                    //             if (action == ALARM) {
-                    //                 if (view.let {
-                    //                         Const.isPermissionGranted(
-                    //                             it.context,
-                    //                             Manifest.permission.POST_NOTIFICATIONS
-                    //                         )
-                    //                     }) {
-                    //                     CoroutineScope(Dispatchers.IO).launch {
-                    //                         delay(500)
-                    //                         item = db.CourseDao().getAllList().last()
-                    //                         if (item.name == name) {
-                    //                             withContext(Dispatchers.Main) {
-                    //                                 modelFlashLight.insertDateAndAlarm(
-                    //                                     item,
-                    //                                     calendarDayB,
-                    //                                     requireContext()
-                    //                                 )
-                    //                             }
-                    //                         } else {
-                    //                             delay(1000)
-                    //                             item = db.CourseDao().getAllList().last()
-                    //                             withContext(Dispatchers.Main) {
-                    //                                 modelFlashLight.insertDateAndAlarm(
-                    //                                     item,
-                    //                                     calendarDayB,
-                    //                                     requireContext()
-                    //                                 )
-                    //                             }
-                    //                         }
-
-                    //                     }
-
-                    //                 } else {
-                    //                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    //                         pLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                    //                     }
-                    //                 }
-
-
-                    //             }
-                    //         }
-                    //     },
-                    //     null,
-                    //     model = modelFlashLight, lifecycleOwner = this, pickImageLauncher, true
-                    // )
                     else Toast.makeText(
                         requireContext(),
                         "Вы выбрали время которое уже прошло",
@@ -379,59 +230,12 @@ class FragmentCalendar : Fragment() {
                     Toast.LENGTH_SHORT
                 ).show()
             }
+             if (modelFlashLight.getPremium()) createAlarmInCalendarnNeon()
         }
 
 
     }
-
-    override fun onResume() {
-        super.onResume()
-        if (pref.getTheme() == THEME_ZABOR) {
-            calendarZero = Calendar.getInstance()
-            if (modelFlashLight.getPremium()) {
-
-                modelFlashLight.getListItemByCalendar(getDateNow(calendarDayB))
-
-                modelFlashLight.listItemLDCalendar.observe(viewLifecycleOwner) {
-                    scrollInStartAdapter()
-                    adapter.submitList(it)
-                    if (it.isNotEmpty()) bindingZabor.tvDela.visibility = View.GONE
-                    else bindingZabor.tvDela.visibility = View.VISIBLE
-                }
-                db.CourseDao().getAll().observe(viewLifecycleOwner) { list ->
-                    val calendarDays = mutableListOf<CalendarDay>()
-                    modelFlashLight.getListItemByCalendar(getDateNow(calendarDayB))
-
-                    list.forEach { item ->
-                        if (item.changeAlarm || !item.change) {
-                            calendar = Calendar.getInstance()
-                            calendar.timeInMillis = item.alarmTime
-                            calendarDay = CalendarDay(calendar)
-                            calendarDay.imageResource = R.drawable.ic_work
-                            calendarDays.add(calendarDay)
-                        }
-                    }
-                    bindingZabor.calendarView.setCalendarDays(calendarDays)
-                }
-                bindingZabor.calendarView.setOnCalendarDayClickListener(object :
-                    OnCalendarDayClickListener {
-                    override fun onClick(calendarDay: CalendarDay) {
-                        calendarDayB = calendarDay.calendar
-                        modelFlashLight.getListItemByCalendar(getDateNow(calendarDayB))
-
-                    }
-
-
-                })
-
-            } else Toast.makeText(
-                view?.context,
-                "Отображение дел в календаре доступно в PREMIUM версии",
-                Toast.LENGTH_SHORT
-            ).show()
-        } else {
-            calendarZero = Calendar.getInstance()
-            if (modelFlashLight.getPremium()) {
+    private fun createAlarmInCalendarnNeon() {
 
                 modelFlashLight.getListItemByCalendar(getDateNow(calendarDayB))
 
@@ -443,13 +247,13 @@ class FragmentCalendar : Fragment() {
                 }
                 db.CourseDao().getAll().observe(viewLifecycleOwner) { list ->
                     val calendarDays = mutableListOf<CalendarDay>()
-                    modelFlashLight.getListItemByCalendar(getDateNow(calendarDayB))
 
                     list.forEach { item ->
                         if (item.changeAlarm || !item.change) {
-                            calendar = Calendar.getInstance()
+
                             calendar.timeInMillis = item.alarmTime
-                            calendarDay = CalendarDay(calendar)
+                            val clonedCalendar = calendar.clone() as Calendar
+                            calendarDay = CalendarDay(clonedCalendar)
                             calendarDay.imageResource = R.drawable.ic_work
                             calendarDays.add(calendarDay)
                         }
@@ -467,13 +271,55 @@ class FragmentCalendar : Fragment() {
 
                 })
 
-            } else Toast.makeText(
+            }
+    private fun createAlarmInCalendarnZabor(){
+
+        modelFlashLight.getListItemByCalendar(getDateNow(calendarDayB))
+
+        modelFlashLight.listItemLDCalendar.observe(viewLifecycleOwner) {
+            scrollInStartAdapter()
+            adapter.submitList(it)
+            if (it.isNotEmpty()) bindingZabor.tvDela.visibility = View.GONE
+            else bindingZabor.tvDela.visibility = View.VISIBLE
+        }
+        db.CourseDao().getAll().observe(viewLifecycleOwner) { list ->
+            val calendarDays = mutableListOf<CalendarDay>()
+            list.forEach { item ->
+                if (item.changeAlarm || !item.change) {
+                    calendar.timeInMillis = item.alarmTime
+                    val clonedCalendar = calendar.clone() as Calendar
+                    calendarDay = CalendarDay(clonedCalendar)
+                    calendarDay.imageResource = R.drawable.ic_work
+                    calendarDays.add(calendarDay)
+                }
+            }
+            bindingZabor.calendarView.setCalendarDays(calendarDays)
+        }
+        bindingZabor.calendarView.setOnCalendarDayClickListener(object :
+            OnCalendarDayClickListener {
+            override fun onClick(calendarDay: CalendarDay) {
+                calendarDayB = calendarDay.calendar
+                modelFlashLight.getListItemByCalendar(getDateNow(calendarDayB))
+
+            }
+
+
+        })
+
+    }
+
+
+    override fun onResume() {
+        super.onResume()
+        calendarZero = Calendar.getInstance()
+            if (!modelFlashLight.getPremium()) Toast.makeText(
                 view?.context,
                 "Отображение дел в календаре доступно в PREMIUM версии",
                 Toast.LENGTH_SHORT
             ).show()
-        }
+
     }
+
 
     private fun initRcView() {
         if (pref.getTheme() == THEME_ZABOR) {

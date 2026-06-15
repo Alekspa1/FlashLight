@@ -117,32 +117,48 @@ class ViewModelFlashLight @Inject constructor(
         }
     }.flowOn(Dispatchers.Default)
 
-    fun getAllCategories(onResult: (List<String>) -> Unit, item: Item?, calendar: Boolean) {
+//    fun getAllCategories(onResult: (List<String>) -> Unit, item: Item?, calendar: Boolean) {
+//        val listCategory = mutableListOf("Повседневные")
+//        viewModelScope.launch {
+//            listCategory.addAll(db.CourseDao().getAllCategories())
+//            if (!calendar) {
+//                if (item == null) {
+//                    val currentCategory = categoryItemFlow.value
+//                    listCategory.remove(currentCategory)
+//                    listCategory.add(0, currentCategory)
+//                } else {
+//                    listCategory.remove(item.category)
+//                    listCategory.add(0, item.category)
+//                }
+//            } else {
+//                if (item != null) {
+//                    listCategory.remove(item.category)
+//                    listCategory.add(0, item.category)
+//                }
+//
+//            }
+//
+//
+//            onResult(listCategory)
+//        }
+//
+//    }
+
+    fun getAllCategories(onResult: (List<String>,String) -> Unit, item: Item?, calendar: Boolean) {
         val listCategory = mutableListOf("Повседневные")
         viewModelScope.launch {
             listCategory.addAll(db.CourseDao().getAllCategories())
-            if (!calendar) {
-                if (item == null) {
-                    val currentCategory = categoryItemFlow.value
-                    listCategory.remove(currentCategory)
-                    listCategory.add(0, currentCategory)
-                } else {
-                    listCategory.remove(item.category)
-                    listCategory.add(0, item.category)
-                }
-            } else {
-                if (item != null) {
-                    listCategory.remove(item.category)
-                    listCategory.add(0, item.category)
-                }
+            var currentCategory = item?.category ?: categoryItemFlow.value
 
+            if (calendar && item == null) {
+                currentCategory = "Повседневные"
             }
 
-
-            onResult(listCategory)
+            onResult(listCategory,currentCategory)
         }
-
     }
+
+
 
 
     fun setView(map: Map<Const.Action, Map<View, Int>>) {

@@ -31,14 +31,20 @@ import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
 import com.exampl3.flashlight.Domain.ItemClickHandler
 import com.exampl3.flashlight.Domain.useCase.PermissionUseCase
 import com.exampl3.flashlight.Presentation.adapters.ItemListAdapter
-import com.exampl3.flashlight.Presentation.adapters.draganddrop.DragItemTouchHelperCallback
 import com.exampl3.flashlight.R
 import com.exampl3.flashlight.databinding.FragmentListBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import javax.inject.Inject
-import androidx.recyclerview.widget.SimpleItemAnimator
+
+import com.exampl3.flashlight.Presentation.adapters.SimpleItem
+import com.mikepenz.fastadapter.FastAdapter
+import com.mikepenz.fastadapter.adapters.ItemAdapter
+import com.mikepenz.fastadapter.diff.FastAdapterDiffUtil
+import com.mikepenz.fastadapter.drag.ItemTouchCallback
+import com.mikepenz.fastadapter.drag.SimpleDragCallback
+import com.mikepenz.fastadapter.utils.DragDropUtil
 
 @AndroidEntryPoint
 open class FragmentList : Fragment() {
@@ -347,48 +353,49 @@ open class FragmentList : Fragment() {
     // }
 
     private fun initRcView() {
-    val rcView = binding.rcView
-
-    adapter = ItemListAdapter(
-        itemClickHandler = itemClickHandler,
-        onOrderChanged = { updatedList ->
-            modelFlashLight.updateItemsOrder(updatedList)
-        },
-        touchHelper = null,
-        pref,
-        themeImp
-    )
-    rcView.layoutManager = LinearLayoutManager(requireContext())
-    rcView.adapter = adapter
+        val itemAdapter = ItemAdapter<SimpleItem>()
+        val fastAdapter = FastAdapter.with(itemAdapter)
+        binding.rcView.layoutManager = LinearLayoutManager(requireContext())
+        binding.rcView.adapter = fastAdapter
+        touchHelper(itemAdapter)
 
 
-        val touchHelper = ItemTouchHelper(DragItemTouchHelperCallback(adapter))
-        if (modelFlashLight.getSort() == SORT_USER) {
-            touchHelper.attachToRecyclerView(rcView)
-            adapter.touchHelper = touchHelper
-        }
 
-        val scrollObserver = object : RecyclerView.AdapterDataObserver() {
-            override fun onItemRangeInserted(positionStart: Int, javaItemCount: Int) {
-                // Если элемент добавился в самое начало списка (позиция 0)
-                if (positionStart == 0) {
-                    // Мягко скроллим RecyclerView на самый верх к новой карточке
-                    rcView.scrollToPosition(0)
-                }
-            }
-        }
-
-        adapter.registerAdapterDataObserver(scrollObserver)
-
-    // 2. ПОДПИСКА НА ОТСОРТИРОВАННЫЙ СПИСОК (Flow)
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                modelFlashLight.sortedItemsFlow.collect { readyList ->
-                    adapter.submitList(readyList)
+                modelFlashLight.sortedItemsFlow.collect { rawDataList ->
+                    scrollInStartAdapter(fastAdapter)
+                    val currentItems = itemAdapter.adapterItems.map { it.item }
+
+                    // Если данные абсолютно идентичны (и статус, и порядок), только тогда игнорируем
+                    if (currentItems == rawDataList) return@collect
+
+                    val items = rawDataList.map { data -> SimpleItem(data,pref,itemClickHandler,themeImp) }
+                    FastAdapterDiffUtil.set(itemAdapter, items, object : com.mikepenz.fastadapter.diff.DiffCallback<SimpleItem> {
+
+                        // 1. Проверяем, та же ли это самая карточка (по ID)
+                        override fun areItemsTheSame(oldItem: SimpleItem, newItem: SimpleItem): Boolean {
+                            return oldItem.identifier == newItem.identifier
+                        }
+
+                        // 2. КРИТИЧЕСКИЙ МОМЕНТ: Проверяем, изменились ли данные внутри (например, цвет/статус)
+                        override fun areContentsTheSame(oldItem: SimpleItem, newItem: SimpleItem): Boolean {
+                            // Так как Item — это data class, равенство '==' проверит все поля сразу.
+                            // Если статус изменился, метод вернет false, и FastAdapter ПЕРЕРИСУЕТ карточку!
+                            return oldItem.item == newItem.item
+                        }
+
+                        override fun getChangePayload(oldItem: SimpleItem, oldItemPosition: Int, newItem: SimpleItem, newItemPosition: Int): Any? {
+                            return null
+                        }
+                    })
                 }
 
             }
         }
+
+
+
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -396,8 +403,57 @@ open class FragmentList : Fragment() {
                     binding.tvCategory.text = category
                 }
             }
-        } // подписка на ui каегорию
+        }
 }
+
+    private fun scrollInStartAdapter(fastAdapter: FastAdapter<SimpleItem>) {
+        fastAdapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
+            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                super.onItemRangeInserted(positionStart, itemCount)
+
+                if (positionStart == 0) {  // Элементы добавились в начало (верх списка)
+                    binding.rcView.scrollToPosition(0)
+
+                    // ИСПРАВЛЕНО: отписываемся через fastAdapter
+                    fastAdapter.unregisterAdapterDataObserver(this)
+                }
+            }
+        })
+    }
+
+    private fun touchHelper(itemAdapter: ItemAdapter<SimpleItem>){
+        val dragCallback = SimpleDragCallback(
+            ItemTouchHelper.UP or ItemTouchHelper.DOWN, // Направления перетаскивания
+            object : ItemTouchCallback {
+
+
+                override fun itemTouchOnMove(oldPosition: Int, newPosition: Int): Boolean {
+                    DragDropUtil.onMove(itemAdapter, oldPosition, newPosition)
+                    return true
+                }
+
+
+                override fun itemTouchDropped(oldPosition: Int, newPosition: Int) {
+                    super.itemTouchDropped(oldPosition, newPosition)
+
+
+                    if (oldPosition == newPosition) return
+
+
+                    val updatedList = itemAdapter.adapterItems.mapIndexed { index, item ->
+                        item.item.copy(sort = index)
+                    }
+
+
+                    modelFlashLight.updateItemsOrder(updatedList)
+                }
+            })
+
+        val touchHelper = ItemTouchHelper(dragCallback)
+        if (modelFlashLight.getSort() == SORT_USER) {
+            touchHelper.attachToRecyclerView(binding.rcView)
+        }
+    }
 
 
     override fun onResume() {

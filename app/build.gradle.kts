@@ -49,6 +49,23 @@ android {
 }
 
 dependencies {
+
+    // Базовый модуль FastAdapter
+    implementation("com.mikepenz:fastadapter:5.7.0")
+
+    // Модуль для работы с ViewBinding (ОБЯЗАТЕЛЬНО!)
+    implementation("com.mikepenz:fastadapter-extensions-binding:5.7.0")
+
+
+    // Модули для drag & drop (уже есть)
+    implementation("com.mikepenz:fastadapter-extensions-drag:5.7.0")
+    implementation("com.mikepenz:fastadapter-extensions-utils:5.7.0")
+
+    // Опционально: для DiffUtil
+    implementation("com.mikepenz:fastadapter-extensions-diff:5.7.0")
+
+
+
     implementation("ru.rustore.sdk:appupdate:7.0.0")
     implementation("com.applandeo:material-calendar-view:1.9.2")
     implementation ("com.github.bumptech.glide:glide:5.0.5")

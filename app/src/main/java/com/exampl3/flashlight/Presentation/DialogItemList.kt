@@ -9,6 +9,7 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Spinner
@@ -94,7 +95,6 @@ object DialogItemList {
         }
         dialog.show()
     }
-
     fun alertItem(
         context: Context, listener: Listener, item: Item?,
         model: ViewModelFlashLight,
@@ -102,47 +102,63 @@ object DialogItemList {
         pick: ActivityResultLauncher<String>,
         calendar: Boolean
     ) {
-
         val builder = AlertDialog.Builder(context)
         val inflater = LayoutInflater.from(context)
-        val dialogLayout = inflater.inflate(R.layout.dialog_layout, null)
+        val dialogLayout = inflater.inflate(R.layout.gpt_dialog, null)
+
+        // Связываем элементы ввода
         val editText1 = dialogLayout.findViewById<EditText>(R.id.itemName)
         val editText2 = dialogLayout.findViewById<EditText>(R.id.edDescItemName)
         val imView = dialogLayout.findViewById<ImageView>(R.id.imPhoto)
         val deleteText = dialogLayout.findViewById<TextView>(R.id.tvDel)
-        val addPhoto = dialogLayout.findViewById<TextView>(R.id.tvAddPhoto)
-        val spiner = dialogLayout.findViewById<Spinner>(R.id.spinner2)
-        var category = ""
+        val addPhotoText = dialogLayout.findViewById<TextView>(R.id.tvAddPhoto)
+        val spiner = dialogLayout.findViewById<AutoCompleteTextView>(R.id.autoCompleteCategories)
 
-        model.getAllCategories({ list ->
+        // Подключаем наши новые стильные кнопки-карточки
+        val btnActionPhoto = dialogLayout.findViewById<View>(R.id.btnActionPhoto)
+        val btnActionAlarm = dialogLayout.findViewById<View>(R.id.btnActionAlarm)
+        val btnOk = dialogLayout.findViewById<View>(R.id.btnOk)
+        val btnCancel = dialogLayout.findViewById<View>(R.id.btnCancel)
+
+       // var category = ""
+
+        // Инициализируем диалог через кастомный View
+        builder.setView(dialogLayout)
+        val alertDialog = builder.create()
+
+        model.getAllCategories({ list,nameCategory ->
+            spiner.setText(nameCategory)
             spinerInput(
                 spiner, context,
-                { selected -> category = selected }, list
+                list
             )
         }, item, calendar)
 
         model.uriPhoto.value = ""
         var uriString = ""
 
+        // Подписка на обновление картинки
         model.uriPhoto.observe(lifecycleOwner) { uri ->
-            updateImagePreview(imView, deleteText, addPhoto, uri)
+            updateImagePreview(imView, deleteText, addPhotoText, uri)
             uriString = uri.toString()
         }
+
         imView.setOnClickListener {
             showExpandedImage(uriString, context)
         }
+
+        // Заполнение полей, если мы редактируем существующий элемент
         if (item != null) {
-            updateImagePreview(imView, deleteText, addPhoto, item.alarmText)
+            updateImagePreview(imView, deleteText, addPhotoText, item.alarmText)
             editText1.setText(item.name)
             editText2.setText(item.desc)
             uriString = item.alarmText
-            updateImagePreview(imView, deleteText, addPhoto, uriString)
+            updateImagePreview(imView, deleteText, addPhotoText, uriString)
         } else {
-            updateImagePreview(imView, deleteText, addPhoto, "")
+            updateImagePreview(imView, deleteText, addPhotoText, "")
             editText1.requestFocus()
             editText1.postDelayed({
-                val imm =
-                    context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                 imm.showSoftInput(editText1, InputMethodManager.SHOW_IMPLICIT)
             }, 200)
         }
@@ -151,121 +167,221 @@ object DialogItemList {
             model.uriPhoto.value = ""
         }
 
-        addPhoto.setOnClickListener {
+        // Клик по красивой кнопке выбора фотографии
+        btnActionPhoto.setOnClickListener {
             pick.launch("image/*")
         }
 
-        builder.setTitle("Сфокусироваться")
         var input1: String
         var input2: String
-        builder.setPositiveButton("OK") { dialog, _ ->
+
+        // Обработка кнопки сохранения (OK) из нашего макета
+        btnOk.setOnClickListener {
             input1 = editText1.text.toString()
             input2 = editText2.text.toString()
-            if (item == null) {
-                if (input1.isEmpty()) {
-                    // Toast.makeText(context, "Название не должно быть пустым", Toast.LENGTH_SHORT).show()
-                    listener.onClickItem(
-                        "(Без названия)",
-                        null,
-                        null,
-                        input2.trim(),
-                        uriString,
-                        category
-                    )
-                } else {
-                    listener.onClickItem(
-                        input1.trim(),
-                        null,
-                        null,
-                        input2.trim(),
-                        uriString,
-                        category
-                    )
-                    dialog.dismiss()
-                }
+            val finalTitle = if (input1.isEmpty()) "(Без названия)" else input1.trim()
 
-            } else {
-                listener.onClickItem(
-                    input1.trim(),
-                    null,
-                    item.id,
-                    input2.trim(),
-                    uriString,
-                    category
-                )
-                dialog.dismiss()
-            }
+            listener.onClickItem(
+                finalTitle,
+                null,
+                item?.id,
+                input2.trim(),
+                uriString,
+                spiner.text.toString()
+            )
+            alertDialog.dismiss()
         }
-        builder.setNeutralButton("Установка будильника") { dialog, _ ->
+
+        // Обработка кнопки «Будильник» из нашего макета
+        btnActionAlarm.setOnClickListener {
             input1 = editText1.text.toString()
             input2 = editText2.text.toString()
-            if (item == null) {
-                if (input1.isEmpty()) {
-                    // Toast.makeText(context, "Название не должно быть пустым", Toast.LENGTH_SHORT).show()
-                    listener.onClickItem(
-                        "(Без названия)",
-                        Const.ALARM,
-                        null,
-                        input2.trim(),
-                        uriString,
-                        category
-                    )
-                    dialog.dismiss()
-                } else {
-                    listener.onClickItem(
-                        input1.trim(),
-                        Const.ALARM,
-                        null,
-                        input2.trim(),
-                        uriString,
-                        category
-                    )
-                    dialog.dismiss()
-                }
+            val finalTitle = if (input1.isEmpty()) "(Без названия)" else input1.trim()
 
-            } else {
-                listener.onClickItem(
-                    input1.trim(),
-                    Const.ALARM,
-                    item.id,
-                    input2.trim(),
-                    uriString,
-                    category
-                )
-                dialog.dismiss()
-            }
-
+            listener.onClickItem(
+                finalTitle,
+                Const.ALARM,
+                item?.id,
+                input2.trim(),
+                uriString,
+                spiner.text.toString()
+            )
+            alertDialog.dismiss()
         }
-        builder.setNegativeButton("Отмена") { dialog, _ -> dialog.cancel() }
-        builder.setView(dialogLayout)
-        builder.show()
+
+        // Обработка кнопки «Отмена»
+        btnCancel.setOnClickListener {
+            alertDialog.cancel()
+        }
+
+        alertDialog.show()
     }
 
+//    fun alertItem(
+//        context: Context, listener: Listener, item: Item?,
+//        model: ViewModelFlashLight,
+//        lifecycleOwner: LifecycleOwner,
+//        pick: ActivityResultLauncher<String>,
+//        calendar: Boolean
+//    ) {
+//
+//        val builder = AlertDialog.Builder(context)
+//        val inflater = LayoutInflater.from(context)
+//        val dialogLayout = inflater.inflate(R.layout.dialog_layout, null)
+//        val editText1 = dialogLayout.findViewById<EditText>(R.id.itemName)
+//        val editText2 = dialogLayout.findViewById<EditText>(R.id.edDescItemName)
+//        val imView = dialogLayout.findViewById<ImageView>(R.id.imPhoto)
+//        val deleteText = dialogLayout.findViewById<TextView>(R.id.tvDel)
+//        val addPhoto = dialogLayout.findViewById<TextView>(R.id.tvAddPhoto)
+//        val spiner = dialogLayout.findViewById<Spinner>(R.id.spinner2)
+//        var category = ""
+//
+//        model.getAllCategories({ list ->
+//            spinerInput(
+//                spiner, context,
+//                { selected -> category = selected }, list
+//            )
+//        }, item, calendar)
+//
+//        model.uriPhoto.value = ""
+//        var uriString = ""
+//
+//        model.uriPhoto.observe(lifecycleOwner) { uri ->
+//            updateImagePreview(imView, deleteText, addPhoto, uri)
+//            uriString = uri.toString()
+//        }
+//        imView.setOnClickListener {
+//            showExpandedImage(uriString, context)
+//        }
+//        if (item != null) {
+//            updateImagePreview(imView, deleteText, addPhoto, item.alarmText)
+//            editText1.setText(item.name)
+//            editText2.setText(item.desc)
+//            uriString = item.alarmText
+//            updateImagePreview(imView, deleteText, addPhoto, uriString)
+//        } else {
+//            updateImagePreview(imView, deleteText, addPhoto, "")
+//            editText1.requestFocus()
+//            editText1.postDelayed({
+//                val imm =
+//                    context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+//                imm.showSoftInput(editText1, InputMethodManager.SHOW_IMPLICIT)
+//            }, 200)
+//        }
+//
+//        deleteText.setOnClickListener {
+//            model.uriPhoto.value = ""
+//        }
+//
+//        addPhoto.setOnClickListener {
+//            pick.launch("image/*")
+//        }
+//
+//        builder.setTitle("Сфокусироваться")
+//        var input1: String
+//        var input2: String
+//        builder.setPositiveButton("OK") { dialog, _ ->
+//            input1 = editText1.text.toString()
+//            input2 = editText2.text.toString()
+//            if (item == null) {
+//                if (input1.isEmpty()) {
+//                    // Toast.makeText(context, "Название не должно быть пустым", Toast.LENGTH_SHORT).show()
+//                    listener.onClickItem(
+//                        "(Без названия)",
+//                        null,
+//                        null,
+//                        input2.trim(),
+//                        uriString,
+//                        category
+//                    )
+//                } else {
+//                    listener.onClickItem(
+//                        input1.trim(),
+//                        null,
+//                        null,
+//                        input2.trim(),
+//                        uriString,
+//                        category
+//                    )
+//                    dialog.dismiss()
+//                }
+//
+//            } else {
+//                listener.onClickItem(
+//                    input1.trim(),
+//                    null,
+//                    item.id,
+//                    input2.trim(),
+//                    uriString,
+//                    category
+//                )
+//                dialog.dismiss()
+//            }
+//        }
+//        builder.setNeutralButton("Установка будильника") { dialog, _ ->
+//            input1 = editText1.text.toString()
+//            input2 = editText2.text.toString()
+//            if (item == null) {
+//                if (input1.isEmpty()) {
+//                    // Toast.makeText(context, "Название не должно быть пустым", Toast.LENGTH_SHORT).show()
+//                    listener.onClickItem(
+//                        "(Без названия)",
+//                        Const.ALARM,
+//                        null,
+//                        input2.trim(),
+//                        uriString,
+//                        category
+//                    )
+//                    dialog.dismiss()
+//                } else {
+//                    listener.onClickItem(
+//                        input1.trim(),
+//                        Const.ALARM,
+//                        null,
+//                        input2.trim(),
+//                        uriString,
+//                        category
+//                    )
+//                    dialog.dismiss()
+//                }
+//
+//            } else {
+//                listener.onClickItem(
+//                    input1.trim(),
+//                    Const.ALARM,
+//                    item.id,
+//                    input2.trim(),
+//                    uriString,
+//                    category
+//                )
+//                dialog.dismiss()
+//            }
+//
+//        }
+//        builder.setNegativeButton("Отмена") { dialog, _ -> dialog.cancel() }
+//        builder.setView(dialogLayout)
+//        builder.show()
+//    }
+
+
+
     private fun spinerInput(
-        spinner: Spinner,
+        autoCompleteTextView: AutoCompleteTextView,
         context: Context,
-        onItemSelected: (String) -> Unit,
-        list: List<String>
+        list: List<String>,
+
     ) {
-        val adapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, list)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinner.adapter = adapter
 
-        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                val selectedWord = parent.getItemAtPosition(position) as String
-                onItemSelected(selectedWord)
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>) {
-                //onItemSelected("Повседневные")
-            }
+        val adapter = ArrayAdapter(
+            context,
+            android.R.layout.simple_spinner_dropdown_item,
+            list
+        )
+        autoCompleteTextView.setAdapter(adapter)
+        autoCompleteTextView.setOnClickListener {
+            autoCompleteTextView.showDropDown()
         }
+        autoCompleteTextView.setDropDownBackgroundResource(R.drawable.spinner_popup_background)
     }
 
 
