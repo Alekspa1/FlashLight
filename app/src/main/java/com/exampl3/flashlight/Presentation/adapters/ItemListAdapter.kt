@@ -24,6 +24,7 @@ import java.util.Calendar
 import java.util.Collections
 import java.util.Date
 import java.util.Locale
+import kotlin.math.abs
 
 class ItemListAdapter(
     private val itemClickHandler: ItemClickHandler,
@@ -232,22 +233,25 @@ class ItemListAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(getItem(position), itemClickHandler)
     }
-    
+
 
     override fun onItemMove(fromPosition: Int, toPosition: Int) {
-         val currentList = currentList.toMutableList()
-         Collections.swap(currentList, fromPosition, toPosition)
-    //   submitList(currentList)
-       notifyItemMoved(fromPosition , toPosition )
-     }
+        val currentList = currentList.toMutableList()
+        Collections.swap(currentList, fromPosition, toPosition)
+
+            submitList(currentList)
+
+    }
 
      override fun onMoveComplete() {
          val itemsWithNewOrder = currentList.mapIndexed { index, item ->
             item.copy(sort = index)
         }
-     //    submitList(itemsWithNewOrder)
+
         onOrderChanged?.invoke(itemsWithNewOrder)
+
      }
+
 }
 
 
