@@ -4,7 +4,6 @@ import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import com.exampl3.flashlight.Const
-import yads.fa
 import javax.inject.Inject
 import javax.inject.Singleton
 

@@ -10,7 +10,6 @@ import androidx.core.net.toUri
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.room.withTransaction
 import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Const.SORT_STANDART
 import com.exampl3.flashlight.Data.GetSystemSoundImp
@@ -181,8 +180,6 @@ class ViewModelFlashLight @Inject constructor(
     fun saveNoteBook(value: String) = pref.saveStringNoteBook(value)
     fun getNotebook() = pref.getStringNoteBook()
 
-
-    val listItemLD = MutableLiveData<List<Item>>()
 
     val listItemLDCalendar = MutableLiveData<List<Item>>()
 

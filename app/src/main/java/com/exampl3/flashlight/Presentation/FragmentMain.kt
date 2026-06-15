@@ -172,9 +172,9 @@ class FragmentMain : Fragment() {
 
     private fun initYaBaner() {
         bannerAd = BannerAdView(requireActivity())
-        binding.yaBaner.setAdUnitId(Const.BANER)
-        binding.yaBaner.setAdSize(BannerAdSize.stickySize(requireActivity(), 350))
-        val adRequest = AdRequest.Builder().build()
+
+        binding.yaBaner.setAdSize(BannerAdSize.sticky(requireActivity(), 350))
+        val adRequest = AdRequest.Builder(Const.BANER).build()
         binding.yaBaner.loadAd(adRequest)
 
     } // Инициализирую Яндекс Рекламу

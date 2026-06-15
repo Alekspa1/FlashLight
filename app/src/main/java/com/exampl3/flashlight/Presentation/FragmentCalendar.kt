@@ -311,7 +311,8 @@ class FragmentCalendar : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        calendarZero = Calendar.getInstance()
+            calendarZero = Calendar.getInstance()
+
             if (!modelFlashLight.getPremium()) Toast.makeText(
                 view?.context,
                 "Отображение дел в календаре доступно в PREMIUM версии",
