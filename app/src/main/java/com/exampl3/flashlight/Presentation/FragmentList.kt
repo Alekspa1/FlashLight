@@ -30,7 +30,6 @@ import com.exampl3.flashlight.Data.ThemeImp
 import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
 import com.exampl3.flashlight.Domain.ItemClickHandler
 import com.exampl3.flashlight.Domain.useCase.PermissionUseCase
-import com.exampl3.flashlight.Presentation.adapters.ItemListAdapter
 import com.exampl3.flashlight.R
 import com.exampl3.flashlight.databinding.FragmentListBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -49,7 +48,6 @@ import com.mikepenz.fastadapter.utils.DragDropUtil
 @AndroidEntryPoint
 open class FragmentList : Fragment() {
     private lateinit var binding: FragmentListBinding
-    private lateinit var adapter: ItemListAdapter
 
     @Inject
     lateinit var db: Database
@@ -206,88 +204,6 @@ open class FragmentList : Fragment() {
 }
 
 
-       // binding.imBAddFrag.setOnClickListener {
-           // modelFlashLight.getItemMaxSort()
-           // DialogItemList.alertItem(
-              //  requireContext(),
-              //  object : DialogItemList.Listener {
-               //     override fun onClickItem(
-                //        name: String,
-                //        action: Int?,
-                //        id: Int?,
-                //       desc: String?,
-                //        uri: String?,
-                //      category: String?
-               //     ) {
-               //         var item: Item
-               //         var permanentFile = ""
-               //         if (uri!!.isNotEmpty()) {
-               //             permanentFile =
-               //                 modelFlashLight.saveImagePermanently(requireContext(), uri.toUri())
-               //                     .toString()
-               //         }
-               //         modelFlashLight.insertItem(
-               //             Item(
-               //                 null,
-                //                name,
-               //                 category = category.toString(),
-               //                 desc = desc,
-               //                 alarmTime = 0,
-               //                 alarmText = permanentFile,
-               //                 sort = modelFlashLight.maxSorted.value ?: 0
-               //             )
-               //         )
-//
-//
-//                        if (action == ALARM) {
-//                           if (view.let {
-//                                    Const.isPermissionGranted(
-//                                        it.context,
- //                                       Manifest.permission.POST_NOTIFICATIONS
-//                                    )
-//                                }) {
-//                                viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-//                                    delay(500)
-//                                    item = db.CourseDao().getAllList().last()
-  //                                  if (item.name == name) {
-    //                                    withContext(Dispatchers.Main) {
-      //                                      modelFlashLight.insertDateAndAlarm(
-        //                                        item,
-          //                                      null,
-            //                                    requireContext()
-              //                              )
-                //                        }
-                  //                  } else {
-                    //                    delay(1000)
-                      //                  item = db.CourseDao().getAllList().last()
-                        //                withContext(Dispatchers.Main) {
-                          //                  modelFlashLight.insertDateAndAlarm(
-                            //                    item,
-//                                                null,
-  //                                              requireContext()
-    //                                        )
-      //                                  }
-        //                            }
-//
-  //                              }
-//
-  //                          } else {
-    //                            DialogItemList.permissonAlert(requireContext(),permissionUseCase, pLauncher)
-//
-  //                          }
-//
-//
-  //                      }
-    //                }
-      //          },
-        //        null,
-          //      model = modelFlashLight,
-//                lifecycleOwner = this,
-  //              pick = pickImageLauncher,
-    //            false
-      //      )
-//
-  //      }
 
         binding.imVoiceFrag.setOnClickListener {
             try {
@@ -304,53 +220,6 @@ open class FragmentList : Fragment() {
         }
 
     }
-
-    // private fun initRcView() {
-    //     val rcView = binding.rcView
-
-    //     adapter = ItemListAdapter(
-    //         itemClickHandler = itemClickHandler,
-    //         onOrderChanged = { updatedList ->
-    //             modelFlashLight.updateItemsOrder(updatedList)
-    //         },
-    //         touchHelper = null,
-    //         pref,
-    //         themeImp
-    //     )
-    //     rcView.layoutManager = LinearLayoutManager(requireContext())
-    //     rcView.adapter = adapter
-    //     val touchHelper = ItemTouchHelper(DragItemTouchHelperCallback(adapter))
-    //     if (modelFlashLight.getSort() == SORT_USER) {
-    //         touchHelper.attachToRecyclerView(rcView)
-    //         adapter.touchHelper = touchHelper
-    //     }
-
-    //     modelFlashLight.listItemLD.observe(viewLifecycleOwner) { list ->
-    //         scrollInStartAdapter() // это чтобы при создании жлемента, был скролл наверх
-    //         if (modelFlashLight.getSort() == SORT_STANDART) {
-    //             adapter.submitList(list.sortedBy { it.id }.reversed().sortedBy { it.alarmTime }
-    //                 .reversed().sortedBy { it.change }
-    //                 .reversed().sortedBy { it.changeAlarm }
-    //                 .reversed())
-    //         } else {
-    //             adapter.submitList(list.sortedBy { it.sort })
-    //         }
-
-
-    //     }
-
-    // } // инициализировал ресайклер
-
-    // private fun scrollInStartAdapter() {
-    //     adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
-    //         override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
-    //             if (positionStart == 0) {  // Элементы добавились в начало (верх списка)
-    //                 binding.rcView.scrollToPosition(0)
-    //                 adapter.unregisterAdapterDataObserver(this)
-    //             }
-    //         }
-    //     })
-    // }
 
     private fun initRcView() {
         val itemAdapter = ItemAdapter<SimpleItem>()

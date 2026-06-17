@@ -24,13 +24,19 @@ import com.exampl3.flashlight.Domain.InsertDateAndAlarm
 import com.exampl3.flashlight.Domain.useCase.insertOrDeleteAlarm.ChangeAlarmUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -55,16 +61,24 @@ class ViewModelFlashLight @Inject constructor(
     private val _sortType = MutableStateFlow(settingsPref.getSort())
     val sortType = _sortType.asStateFlow()
 
+    private val _listItemAll = MutableStateFlow(db.CourseDao().getAllItemsFlow())
+    val listItemAll = _listItemAll.asStateFlow()
+
     private val _categoryItemFlow = MutableStateFlow("Повседневные")
     val categoryItemFlow = _categoryItemFlow.asStateFlow()
 
+    val timeItemsInCalendar = MutableStateFlow(0L)
+
+    private val _toastEvent = MutableSharedFlow<String>()
+    val toastEvent = _toastEvent.asSharedFlow()
+
+    val getItemsInCalendar = db.CourseDao().getItemsInCalendar()
 
 
     fun savePremium(flag: Boolean) = pref.savePremium(flag)
     fun getPremium() = pref.getPremium()
 
-    private val _toastEvent = MutableSharedFlow<String>()
-    val toastEvent = _toastEvent.asSharedFlow()
+
 
     suspend fun sendEvent(value: String) = _toastEvent.emit(value)
 
@@ -95,7 +109,7 @@ class ViewModelFlashLight @Inject constructor(
 
 
     val sortedItemsFlow: Flow<List<Item>> = combine(
-        db.CourseDao().getAllItemsFlow(), // Поток всех дел
+        listItemAll.value, // Поток всех дел
         sortType,                         // Поток типа сортировки
         categoryItemFlow                  // Поток выбранной категории
     ) { list, sort, currentCategory ->
@@ -116,47 +130,37 @@ class ViewModelFlashLight @Inject constructor(
         }
     }.flowOn(Dispatchers.Default)
 
-//    fun getAllCategories(onResult: (List<String>) -> Unit, item: Item?, calendar: Boolean) {
-//        val listCategory = mutableListOf("Повседневные")
-//        viewModelScope.launch {
-//            listCategory.addAll(db.CourseDao().getAllCategories())
-//            if (!calendar) {
-//                if (item == null) {
-//                    val currentCategory = categoryItemFlow.value
-//                    listCategory.remove(currentCategory)
-//                    listCategory.add(0, currentCategory)
-//                } else {
-//                    listCategory.remove(item.category)
-//                    listCategory.add(0, item.category)
-//                }
-//            } else {
-//                if (item != null) {
-//                    listCategory.remove(item.category)
-//                    listCategory.add(0, item.category)
-//                }
-//
-//            }
-//
-//
-//            onResult(listCategory)
-//        }
-//
-//    }
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val listItemCalendarflow = timeItemsInCalendar.flatMapLatest { timeDay ->
+        db.CourseDao().getAllListCalendarRcView(timeDay)
+    }
 
-    fun getAllCategories(onResult: (List<String>,String) -> Unit, item: Item?, calendar: Boolean) {
+    fun getAllCategories(onResult: (List<String>) -> Unit, item: Item?, calendar: Boolean) {
         val listCategory = mutableListOf("Повседневные")
         viewModelScope.launch {
             listCategory.addAll(db.CourseDao().getAllCategories())
-            var currentCategory = item?.category ?: categoryItemFlow.value
+            if (!calendar) {
+                if (item == null) {
+                    val currentCategory = categoryItemFlow.value
+                    listCategory.remove(currentCategory)
+                    listCategory.add(0, currentCategory)
+                } else {
+                    listCategory.remove(item.category)
+                    listCategory.add(0, item.category)
+                }
+            } else {
+                if (item != null) {
+                    listCategory.remove(item.category)
+                    listCategory.add(0, item.category)
+                }
 
-            if (calendar && item == null) {
-                currentCategory = "Повседневные"
             }
 
-            onResult(listCategory,currentCategory)
-        }
-    }
 
+            onResult(listCategory)
+        }
+
+    }
 
 
 
@@ -182,6 +186,7 @@ class ViewModelFlashLight @Inject constructor(
 
 
     val listItemLDCalendar = MutableLiveData<List<Item>>()
+
 
     val uriPhoto = MutableLiveData<String>()
 
@@ -303,29 +308,6 @@ class ViewModelFlashLight @Inject constructor(
         }
     }
 
-//    fun updateItemsOrder(newList: List<Item>) {
-//        viewModelScope.launch {
-//            saveNewOrder(newList)
-//            listItemLD.value = newList
-//        }
-//
-//    }
-//
-//    fun saveNewOrder(newList: List<Item>) {
-//        newList.forEach { newItem ->
-//            updateItem(newItem)
-//        }
-//    }
-
-    // fun getItemMaxSort() {
-    //     viewModelScope.launch {
-    //         maxSorted.value = (db.CourseDao().getItemWithMaxSort()?.sort?.minus(1))
-    //     }
-    // }
-
-    //fun insertItem(item: Item) {
-    //    viewModelScope.launch { db.CourseDao().insertItem(item) }
-    // }
 
     fun insertItem(
         name: String,
@@ -437,13 +419,10 @@ class ViewModelFlashLight @Inject constructor(
     }
 
 
-    fun getListItemByCalendar(time: Long) {
-        viewModelScope.launch {
-            listItemLDCalendar.value =
-                db.CourseDao().getAllListCalendarRcView(time)
-                    .filter { item -> item.changeAlarm || !item.change }
-        }
+    fun insetTimeIncalendar(time: Long) {
+        timeItemsInCalendar.value = time
     }
+
 
 }
 

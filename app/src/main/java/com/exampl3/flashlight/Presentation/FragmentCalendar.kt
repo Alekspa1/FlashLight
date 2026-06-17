@@ -13,6 +13,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.applandeo.materialcalendarview.CalendarDay
@@ -25,11 +28,15 @@ import com.exampl3.flashlight.Data.ThemeImp
 import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
 import com.exampl3.flashlight.Domain.ItemClickHandler
 import com.exampl3.flashlight.Domain.useCase.PermissionUseCase
-import com.exampl3.flashlight.Presentation.adapters.ItemListAdapter
+import com.exampl3.flashlight.Presentation.adapters.SimpleItem
 import com.exampl3.flashlight.R
 import com.exampl3.flashlight.databinding.FragmentCalendarBinding
 import com.exampl3.flashlight.databinding.FragmentCalendarZaborBinding
+import com.mikepenz.fastadapter.FastAdapter
+import com.mikepenz.fastadapter.adapters.ItemAdapter
+import com.mikepenz.fastadapter.diff.FastAdapterDiffUtil
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import java.util.Calendar
 import javax.inject.Inject
 
@@ -56,7 +63,6 @@ class FragmentCalendar : Fragment() {
     private lateinit var calendarZero: Calendar
     private lateinit var calendarDay: CalendarDay
     private lateinit var calendarDayB: Calendar
-    private lateinit var adapter: ItemListAdapter
     private lateinit var pLauncher: ActivityResultLauncher<String>
     private lateinit var itemClickHandler: ItemClickHandler
     private val pickImageLauncher = registerForActivityResult(
@@ -93,7 +99,8 @@ class FragmentCalendar : Fragment() {
             )
         calendar = Calendar.getInstance()
         calendarDayB = Calendar.getInstance()
-        initRcView()
+        initRcView("")
+        modelFlashLight.insetTimeIncalendar(calendar.timeInMillis)
 
 
          if (pref.getTheme() == THEME_ZABOR) {
@@ -236,35 +243,44 @@ class FragmentCalendar : Fragment() {
 
     }
     private fun createAlarmInCalendarnNeon() {
+//        viewLifecycleOwner.lifecycleScope.launch {
+//            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+//                modelFlashLight.listItemCalendarflow.collect {
+//                    adapter.submitList(it)
+//                    if (it.isNotEmpty()) binding.tvDela.visibility = View.GONE
+//                    else binding.tvDela.visibility = View.VISIBLE
+//                }
+//
+//
+//            }
+//        }
 
-                modelFlashLight.getListItemByCalendar(getDateNow(calendarDayB))
 
-                modelFlashLight.listItemLDCalendar.observe(viewLifecycleOwner) {
-                    scrollInStartAdapter()
-                    adapter.submitList(it)
-                    if (it.isNotEmpty()) binding.tvDela.visibility = View.GONE
-                    else binding.tvDela.visibility = View.VISIBLE
-                }
-                db.CourseDao().getAll().observe(viewLifecycleOwner) { list ->
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                modelFlashLight.getItemsInCalendar.collect { listItems->
                     val calendarDays = mutableListOf<CalendarDay>()
-
-                    list.forEach { item ->
-                        if (item.changeAlarm || !item.change) {
-
+                    listItems.forEach { item->
                             calendar.timeInMillis = item.alarmTime
                             val clonedCalendar = calendar.clone() as Calendar
                             calendarDay = CalendarDay(clonedCalendar)
                             calendarDay.imageResource = R.drawable.ic_work
                             calendarDays.add(calendarDay)
-                        }
                     }
                     binding.calendarView.setCalendarDays(calendarDays)
                 }
+
+
+            }
+        }
+
+
+
                 binding.calendarView.setOnCalendarDayClickListener(object :
                     OnCalendarDayClickListener {
                     override fun onClick(calendarDay: CalendarDay) {
                         calendarDayB = calendarDay.calendar
-                        modelFlashLight.getListItemByCalendar(getDateNow(calendarDayB))
+                        modelFlashLight.insetTimeIncalendar(getDateNow(calendarDayB))
 
                     }
 
@@ -274,32 +290,30 @@ class FragmentCalendar : Fragment() {
             }
     private fun createAlarmInCalendarnZabor(){
 
-        modelFlashLight.getListItemByCalendar(getDateNow(calendarDayB))
 
-        modelFlashLight.listItemLDCalendar.observe(viewLifecycleOwner) {
-            scrollInStartAdapter()
-            adapter.submitList(it)
-            if (it.isNotEmpty()) bindingZabor.tvDela.visibility = View.GONE
-            else bindingZabor.tvDela.visibility = View.VISIBLE
-        }
-        db.CourseDao().getAll().observe(viewLifecycleOwner) { list ->
-            val calendarDays = mutableListOf<CalendarDay>()
-            list.forEach { item ->
-                if (item.changeAlarm || !item.change) {
-                    calendar.timeInMillis = item.alarmTime
-                    val clonedCalendar = calendar.clone() as Calendar
-                    calendarDay = CalendarDay(clonedCalendar)
-                    calendarDay.imageResource = R.drawable.ic_work
-                    calendarDays.add(calendarDay)
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                modelFlashLight.getItemsInCalendar.collect { listItems->
+                    val calendarDays = mutableListOf<CalendarDay>()
+                    listItems.forEach { item->
+                        calendar.timeInMillis = item.alarmTime
+                        val clonedCalendar = calendar.clone() as Calendar
+                        calendarDay = CalendarDay(clonedCalendar)
+                        calendarDay.imageResource = R.drawable.ic_work
+                        calendarDays.add(calendarDay)
+                    }
+                    bindingZabor.calendarView.setCalendarDays(calendarDays)
                 }
+
+
             }
-            bindingZabor.calendarView.setCalendarDays(calendarDays)
         }
         bindingZabor.calendarView.setOnCalendarDayClickListener(object :
             OnCalendarDayClickListener {
             override fun onClick(calendarDay: CalendarDay) {
                 calendarDayB = calendarDay.calendar
-                modelFlashLight.getListItemByCalendar(getDateNow(calendarDayB))
+               // modelFlashLight.getListItemByCalendar(getDateNow(calendarDayB))
+                modelFlashLight.insetTimeIncalendar(getDateNow(calendarDayB))
 
             }
 
@@ -322,59 +336,101 @@ class FragmentCalendar : Fragment() {
     }
 
 
-    private fun initRcView() {
+
+
+    private fun initRcView(t: String) {
         if (pref.getTheme() == THEME_ZABOR) {
-            val rcView = bindingZabor.rcViewItem
+            val itemAdapter = ItemAdapter<SimpleItem>()
+            val fastAdapter = FastAdapter.with(itemAdapter)
+            bindingZabor.rcViewItem.layoutManager = LinearLayoutManager(requireContext())
+            bindingZabor.rcViewItem.adapter = fastAdapter
 
-            adapter = ItemListAdapter(
-                itemClickHandler = itemClickHandler,
-                onOrderChanged = null,
-                touchHelper = null,
-                pref,
-                themeImp
-            )
-            rcView.layoutManager = LinearLayoutManager(requireContext())
-            rcView.adapter = adapter
-        } else {
-            val rcView = binding.rcViewItem
 
-            adapter = ItemListAdapter(
-                itemClickHandler = itemClickHandler,
-                onOrderChanged = null,
-                touchHelper = null,
-                pref,
-                themeImp
-            )
-            rcView.layoutManager = LinearLayoutManager(requireContext())
-            rcView.adapter = adapter
+            viewLifecycleOwner.lifecycleScope.launch {
+                viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    modelFlashLight.listItemCalendarflow.collect {rawDataList->
 
+                        val currentItems = itemAdapter.adapterItems.map { it.item }
+
+                        // Если данные абсолютно идентичны (и статус, и порядок), только тогда игнорируем
+                        if (currentItems == rawDataList) return@collect
+
+                        val items = rawDataList.map { data -> SimpleItem(data,pref,itemClickHandler,themeImp) }
+                        FastAdapterDiffUtil.set(itemAdapter, items, object : com.mikepenz.fastadapter.diff.DiffCallback<SimpleItem> {
+
+                            // 1. Проверяем, та же ли это самая карточка (по ID)
+                            override fun areItemsTheSame(oldItem: SimpleItem, newItem: SimpleItem): Boolean {
+                                return oldItem.identifier == newItem.identifier
+                            }
+
+                            // 2. КРИТИЧЕСКИЙ МОМЕНТ: Проверяем, изменились ли данные внутри (например, цвет/статус)
+                            override fun areContentsTheSame(oldItem: SimpleItem, newItem: SimpleItem): Boolean {
+                                // Так как Item — это data class, равенство '==' проверит все поля сразу.
+                                // Если статус изменился, метод вернет false, и FastAdapter ПЕРЕРИСУЕТ карточку!
+                                return oldItem.item == newItem.item
+                            }
+
+                            override fun getChangePayload(oldItem: SimpleItem, oldItemPosition: Int, newItem: SimpleItem, newItemPosition: Int): Any? {
+                                return null
+                            }
+                        })
+
+                        if (rawDataList.isNotEmpty()) bindingZabor.tvDela.visibility = View.GONE
+                        else bindingZabor.tvDela.visibility = View.VISIBLE
+                    }
+
+
+                }
+            }
+        }
+        else  {
+            val itemAdapter = ItemAdapter<SimpleItem>()
+            val fastAdapter = FastAdapter.with(itemAdapter)
+            binding.rcViewItem.layoutManager = LinearLayoutManager(requireContext())
+            binding.rcViewItem.adapter = fastAdapter
+
+
+            viewLifecycleOwner.lifecycleScope.launch {
+                viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    modelFlashLight.listItemCalendarflow.collect {rawDataList->
+
+                        val currentItems = itemAdapter.adapterItems.map { it.item }
+
+                        // Если данные абсолютно идентичны (и статус, и порядок), только тогда игнорируем
+                        if (currentItems == rawDataList) return@collect
+
+                        val items = rawDataList.map { data -> SimpleItem(data,pref,itemClickHandler,themeImp) }
+                        FastAdapterDiffUtil.set(itemAdapter, items, object : com.mikepenz.fastadapter.diff.DiffCallback<SimpleItem> {
+
+                            // 1. Проверяем, та же ли это самая карточка (по ID)
+                            override fun areItemsTheSame(oldItem: SimpleItem, newItem: SimpleItem): Boolean {
+                                return oldItem.identifier == newItem.identifier
+                            }
+
+                            // 2. КРИТИЧЕСКИЙ МОМЕНТ: Проверяем, изменились ли данные внутри (например, цвет/статус)
+                            override fun areContentsTheSame(oldItem: SimpleItem, newItem: SimpleItem): Boolean {
+                                // Так как Item — это data class, равенство '==' проверит все поля сразу.
+                                // Если статус изменился, метод вернет false, и FastAdapter ПЕРЕРИСУЕТ карточку!
+                                return oldItem.item == newItem.item
+                            }
+
+                            override fun getChangePayload(oldItem: SimpleItem, oldItemPosition: Int, newItem: SimpleItem, newItemPosition: Int): Any? {
+                                return null
+                            }
+                        })
+
+                        if (rawDataList.isNotEmpty()) binding.tvDela.visibility = View.GONE
+                        else binding.tvDela.visibility = View.VISIBLE
+                    }
+
+
+                }
+            }
         }
 
-
-    } // инициализировал ресайклер
-
-    private fun scrollInStartAdapter() {
-        if (pref.getTheme() == THEME_ZABOR) {
-            adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
-                override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
-                    if (positionStart == 0) {  // Элементы добавились в начало (верх списка)
-                        bindingZabor.rcViewItem.scrollToPosition(0)
-                        adapter.unregisterAdapterDataObserver(this)
-                    }
-                }
-            })
-        } else {
-            adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
-                override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
-                    if (positionStart == 0) {  // Элементы добавились в начало (верх списка)
-                        binding.rcViewItem.scrollToPosition(0)
-                        adapter.unregisterAdapterDataObserver(this)
-                    }
-                }
-            })
-        }
 
     }
+
 
 
     private fun getDateNow(calendar: Calendar): Long {
