@@ -51,7 +51,7 @@ class FragmentSettings : Fragment() {
     private val exportLauncher =
         registerForActivityResult(ActivityResultContracts.CreateDocument("application/octet-stream")) { uri ->
             uri?.let {
-                // Пользователь выбрал место и нажал "Сохранить" -> Передаем во ViewModel
+                binding.progressBar2.visibility = View.VISIBLE
                 modelFlashLight.doExport(it)
             }
         }
@@ -60,7 +60,7 @@ class FragmentSettings : Fragment() {
     private val importLauncher =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             uri?.let {
-                // Пользователь выбрал файл бэкапа -> Передаем во ViewModel
+                binding.progressBar2.visibility = View.VISIBLE
                 modelFlashLight.doImport(it)
             }
         }

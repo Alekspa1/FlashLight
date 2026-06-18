@@ -63,6 +63,9 @@ dependencies {
 
     // Опционально: для DiffUtil
     implementation("com.mikepenz:fastadapter-extensions-diff:5.7.0")
+    //pay SDK
+    implementation(platform("ru.rustore.sdk:bom:2025.11.01"))
+    implementation("ru.rustore.sdk:pay")
 
 
 

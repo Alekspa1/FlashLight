@@ -3,7 +3,9 @@ package com.exampl3.flashlight.Data.sharedPreference
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import com.exampl3.flashlight.Const
+import com.exampl3.flashlight.Domain.LogText
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -26,9 +28,10 @@ class SharedPreferenceImpl @Inject constructor(
         context.getSharedPreferences("PREMIUM", Context.MODE_PRIVATE)
     private val editPremium: SharedPreferences.Editor = prefPremium.edit()
 
-    fun getPremium(): Boolean = prefPremium.getBoolean(Const.PREMIUM_KEY, true)
+    fun getPremium(): Boolean = prefPremium.getBoolean(Const.PREMIUM_KEY, false)
 
     fun savePremium(flag: Boolean) {
+        LogText("Метод гдето вызвался")
         editPremium.putBoolean(Const.PREMIUM_KEY, flag)
         editPremium.apply()
     }

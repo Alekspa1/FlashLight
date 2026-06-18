@@ -21,6 +21,8 @@ import com.exampl3.flashlight.Data.ThemeImp
 import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
 import com.exampl3.flashlight.Data.sharedPreference.SharedPreferenceImpl
 import com.exampl3.flashlight.Domain.InsertDateAndAlarm
+import com.exampl3.flashlight.Domain.LogText
+import com.exampl3.flashlight.Domain.PaySDK
 import com.exampl3.flashlight.Domain.useCase.insertOrDeleteAlarm.ChangeAlarmUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -28,21 +30,19 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileNotFoundException
 import java.util.Calendar
 import javax.inject.Inject
+import kotlin.collections.emptyList
 
 
 @HiltViewModel
@@ -54,10 +54,13 @@ class ViewModelFlashLight @Inject constructor(
     private val changeAlarm: ChangeAlarmUseCase,
     private val theme: ThemeImp,
     private val getSystemSoundImp: GetSystemSoundImp,
-    private val backupManager: BackupManager
+    private val backupManager: BackupManager,
+    private val paySDK: PaySDK
 ) : ViewModel() {
 
-
+    init {
+        LogText(pref.getPremium().toString())
+    }
     private val _sortType = MutableStateFlow(settingsPref.getSort())
     val sortType = _sortType.asStateFlow()
 
@@ -74,11 +77,26 @@ class ViewModelFlashLight @Inject constructor(
 
     val getItemsInCalendar = db.CourseDao().getItemsInCalendar()
 
+    val statePremiumFlow = MutableStateFlow(pref.getPremium())
 
-    fun savePremium(flag: Boolean) = pref.savePremium(flag)
+
+    fun savePremium(flag: Boolean)  {
+        pref.savePremium(flag)
+        statePremiumFlow.value = flag
+    }
+
     fun getPremium() = pref.getPremium()
 
+    fun getAllListProducts(context: Context) = paySDK.getAllListProducts(context){savePremium(true)}
 
+    fun getListShopingProducts(context: Context) = paySDK.getListShopingProductsNew(context){ statePremium->
+        savePremium(statePremium)
+    }
+
+    val getItemCalendarCombine = combine(getItemsInCalendar,statePremiumFlow){list,premium->
+     if(premium) list
+     else emptyList()
+    }
 
     suspend fun sendEvent(value: String) = _toastEvent.emit(value)
 
@@ -132,7 +150,13 @@ class ViewModelFlashLight @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val listItemCalendarflow = timeItemsInCalendar.flatMapLatest { timeDay ->
-        db.CourseDao().getAllListCalendarRcView(timeDay)
+      if (timeDay != 0L) {
+          val dbFlow = db.CourseDao().getAllListCalendarRcView(timeDay)
+          dbFlow.combine(statePremiumFlow) { list, premium ->
+              if (premium) list else emptyList() // Ошибки типов больше нет!
+          }
+      }
+      else flowOf(emptyList())
     }
 
     fun getAllCategories(onResult: (List<String>) -> Unit, item: Item?, calendar: Boolean) {
@@ -184,8 +208,6 @@ class ViewModelFlashLight @Inject constructor(
     fun saveNoteBook(value: String) = pref.saveStringNoteBook(value)
     fun getNotebook() = pref.getStringNoteBook()
 
-
-    val listItemLDCalendar = MutableLiveData<List<Item>>()
 
 
     val uriPhoto = MutableLiveData<String>()

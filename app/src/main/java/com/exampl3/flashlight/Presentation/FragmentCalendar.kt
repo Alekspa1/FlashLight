@@ -17,7 +17,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.applandeo.materialcalendarview.CalendarDay
 import com.applandeo.materialcalendarview.listeners.OnCalendarDayClickListener
 import com.exampl3.flashlight.Const
@@ -99,8 +98,7 @@ class FragmentCalendar : Fragment() {
             )
         calendar = Calendar.getInstance()
         calendarDayB = Calendar.getInstance()
-        initRcView("")
-        modelFlashLight.insetTimeIncalendar(getDateNow(calendar))
+        initRcView()
 
          if (pref.getTheme() == THEME_ZABOR) {
             bindingZabor.imBAddCalendar.setOnClickListener {
@@ -169,7 +167,10 @@ class FragmentCalendar : Fragment() {
                     Toast.LENGTH_SHORT
                 ).show()
             }
-             if (modelFlashLight.getPremium()) createAlarmInCalendarnZabor()
+             if (modelFlashLight.getPremium()) {
+                 createAlarmInCalendarnZabor()
+                 modelFlashLight.insetTimeIncalendar(getDateNow(calendar))
+             }
         }
          else {
             binding.imBAddCalendar.setOnClickListener {
@@ -236,28 +237,19 @@ class FragmentCalendar : Fragment() {
                     Toast.LENGTH_SHORT
                 ).show()
             }
-             if (modelFlashLight.getPremium()) createAlarmInCalendarnNeon()
+             if (modelFlashLight.getPremium()) {
+                 createAlarmInCalendarnNeon()
+                 modelFlashLight.insetTimeIncalendar(getDateNow(calendar))
+             }
         }
 
 
     }
     private fun createAlarmInCalendarnNeon() {
-//        viewLifecycleOwner.lifecycleScope.launch {
-//            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-//                modelFlashLight.listItemCalendarflow.collect {
-//                    adapter.submitList(it)
-//                    if (it.isNotEmpty()) binding.tvDela.visibility = View.GONE
-//                    else binding.tvDela.visibility = View.VISIBLE
-//                }
-//
-//
-//            }
-//        }
-
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                modelFlashLight.getItemsInCalendar.collect { listItems->
+                modelFlashLight.getItemCalendarCombine.collect { listItems->
                     val calendarDays = mutableListOf<CalendarDay>()
                     listItems.forEach { item->
                             calendar.timeInMillis = item.alarmTime
@@ -337,7 +329,7 @@ class FragmentCalendar : Fragment() {
 
 
 
-    private fun initRcView(t: String) {
+    private fun initRcView() {
         if (pref.getTheme() == THEME_ZABOR) {
             val itemAdapter = ItemAdapter<SimpleItem>()
             val fastAdapter = FastAdapter.with(itemAdapter)
@@ -349,23 +341,16 @@ class FragmentCalendar : Fragment() {
                 viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                     modelFlashLight.listItemCalendarflow.collect {rawDataList->
 
-                        val currentItems = itemAdapter.adapterItems.map { it.item }
-
-                        // Если данные абсолютно идентичны (и статус, и порядок), только тогда игнорируем
-                        if (currentItems == rawDataList) return@collect
 
                         val items = rawDataList.map { data -> SimpleItem(data,pref,itemClickHandler,themeImp) }
                         FastAdapterDiffUtil.set(itemAdapter, items, object : com.mikepenz.fastadapter.diff.DiffCallback<SimpleItem> {
 
-                            // 1. Проверяем, та же ли это самая карточка (по ID)
                             override fun areItemsTheSame(oldItem: SimpleItem, newItem: SimpleItem): Boolean {
-                                return oldItem.identifier == newItem.identifier
+                               // return oldItem.identifier == newItem.identifier
+                                return oldItem.item.id == newItem.item.id
                             }
 
-                            // 2. КРИТИЧЕСКИЙ МОМЕНТ: Проверяем, изменились ли данные внутри (например, цвет/статус)
                             override fun areContentsTheSame(oldItem: SimpleItem, newItem: SimpleItem): Boolean {
-                                // Так как Item — это data class, равенство '==' проверит все поля сразу.
-                                // Если статус изменился, метод вернет false, и FastAdapter ПЕРЕРИСУЕТ карточку!
                                 return oldItem.item == newItem.item
                             }
 

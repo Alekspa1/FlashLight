@@ -1,6 +1,7 @@
 package com.exampl3.flashlight.Presentation
 
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
@@ -11,29 +12,32 @@ import com.exampl3.flashlight.Domain.ToastFun
 import com.exampl3.flashlight.R
 import com.exampl3.flashlight.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
+import ru.rustore.sdk.pay.IntentInteractor
+import ru.rustore.sdk.pay.RuStorePayClient
 
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
+    private val intentInteractor: IntentInteractor by lazy {
+        RuStorePayClient.instance.getIntentInteractor()
+    }
+
     private lateinit var binding: ActivityMainBinding
-    private val modelFlashLight: ViewModelFlashLight by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
+        if (savedInstanceState == null) {
+            intentInteractor.proceedIntent(intent)
+        }
         setupBackButtonHandler()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        intent?.getStringExtra(Const.REBOOT)?.let { message ->
-            // Показываем тост напрямую, без отправки во ViewModel
-            ToastFun(this, message)
-
-            // Обязательно удаляем экстра-данные, чтобы тост не вылезал при повороте экрана!
-            intent.removeExtra(Const.REBOOT)
-        }
-
-
+    }
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        intentInteractor.proceedIntent(intent)
     }
 
 

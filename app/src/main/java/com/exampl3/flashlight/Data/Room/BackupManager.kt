@@ -127,7 +127,6 @@ class BackupManager @Inject constructor(
     private fun restartApp() {
         val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
         intent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-        intent?.putExtra(Const.REBOOT, "Успешно")
         context.startActivity(intent)
         exitProcess(0)
     }
