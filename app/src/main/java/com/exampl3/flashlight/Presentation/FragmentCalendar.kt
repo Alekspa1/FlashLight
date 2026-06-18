@@ -100,8 +100,7 @@ class FragmentCalendar : Fragment() {
         calendar = Calendar.getInstance()
         calendarDayB = Calendar.getInstance()
         initRcView("")
-        modelFlashLight.insetTimeIncalendar(calendar.timeInMillis)
-
+        modelFlashLight.insetTimeIncalendar(getDateNow(calendar))
 
          if (pref.getTheme() == THEME_ZABOR) {
             bindingZabor.imBAddCalendar.setOnClickListener {

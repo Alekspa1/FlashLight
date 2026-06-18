@@ -29,6 +29,7 @@ import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Data.ThemeImp
 import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
 import com.exampl3.flashlight.Domain.ItemClickHandler
+import com.exampl3.flashlight.Domain.LogText
 import com.exampl3.flashlight.Domain.useCase.PermissionUseCase
 import com.exampl3.flashlight.R
 import com.exampl3.flashlight.databinding.FragmentListBinding
