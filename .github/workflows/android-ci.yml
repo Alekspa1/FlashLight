@@ -47,7 +47,9 @@ jobs:
           alias: ${{ secrets.ALIAS }}
           keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
           keyPassword: ${{ secrets.KEY_PASSWORD }}
-          buildToolsVersion: 34.0.0
+        # Версия указывается в блоке env большими буквами!
+        env:
+          BUILD_TOOLS_VERSION: "34.0.0"
 
       # 7. Отправляем подписанный релизный файл в Telegram
       - name: Send APK to Telegram
