@@ -1,4 +1,4 @@
-name: Build and Send APK to Telegram
+name: Build and Send Release APK to Telegram
 
 on:
   push:
@@ -29,19 +29,30 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      # 4. Проверка качества кода
-      - name: Run Quality Checks for Debug Only
-        run: ./gradlew compileDebugSources
+      # 4. Проверка качества кода (опционально, для релизных исходников)
+      - name: Run Quality Checks for Release
+        run: ./gradlew compileReleaseSources
 
-      # 5. Собираем только отладочный APK
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug
+      # 5. Собираем релизный APK
+      - name: Build Release APK
+        run: ./gradlew assembleRelease
 
-      # 6. Отправляем готовый файл прямо вам в Telegram-чат через вашего созданного бота
+      # 6. Подписываем релизный APK вашим ключом
+      - name: Sign APK
+        uses: r0adkll/sign-android-release@v1
+        id: sign_app
+        with:
+          releaseDirectory: app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: ${{ secrets.ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+
+      # 7. Отправляем подписанный релизный файл в Telegram
       - name: Send APK to Telegram
         uses: appleboy/telegram-action@master
         with:
           to: 706399730
           token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: "Сборка готова!"
-          document: app/build/outputs/apk/debug/app-debug.apk
+          message: "Релизная сборка готова и подписана!"
+          document: ${{ steps.sign_app.outputs.signedReleaseFile }}
