@@ -136,38 +136,38 @@ class SimpleItem (
 
         // 2. ДОБАВЛЕН ВИБРООТКЛИК НА ОБЫЧНЫЙ КЛИК ПО КАРТОЧКЕ
          cardView.setOnClickListener {
-             cardView.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY)
+             cardView.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
              itemClickHandler.onClick(item, Const.CHANGE_ITEM)
          }
         
         // 3. ДОБАВЛЕН ВИБРООТКЛИК НА ИЗМЕНЕНИЕ СТАТУСА (Двойной микро-клик "Выполнено")
         imStatus.setOnClickListener {
-            imStatus.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY)
+            imStatus.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
             itemClickHandler.onClick(item, Const.CHANGE)
         }
         
         // 4. ДОБАВЛЕН ВИБРООТКЛИК НА УДАЛЕНИЕ (Легкий щелчок)
         imDeleteList.setOnClickListener {
-            imDeleteList.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY)
+            imDeleteList.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
             itemClickHandler.onClick(item, Const.DELETE)
         }
         
         // 5. ДОБАВЛЕН ВИБРООТКЛИК НА БУДИЛЬНИК (Легкий щелчок)
         imAlarm.setOnClickListener {
-            imAlarm.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY)
+            imAlarm.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
             itemClickHandler.onClick(item, Const.ALARM)
         }
         
         // 6. ДОБАВЛЕН ВИБРООТКЛИК НА ДОЛГИЙ КЛИК ПО БУДИЛЬНИКУ
         imAlarm.setOnLongClickListener {
-            imAlarm.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY)
+            imAlarm.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
             itemClickHandler.onLongClick(item)
             true
         }
         
         // 7. ДОБАВЛЕН ВИБРООТКЛИК НА ПРОСМОТР ИЗОБРАЖЕНИЯ
         imPhotoView.setOnClickListener {
-            imPhotoView.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY)
+            imPhotoView.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
             itemClickHandler.onClick(item, Const.IMAGE)
         }
     }
