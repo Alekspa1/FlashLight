@@ -52,7 +52,7 @@ cardView.setOnTouchListener { view, event ->
         android.view.MotionEvent.ACTION_DOWN -> {
             // Создаем задачу на запуск драга с задержкой
             dragRunnable = Runnable {
-                val viewHolder = root.tag as? RecyclerView.ViewHolder
+                val viewHolder = root.parent as? RecyclerView
                 if (viewHolder != null) {
                     // 1. Мощная вибрация
                     cardView.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
