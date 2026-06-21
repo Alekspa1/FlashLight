@@ -334,6 +334,23 @@ open class FragmentList : Fragment() {
         }
     } // Скобка закрывает объект dragCallback
 
+       override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
+            super.onSelectedChanged(viewHolder, actionState)
+            // Проверяем, что это именно перетаскивание (DRAG)
+            if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
+                // Изменяем прозрачность всей карточки (0.5f - это 50% прозрачности)
+                viewHolder?.itemView?.alpha = 0.5f
+            }
+        }
+
+        // 2. СРАБОТАЕТ, КОГДА КАРТОЧКУ ОТПУСТИЛИ (Возвращаем всё как было)
+        override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
+            super.clearView(recyclerView, viewHolder)
+            // Возвращаем полную видимость (1.0f - это 100%)
+            viewHolder.itemView.alpha = 1.0f
+        }
+    }
+
 myItemTouchHelper = ItemTouchHelper(dragCallback) // Поменяли имя тут
 if (modelFlashLight.getSort() == SORT_USER) {
     myItemTouchHelper.attachToRecyclerView(binding.rcView)
