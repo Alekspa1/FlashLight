@@ -227,11 +227,11 @@ open class FragmentList : Fragment() {
     private fun initRcView() {
         val itemAdapter = ItemAdapter<SimpleItem>()
         val fastAdapter = FastAdapter.with(itemAdapter)
-        fastAdapter.onClickListener = { _, _, item, _ ->
-        // Вызываем вашу команду редактирования карточки
-        itemClickHandler.onClick(item.item, Const.CHANGE_ITEM)
-            true // Клик успешно обработан
-        }
+        // fastAdapter.onClickListener = { _, _, item, _ ->
+        // // Вызываем вашу команду редактирования карточки
+        // itemClickHandler.onClick(item.item, Const.CHANGE_ITEM)
+        //     true // Клик успешно обработан
+        // }
         binding.rcView.layoutManager = LinearLayoutManager(requireContext())
         binding.rcView.adapter = fastAdapter
         touchHelper(itemAdapter)
