@@ -45,7 +45,7 @@ import com.mikepenz.fastadapter.diff.FastAdapterDiffUtil
 import com.mikepenz.fastadapter.drag.ItemTouchCallback
 import com.mikepenz.fastadapter.drag.SimpleDragCallback
 import com.mikepenz.fastadapter.utils.DragDropUtil
-import androidx.recyclerview.widget.RecyclerView
+
 
 @AndroidEntryPoint
 open class FragmentList : Fragment() {
@@ -304,46 +304,41 @@ open class FragmentList : Fragment() {
     }
 
     private fun touchHelper(itemAdapter: ItemAdapter<SimpleItem>){
-        val dragCallback = SimpleDragCallback(
-            ItemTouchHelper.UP or ItemTouchHelper.DOWN, // Направления перетаскивания
-            object : ItemTouchCallback {
+    // ИСПРАВЛЕНО: Убрали "ItemTouchHelper.UP or ItemTouchHelper.DOWN," 
+    // и перед SimpleDragCallback добавили ключевое слово "object :"
+    val dragCallback = object : SimpleDragCallback(
+        object : ItemTouchCallback {
 
+            override fun itemTouchOnMove(oldPosition: Int, newPosition: Int): Boolean {
+                DragDropUtil.onMove(itemAdapter, oldPosition, newPosition)
+                return true
+            }
 
-                override fun itemTouchOnMove(oldPosition: Int, newPosition: Int): Boolean {
-                    DragDropUtil.onMove(itemAdapter, oldPosition, newPosition)
-                    return true
+            override fun itemTouchDropped(oldPosition: Int, newPosition: Int) {
+                super.itemTouchDropped(oldPosition, newPosition)
+
+                if (oldPosition == newPosition) return
+
+                val updatedList = itemAdapter.adapterItems.mapIndexed { index, item ->
+                    item.item.copy(sort = index)
                 }
 
-
-                override fun itemTouchDropped(oldPosition: Int, newPosition: Int) {
-                    super.itemTouchDropped(oldPosition, newPosition)
-
-
-                    if (oldPosition == newPosition) return
-
-
-                    val updatedList = itemAdapter.adapterItems.mapIndexed { index, item ->
-                        item.item.copy(sort = index)
-                    }
-
-
-                    modelFlashLight.updateItemsOrder(updatedList)
-                }
-            }){ // <-- Открываем фигурные скобки нашего анонимного объекта драга
+                modelFlashLight.updateItemsOrder(updatedList)
+            }
+        }
+    ) { // Фигурная скобка объекта
         
-        // 2. Теперь эта функция находится на своём месте и override сработает без ошибок!
+        // Теперь переопределение лежит строго внутри объекта SimpleDragCallback!
         override fun isLongPressDragEnabled(): Boolean {
             return false
         }
-    } // <-- Закрываем фигурные скобки объекта драга  
+    } // Скобка закрывает объект dragCallback
 
-     
-
-         touchHelper = ItemTouchHelper(dragCallback)
-        if (modelFlashLight.getSort() == SORT_USER) {
-            touchHelper.attachToRecyclerView(binding.rcView)
-        }
+    touchHelper = ItemTouchHelper(dragCallback)
+    if (modelFlashLight.getSort() == SORT_USER) {
+        touchHelper?.attachToRecyclerView(binding.rcView) // Добавили '?' для безопасности переменной класса
     }
+}
 
 
     override fun onResume() {
