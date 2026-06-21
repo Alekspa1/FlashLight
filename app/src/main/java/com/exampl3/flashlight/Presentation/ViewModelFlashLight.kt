@@ -80,14 +80,17 @@ class ViewModelFlashLight @Inject constructor(
     val statePremiumFlow = MutableStateFlow(pref.getPremium())
 
 
-    fun savePremium(flag: Boolean)  {
-        pref.savePremium(flag)
-        statePremiumFlow.value = flag
-    }
+    fun savePremium(flag: Boolean, contex: Context) {
+    // Эта строка выведет в консоль имя потока: "main" или что-то вроде "RxCachedThreadScheduler-1"
+    ToastFun(context, "POTOK_TAG", "Метод вызван в потоке: ${Thread.currentThread().name}")
+    
+    pref.savePremium(flag)
+    statePremiumFlow.value = flag
+}
 
     fun getPremium() = pref.getPremium()
 
-    fun getAllListProducts(context: Context) = paySDK.getAllListProducts(context){savePremium(true)}
+    fun getAllListProducts(context: Context) = paySDK.getAllListProducts(context){savePremium(true, context)}
 
     fun getListShopingProducts(context: Context) = paySDK.getListShopingProductsNew(context){ statePremium->
         savePremium(statePremium)
