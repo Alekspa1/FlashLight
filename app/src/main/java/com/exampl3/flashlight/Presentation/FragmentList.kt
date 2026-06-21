@@ -247,7 +247,7 @@ open class FragmentList : Fragment() {
                             // Передаем ViewHolder во фрагмент при нажатии на иконку
                             onStartDragListener = { viewHolder ->
                             // Запускаем перетаскивание карточки вручную
-                                if (::myItemTouchHelper.isInitialized) { 
+                                if (modelFlashLight.getSort() == SORT_USER && ::myItemTouchHelper.isInitialized) {
                 myItemTouchHelper.startDrag(viewHolder)
             }
                                         }
@@ -338,6 +338,8 @@ open class FragmentList : Fragment() {
         // 2. СРАБОТАЕТ, КОГДА КАРТОЧКУ ОТПУСТИЛИ (Возвращаем 100% яркость)
         override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
             super.clearView(recyclerView, viewHolder)
+            
+            // Если у вас там было изменение прозрачности (alpha = 1.0f), оставьте его тоже:
             viewHolder.itemView.alpha = 1.0f
         }
         
@@ -345,6 +347,8 @@ open class FragmentList : Fragment() {
 
     // Код инициализации идет дальше в самом методе touchHelper
     myItemTouchHelper = ItemTouchHelper(dragCallback)
+    
+
     if (modelFlashLight.getSort() == SORT_USER) {
         myItemTouchHelper.attachToRecyclerView(binding.rcView)
     }
