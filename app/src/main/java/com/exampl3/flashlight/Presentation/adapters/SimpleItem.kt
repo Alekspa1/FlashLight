@@ -45,7 +45,6 @@ class SimpleItem (
    override fun bindView(binding: ItemBinding, payloads: List<Any>) {
     with(binding) {
         
-var dragRunnable: Runnable? = null
 
 cardView.setOnTouchListener { _, event ->
             if (event.actionMasked == MotionEvent.ACTION_DOWN) {
@@ -59,21 +58,6 @@ cardView.setOnTouchListener { _, event ->
             }
             false 
         }
-
-//    cardView.setOnTouchListener { _, event ->
-//     if (event.actionMasked == MotionEvent.ACTION_DOWN) {
-//         // Уверенная вибрация ("виртуальная кнопка") строго в момент нажатия
-//         cardView.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY)
-
-//         // Ваш оригинальный рабочий поиск ViewHolder
-//         val viewHolder = root.tag as? RecyclerView.ViewHolder
-        
-//         if (viewHolder != null) {
-//             onStartDragListener(viewHolder)
-//         }
-//     }
-//     false // Оставляем false, как у вас и было, чтобы обычные клики тоже проходили
-// }
 
         tvTextItem.text = item.name
         tvAlarm.text = alarmText(item) ?: "".trim()
@@ -141,11 +125,11 @@ cardView.setOnTouchListener { _, event ->
         val listTextView = listOf(tvTextItem, tvAlarm, tvDesc)
         theme.setSizeTextIsList(listTextView)
 
-         // 2. ДОБАВЛЕН ВИБРООТКЛИК НА ОБЫЧНЫЙ КЛИК ПО КАРТОЧКЕ
-         // cardView.setOnClickListener {
-         //     cardView.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY)
-         //     itemClickHandler.onClick(item, Const.CHANGE_ITEM)
-         // }
+         2. ДОБАВЛЕН ВИБРООТКЛИК НА ОБЫЧНЫЙ КЛИК ПО КАРТОЧКЕ
+         cardView.setOnClickListener {
+             cardView.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY)
+             itemClickHandler.onClick(item, Const.CHANGE_ITEM)
+         }
         
         // 3. ДОБАВЛЕН ВИБРООТКЛИК НА ИЗМЕНЕНИЕ СТАТУСА (Двойной микро-клик "Выполнено")
         imStatus.setOnClickListener {
