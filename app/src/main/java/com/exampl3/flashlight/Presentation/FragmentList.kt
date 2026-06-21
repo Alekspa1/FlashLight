@@ -340,7 +340,7 @@ open class FragmentList : Fragment() {
         // Один раз безопасно проверяем viewHolder через .let
         viewHolder?.let { holder ->
             // Внутри блока 'holder' гарантированно не null, пишем код без единого знака '?'
-            holder.itemView.animate().scaleX(0.90f).scaleY(0.90f).setDuration(100).start()
+            holder.itemView.animate().scaleX(0.93f).scaleY(0.93f).setDuration(100).start()
             holder.itemView.alpha = 0.5f
         }
     }
