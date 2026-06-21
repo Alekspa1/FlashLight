@@ -68,6 +68,7 @@ open class FragmentList : Fragment() {
     private lateinit var pLauncher: ActivityResultLauncher<String>
 
     private lateinit var itemClickHandler: ItemClickHandler
+    private lateinit var touchHelper: ItemTouchHelper
 
 
     private val pickImageLauncher = registerForActivityResult(
@@ -240,7 +241,17 @@ open class FragmentList : Fragment() {
                     // Если данные абсолютно идентичны (и статус, и порядок), только тогда игнорируем
                     if (currentItems == rawDataList) return@collect
 
-                    val items = rawDataList.map { data -> SimpleItem(data,pref,itemClickHandler,themeImp) }
+                    val items = rawDataList.map { data -> 
+                        SimpleItem(data, pref, itemClickHandler, themeImp).apply {
+                            // Передаем ViewHolder во фрагмент при нажатии на иконку
+                            onStartDragListener = { viewHolder ->
+                            // Запускаем перетаскивание карточки вручную
+                                if (::touchHelper.isInitialized) {
+                                touchHelper.startDrag(viewHolder)
+                                                }
+                                        }
+                                    }
+                                }
                     FastAdapterDiffUtil.set(itemAdapter, items, object : com.mikepenz.fastadapter.diff.DiffCallback<SimpleItem> {
 
                         // 1. Проверяем, та же ли это самая карточка (по ID)
@@ -318,8 +329,12 @@ open class FragmentList : Fragment() {
                     modelFlashLight.updateItemsOrder(updatedList)
                 }
             })
+        
+        override fun isLongPressDragEnabled(): Boolean {
+        return false
+    }
 
-        val touchHelper = ItemTouchHelper(dragCallback)
+         touchHelper = ItemTouchHelper(dragCallback)
         if (modelFlashLight.getSort() == SORT_USER) {
             touchHelper.attachToRecyclerView(binding.rcView)
         }
