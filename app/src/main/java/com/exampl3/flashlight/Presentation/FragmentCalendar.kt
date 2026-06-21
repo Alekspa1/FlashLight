@@ -167,10 +167,18 @@ class FragmentCalendar : Fragment() {
                     Toast.LENGTH_SHORT
                 ).show()
             }
-             if (modelFlashLight.getPremium()) {
-                 createAlarmInCalendarnZabor()
+            viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                modelFlashLight.statePremiumFlow.collect {premium->
+                    if(premium){
+                     createAlarmInCalendarnZabor()
                  modelFlashLight.insetTimeIncalendar(getDateNow(calendar))
-             }
+}
+
+                }
+            }
+        }
+
         }
          else {
             binding.imBAddCalendar.setOnClickListener {
@@ -237,10 +245,19 @@ class FragmentCalendar : Fragment() {
                     Toast.LENGTH_SHORT
                 ).show()
             }
-             if (modelFlashLight.getPremium()) {
-                 createAlarmInCalendarnNeon()
+
+              viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                modelFlashLight.statePremiumFlow.collect {premium->
+                    if(premium){
+               createAlarmInCalendarnNeon()
                  modelFlashLight.insetTimeIncalendar(getDateNow(calendar))
-             }
+}
+
+                }
+            }
+        }
+            
         }
 
 
