@@ -31,7 +31,7 @@ class SimpleItem (
     override val type: Int = R.id.fastadapter_item
     override var isDraggable: Boolean = true
     override var identifier: Long = item.id?.toLong() ?: 0L
-
+    var onStartDragListener: (RecyclerView.ViewHolder) -> Unit = { }
 
 
     // 5. Создание binding
@@ -42,6 +42,21 @@ class SimpleItem (
     // 6. Привязка данных
     override fun bindView(binding: ItemBinding, payloads: List<Any>) {
         with(binding) {
+
+             binding.cardView.setOnTouchListener { _, event ->
+        // Если пользователь только что опустил палец на иконку
+        if (event.actionMasked == MotionEvent.ACTION_DOWN) {
+            // Ищем ViewHolder этой карточки. В FastAdapter Binding-версии он доступен через тег или binding.root
+            val recyclerView = binding.root.parent as? RecyclerView
+            val viewHolder = recyclerView?.getChildViewHolder(binding.root)
+            
+            if (viewHolder != null) {
+                // Передаем ViewHolder во фрагмент, чтобы запустить drag
+                onStartDragListener?.invoke(viewHolder)
+            }
+        }
+        false // Возвращаем false, чтобы стандартные клики (если они есть) тоже могли работать
+    }
 
             tvTextItem.text = item.name
             tvAlarm.text = alarmText(item) ?: "".trim()
