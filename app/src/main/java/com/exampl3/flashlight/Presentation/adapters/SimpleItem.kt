@@ -42,115 +42,126 @@ class SimpleItem (
     }
 
     // 6. Привязка данных
-    override fun bindView(binding: ItemBinding, payloads: List<Any>) {
-        with(binding) {
+   override fun bindView(binding: ItemBinding, payloads: List<Any>) {
+    with(binding) {
 
-             cardView.setOnLongClickListener  { _, event ->
-        // Если пользователь только что опустил палец на иконку
-        if (event.actionMasked == MotionEvent.ACTION_DOWN) {
-            // Ищем ViewHolder этой карточки. В FastAdapter Binding-версии он доступен через тег или binding.root
-            val recyclerView = binding.root.parent as? RecyclerView
-            val viewHolder = recyclerView?.getChildViewHolder(binding.root)
-            
+        // 1. ИСПРАВЛЕНО: Правильный лонг-клик для перетаскивания карточки с задержкой и виброоткликом
+        cardView.setOnLongClickListener {
+            // Безопасно вытаскиваем ViewHolder из тега корневого ConstraintLayout
+            val viewHolder = root.tag as? RecyclerView.ViewHolder
             if (viewHolder != null) {
-                // Передаем ViewHolder во фрагмент, чтобы запустить drag
-                onStartDragListener?.invoke(viewHolder)
+                // Приятный плотный виброотклик ("оторвали карточку")
+                cardView.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
+                onStartDragListener(viewHolder) // Запускаем перетаскивание во фрагменте
+                return@setOnLongClickListener true // Успешно обработано
+            }
+            false
+        }
+
+        tvTextItem.text = item.name
+        tvAlarm.text = alarmText(item) ?: "".trim()
+        tvDesc.text = item.desc
+        if (tvDesc.text !== "") tvDesc.visibility = View.VISIBLE
+        if (item.alarmText.isNotEmpty()) imPhotoView.visibility = View.VISIBLE
+        else imPhotoView.visibility = View.GONE
+        
+        // Настройка темы
+        if (settingPref.getTheme() == THEME_FUTURE){
+            tvTextItem.setTextAppearance(com.exampl3.flashlight.R.style.StyleItem)
+            tvDesc.setTextAppearance(com.exampl3.flashlight.R.style.StyleItemDesc)
+            tvAlarm.setTextAppearance(com.exampl3.flashlight.R.style.StyleItem_Alarm)
+            when (item.changeAlarm) {
+                true -> {
+                    cardView.setBackgroundResource(com.exampl3.flashlight.R.drawable.button_background_alarm)
+                    tvAlarm.visibility = View.VISIBLE
+                    imAlarm.setImageResource(com.exampl3.flashlight.R.drawable.ic_alarm_on)
+                }
+                false -> {
+                    tvAlarm.visibility = View.GONE
+                    imAlarm.setImageResource(com.exampl3.flashlight.R.drawable.ic_alarm_off)
+                }
+            }
+            when (item.change) {
+                true -> {
+                    cardView.setBackgroundResource(com.exampl3.flashlight.R.drawable.button_background_true)
+                    imStatus.setImageResource(com.exampl3.flashlight.R.drawable.ic_item_true)
+                }
+                false -> {
+                    if (!item.changeAlarm) cardView.setBackgroundResource(com.exampl3.flashlight.R.drawable.button_background_false)
+                    imStatus.setImageResource(com.exampl3.flashlight.R.drawable.ic_item_false)
+                }
+            }
+        } else {
+            imDeleteList.setImageResource(com.exampl3.flashlight.R.drawable.ic_de_zabor)
+            tvTextItem.setTextAppearance(com.exampl3.flashlight.R.style.StyleItemZabor)
+            tvDesc.setTextAppearance(com.exampl3.flashlight.R.style.StyleItemDescZabor)
+            tvAlarm.setTextAppearance(com.exampl3.flashlight.R.style.StyleItem_AlarmZabor)
+            imPhotoView.setImageResource(com.exampl3.flashlight.R.drawable.ic_image_zabor)
+            when (item.change) {
+                true -> {
+                    imStatus.setImageResource(com.exampl3.flashlight.R.drawable.ic_item_true_zabor)
+                    cardView.setBackgroundResource(com.exampl3.flashlight.R.drawable.button_background_item_category_zabor_true)
+                }
+                false -> {
+                    imStatus.setImageResource(com.exampl3.flashlight.R.drawable.ic_item_false_zabor)
+                    cardView.setBackgroundResource(com.exampl3.flashlight.R.drawable.button_background_item_category_zabor_false)
+                }
+            }
+            when(item.changeAlarm){
+                true-> {
+                    tvAlarm.visibility = View.VISIBLE
+                    cardView.setBackgroundResource(com.exampl3.flashlight.R.drawable.button_background_item_category_zabor_alarm)
+                    imAlarm.setImageResource(com.exampl3.flashlight.R.drawable.ic_alarm_on)
+                }
+                false->{
+                    tvAlarm.visibility = View.GONE
+                    imAlarm.setImageResource(com.exampl3.flashlight.R.drawable.ic_alarm_zabor)
+                }
             }
         }
-        false // Возвращаем false, чтобы стандартные клики (если они есть) тоже могли работать
-    }
+        
+        // Настройка шрифта
+        val listTextView = listOf(tvTextItem, tvAlarm, tvDesc)
+        theme.setSizeTextIsList(listTextView)
 
-            tvTextItem.text = item.name
-            tvAlarm.text = alarmText(item) ?: "".trim()
-            tvDesc.text = item.desc
-            if (tvDesc.text !== "") tvDesc.visibility = View.VISIBLE
-            if (item.alarmText.isNotEmpty()) imPhotoView.visibility = View.VISIBLE
-            else imPhotoView.visibility = View.GONE
-            //настройка темы
-            if (settingPref.getTheme() == THEME_FUTURE){
-                tvTextItem.setTextAppearance(com.exampl3.flashlight.R.style.StyleItem)
-                tvDesc.setTextAppearance(com.exampl3.flashlight.R.style.StyleItemDesc)
-                tvAlarm.setTextAppearance(com.exampl3.flashlight.R.style.StyleItem_Alarm)
-                when (item.changeAlarm) {
-                    true -> {
-                        cardView.setBackgroundResource(com.exampl3.flashlight.R.drawable.button_background_alarm)
-                        tvAlarm.visibility = View.VISIBLE
-                        imAlarm.setImageResource(com.exampl3.flashlight.R.drawable.ic_alarm_on)
-                    }
-
-                    false -> {
-                        tvAlarm.visibility = View.GONE
-                        imAlarm.setImageResource(com.exampl3.flashlight.R.drawable.ic_alarm_off)
-                    }
-                }
-                when (item.change) {
-                    true -> {
-                        cardView.setBackgroundResource(com.exampl3.flashlight.R.drawable.button_background_true)
-                        imStatus.setImageResource(com.exampl3.flashlight.R.drawable.ic_item_true)
-                    }
-
-                    false -> {
-                        if (!item.changeAlarm) cardView.setBackgroundResource(com.exampl3.flashlight.R.drawable.button_background_false)
-                        imStatus.setImageResource(com.exampl3.flashlight.R.drawable.ic_item_false)
-                    }
-                }
-            }
-            else {
-                imDeleteList.setImageResource(com.exampl3.flashlight.R.drawable.ic_de_zabor)
-                tvTextItem.setTextAppearance(com.exampl3.flashlight.R.style.StyleItemZabor)
-                tvDesc.setTextAppearance(com.exampl3.flashlight.R.style.StyleItemDescZabor)
-                tvAlarm.setTextAppearance(com.exampl3.flashlight.R.style.StyleItem_AlarmZabor)
-                imPhotoView.setImageResource(com.exampl3.flashlight.R.drawable.ic_image_zabor)
-                when (item.change) {
-                    true -> {
-                        imStatus.setImageResource(com.exampl3.flashlight.R.drawable.ic_item_true_zabor)
-                        cardView
-                            .setBackgroundResource(com.exampl3.flashlight.R.drawable.button_background_item_category_zabor_true)
-                    }
-                    false -> {
-                        imStatus.setImageResource(com.exampl3.flashlight.R.drawable.ic_item_false_zabor)
-                        cardView
-                            .setBackgroundResource(com.exampl3.flashlight.R.drawable.button_background_item_category_zabor_false)
-                    }
-                }
-                when(item.changeAlarm){
-                    true-> {
-                        tvAlarm.visibility = View.VISIBLE
-                        cardView
-                            .setBackgroundResource(com.exampl3.flashlight.R.drawable.button_background_item_category_zabor_alarm)
-                        imAlarm.setImageResource(com.exampl3.flashlight.R.drawable.ic_alarm_on)
-                    }
-                    false->{
-                        tvAlarm.visibility = View.GONE
-                        imAlarm.setImageResource(com.exampl3.flashlight.R.drawable.ic_alarm_zabor)
-                    }
-                }
-            }
-            //настройка шрифта
-            val listTextView = listOf(tvTextItem,tvAlarm,tvDesc)
-            theme.setSizeTextIsList(listTextView)
-
-            cardView.setOnClickListener {
-                itemClickHandler.onClick(item, Const.CHANGE_ITEM)
-            }
-            imStatus.setOnClickListener {
-                itemClickHandler.onClick(item, Const.CHANGE)
-            }
-            imDeleteList.setOnClickListener {
-                itemClickHandler.onClick(item, Const.DELETE)
-            }
-            imAlarm.setOnClickListener {
-                itemClickHandler.onClick(item, Const.ALARM)
-            }
-            imAlarm.setOnLongClickListener {
-                itemClickHandler.onLongClick(item)
-                true
-            }
-            imPhotoView.setOnClickListener {
-                itemClickHandler.onClick(item, Const.IMAGE )
-            }
+        // 2. ДОБАВЛЕН ВИБРООТКЛИК НА ОБЫЧНЫЙ КЛИК ПО КАРТОЧКЕ
+        cardView.setOnClickListener {
+            cardView.performHapticFeedback(android.view.HapticFeedbackConstants.KEYBOARD_TAP)
+            itemClickHandler.onClick(item, Const.CHANGE_ITEM)
+        }
+        
+        // 3. ДОБАВЛЕН ВИБРООТКЛИК НА ИЗМЕНЕНИЕ СТАТУСА (Двойной микро-клик "Выполнено")
+        imStatus.setOnClickListener {
+            imStatus.performHapticFeedback(android.view.HapticFeedbackConstants.CONFIRM)
+            itemClickHandler.onClick(item, Const.CHANGE)
+        }
+        
+        // 4. ДОБАВЛЕН ВИБРООТКЛИК НА УДАЛЕНИЕ (Легкий щелчок)
+        imDeleteList.setOnClickListener {
+            imDeleteList.performHapticFeedback(android.view.HapticFeedbackConstants.KEYBOARD_TAP)
+            itemClickHandler.onClick(item, Const.DELETE)
+        }
+        
+        // 5. ДОБАВЛЕН ВИБРООТКЛИК НА БУДИЛЬНИК (Легкий щелчок)
+        imAlarm.setOnClickListener {
+            imAlarm.performHapticFeedback(android.view.HapticFeedbackConstants.KEYBOARD_TAP)
+            itemClickHandler.onClick(item, Const.ALARM)
+        }
+        
+        // 6. ДОБАВЛЕН ВИБРООТКЛИК НА ДОЛГИЙ КЛИК ПО БУДИЛЬНИКУ
+        imAlarm.setOnLongClickListener {
+            imAlarm.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
+            itemClickHandler.onLongClick(item)
+            true
+        }
+        
+        // 7. ДОБАВЛЕН ВИБРООТКЛИК НА ПРОСМОТР ИЗОБРАЖЕНИЯ
+        imPhotoView.setOnClickListener {
+            imPhotoView.performHapticFeedback(android.view.HapticFeedbackConstants.KEYBOARD_TAP)
+            itemClickHandler.onClick(item, Const.IMAGE)
         }
     }
+}
 
     // 7. Очистка (опционально)
     override fun unbindView(binding: ItemBinding) {
