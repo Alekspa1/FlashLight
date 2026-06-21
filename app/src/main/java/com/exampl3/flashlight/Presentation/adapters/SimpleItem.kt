@@ -44,7 +44,12 @@ class SimpleItem (
     // 6. Привязка данных
    override fun bindView(binding: ItemBinding, payloads: List<Any>) {
     with(binding) {
-
+        
+        imStatus.setupBounceAnimation()
+        imDeleteList.setupBounceAnimation()
+        imAlarm.setupBounceAnimation()
+        imPhotoView.setupBounceAnimation()
+        
         // 1. ИСПРАВЛЕНО: Правильный лонг-клик для перетаскивания карточки с задержкой и виброоткликом
         cardView.setOnLongClickListener {
             // Безопасно вытаскиваем ViewHolder из тега корневого ConstraintLayout
@@ -126,38 +131,38 @@ class SimpleItem (
 
         // 2. ДОБАВЛЕН ВИБРООТКЛИК НА ОБЫЧНЫЙ КЛИК ПО КАРТОЧКЕ
         cardView.setOnClickListener {
-            cardView.performHapticFeedback(android.view.HapticFeedbackConstants.KEYBOARD_TAP)
+            cardView.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY)
             itemClickHandler.onClick(item, Const.CHANGE_ITEM)
         }
         
         // 3. ДОБАВЛЕН ВИБРООТКЛИК НА ИЗМЕНЕНИЕ СТАТУСА (Двойной микро-клик "Выполнено")
         imStatus.setOnClickListener {
-            imStatus.performHapticFeedback(android.view.HapticFeedbackConstants.CONFIRM)
+            imStatus.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY)
             itemClickHandler.onClick(item, Const.CHANGE)
         }
         
         // 4. ДОБАВЛЕН ВИБРООТКЛИК НА УДАЛЕНИЕ (Легкий щелчок)
         imDeleteList.setOnClickListener {
-            imDeleteList.performHapticFeedback(android.view.HapticFeedbackConstants.KEYBOARD_TAP)
+            imDeleteList.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY)
             itemClickHandler.onClick(item, Const.DELETE)
         }
         
         // 5. ДОБАВЛЕН ВИБРООТКЛИК НА БУДИЛЬНИК (Легкий щелчок)
         imAlarm.setOnClickListener {
-            imAlarm.performHapticFeedback(android.view.HapticFeedbackConstants.KEYBOARD_TAP)
+            imAlarm.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY)
             itemClickHandler.onClick(item, Const.ALARM)
         }
         
         // 6. ДОБАВЛЕН ВИБРООТКЛИК НА ДОЛГИЙ КЛИК ПО БУДИЛЬНИКУ
         imAlarm.setOnLongClickListener {
-            imAlarm.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
+            imAlarm.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY)
             itemClickHandler.onLongClick(item)
             true
         }
         
         // 7. ДОБАВЛЕН ВИБРООТКЛИК НА ПРОСМОТР ИЗОБРАЖЕНИЯ
         imPhotoView.setOnClickListener {
-            imPhotoView.performHapticFeedback(android.view.HapticFeedbackConstants.KEYBOARD_TAP)
+            imPhotoView.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY)
             itemClickHandler.onClick(item, Const.IMAGE)
         }
     }
@@ -247,4 +252,19 @@ class SimpleItem (
             }
         }
     }
+    fun View.setupBounceAnimation() {
+    setOnTouchListener { v, event ->
+        when (event.action) {
+            android.view.MotionEvent.ACTION_DOWN -> {
+                // При нажатии уменьшаем кнопку до 92% и делаем чуть прозрачной
+                v.animate().scaleX(0.92f).scaleY(0.92f).alpha(0.8f).setDuration(100).start()
+            }
+            android.view.MotionEvent.ACTION_UP, android.view.MotionEvent.ACTION_CANCEL -> {
+                // Когда отпустили — плавно возвращаем к 100% размеру
+                v.animate().scaleX(1f).scaleY(1f).alpha(1f).setDuration(150).start()
+            }
+        }
+        false // Возвращаем false, чтобы не ломать обычные клики (setOnClickListener)
+    }
+}
 }
