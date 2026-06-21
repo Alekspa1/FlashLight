@@ -144,7 +144,7 @@ open class FragmentList : Fragment() {
                     // БЕРЕМ КАТЕГОРИЮ ИЗ FLOW ЧЕРЕЗ .value (Прямо как раньше из LiveData!)
                     category = modelFlashLight.categoryItemFlow.value, 
                     
-                    desc = null,          // У голосовой заметки нет описания
+                    desc = "",          // У голосовой заметки нет описания
                     alarmText = "",       // У голосовой заметки нет картинки
                     hasAlarmPermission = false, // Будильник для голосового ввода выключен
                     isAlarmAction = false,      // Будильник для голосового ввода выключен
