@@ -89,7 +89,7 @@ fun savePremium(flag: Boolean) {
 
     fun getPremium() = pref.getPremium()
 
-    fun getAllListProducts(context: Context) = paySDK.getAllListProducts(context){savePremium(true, context)}
+    fun getAllListProducts(context: Context) = paySDK.getAllListProducts(context){savePremium(true)}
 
     fun getListShopingProducts(context: Context) = paySDK.getListShopingProductsNew(context){ statePremium->
         savePremium(statePremium)
