@@ -84,8 +84,20 @@ fun savePremium(flag: Boolean) {
     viewModelScope.launch(Dispatchers.Main) {
         pref.savePremium(flag)
         statePremiumFlow.value = flag
+        if(flag){
+        val toDayTime = getDateNow(Calendar.getInstance())
+        insetTimeIncalendar(toDayTime)
+        } 
     }
 }
+
+private fun getDateNow(calendar: Calendar): Long {
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        return calendar.timeInMillis
+    }
 
     fun getPremium() = pref.getPremium()
 
