@@ -48,21 +48,25 @@ class SimpleItem (
 
 
 
-cardView.setOnTouchListener { _, event ->
-    if (event.actionMasked == MotionEvent.ACTION_DOWN) {
-        // 1. Мощная вибрация при нажатии
-        cardView.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
+// cardView.setOnTouchListener { _, event ->
+//     if (event.actionMasked == MotionEvent.ACTION_DOWN) {
+//         val recyclerView = root.parent as? RecyclerView
+//         val viewHolder = recyclerView?.getChildViewHolder(root)
+//         if (viewHolder != null) {
+//             onStartDragListener(viewHolder)
+//         }
+//     }
+//     false // Оставляем false!
+// }
 
-        // 3. Ваш оригинальный рабочий поиск ViewHolder
-        val recyclerView = root.parent as? RecyclerView
-        val viewHolder = recyclerView?.getChildViewHolder(root)
-        
-        if (viewHolder != null) {
-            onStartDragListener(viewHolder)
+        cardView.setOnLongClickListener {
+            val recyclerView = root.parent as? RecyclerView
+            val viewHolder = recyclerView?.getChildViewHolder(root)
+            if (viewHolder != null) {
+             onStartDragListener(viewHolder)
+         }
+            true
         }
-    }
-    false // СТРОГО FALSE! Тогда обычный cardView.setOnClickListener будет работать отлично
-}
 
         tvTextItem.text = item.name
         tvAlarm.text = alarmText(item) ?: "".trim()
