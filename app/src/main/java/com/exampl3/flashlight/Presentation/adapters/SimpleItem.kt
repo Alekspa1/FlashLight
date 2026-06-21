@@ -45,20 +45,51 @@ class SimpleItem (
    override fun bindView(binding: ItemBinding, payloads: List<Any>) {
     with(binding) {
         
+var dragRunnable: Runnable? = null
 
-
-    cardView.setOnLongClickListener {
-    // Безопасно достаем ViewHolder из тега корневого ConstraintLayout
-    val viewHolder = root.tag as? RecyclerView.ViewHolder
-    if (viewHolder != null) {
-        // Системный виброотклик ("оторвали карточку")
-        cardView.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
+cardView.setOnTouchListener { view, event ->
+    when (event.actionMasked) {
+        android.view.MotionEvent.ACTION_DOWN -> {
+            // Создаем задачу на запуск драга с задержкой
+            dragRunnable = Runnable {
+                val viewHolder = root.tag as? RecyclerView.ViewHolder
+                if (viewHolder != null) {
+                    // 1. Мощная вибрация
+                    cardView.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
+                    
+                    // 2. Плавная анимация уменьшения карточки до 95%
+                    cardView.animate().scaleX(0.95f).scaleY(0.95f).setDuration(150).start()
+                    
+                    // 3. Запускаем перетаскивание
+                    onStartDragListener(viewHolder)
+                }
+            }
+            // Запускаем таймер задержки на 350 миллисекунд
+            dragRunnable?.let { view.postDelayed(it, 350) }
+        }
         
-        onStartDragListener(viewHolder) // Запускаем перетаскивание
-        return@setOnLongClickListener true // Успешно обработано
+        android.view.MotionEvent.ACTION_UP, android.view.MotionEvent.ACTION_CANCEL -> {
+            // Если палец подняли или увели в сторону — отменяем таймер драга
+            dragRunnable?.let { view.removeCallbacks(it) }
+        }
     }
-    false
+    false // Оставляем false, чтобы обычные клики по кнопкам и карточке не ломались
 }
+
+//    cardView.setOnTouchListener { _, event ->
+//     if (event.actionMasked == MotionEvent.ACTION_DOWN) {
+//         // Уверенная вибрация ("виртуальная кнопка") строго в момент нажатия
+//         cardView.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY)
+
+//         // Ваш оригинальный рабочий поиск ViewHolder
+//         val viewHolder = root.tag as? RecyclerView.ViewHolder
+        
+//         if (viewHolder != null) {
+//             onStartDragListener(viewHolder)
+//         }
+//     }
+//     false // Оставляем false, как у вас и было, чтобы обычные клики тоже проходили
+// }
 
         tvTextItem.text = item.name
         tvAlarm.text = alarmText(item) ?: "".trim()
