@@ -45,10 +45,7 @@ class SimpleItem (
    override fun bindView(binding: ItemBinding, payloads: List<Any>) {
     with(binding) {
         
-        imStatus.setupBounceAnimation()
-        imDeleteList.setupBounceAnimation()
-        imAlarm.setupBounceAnimation()
-        imPhotoView.setupBounceAnimation()
+
         
         // 1. ИСПРАВЛЕНО: Правильный лонг-клик для перетаскивания карточки с задержкой и виброоткликом
         cardView.setOnLongClickListener {
@@ -130,10 +127,10 @@ class SimpleItem (
         theme.setSizeTextIsList(listTextView)
 
         // 2. ДОБАВЛЕН ВИБРООТКЛИК НА ОБЫЧНЫЙ КЛИК ПО КАРТОЧКЕ
-        cardView.setOnClickListener {
-            cardView.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY)
-            itemClickHandler.onClick(item, Const.CHANGE_ITEM)
-        }
+        // cardView.setOnClickListener {
+        //     cardView.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY)
+        //     itemClickHandler.onClick(item, Const.CHANGE_ITEM)
+        // }
         
         // 3. ДОБАВЛЕН ВИБРООТКЛИК НА ИЗМЕНЕНИЕ СТАТУСА (Двойной микро-клик "Выполнено")
         imStatus.setOnClickListener {
@@ -252,19 +249,4 @@ class SimpleItem (
             }
         }
     }
-    fun View.setupBounceAnimation() {
-    setOnTouchListener { v, event ->
-        when (event.action) {
-            android.view.MotionEvent.ACTION_DOWN -> {
-                // При нажатии уменьшаем кнопку до 92% и делаем чуть прозрачной
-                v.animate().scaleX(0.92f).scaleY(0.92f).alpha(0.8f).setDuration(100).start()
-            }
-            android.view.MotionEvent.ACTION_UP, android.view.MotionEvent.ACTION_CANCEL -> {
-                // Когда отпустили — плавно возвращаем к 100% размеру
-                v.animate().scaleX(1f).scaleY(1f).alpha(1f).setDuration(150).start()
-            }
-        }
-        false // Возвращаем false, чтобы не ломать обычные клики (setOnClickListener)
-    }
-}
 }
