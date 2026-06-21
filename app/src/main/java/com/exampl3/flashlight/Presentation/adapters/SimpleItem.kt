@@ -125,7 +125,7 @@ cardView.setOnTouchListener { _, event ->
         val listTextView = listOf(tvTextItem, tvAlarm, tvDesc)
         theme.setSizeTextIsList(listTextView)
 
-         2. ДОБАВЛЕН ВИБРООТКЛИК НА ОБЫЧНЫЙ КЛИК ПО КАРТОЧКЕ
+        // 2. ДОБАВЛЕН ВИБРООТКЛИК НА ОБЫЧНЫЙ КЛИК ПО КАРТОЧКЕ
          cardView.setOnClickListener {
              cardView.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY)
              itemClickHandler.onClick(item, Const.CHANGE_ITEM)
