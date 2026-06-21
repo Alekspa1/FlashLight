@@ -46,39 +46,25 @@ class SimpleItem (
     with(binding) {
         
 
-private var dragRunnable: Runnable? = null
 
-// 2. Внутри метода bindView заменяем ваш код на этот:
-cardView.setOnTouchListener { view, event ->
-    when (event.actionMasked) {
-        android.view.MotionEvent.ACTION_DOWN -> {
-            // Создаем задачу, которая выполнится через 350 миллисекунд
-            dragRunnable = Runnable {
-                // ВАШ РОБОЧИЙ КОД ПОИСКА VIEWHOLDER:
-                val recyclerView = root.parent as? RecyclerView
-                val viewHolder = recyclerView?.getChildViewHolder(root)
-                
-                if (viewHolder != null) {
-                    // Мощный виброотклик ("оторвали карточку")
-                    cardView.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
-                    
-                    // Плавная анимация уменьшения карточки до 95%
-                    cardView.animate().scaleX(0.95f).scaleY(0.95f).setDuration(150).start()
-                    
-                    // Запускаем перетаскивание вашим методом
-                    onStartDragListener(viewHolder)
-                }
-            }
-            // Запускаем таймер задержки
-            dragRunnable?.let { view.postDelayed(it, 350) }
-        }
+
+cardView.setOnTouchListener { _, event ->
+    if (event.actionMasked == MotionEvent.ACTION_DOWN) {
+        // 1. Мощная вибрация при нажатии
+        cardView.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
+
+        // 2. Плавное уменьшение карточки до 95% (занимает 100 миллисекунд)
+        cardView.animate().scaleX(0.80f).scaleY(0.80f).setDuration(100).start()
+
+        // 3. Ваш оригинальный рабочий поиск ViewHolder
+        val recyclerView = root.parent as? RecyclerView
+        val viewHolder = recyclerView?.getChildViewHolder(root)
         
-        android.view.MotionEvent.ACTION_UP, android.view.MotionEvent.ACTION_CANCEL -> {
-            // Если палец подняли раньше времени — отменяем таймер драга
-            dragRunnable?.let { view.removeCallbacks(it) }
+        if (viewHolder != null) {
+            onStartDragListener(viewHolder)
         }
     }
-    false // Оставляем false, как у вас и было, чтобы обычные клики не ломались
+    false // СТРОГО FALSE! Тогда обычный cardView.setOnClickListener будет работать отлично
 }
 
         tvTextItem.text = item.name
