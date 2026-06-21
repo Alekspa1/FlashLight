@@ -45,6 +45,7 @@ import com.mikepenz.fastadapter.diff.FastAdapterDiffUtil
 import com.mikepenz.fastadapter.drag.ItemTouchCallback
 import com.mikepenz.fastadapter.drag.SimpleDragCallback
 import com.mikepenz.fastadapter.utils.DragDropUtil
+import androidx.recyclerview.widget.RecyclerView
 
 @AndroidEntryPoint
 open class FragmentList : Fragment() {
@@ -328,11 +329,15 @@ open class FragmentList : Fragment() {
 
                     modelFlashLight.updateItemsOrder(updatedList)
                 }
-            })
+            }){ // <-- Открываем фигурные скобки нашего анонимного объекта драга
         
+        // 2. Теперь эта функция находится на своём месте и override сработает без ошибок!
         override fun isLongPressDragEnabled(): Boolean {
-        return false
-    }
+            return false
+        }
+    } // <-- Закрываем фигурные скобки объекта драга  
+
+     
 
          touchHelper = ItemTouchHelper(dragCallback)
         if (modelFlashLight.getSort() == SORT_USER) {
