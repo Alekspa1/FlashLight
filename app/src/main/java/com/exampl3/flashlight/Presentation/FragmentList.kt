@@ -333,18 +333,24 @@ open class FragmentList : Fragment() {
         }
 
         // 1. СТРАБОТАЕТ, КОГДА КАРТОЧКУ ЗАЖАЛИ (Делаем прозрачной)
-        override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
-            super.onSelectedChanged(viewHolder, actionState)
+      override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
+        super.onSelectedChanged(viewHolder, actionState)
+    
             if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
-                viewHolder?.itemView?.alpha = 0.5f
-            }
+        // Один раз безопасно проверяем viewHolder через .let
+        viewHolder?.let { holder ->
+            // Внутри блока 'holder' гарантированно не null, пишем код без единого знака '?'
+            holder.itemView.animate().scaleX(0.90f).scaleY(0.90f).setDuration(100).start()
+            holder.itemView.alpha = 0.5f
         }
+    }
+}
 
         // 2. СРАБОТАЕТ, КОГДА КАРТОЧКУ ОТПУСТИЛИ (Возвращаем 100% яркость)
         override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
             super.clearView(recyclerView, viewHolder)
             
-            // Если у вас там было изменение прозрачности (alpha = 1.0f), оставьте его тоже:
+            viewHolder.itemView.animate().scaleX(1f).scaleY(1f).setDuration(100).start()
             viewHolder.itemView.alpha = 1.0f
         }
         
