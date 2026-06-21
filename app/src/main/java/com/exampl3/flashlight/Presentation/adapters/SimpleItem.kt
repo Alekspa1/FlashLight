@@ -48,17 +48,20 @@ class SimpleItem (
 
         
         // 1. ИСПРАВЛЕНО: Правильный лонг-клик для перетаскивания карточки с задержкой и виброоткликом
-        cardView.setOnLongClickListener {
-            // Безопасно вытаскиваем ViewHolder из тега корневого ConstraintLayout
+               cardView.setOnLongClickListener  { _, event ->
+        // Если пользователь только что опустил палец на иконку
+        if (event.actionMasked == MotionEvent.ACTION_DOWN) {
+            // Ищем ViewHolder этой карточки. В FastAdapter Binding-версии он доступен через тег или binding.root
+            val recyclerView = binding.root.parent as? RecyclerView
             val viewHolder = recyclerView?.getChildViewHolder(binding.root)
+            
             if (viewHolder != null) {
-                // Приятный плотный виброотклик ("оторвали карточку")
-                cardView.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
-                onStartDragListener(viewHolder) // Запускаем перетаскивание во фрагменте
-                return@setOnLongClickListener true // Успешно обработано
+                // Передаем ViewHolder во фрагмент, чтобы запустить drag
+                onStartDragListener?.invoke(viewHolder)
             }
-            false
         }
+        false // Возвращаем false, чтобы стандартные клики (если они есть) тоже могли работать
+    }
 
         tvTextItem.text = item.name
         tvAlarm.text = alarmText(item) ?: "".trim()
