@@ -303,12 +303,10 @@ open class FragmentList : Fragment() {
         })
     }
 
-    private fun touchHelper(itemAdapter: ItemAdapter<SimpleItem>){
-    // ИСПРАВЛЕНО: Убрали "ItemTouchHelper.UP or ItemTouchHelper.DOWN," 
-    // и перед SimpleDragCallback добавили ключевое слово "object :"
+ private fun touchHelper(itemAdapter: ItemAdapter<SimpleItem>) {
+    // Создаем объект SimpleDragCallback
     val dragCallback = object : SimpleDragCallback(
         object : ItemTouchCallback {
-
             override fun itemTouchOnMove(oldPosition: Int, newPosition: Int): Boolean {
                 DragDropUtil.onMove(itemAdapter, oldPosition, newPosition)
                 return true
@@ -316,45 +314,40 @@ open class FragmentList : Fragment() {
 
             override fun itemTouchDropped(oldPosition: Int, newPosition: Int) {
                 super.itemTouchDropped(oldPosition, newPosition)
-
                 if (oldPosition == newPosition) return
-
                 val updatedList = itemAdapter.adapterItems.mapIndexed { index, item ->
                     item.item.copy(sort = index)
                 }
-
                 modelFlashLight.updateItemsOrder(updatedList)
             }
         }
-    ) { // Фигурная скобка объекта
+    ) { // <-- Скобка ОТКРЫВАЕТ внутренности SimpleDragCallback
         
-        // Теперь переопределение лежит строго внутри объекта SimpleDragCallback!
         override fun isLongPressDragEnabled(): Boolean {
             return false
         }
-    } // Скобка закрывает объект dragCallback
 
-       override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
+        // 1. СТРАБОТАЕТ, КОГДА КАРТОЧКУ ЗАЖАЛИ (Делаем прозрачной)
+        override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
             super.onSelectedChanged(viewHolder, actionState)
-            // Проверяем, что это именно перетаскивание (DRAG)
             if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
-                // Изменяем прозрачность всей карточки (0.5f - это 50% прозрачности)
                 viewHolder?.itemView?.alpha = 0.5f
             }
         }
 
-        // 2. СРАБОТАЕТ, КОГДА КАРТОЧКУ ОТПУСТИЛИ (Возвращаем всё как было)
+        // 2. СРАБОТАЕТ, КОГДА КАРТОЧКУ ОТПУСТИЛИ (Возвращаем 100% яркость)
         override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
             super.clearView(recyclerView, viewHolder)
-            // Возвращаем полную видимость (1.0f - это 100%)
             viewHolder.itemView.alpha = 1.0f
         }
-    }
+        
+    } // <-- Эта скобка ЗАКРЫВАЕТ объект dragCallback! Она критически важна.
 
-myItemTouchHelper = ItemTouchHelper(dragCallback) // Поменяли имя тут
-if (modelFlashLight.getSort() == SORT_USER) {
-    myItemTouchHelper.attachToRecyclerView(binding.rcView)
-}
+    // Код инициализации идет дальше в самом методе touchHelper
+    myItemTouchHelper = ItemTouchHelper(dragCallback)
+    if (modelFlashLight.getSort() == SORT_USER) {
+        myItemTouchHelper.attachToRecyclerView(binding.rcView)
+    }
 }
 
 
