@@ -18,6 +18,8 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import androidx.recyclerview.widget.RecyclerView
+import android.view.MotionEvent
 
 
 class SimpleItem (
@@ -43,7 +45,7 @@ class SimpleItem (
     override fun bindView(binding: ItemBinding, payloads: List<Any>) {
         with(binding) {
 
-             binding.cardView.setOnTouchListener { _, event ->
+             cardView.setOnTouchListener { _, event ->
         // Если пользователь только что опустил палец на иконку
         if (event.actionMasked == MotionEvent.ACTION_DOWN) {
             // Ищем ViewHolder этой карточки. В FastAdapter Binding-версии он доступен через тег или binding.root
