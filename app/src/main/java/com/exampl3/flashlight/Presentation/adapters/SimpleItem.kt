@@ -45,7 +45,7 @@ class SimpleItem (
     override fun bindView(binding: ItemBinding, payloads: List<Any>) {
         with(binding) {
 
-             cardView.setOnTouchListener { _, event ->
+             cardView.setOnLongClickListener  { _, event ->
         // Если пользователь только что опустил палец на иконку
         if (event.actionMasked == MotionEvent.ACTION_DOWN) {
             // Ищем ViewHolder этой карточки. В FastAdapter Binding-версии он доступен через тег или binding.root
