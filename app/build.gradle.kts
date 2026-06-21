@@ -16,8 +16,8 @@ android {
         applicationId = "com.exampl3.flashlight"
         minSdk = 26
         targetSdk = 36
-        versionCode = 34
-        versionName = "9.7"
+        versionCode = 35
+        versionName = "10"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     ksp {

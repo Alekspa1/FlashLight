@@ -26,7 +26,6 @@ import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Data.ThemeImp
 import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
 import com.exampl3.flashlight.Domain.ItemListClickHandler
-import com.exampl3.flashlight.Domain.LogText
 import com.exampl3.flashlight.Domain.UpgrateRustore
 import com.exampl3.flashlight.Presentation.adapters.ListMenuAdapter
 import com.exampl3.flashlight.Presentation.adapters.VpAdapter
@@ -50,11 +49,12 @@ class FragmentMain : Fragment() {
 
     @Inject
     lateinit var pref: SettingsSharedPreference
+
     @Inject
     lateinit var theme: ThemeImp
 
     @Inject
-    lateinit var upgrare : UpgrateRustore
+    lateinit var upgrare: UpgrateRustore
 
 
     private lateinit var itemListClickHandler: ItemListClickHandler
@@ -86,8 +86,8 @@ class FragmentMain : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                modelFlashLight.statePremiumFlow.collect {premium->
-                    if(premium){
+                modelFlashLight.statePremiumFlow.collect { premium ->
+                    if (premium) {
                         binding.yaBaner.visibility = View.GONE
                         binding.tvNewPremium.text = requireContext().getString(R.string.premium_on)
                         binding.tvNewPremium.setCompoundDrawablesRelativeWithIntrinsicBounds(
@@ -97,13 +97,16 @@ class FragmentMain : Fragment() {
                             null  // Bottom
                         )
 
-                    }
-                    else{
+                    } else {
+                        val icon =
+                            if (modelFlashLight.getTheme() == THEME_ZABOR) R.drawable.ic_premium_off_zabor
+                            else R.drawable.ic_premium_off
                         initYaBaner()
                         binding.yaBaner.visibility = View.VISIBLE
-                        binding.tvNewPremium.text = requireActivity().getString(R.string.premium_off)
+                        binding.tvNewPremium.text =
+                            requireActivity().getString(R.string.premium_off)
                         binding.tvNewPremium.setCompoundDrawablesRelativeWithIntrinsicBounds(
-                            ContextCompat.getDrawable(requireContext(), R.drawable.ic_premium_off),
+                            ContextCompat.getDrawable(requireContext(), icon),
                             null, // Top
                             null, // End
                             null  // Bottom
@@ -147,7 +150,7 @@ class FragmentMain : Fragment() {
                             uri: String?,
                             category: String?
                         ) {
-                            modelFlashLight.insertCategory(name,requireActivity())
+                            modelFlashLight.insertCategory(name, requireActivity())
                         }
                     }, null)
                 } else Toast.makeText(
@@ -194,7 +197,13 @@ class FragmentMain : Fragment() {
         }.attach()
 
         // инициализировал ресайклер
-        itemListClickHandler = ItemListClickHandler(requireContext(),modelFlashLight,binding.drawer,binding.tabLayout,db)
+        itemListClickHandler = ItemListClickHandler(
+            requireContext(),
+            modelFlashLight,
+            binding.drawer,
+            binding.tabLayout,
+            db
+        )
         val rcView = binding.rcView
         adapter = ListMenuAdapter(itemListClickHandler, pref, theme)
         rcView.layoutManager = LinearLayoutManager(requireActivity())
@@ -211,8 +220,6 @@ class FragmentMain : Fragment() {
     } // Инициализирую все
 
 
-
-
     private fun stub(text: String) {
         Toast.makeText(
             requireActivity(),
@@ -226,58 +233,53 @@ class FragmentMain : Fragment() {
 
         with(modelFlashLight) {
             with(binding) {
-                val icon = if (modelFlashLight.getPremium()) R.drawable.ic_premium_on
-                else R.drawable.ic_premium_off_zabor
 
-            val listView = mapOf<Const.Action, Map<View, Int>>(
-                Const.Action.BACKGROUND_RESOURCE to
-                        mapOf
-                            (
-                            drawer to R.drawable.zabor,
-                            navView to R.drawable.zabor,
-                            cardZone to R.color.black,
-                            cardZone2 to R.color.black,
-                            cardZone3 to R.color.black,
-                            cardZone4 to R.color.black,
-                            tvTitileMenu to R.drawable.button_background_item_category_zabor,
-                            draverTvTitileMenu to R.drawable.button_background_item_category_zabor
-                        ),
-                Const.Action.IMAGE_RESOURCE to
-                        mapOf
-                            (
-                            imMenuMain to R.drawable.ic_menu_zabor,
-                            imSharedMain to R.drawable.ic_share_zabor,
-                            imSharedMain to R.drawable.ic_share_zabor,
-                            imBAddMenu to R.drawable.ic_add_zabor
-                        ),
-                Const.Action.TEXT_IMAGE to
-                        mapOf
-                            (
-                            tvNewPremium to icon,
-                            tvNewUpgrate to R.drawable.ic_update_zabor,
-                            tvNewSettings to R.drawable.ic_settings_zabor
-                        ),
-                Const.Action.TEXT_STYLE to mapOf
-                    (
-                    tvNewPremium to R.style.StyleButtonZabor,
-                    tvNewUpgrate to R.style.StyleButtonZabor,
-                    tvNewSettings to R.style.StyleButtonZabor,
-                    tvCategoryDrawer to R.style.StyleMenuZabor,
-                    tvTitileMenu to R.style.StyleItemZabor,
-                    draverTvTitileMenu to R.style.StyleItemZabor
+                val listView = mapOf<Const.Action, Map<View, Int>>(
+                    Const.Action.BACKGROUND_RESOURCE to
+                            mapOf
+                                (
+                                drawer to R.drawable.zabor,
+                                navView to R.drawable.zabor,
+                                cardZone to R.color.black,
+                                cardZone2 to R.color.black,
+                                cardZone3 to R.color.black,
+                                cardZone4 to R.color.black,
+                                tvTitileMenu to R.drawable.button_background_item_category_zabor,
+                                draverTvTitileMenu to R.drawable.button_background_item_category_zabor
+                            ),
+                    Const.Action.IMAGE_RESOURCE to
+                            mapOf
+                                (
+                                imMenuMain to R.drawable.ic_menu_zabor,
+                                imSharedMain to R.drawable.ic_share_zabor,
+                                imSharedMain to R.drawable.ic_share_zabor,
+                                imBAddMenu to R.drawable.ic_add_zabor
+                            ),
+                    Const.Action.TEXT_IMAGE to
+                            mapOf
+                                (
+                                tvNewUpgrate to R.drawable.ic_update_zabor,
+                                tvNewSettings to R.drawable.ic_settings_zabor
+                            ),
+                    Const.Action.TEXT_STYLE to mapOf
+                        (
+                        tvNewPremium to R.style.StyleButtonZabor,
+                        tvNewUpgrate to R.style.StyleButtonZabor,
+                        tvNewSettings to R.style.StyleButtonZabor,
+                        tvCategoryDrawer to R.style.StyleMenuZabor,
+                        tvTitileMenu to R.style.StyleItemZabor,
+                        draverTvTitileMenu to R.style.StyleItemZabor
+                    )
                 )
-            )
 
-            if (getTheme() == THEME_ZABOR) {
-                modelFlashLight.setView(listView)
-            }
+                if (getTheme() == THEME_ZABOR) {
+                    modelFlashLight.setView(listView)
+                }
                 modelFlashLight.setSize(listView)
 
 
             }
         }
-
-
 
 
     }
