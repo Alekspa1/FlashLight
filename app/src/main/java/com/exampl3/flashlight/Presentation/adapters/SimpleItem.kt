@@ -46,22 +46,19 @@ class SimpleItem (
     with(binding) {
         
 
+
+    cardView.setOnLongClickListener {
+    // Безопасно достаем ViewHolder из тега корневого ConstraintLayout
+    val viewHolder = root.tag as? RecyclerView.ViewHolder
+    if (viewHolder != null) {
+        // Системный виброотклик ("оторвали карточку")
+        cardView.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
         
-        // 1. ИСПРАВЛЕНО: Правильный лонг-клик для перетаскивания карточки с задержкой и виброоткликом
-               cardView.setOnLongClickListener  { _, event ->
-        // Если пользователь только что опустил палец на иконку
-        if (event.actionMasked == MotionEvent.ACTION_DOWN) {
-            // Ищем ViewHolder этой карточки. В FastAdapter Binding-версии он доступен через тег или binding.root
-            val recyclerView = binding.root.parent as? RecyclerView
-            val viewHolder = recyclerView?.getChildViewHolder(binding.root)
-            
-            if (viewHolder != null) {
-                // Передаем ViewHolder во фрагмент, чтобы запустить drag
-                onStartDragListener?.invoke(viewHolder)
-            }
-        }
-        false // Возвращаем false, чтобы стандартные клики (если они есть) тоже могли работать
+        onStartDragListener(viewHolder) // Запускаем перетаскивание
+        return@setOnLongClickListener true // Успешно обработано
     }
+    false
+}
 
         tvTextItem.text = item.name
         tvAlarm.text = alarmText(item) ?: "".trim()
@@ -129,11 +126,11 @@ class SimpleItem (
         val listTextView = listOf(tvTextItem, tvAlarm, tvDesc)
         theme.setSizeTextIsList(listTextView)
 
-         2. ДОБАВЛЕН ВИБРООТКЛИК НА ОБЫЧНЫЙ КЛИК ПО КАРТОЧКЕ
-         cardView.setOnClickListener {
-             cardView.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY)
-             itemClickHandler.onClick(item, Const.CHANGE_ITEM)
-         }
+         // 2. ДОБАВЛЕН ВИБРООТКЛИК НА ОБЫЧНЫЙ КЛИК ПО КАРТОЧКЕ
+         // cardView.setOnClickListener {
+         //     cardView.performHapticFeedback(android.view.HapticFeedbackConstants.VIRTUAL_KEY)
+         //     itemClickHandler.onClick(item, Const.CHANGE_ITEM)
+         // }
         
         // 3. ДОБАВЛЕН ВИБРООТКЛИК НА ИЗМЕНЕНИЕ СТАТУСА (Двойной микро-клик "Выполнено")
         imStatus.setOnClickListener {
