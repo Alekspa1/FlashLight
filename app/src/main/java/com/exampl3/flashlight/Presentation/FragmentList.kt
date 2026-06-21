@@ -69,7 +69,7 @@ open class FragmentList : Fragment() {
     private lateinit var pLauncher: ActivityResultLauncher<String>
 
     private lateinit var itemClickHandler: ItemClickHandler
-    private lateinit var touchHelper: ItemTouchHelper
+    private lateinit var myItemTouchHelper: ItemTouchHelper
 
 
     private val pickImageLauncher = registerForActivityResult(
@@ -247,9 +247,9 @@ open class FragmentList : Fragment() {
                             // Передаем ViewHolder во фрагмент при нажатии на иконку
                             onStartDragListener = { viewHolder ->
                             // Запускаем перетаскивание карточки вручную
-                                if (::touchHelper.isInitialized) {
-                                touchHelper.startDrag(viewHolder)
-                                                }
+                                if (::myItemTouchHelper.isInitialized) { 
+                myItemTouchHelper.startDrag(viewHolder)
+            }
                                         }
                                     }
                                 }
@@ -334,10 +334,10 @@ open class FragmentList : Fragment() {
         }
     } // Скобка закрывает объект dragCallback
 
-    touchHelper = ItemTouchHelper(dragCallback)
-    if (modelFlashLight.getSort() == SORT_USER) {
-        touchHelper?.attachToRecyclerView(binding.rcView) // Добавили '?' для безопасности переменной класса
-    }
+myItemTouchHelper = ItemTouchHelper(dragCallback) // Поменяли имя тут
+if (modelFlashLight.getSort() == SORT_USER) {
+    myItemTouchHelper.attachToRecyclerView(binding.rcView)
+}
 }
 
 
