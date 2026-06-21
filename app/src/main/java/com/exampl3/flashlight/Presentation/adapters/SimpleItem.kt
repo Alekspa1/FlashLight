@@ -46,18 +46,40 @@ class SimpleItem (
     with(binding) {
         
 
-cardView.setOnTouchListener { _, event ->
-            if (event.actionMasked == MotionEvent.ACTION_DOWN) {
-                // Ищем RecyclerView и ViewHolder этой карточки
+private var dragRunnable: Runnable? = null
+
+// 2. Внутри метода bindView заменяем ваш код на этот:
+cardView.setOnTouchListener { view, event ->
+    when (event.actionMasked) {
+        android.view.MotionEvent.ACTION_DOWN -> {
+            // Создаем задачу, которая выполнится через 350 миллисекунд
+            dragRunnable = Runnable {
+                // ВАШ РОБОЧИЙ КОД ПОИСКА VIEWHOLDER:
                 val recyclerView = root.parent as? RecyclerView
                 val viewHolder = recyclerView?.getChildViewHolder(root)
                 
                 if (viewHolder != null) {
-                    onStartDragListener(viewHolder) // Вызываем слушатель без null-проверки
+                    // Мощный виброотклик ("оторвали карточку")
+                    cardView.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
+                    
+                    // Плавная анимация уменьшения карточки до 95%
+                    cardView.animate().scaleX(0.95f).scaleY(0.95f).setDuration(150).start()
+                    
+                    // Запускаем перетаскивание вашим методом
+                    onStartDragListener(viewHolder)
                 }
             }
-            false 
+            // Запускаем таймер задержки
+            dragRunnable?.let { view.postDelayed(it, 350) }
         }
+        
+        android.view.MotionEvent.ACTION_UP, android.view.MotionEvent.ACTION_CANCEL -> {
+            // Если палец подняли раньше времени — отменяем таймер драга
+            dragRunnable?.let { view.removeCallbacks(it) }
+        }
+    }
+    false // Оставляем false, как у вас и было, чтобы обычные клики не ломались
+}
 
         tvTextItem.text = item.name
         tvAlarm.text = alarmText(item) ?: "".trim()
