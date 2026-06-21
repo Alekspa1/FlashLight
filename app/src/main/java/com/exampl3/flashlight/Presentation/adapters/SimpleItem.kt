@@ -53,9 +53,6 @@ cardView.setOnTouchListener { _, event ->
         // 1. Мощная вибрация при нажатии
         cardView.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
 
-        // 2. Плавное уменьшение карточки до 95% (занимает 100 миллисекунд)
-        cardView.animate().scaleX(0.80f).scaleY(0.80f).setDuration(100).start()
-
         // 3. Ваш оригинальный рабочий поиск ViewHolder
         val recyclerView = root.parent as? RecyclerView
         val viewHolder = recyclerView?.getChildViewHolder(root)
