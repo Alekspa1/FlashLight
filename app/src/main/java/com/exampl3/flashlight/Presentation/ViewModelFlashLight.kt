@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
@@ -58,9 +59,8 @@ class ViewModelFlashLight @Inject constructor(
     private val paySDK: PaySDK
 ) : ViewModel() {
 
-    init {
-        LogText(pref.getPremium().toString())
-    }
+
+
     private val _sortType = MutableStateFlow(settingsPref.getSort())
     val sortType = _sortType.asStateFlow()
 
@@ -70,7 +70,7 @@ class ViewModelFlashLight @Inject constructor(
     private val _categoryItemFlow = MutableStateFlow("Повседневные")
     val categoryItemFlow = _categoryItemFlow.asStateFlow()
 
-    val timeItemsInCalendar = MutableStateFlow(0L)
+    val timeItemsInCalendar = MutableStateFlow(getDateNow(Calendar.getInstance()) )
 
     private val _toastEvent = MutableSharedFlow<String>()
     val toastEvent = _toastEvent.asSharedFlow()
@@ -79,27 +79,77 @@ class ViewModelFlashLight @Inject constructor(
 
     val statePremiumFlow = MutableStateFlow(pref.getPremium())
 
+    val uriPhoto = MutableLiveData<String>()
 
-fun savePremium(flag: Boolean) {
-    viewModelScope.launch(Dispatchers.Main) {
-        pref.savePremium(flag)
-        statePremiumFlow.value = flag 
+    val sortedItemsFlow: Flow<List<Item>> = combine(
+        listItemAll.value, // Поток всех дел
+        sortType,                         // Поток типа сортировки
+        categoryItemFlow                  // Поток выбранной категории
+    ) { list, sort, currentCategory ->
+
+        // 1. СНАЧАЛА ФИЛЬТРУЕМ СПИСОК: оставляем только дела из выбранной категории
+        val filteredList = list.filter { it.category == currentCategory }
+
+        // 2. ЗАТЕМ СОРТИРУЕМ ОТФИЛЬТРОВАННЫЙ СПИСОК
+        if (sort == SORT_STANDART) {
+            filteredList.sortedWith(
+                compareBy<Item> { it.change }
+                    .thenBy { if (it.alarmTime > 0L) 0 else 1 }
+                    .thenByDescending { it.alarmTime }
+                    .thenBy { it.sort }
+            )
+        } else {
+            filteredList.sortedBy { it.sort }
+        }
+    }.flowOn(Dispatchers.Default)
+
+    val getItemCalendarCombine = combine(getItemsInCalendar, statePremiumFlow) { list, premium ->
+        if (premium) list
+        else emptyList()
     }
-}
+
+//    @OptIn(ExperimentalCoroutinesApi::class)
+//    val listItemCalendarflow = timeItemsInCalendar.flatMapLatest { timeDay ->
+//        if (timeDay != 0L) {
+//            val dbFlow = db.CourseDao().getAllListCalendarRcView(timeDay)
+//            dbFlow.combine(statePremiumFlow) { list, premium ->
+//                if (premium) list else emptyList() // Ошибки типов больше нет!
+//            }
+//        } else flowOf(emptyList())
+//    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val listItemCalendarflow = timeItemsInCalendar.flatMapLatest { timeDay ->
+            val dbFlow = db.CourseDao().getAllListCalendarRcView(timeDay)
+
+            dbFlow.combine(statePremiumFlow) { list, premium ->
+                if (premium) list else emptyList() // Ошибки типов больше нет!
+            }
+    }
+
+
+
+    //Пошли методы
+
+
+    fun savePremium(flag: Boolean) {
+        viewModelScope.launch(Dispatchers.Main) {
+            pref.savePremium(flag)
+            statePremiumFlow.value = flag
+        }
+    }
 
 
     fun getPremium() = pref.getPremium()
 
-    fun getAllListProducts(context: Context) = paySDK.getAllListProducts(context){savePremium(true)}
+    fun getAllListProducts(context: Context) =
+        paySDK.getAllListProducts(context) { savePremium(true) }
 
-    fun getListShopingProducts(context: Context) = paySDK.getListShopingProductsNew(context){ statePremium->
-        savePremium(statePremium)
-    }
+    fun getListShopingProducts(context: Context) =
+        paySDK.getListShopingProductsNew(context) { statePremium ->
+            savePremium(statePremium)
+        }
 
-    val getItemCalendarCombine = combine(getItemsInCalendar,statePremiumFlow){list,premium->
-     if(premium) list
-     else emptyList()
-    }
 
     suspend fun sendEvent(value: String) = _toastEvent.emit(value)
 
@@ -129,39 +179,6 @@ fun savePremium(flag: Boolean) {
     }
 
 
-    val sortedItemsFlow: Flow<List<Item>> = combine(
-        listItemAll.value, // Поток всех дел
-        sortType,                         // Поток типа сортировки
-        categoryItemFlow                  // Поток выбранной категории
-    ) { list, sort, currentCategory ->
-
-        // 1. СНАЧАЛА ФИЛЬТРУЕМ СПИСОК: оставляем только дела из выбранной категории
-        val filteredList = list.filter { it.category == currentCategory }
-
-        // 2. ЗАТЕМ СОРТИРУЕМ ОТФИЛЬТРОВАННЫЙ СПИСОК
-        if (sort == SORT_STANDART) {
-            filteredList.sortedWith(
-                compareBy<Item> { it.change }
-                    .thenBy { if (it.alarmTime > 0L) 0 else 1 }
-                    .thenByDescending { it.alarmTime }
-                    .thenBy { it.sort }
-            )
-        } else {
-            filteredList.sortedBy { it.sort }
-        }
-    }.flowOn(Dispatchers.Default)
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val listItemCalendarflow = timeItemsInCalendar.flatMapLatest { timeDay ->
-      if (timeDay != 0L) {
-          val dbFlow = db.CourseDao().getAllListCalendarRcView(timeDay)
-          dbFlow.combine(statePremiumFlow) { list, premium ->
-              if (premium) list else emptyList() // Ошибки типов больше нет!
-          }
-      }
-      else flowOf(emptyList())
-    }
-
     fun getAllCategories(onResult: (List<String>) -> Unit, item: Item?, calendar: Boolean) {
         val listCategory = mutableListOf("Повседневные")
         viewModelScope.launch {
@@ -190,7 +207,6 @@ fun savePremium(flag: Boolean) {
     }
 
 
-
     fun setView(map: Map<Const.Action, Map<View, Int>>) {
         theme.view(map)
     }
@@ -210,10 +226,6 @@ fun savePremium(flag: Boolean) {
 
     fun saveNoteBook(value: String) = pref.saveStringNoteBook(value)
     fun getNotebook() = pref.getStringNoteBook()
-
-
-
-    val uriPhoto = MutableLiveData<String>()
 
 
     fun getAllListCategory(): Flow<List<ListCategory>> {
@@ -443,8 +455,16 @@ fun savePremium(flag: Boolean) {
         }
     }
 
+    fun getDateNow(calendar: Calendar): Long {
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        return calendar.timeInMillis
+    }
 
     fun insetTimeIncalendar(time: Long) {
+
         timeItemsInCalendar.value = time
     }
 

@@ -26,6 +26,7 @@ import com.exampl3.flashlight.Data.Room.Database
 import com.exampl3.flashlight.Data.ThemeImp
 import com.exampl3.flashlight.Data.sharedPreference.SettingsSharedPreference
 import com.exampl3.flashlight.Domain.ItemClickHandler
+import com.exampl3.flashlight.Domain.LogText
 import com.exampl3.flashlight.Domain.useCase.PermissionUseCase
 import com.exampl3.flashlight.Presentation.adapters.SimpleItem
 import com.exampl3.flashlight.R
@@ -103,7 +104,7 @@ class FragmentCalendar : Fragment() {
          if (pref.getTheme() == THEME_ZABOR) {
             bindingZabor.imBAddCalendar.setOnClickListener {
                 if (modelFlashLight.getPremium())
-                    if (getDateNow(calendarDayB) >= getDateNow(calendarZero)) DialogItemList.alertItem(
+                    if (modelFlashLight.getDateNow(calendarDayB) >= modelFlashLight.getDateNow(calendarZero)) DialogItemList.alertItem(
                         requireContext(),
                         object : DialogItemList.Listener {
                             override fun onClickItem(
@@ -167,23 +168,15 @@ class FragmentCalendar : Fragment() {
                     Toast.LENGTH_SHORT
                 ).show()
             }
-            viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                modelFlashLight.statePremiumFlow.collect {premium->
-                    if(premium){
-                     createAlarmInCalendarnZabor()
-                 modelFlashLight.insetTimeIncalendar(getDateNow(calendar))
-}
-
-                }
-            }
-        }
-
+             createAlarmInCalendarnZabor()
         }
          else {
             binding.imBAddCalendar.setOnClickListener {
+
+                modelFlashLight.savePremium(!modelFlashLight.getPremium())
+
                 if (modelFlashLight.getPremium())
-                    if (getDateNow(calendarDayB) >= getDateNow(calendarZero)) DialogItemList.alertItem(
+                    if (modelFlashLight.getDateNow(calendarDayB) >= modelFlashLight.getDateNow(calendarZero)) DialogItemList.alertItem(
                         requireContext(),
                         object : DialogItemList.Listener {
                             override fun onClickItem(
@@ -245,18 +238,7 @@ class FragmentCalendar : Fragment() {
                     Toast.LENGTH_SHORT
                 ).show()
             }
-
-              viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                modelFlashLight.statePremiumFlow.collect {premium->
-                    if(premium){
-               createAlarmInCalendarnNeon()
-                 modelFlashLight.insetTimeIncalendar(getDateNow(calendar))
-}
-
-                }
-            }
-        }
+             createAlarmInCalendarnNeon()
             
         }
 
@@ -288,7 +270,7 @@ class FragmentCalendar : Fragment() {
                     OnCalendarDayClickListener {
                     override fun onClick(calendarDay: CalendarDay) {
                         calendarDayB = calendarDay.calendar
-                        modelFlashLight.insetTimeIncalendar(getDateNow(calendarDayB))
+                        modelFlashLight.insetTimeIncalendar(modelFlashLight.getDateNow(calendarDayB))
 
                     }
 
@@ -320,8 +302,7 @@ class FragmentCalendar : Fragment() {
             OnCalendarDayClickListener {
             override fun onClick(calendarDay: CalendarDay) {
                 calendarDayB = calendarDay.calendar
-               // modelFlashLight.getListItemByCalendar(getDateNow(calendarDayB))
-                modelFlashLight.insetTimeIncalendar(getDateNow(calendarDayB))
+                modelFlashLight.insetTimeIncalendar(modelFlashLight.getDateNow(calendarDayB))
 
             }
 
@@ -358,12 +339,14 @@ class FragmentCalendar : Fragment() {
                 viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                     modelFlashLight.listItemCalendarflow.collect {rawDataList->
 
+                        val items = rawDataList.map { data ->
+                            SimpleItem(data,pref,itemClickHandler,themeImp)
+                        }
 
-                        val items = rawDataList.map { data -> SimpleItem(data,pref,itemClickHandler,themeImp) }
                         FastAdapterDiffUtil.set(itemAdapter, items, object : com.mikepenz.fastadapter.diff.DiffCallback<SimpleItem> {
 
                             override fun areItemsTheSame(oldItem: SimpleItem, newItem: SimpleItem): Boolean {
-                               // return oldItem.identifier == newItem.identifier
+
                                 return oldItem.item.id == newItem.item.id
                             }
 
@@ -433,15 +416,6 @@ class FragmentCalendar : Fragment() {
     }
 
 
-
-    private fun getDateNow(calendar: Calendar): Long {
-        calendar.set(Calendar.HOUR_OF_DAY, 0)
-        calendar.set(Calendar.MINUTE, 0)
-        calendar.set(Calendar.SECOND, 0)
-        calendar.set(Calendar.MILLISECOND, 0)
-        return calendar.timeInMillis
-    }
-
     private fun theme() {
         with(modelFlashLight) {
             with(bindingZabor) {
@@ -453,12 +427,8 @@ class FragmentCalendar : Fragment() {
                     Const.Action.TEXT_COLOR to mapOf(tvDela to R.color.black)
                 )
 
-
-
                 modelFlashLight.setView(list)
-
                 setSize(list)
-
             }
         }
 

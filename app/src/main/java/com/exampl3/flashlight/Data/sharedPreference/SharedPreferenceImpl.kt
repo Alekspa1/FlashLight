@@ -31,7 +31,6 @@ class SharedPreferenceImpl @Inject constructor(
     fun getPremium(): Boolean = prefPremium.getBoolean(Const.PREMIUM_KEY, false)
 
     fun savePremium(flag: Boolean) {
-        LogText("Метод гдето вызвался")
         editPremium.putBoolean(Const.PREMIUM_KEY, flag)
         editPremium.apply()
     }
