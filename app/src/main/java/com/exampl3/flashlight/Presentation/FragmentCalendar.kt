@@ -173,8 +173,6 @@ class FragmentCalendar : Fragment() {
          else {
             binding.imBAddCalendar.setOnClickListener {
 
-                modelFlashLight.savePremium(!modelFlashLight.getPremium())
-
                 if (modelFlashLight.getPremium())
                     if (modelFlashLight.getDateNow(calendarDayB) >= modelFlashLight.getDateNow(calendarZero)) DialogItemList.alertItem(
                         requireContext(),
