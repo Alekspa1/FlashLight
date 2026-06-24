@@ -281,7 +281,7 @@ class FragmentCalendar : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                modelFlashLight.getItemsInCalendar.collect { listItems->
+                modelFlashLight.getItemCalendarCombine.collect { listItems->
                     val calendarDays = mutableListOf<CalendarDay>()
                     listItems.forEach { item->
                         calendar.timeInMillis = item.alarmTime
