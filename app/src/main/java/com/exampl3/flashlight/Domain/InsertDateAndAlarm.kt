@@ -116,7 +116,7 @@ class InsertDateAndAlarm @Inject constructor(
         }
     }
 
-    private fun addOneYearOrMonth(dateInMillis: Long,action: String): Long {
+    private fun addOneYearOrMonth(dateInMillis: Long, action: Int): Long {
         val date = if(action == Const.ALARM_MONTH) Calendar.MONTH else Calendar.YEAR
         val canendar = Calendar.getInstance()
         canendar.timeInMillis = dateInMillis
