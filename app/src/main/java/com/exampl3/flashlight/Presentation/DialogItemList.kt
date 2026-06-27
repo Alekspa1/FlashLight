@@ -1,16 +1,15 @@
 package com.exampl3.flashlight.Presentation
 
-import android.Manifest
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
 import android.net.Uri
-import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Spinner
@@ -21,7 +20,6 @@ import androidx.lifecycle.LifecycleOwner
 import com.bumptech.glide.Glide
 import com.exampl3.flashlight.Const
 import com.exampl3.flashlight.Data.Room.Item
-import com.exampl3.flashlight.Domain.useCase.PermissionUseCase
 import com.exampl3.flashlight.Domain.useCase.SoundPlayer
 import com.exampl3.flashlight.R
 
@@ -97,6 +95,7 @@ object DialogItemList {
         }
         dialog.show()
     }
+
 
     fun alertItem(
         context: Context, listener: Listener, item: Item?,
@@ -244,6 +243,8 @@ object DialogItemList {
         builder.show()
     }
 
+
+
     private fun spinerInput(
         spinner: Spinner,
         context: Context,
@@ -265,9 +266,9 @@ object DialogItemList {
                 onItemSelected(selectedWord)
             }
 
-            override fun onNothingSelected(parent: AdapterView<*>) {
-                //onItemSelected("Повседневные")
-            }
+            override fun onNothingSelected(p0: AdapterView<*>?) {}
+
+
         }
     }
 
@@ -497,30 +498,18 @@ object DialogItemList {
 
     }
 
-    fun permissonAlert(
-        context: Context,
-        permissionUseCase: PermissionUseCase,
-        pLauncher: ActivityResultLauncher<String>
-    ) {
-        AlertDialog.Builder(context)
-            .setTitle("Настройка стабильной работы")
-            .setMessage(
-                "Для точной работы будильника необходимо предоставить приложению разрешение на уведомления, " +
-                        "а затем отключить ограничения батареи. После того как вы все разрешите, нажмите на кнопку будильника повторно"
-            )
-            .setPositiveButton("Далее") { _, _ ->
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    pLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                } else {
-                    val intent = permissionUseCase.getBatteryOptimizationIntent(context)
-                    context.startActivity(intent)
-                }
-
-            }
-            .setNegativeButton("Отмена", null)
-            .setCancelable(false)
-            .show()
+    fun alertBackup(context: Context, action: ActionTrueOrFalse){
+        val builred = AlertDialog.Builder(context)
+        val dialog = builred.create()
+        dialog.setTitle("Внимание")
+        dialog.setMessage("Это может занять некоторое время, обязательно дождитесь перезапуска приложения")
+        dialog.setButton(AlertDialog.BUTTON_POSITIVE, "Начать") { _, _ ->
+            action.onClick(true)
+        }
+        dialog.setButton(AlertDialog.BUTTON_NEGATIVE, "Отмена") { _, _ ->
+            action.onClick(false)
+        }
+        dialog.show()
     }
 
     interface Listener {

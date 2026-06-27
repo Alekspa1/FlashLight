@@ -24,8 +24,7 @@ class ItemClickHandler (
     private val modelFlashLight: ViewModelFlashLight,
     private val lifecycleOwner: LifecycleOwner,
     private val pickImageLauncher: ActivityResultLauncher<String>,
-    private val pLauncher : ActivityResultLauncher<String>,
-    private val permissionUseCase: PermissionUseCase
+    private val pLauncher : ActivityResultLauncher<String>
 ) {
 
 
@@ -65,11 +64,11 @@ class ItemClickHandler (
 
             ALARM -> {
                 if (Const.isPermissionGranted(context, Manifest.permission.POST_NOTIFICATIONS)) {
-                    // Если разрешение на уведомления уже есть — просто ставим будильник
                     modelFlashLight.insertDateAndAlarm(item, null, context)
                 } else {
-                        DialogItemList.permissonAlert(context, permissionUseCase, pLauncher)
-
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                         pLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    }
                 }
             }
 

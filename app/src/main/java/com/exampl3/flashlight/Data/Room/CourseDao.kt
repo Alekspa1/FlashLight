@@ -36,14 +36,20 @@ interface CourseDao {
     @Query("SELECT * FROM Item")
     suspend fun getAllList(): List<Item>
 
-    @Query("SELECT * FROM Item WHERE alarmTime >= :time and alarmTime < (:time+86400000)")
-   suspend fun getAllListCalendarRcView(time: Long): List<Item>
+    @Query("SELECT * FROM Item WHERE alarmTime >= :time and alarmTime < (:time+86400000) and (item.changeAlarm = 1 or item.change = 0)")
+    fun getAllListCalendarRcView(time: Long): Flow<List<Item>>
+
+    @Query("SELECT * FROM Item WHERE item.changeAlarm = 1 or item.change = 0")
+    fun getItemsInCalendar() : Flow<List<Item>>
 
     @Query("DELETE FROM Item WHERE category == :value")
     fun deleteItemInCategory(value: String)
 
     @Update
     suspend fun updateItem(item: Item)
+
+    @Update
+    suspend fun updateItemsOrder(items: List<Item>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertItem(item: Item) : Long
@@ -53,6 +59,9 @@ interface CourseDao {
 
     @Update
     suspend fun updateItems(items: List<Item>)
+
+    @Query("SELECT * FROM Item WHERE changeAlarm = true")
+    suspend fun getActiveAlarms(): List<Item>
 
 
     //MENU

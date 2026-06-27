@@ -3,7 +3,9 @@ package com.exampl3.flashlight.Data.sharedPreference
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import com.exampl3.flashlight.Const
+import com.exampl3.flashlight.Domain.LogText
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -12,31 +14,24 @@ class SharedPreferenceImpl @Inject constructor(
     context: Application
 ) {
     private val greetings =
-        "Дорогие пользователи! \nВвиду особенности некоторых моделей телефонов," +
-                " установленные напоминания сбиваются после перезагрузки устройства," +
-                " если вы столкнулись с такой проблемой, вам необходимо в настройках приложения," +
-                " включить автозапуск приложения или разрешить приложению работать в фоновом режиме. " +
-                "Либо повторно входить в приложение после перезагрузки, чтобы напоминания обновились." +
-                "Если вам понравится мое приложение, то буду рад если оставите хороший отзыв," +
-                " также если у вас будут вопросы или предложения по улучшению приложения в настройках есть кнопка обратной связи и инструкция " +
-                "к приложению."
+        "Дорогие пользователи! ❤️\n\nИз-за агрессивных систем энергосбережения на " +
+                "некоторых моделях телефонов (особенно Huawei, Honor, Xiaomi) напоминания могут срабатывать с опозданием или сбрасываться системой при перезагрузке устройства." +
+                "\n\nЧтобы всё работало секунда в секунду, перейдите в настройки разрешите ему:" +
+                "\n• Работу в фоновом режиме\n• В настройках приложения найдите пункт который отключает энергосбережение или оптимизацию батареи(на каждом смартфоне по разному)\n\n⚠️" +
+                " Если после перезагрузки смартфона напоминания не сработали, вам необходимо будет повторно входить в приложение после " +
+                "каждой перезагрузки чтобы напоминания обновились" +
+                "\n\nПо любым вопросам и предложениям пишите мне через кнопку обратной связи." +
+                "Если вам понравится мое приложение, буду очень рад вашему хорошему отзыву! "
 
 
     private var prefPremium: SharedPreferences =
         context.getSharedPreferences("PREMIUM", Context.MODE_PRIVATE)
     private val editPremium: SharedPreferences.Editor = prefPremium.edit()
 
-    fun getPremium(): Boolean = prefPremium.getBoolean(Const.PREMIUM_KEY, true)
+    fun getPremium(): Boolean = prefPremium.getBoolean(Const.PREMIUM_KEY, false)
 
     fun savePremium(flag: Boolean) {
         editPremium.putBoolean(Const.PREMIUM_KEY, flag)
-        editPremium.apply()
-    }
-
-    fun isFirstAlarm(): Boolean = prefPremium.getBoolean(Const.FIRST_ALARM, true)
-
-    fun saveFirstAlarm(flag: Boolean) {
-        editPremium.putBoolean(Const.FIRST_ALARM, flag)
         editPremium.apply()
     }
 

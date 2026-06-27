@@ -14,18 +14,29 @@
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission android:name="android.permission.READ_SETTINGS" />
 
+   
+
 
     <application
         android:name=".Presentation.App"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
-        android:fullBackupContent="@xml/backup_rules"
+        android:fullBackupContent="false"
         android:icon="@mipmap/ic_icon"
         android:label="Focus"
+        tools:replace="android:label"
         android:roundIcon="@mipmap/ic_icon_round"
         android:supportsRtl="true"
         android:theme="@style/Base.Theme.FlashLight"
         tools:targetApi="31">
+
+        <meta-data
+            android:name="console_app_id_value"
+            android:value="2063541058" />
+
+        <meta-data
+            android:name="sdk_pay_scheme_value"
+            android:value="rustorepayflashlight" />
 
 
         <receiver
@@ -48,6 +59,7 @@
             android:name=".Presentation.MainActivity"
             android:exported="true"
             android:screenOrientation="portrait">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -56,7 +68,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="flashlight" />
+                <data android:scheme="rustorepayflashlight" />
             </intent-filter>
         </activity>
     </application>

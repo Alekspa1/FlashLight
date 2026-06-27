@@ -24,7 +24,7 @@ class InsertDateAndAlarm @Inject constructor(
     private val db: Database,
     private val pref: SharedPreferenceImpl,
 ) {
-    private var calendarZero = Calendar.getInstance()
+   // private var calendarZero = Calendar.getInstance()
 
     suspend fun exumDateAndAction(item: Item, date: Calendar?, context: Context) {
         val dateCalendar = date ?: insertDateUseCase.exum(item, context)
@@ -43,7 +43,7 @@ class InsertDateAndAlarm @Inject constructor(
     }
 
     suspend fun exumAlarm(item: Item, context: Context, first: Boolean) {
-        calendarZero = Calendar.getInstance()
+        val calendarZero = Calendar.getInstance()
         if (first) {
             db.CourseDao().updateItem(item.copy(changeAlarm = true, change = false))
             changeAlarm.exum(item, item.interval)
@@ -103,22 +103,30 @@ class InsertDateAndAlarm @Inject constructor(
 
             Const.ALARM_MONTH -> {
                 val newItem =
-                    item.copy(changeAlarm = true, alarmTime = item.alarmTime + Const.MONTH)
+                    item.copy(changeAlarm = true, alarmTime = addOneYearOrMonth(item.alarmTime,Const.ALARM_MONTH ))
                 changeAlarm.exum(newItem, newItem.interval)
                 db.CourseDao().updateItem(newItem)
             }
 
             Const.ALARM_YEAR -> {
-                val newItem = item.copy(changeAlarm = true, alarmTime = addOneYear(item.alarmTime))
+                val newItem = item.copy(changeAlarm = true, alarmTime = addOneYearOrMonth(item.alarmTime,Const.ALARM_YEAR))
                 changeAlarm.exum(newItem, newItem.interval)
                 db.CourseDao().updateItem(newItem)
             }
         }
     }
 
-    private fun addOneYear(dateInMillis: Long): Long {
-        calendarZero.timeInMillis = dateInMillis
-        calendarZero.add(Calendar.YEAR, 1) // Добавляем один год
-        return calendarZero.timeInMillis
+    private fun addOneYearOrMonth(dateInMillis: Long, action: Int): Long {
+        val date = if(action == Const.ALARM_MONTH) Calendar.MONTH else Calendar.YEAR
+        val canendar = Calendar.getInstance()
+        canendar.timeInMillis = dateInMillis
+        canendar.add(date, 1) // Добавляем один год или месяц
+        return canendar.timeInMillis
     }
+    //   private fun addOneMonth(dateInMillis: Long): Long {
+    //     val canendarMonth = Calendar.getInstance()
+    //     canendarMonth.timeInMillis = dateInMillis
+    //     canendarMonth.add(Calendar.MONTH, 1) // Добавляем один месяц
+    //     return canendarMonth.timeInMillis
+    // }
 }

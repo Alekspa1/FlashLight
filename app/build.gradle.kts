@@ -16,8 +16,8 @@ android {
         applicationId = "com.exampl3.flashlight"
         minSdk = 26
         targetSdk = 36
-        versionCode = 34
-        versionName = "9.7"
+        versionCode = 35
+        versionName = "10"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     ksp {
@@ -49,23 +49,43 @@ android {
 }
 
 dependencies {
+
+    // Базовый модуль FastAdapter
+    implementation("com.mikepenz:fastadapter:5.7.0")
+
+    // Модуль для работы с ViewBinding (ОБЯЗАТЕЛЬНО!)
+    implementation("com.mikepenz:fastadapter-extensions-binding:5.7.0")
+
+
+    // Модули для drag & drop (уже есть)
+    implementation("com.mikepenz:fastadapter-extensions-drag:5.7.0")
+    implementation("com.mikepenz:fastadapter-extensions-utils:5.7.0")
+
+    // Опционально: для DiffUtil
+    implementation("com.mikepenz:fastadapter-extensions-diff:5.7.0")
+    //pay SDK
+    implementation(platform("ru.rustore.sdk:bom:2025.11.01"))
+    implementation("ru.rustore.sdk:pay")
+
+
+
     implementation("ru.rustore.sdk:appupdate:7.0.0")
     implementation("com.applandeo:material-calendar-view:1.9.2")
-    implementation ("com.github.bumptech.glide:glide:5.0.5")
-    implementation("androidx.navigation:navigation-fragment-ktx:2.9.6")
-    implementation("androidx.navigation:navigation-ui-ktx:2.9.6")
+    implementation ("com.github.bumptech.glide:glide:5.0.7")
+    implementation("androidx.navigation:navigation-fragment-ktx:2.9.8")
+    implementation("androidx.navigation:navigation-ui-ktx:2.9.8")
     implementation("androidx.fragment:fragment:1.8.9")
     implementation("androidx.cardview:cardview:1.0.0")
 
-    ksp ("com.github.bumptech.glide:compiler:5.0.5")
+    ksp ("com.github.bumptech.glide:compiler:5.0.7")
 
-    implementation("com.yandex.android:mobileads:7.18.1")
+    implementation("com.yandex.android:mobileads:8.1.0")
 
 
     implementation("ru.rustore.sdk:billingclient:7.0.0")
-    implementation ("com.google.dagger:hilt-android:2.57.2")
-    implementation("androidx.activity:activity-ktx:1.12.2")
-    ksp ("com.google.dagger:hilt-compiler:2.57.2")
+    implementation ("com.google.dagger:hilt-android:2.59.2")
+    implementation("androidx.activity:activity-ktx:1.13.0")
+    ksp ("com.google.dagger:hilt-compiler:2.59.2")
 
     implementation ("androidx.room:room-runtime:2.8.4")
     ksp ("androidx.room:room-compiler:2.8.4")

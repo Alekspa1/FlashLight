@@ -22,8 +22,6 @@ class UpgrateRustore @Inject constructor(context: Context, val themeImp: ThemeIm
                 themeImp.view(mapOf(Const.Action.TEXT_IMAGE to mapOf(textView to icon)))
             }
         }
-            .addOnFailureListener { throwable ->
-                LogText("getAppUpdateInfo error, $throwable")
-            }
+
     }
 }
