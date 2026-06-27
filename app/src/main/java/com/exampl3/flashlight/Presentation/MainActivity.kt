@@ -3,6 +3,7 @@ package com.exampl3.flashlight.Presentation
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -17,7 +18,7 @@ import ru.rustore.sdk.pay.RuStorePayClient
 
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity() {
+class MainActivity : ComponentActivity() {
 
     private val intentInteractor: IntentInteractor by lazy {
         RuStorePayClient.instance.getIntentInteractor()
@@ -30,6 +31,8 @@ class MainActivity : AppCompatActivity() {
         if (savedInstanceState == null) {
             intentInteractor.proceedIntent(intent)
         }
+
+
         setupBackButtonHandler()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)

@@ -56,7 +56,7 @@
 
         <activity
             android:launchMode="singleTask"
-            android:name=".Presentation.MainActivity"
+            android:name="com.drag0n.shared.presentation.MainActivity"
             android:exported="true"
             android:screenOrientation="portrait">
 

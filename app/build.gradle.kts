@@ -49,7 +49,7 @@ android {
 }
 
 dependencies {
-
+    implementation(project(":shared"))
     // Базовый модуль FastAdapter
     implementation("com.mikepenz:fastadapter:5.7.0")
 
