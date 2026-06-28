@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import presentation.Notebook
 
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
@@ -198,7 +199,7 @@ fun MainWeatherPager(onClick: (Int) -> Unit = {}) {
 
 
 
-                0 -> {Text("1")}
+                0 -> {Notebook(}
 
 
 
