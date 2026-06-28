@@ -88,7 +88,6 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      # ТЕСТЫ ТУТ: Проверяем общую бизнес-логику из commonTest на быстром Linux-сервере
       - name: Run KMP Common Tests
         run: ./gradlew :shared:testDebugUnitTest
 
@@ -118,7 +117,7 @@ jobs:
           message: "Релизная сборка Android готова и подписана! Все общие тесты пройдены успешно."
           document: ${{ steps.sign_app.outputs.signedReleaseFile }}
 
-  # ================= РАБОТА 2: ЧИСТАЯ ПРОВЕРКА СБОРКИ IOS (MACOS) =================
+  # ================= РАБОТА 2: ЖИВОЙ ЗАПУСК И ЛОГИРОВАНИЕ IOS (MACOS) =================
   build-ios:
     runs-on: macos-latest
     steps:
@@ -135,10 +134,17 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      # Просто проверяем, что весь проект компилируется под iOS без ошибок
-      - name: Verify Xcode Project Compilation
+      # ИСХОДНАЯ КОМАНДА ЗАМЕНЕНА НА ТЕСТОВУЮ ДЛЯ ВЫВОДА GITHUB_CI_LOG
+      - name: Launch iOS Simulator and Print Kotlin Logs
         run: |
-          echo "==== Проверка финальной компиляции проекта iosApp ===="
+          echo "==== Запуск симулятора iPhone и вызов функции StartApp() ===="
           cd iosApp
-          xcodebuild -scheme iosApp -destination 'generic/platform=iOS Simulator' clean build
-          echo "==== iOS фреймворки и Swift успешно собраны! ===="
+          
+          # Запускаем xcodebuild в режиме test вместо build. 
+          # Это заставит iOS выполнить LaunchedEffect и выплюнуть println() в терминал.
+          xcodebuild test \
+            -project iosApp.xcodeproj \
+            -scheme iosApp \
+            -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest'
+          
+          echo "==== Запуск прошел успешно, логи зафиксированы! ===="
