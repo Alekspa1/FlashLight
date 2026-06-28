@@ -1,4 +1,66 @@
-name: Build and Send Release APK to Telegram
+#name: Build and Send Release APK to Telegram
+#
+#on:
+#  push:
+#    branches:
+#      - '**'
+#  pull_request:
+#    branches:
+#      - '**'
+#
+#jobs:
+#  build-and-send:
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      # 1. Скачиваем код репозитория
+#      - name: Checkout Code
+#        uses: actions/checkout@v4
+#
+#      # 2. Устанавливаем Java
+#      - name: Set up JDK 17
+#        uses: actions/setup-java@v4
+#        with:
+#          java-version: '17'
+#          distribution: 'temurin'
+#          cache: gradle
+#
+#      # 3. Даем права на выполнение Gradle
+#      - name: Grant execute permission for gradlew
+#        run: chmod +x gradlew
+#
+#      # 4. Проверка качества кода (опционально, для релизных исходников)
+#      - name: Run Quality Checks for Release
+#        run: ./gradlew compileReleaseSources
+#
+#      # 5. Собираем релизный APK
+#      - name: Build Release APK
+#        run: ./gradlew assembleRelease
+#
+#      # 6. Подписываем релизный APK вашим ключом
+#      - name: Sign APK
+#        uses: r0adkll/sign-android-release@v1
+#        id: sign_app
+#        with:
+#          releaseDirectory: app/build/outputs/apk/release
+#          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+#          alias: ${{ secrets.ALIAS }}
+#          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+#          keyPassword: ${{ secrets.KEY_STORE_PASSWORD }}
+#        # Версия указывается в блоке env большими буквами!
+#        env:
+#          BUILD_TOOLS_VERSION: "34.0.0"
+#
+#      # 7. Отправляем подписанный релизный файл в Telegram
+#      - name: Send APK to Telegram
+#        uses: appleboy/telegram-action@master
+#        with:
+#          to: 706399730
+#          token: ${{ secrets.TELEGRAM_TOKEN }}
+#          message: "Релизная сборка готова и подписана!"
+#          document: ${{ steps.sign_app.outputs.signedReleaseFile }}
+
+name: Build and Send Release APK to Telegram & Check iOS
 
 on:
   push:
@@ -9,9 +71,9 @@ on:
       - '**'
 
 jobs:
-  build-and-send:
+  # ================= РАБОТА 1: СБОРКА И ОТПРАВКА ANDROID =================
+  build-android:
     runs-on: ubuntu-latest
-
     steps:
       # 1. Скачиваем код репозитория
       - name: Checkout Code
@@ -47,7 +109,6 @@ jobs:
           alias: ${{ secrets.ALIAS }}
           keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
           keyPassword: ${{ secrets.KEY_STORE_PASSWORD }}
-        # Версия указывается в блоке env большими буквами!
         env:
           BUILD_TOOLS_VERSION: "34.0.0"
 
@@ -57,5 +118,44 @@ jobs:
         with:
           to: 706399730
           token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: "Релизная сборка готова и подписана!"
+          message: "Релизная сборка Android готова и подписана!"
           document: ${{ steps.sign_app.outputs.signedReleaseFile }}
+
+  # ================= РАБОТА 2: ПРОВЕРКА СБОРКИ IOS =================
+  build-ios:
+    runs-on: macos-latest # Xcode доступен только на macOS
+    steps:
+      # 1. Скачиваем код репозитория
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 2. Устанавливаем Java (нужна для компиляции Kotlin-части фреймворка)
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      # 3. Даем права на выполнение Gradle
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # 4. Собираем Kotlin iOS фреймворк и логируем вывод в консоль GitHub
+      - name: Compile Kotlin Multiplatform Framework for iOS
+        run: |
+          echo "==== Запуск компиляции KMP фреймворка ===="
+          ./gradlew :shared:linkReleaseFrameworkIosSimulatorArm64 --info
+          echo "==== Компиляция Kotlin-части успешно завершена ===="
+
+      # 5. Запускаем приложение в Симуляторе в режиме тестирования и пишем логи
+      - name: Launch iOS Simulator and Run Tests (Log Verification)
+        run: |
+          echo "==== Запуск скрытого iOS симулятора и вызов функции App() ===="
+          cd iosApp
+          
+          # Запускаем команду тестирования Xcode, которая принудительно выведет все println в логи CI
+          xcodebuild test \
+            -scheme iosApp \
+            -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' \
+            -resultBundlePath TestResults

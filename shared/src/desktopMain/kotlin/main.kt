@@ -1,6 +1,6 @@
 package com.dragon.shared
 
-import App
+import StartApp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 
@@ -9,6 +9,6 @@ fun main() = application {
         onCloseRequest = ::exitApplication,
         title = "Focus" // Имя окна вашей программы
     ) {
-        App() // Вызываем нашу общую функцию из commonMain
+        StartApp() // Вызываем нашу общую функцию из commonMain
     }
 }

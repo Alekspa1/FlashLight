@@ -11,7 +11,7 @@ kotlin {
     jvm("desktop")
 
     // 2. Таргеты для iOS (объединенные в красивый цикл)
-    val xcfName = "sharedKit"
+    val xcfName = "ComposeApp"
     listOf(
         iosX64(),
         iosArm64(),
