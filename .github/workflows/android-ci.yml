@@ -117,7 +117,7 @@ jobs:
           message: "Релизная сборка Android готова и подписана! Все общие тесты пройдены успешно."
           document: ${{ steps.sign_app.outputs.signedReleaseFile }}
 
-  # ================= РАБОТА 2: ЖИВОЙ ЗАПУСК И ЛОГИРОВАНИЕ IOS (MACOS) =================
+   # ================= РАБОТА 2: ЖИВОЙ ЗАПУСК И ЛОГИРОВАНИЕ IOS (MACOS) =================
   build-ios:
     runs-on: macos-latest
     steps:
@@ -134,17 +134,10 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      # ИСХОДНАЯ КОМАНДА ЗАМЕНЕНА НА ТЕСТОВУЮ ДЛЯ ВЫВОДА GITHUB_CI_LOG
-      - name: Launch iOS Simulator and Print Kotlin Logs
+      # Запускаем приложение на симуляторе напрямую силами Kotlin/Gradle
+      - name: Run App on iOS Simulator and Print Logs
         run: |
-          echo "==== Запуск симулятора iPhone и вызов функции StartApp() ===="
-          cd iosApp
+          echo "==== Запуск iOS симулятора через Gradle ===="
           
-          # Запускаем xcodebuild в режиме test вместо build. 
-          # Это заставит iOS выполнить LaunchedEffect и выплюнуть println() в терминал.
-          xcodebuild test \
-            -project iosApp.xcodeproj \
-            -scheme iosApp \
-            -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest'
-          
-          echo "==== Запуск прошел успешно, логи зафиксированы! ===="
+          # Эта таска сама создаст симулятор iPhone, запустит приложение и выведет println() в консоль
+          ./gradlew :shared:iosSimulatorArm64Test --info
