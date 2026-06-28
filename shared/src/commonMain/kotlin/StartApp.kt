@@ -9,11 +9,7 @@ import presentation.MainWeatherPager
 
 @Composable
 fun StartApp() {
-    LaunchedEffect(Unit) {
-        println("=========================================")
-        println("KMP APP LOG: Общий интерфейс успешно запущен!")
-        println("=========================================")
-    }
+
     MaterialTheme {
         Box(
             modifier = Modifier.fillMaxSize(),

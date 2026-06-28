@@ -53,6 +53,9 @@ kotlin {
             // Сюда при необходимости добавим специфичные для iOS библиотеки
         }
     }
+    sourceSets.commonTest.dependencies {
+        implementation(kotlin("test"))
+    }
 }
 
 android {
