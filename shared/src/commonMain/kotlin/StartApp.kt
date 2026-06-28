@@ -9,7 +9,11 @@ import presentation.MainWeatherPager
 
 @Composable
 fun StartApp() {
-
+LaunchedEffect(Unit) {
+        println("=====================================================")
+        println("GITHUB_CI_LOG: Функция StartApp() УСПЕШНО ЗАПУСТИЛАСЬ!")
+        println("=====================================================")
+    }
     MaterialTheme {
         Box(
             modifier = Modifier.fillMaxSize(),
