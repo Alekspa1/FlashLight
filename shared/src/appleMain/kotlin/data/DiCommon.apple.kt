@@ -1,4 +1,11 @@
 package data
 
-actual val moduleSharedPref: org.koin.core.module.Module
-    get() = TODO("Not yet implemented")
+import data.repository.IosSharedPrefImpl
+import domain.repostirory.SharedPrefRepository
+import org.koin.core.module.Module
+import org.koin.dsl.module
+
+actual val moduleSharedPref: Module = module {
+    single <SharedPrefRepository> { IosSharedPrefImpl() }
+
+}

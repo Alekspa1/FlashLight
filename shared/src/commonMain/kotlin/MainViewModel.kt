@@ -13,6 +13,8 @@ class MainViewModel(
 
     var stateTextNotebook by mutableStateOf(pref.loadTextNoteBook())
 
+
     fun saveText() = pref.saveTextNoteBook(stateTextNotebook)
+
 
 }

@@ -3,6 +3,7 @@ package presentation
 import MainViewModel
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -32,29 +33,37 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+
 import org.koin.compose.viewmodel.koinViewModel
-import presentation.Notebook
+
 
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 
 @Composable
-fun MainWeatherPager(paddingValues: PaddingValues, onClick: (Int) -> Unit = {}) {
+fun MainWeatherPager(paddingValues: PaddingValues, onClick: () -> Unit = {}) {
+
     val viewModel: MainViewModel = koinViewModel()
     val titles = listOf("Блокнот","Список дел","Календарь")
-
     val pagerState = rememberPagerState(pageCount = { titles.size })
-
     val scope = rememberCoroutineScope()
 
 
-
-
-
     Column(
-        modifier = Modifier.fillMaxSize().padding(paddingValues),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(
+                // Достаем из объекта строго верхний системный отступ:
+                top = paddingValues.calculateTopPadding(),
+                // Достаем из объекта строго нижний системный отступ:
+                bottom = paddingValues.calculateBottomPadding(),
+                // Ваши фиксированные аккуратные отступы по бокам:
+                start = 4.dp,
+                end = 4.dp
+            ),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Row(
@@ -67,7 +76,7 @@ fun MainWeatherPager(paddingValues: PaddingValues, onClick: (Int) -> Unit = {}) 
 
             IconButton(
 
-                onClick = { onClick(0) },
+                onClick = { onClick() },
 
                 modifier = Modifier.fillMaxHeight() // Иконка растягивается на всю высоту вкладок
 
@@ -97,12 +106,7 @@ fun MainWeatherPager(paddingValues: PaddingValues, onClick: (Int) -> Unit = {}) 
 
                 indicator = {
 
-                    // В Material 3 (M3) позиции вкладок теперь берутся из context (this)
-
                     val modifier = Modifier.tabIndicatorOffset(pagerState.currentPage)
-
-
-
                     TabRowDefaults.PrimaryIndicator(
 
                         modifier = modifier,
@@ -112,7 +116,6 @@ fun MainWeatherPager(paddingValues: PaddingValues, onClick: (Int) -> Unit = {}) 
                         height = 3.dp,        // Толщина
 
                         color = Color.White,  // БЕЛЫЙ ЦВЕТ
-
                         shape = RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp)
 
                     )
@@ -132,19 +135,11 @@ fun MainWeatherPager(paddingValues: PaddingValues, onClick: (Int) -> Unit = {}) 
                         selected = selected,
 
                         onClick = {
-
                             if (pagerState.currentPage != index) {
-
                                 scope.launch { pagerState.animateScrollToPage(index) }
-
                             }
 
                         },
-
-
-
-
-
                         text = {
 
                             Text(
@@ -171,62 +166,27 @@ fun MainWeatherPager(paddingValues: PaddingValues, onClick: (Int) -> Unit = {}) 
 
         }
 
-
-
-        // Обертка для иконки и вкладок
-
-
-
-
-
         HorizontalPager(
-
-
-
             state = pagerState,
-
-
-
             modifier = Modifier
-
-                .fillMaxSize(),
-
-            userScrollEnabled = pagerState.currentPage != 2
-
-
+                .fillMaxSize()
 
         ) { pageIndex ->
-
-
-
             when (pageIndex) {
-
-
-
                 0 -> {Notebook(viewModel)}
-
-
-
                 1 -> {Text("2")}
-
-
-
                 2 -> {Text("3")}
-
-
 
             }
 
-
-
         }
-
-
 
     }
 
+}
 
-
-
-
+@Preview
+@Composable
+fun Preview(){
+    MainWeatherPager(PaddingValues())
 }

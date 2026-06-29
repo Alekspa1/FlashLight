@@ -1,6 +1,6 @@
 package data
 
-import data.repostitory.SharedPrefIml
+import data.repostitory.AndroidSharedPrefIml
 import domain.repostirory.SharedPrefRepository
 
 import org.koin.dsl.module
@@ -8,5 +8,5 @@ import org.koin.dsl.module
 
 actual val moduleSharedPref = module {
 
-    single<SharedPrefRepository> { SharedPrefIml(get()) }
+    single<SharedPrefRepository> { AndroidSharedPrefIml(get()) }
 }

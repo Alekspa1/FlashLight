@@ -7,37 +7,38 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import flashlight.shared.generated.resources.Res
 import flashlight.shared.generated.resources.background_neon
+import flashlight.shared.generated.resources.background_zabor
+import flashlight.shared.generated.resources.ic_micro_neon
 
 import org.jetbrains.compose.resources.painterResource
 import presentation.MainWeatherPager
 
 @Composable
 fun StartApp() {
-
     MaterialTheme {
-        // 1. Scaffold сам вычисляет отступы челки, статус-бара и системной полоски снизу
-        Scaffold(
-            modifier = Modifier.fillMaxSize()
-        ) { innerPadding -> // <-- Переменная, которая хранит все безопасные отступы
+        // 1. САМЫЙ НИЖНИЙ СЛОЙ: Чистый Box, который намертво растягивает картинку
+        Box(
+            modifier = Modifier.fillMaxSize() // ТУТ НЕТ И НЕ ДОЛЖНО БЫТЬ .padding(innerPadding)!
+        ) {
+            Image(
+                painter = painterResource(Res.drawable.background_neon),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                // Заставляет картинку заполнить всё окно Windows до последнего пикселя
+                contentScale = ContentScale.FillBounds
+            )
 
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                   ,
-                contentAlignment = Alignment.Center
-            ) {
-                Image(
-                    // Вызываем painterResource через объект Res:
-                    painter = painterResource(Res.drawable.background_neon),
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
-                    // Растягиваем картинку на весь экран без искажения пропорций:
-                    contentScale = ContentScale.Crop
-                )
-                MainWeatherPager(innerPadding)
+            // 2. СЛЕДУЮЩИЙ СЛОЙ: Накладываем Scaffold ПОВЕРХ картинки
+            Scaffold(
+                modifier = Modifier.fillMaxSize(),
+                containerColor = Color.Transparent // Делаем подложку прозрачной, чтобы видеть картинку
+            ) { innerPadding ->
+               MainWeatherPager(innerPadding)
+
             }
         }
     }

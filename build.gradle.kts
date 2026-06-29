@@ -11,7 +11,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose") version "2.3.0" apply false
 
     // Плагин Compose Multiplatform (актуальная стабильная под Kotlin 2.0.20)
-    id("org.jetbrains.compose") version "1.6.11" apply false
+    id("org.jetbrains.compose") version "1.11.1" apply false
 
     // Ваши сопутствующие плагины (версии из вашего проекта)
     id("com.google.devtools.ksp") version "2.3.0" apply false // версия KSP привязана к версии Kotlin

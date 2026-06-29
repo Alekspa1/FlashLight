@@ -13,7 +13,7 @@ kotlin {
     // 2. Таргеты для iOS (объединенные в красивый цикл)
     val xcfName = "ComposeApp"
     listOf(
-        iosX64(),
+      //  iosX64(),
         iosArm64(),
         iosSimulatorArm64()
     ).forEach { iosTarget ->
@@ -27,10 +27,10 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             // Подключаем базовые компоненты Compose Multiplatform
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.material3)          // Material 3 дизайн
-            implementation(compose.components.resources) // Для строк, картинок и шрифтов
+            implementation("org.jetbrains.compose.runtime:runtime:1.11.1")
+            implementation("org.jetbrains.compose.foundation:foundation:1.11.1")
+            implementation("org.jetbrains.compose.material3:material3:1.9.0")          // Material 3 дизайн
+            implementation("org.jetbrains.compose.components:components-resources:1.11.1") // Для строк, картинок и шрифтов
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
             implementation("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose:2.9.6")
             implementation("org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose:2.9.6")
@@ -42,6 +42,11 @@ kotlin {
 
             // 3. Аналог libs.koin.compose.viewmodel (Магия функции koinViewModel() для KMP)
             implementation("io.insert-koin:koin-compose-viewmodel:4.2.2")
+
+            implementation("org.jetbrains.compose.ui:ui-tooling-preview:1.10.0") // если нужен превью
+
+            // САМАЯ ВАЖНАЯ СТРОЧКА:
+            implementation("org.jetbrains.compose.material:material-icons-extended:1.7.3")
         }
 
         commonTest.dependencies {
@@ -51,6 +56,7 @@ kotlin {
         androidMain.dependencies {
             implementation("androidx.activity:activity-compose:1.13.0") // Для setContent и ComponentActivity
             implementation("androidx.appcompat:appcompat:1.7.1")
+            implementation("org.jetbrains.compose.ui:ui-tooling-preview:1.10.0")
         }
 
         val desktopMain by getting {
@@ -75,4 +81,8 @@ android {
     defaultConfig {
         minSdk = 26
     }
+}
+
+dependencies {
+    debugImplementation("androidx.compose.ui:ui-tooling:1.10.0")
 }
