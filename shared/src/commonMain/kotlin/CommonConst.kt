@@ -1,0 +1,65 @@
+object CommonConst {
+    enum class Action{TEXT_STYLE,TEXT_COLOR,TEXT_IMAGE,BACKGROUND_COLOR,IMAGE_RESOURCE,BACKGROUND_RESOURCE,}
+
+    const val RUSTORE = "https://apps.rustore.ru/app/com.exampl3.flashlight"
+    const val AUTHORIZED_RUSTORE = "rustore://auth/"
+    const val APP_GALERY = "https://flashlightandtodolist.drru.agconnect.link/d6zW"
+    const val PREMIUM_KEY = "premium_KEY"
+    const val FIRST_ALARM = "FIRST_ALARM"
+    //private val calendar: Calendar = Calendar.getInstance()
+    //private val dayInMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
+    const val BANER = "R-M-4702196-1"
+    const val TEN_MINUTES = 600000
+
+    const val KEY_NOTE_BOOK = "key"
+    const val DELETE = 10
+    const val CHANGE = 11
+    const val CHANGE_ITEM = 12
+    const val ALARM = 13
+    const val IMAGE = 14
+    const val CHANNEL_ID = "channelID"
+    const val CHANNEL_ID_PASSED = "CHANNEL_ID_PASSED"
+    const val KEY_INTENT = "keyId"
+    const val KEY_INTENT_ALARM = "keyIdAlarm"
+    const val KEY_INTENT_CALL_BACKREADY = "keyIntentCallBackready"
+    const val KEY_INTENT_CALL_POSTPONE = "keyIntentCallpostpone"
+    const val REBOOT = "android.intent.action.BOOT_COMPLETED"
+    const val ALARM_ONE = 0
+    const val ALARM_DAY = 1
+    const val ALARM_WEEK = 2
+    const val ALARM_MONTH = 3
+    const val ALARM_YEAR = 4
+    const val DELETE_ALARM = 5
+    const val ALARM_REPEAT = 6
+   // val ONE_MONTH = ProductId("premium_version_podpiska_flash_light")
+   // val SIX_MONTH = ProductId("premium_version_podpiska_six_month_flash_light")
+   // val ONE_YEAR = ProductId("premium_version_podpiska_one_year_flash_light")
+   // val FOREVER = ProductId("premium_version_flash_light")
+   // val MONTH = AlarmManager.INTERVAL_DAY* dayInMonth
+//    val PURCHASE_LIST: List<ProductId> = listOf(
+//        FOREVER,
+//        ONE_MONTH,
+//        SIX_MONTH,
+//        ONE_YEAR,
+//    )
+    const val NOT_AUTHORIZED = "RuStore User Not Authorized"
+    const val DONATE = "https://www.tinkoff.ru/rm/r_yDLrspQXuU.pghPicassj/iZZa112656"
+
+    const val SORT_SETTINGS = "SORT_SETTINGS"
+    const val SORT_STANDART = "SORT_STANDART"
+    const val SORT_USER = "SORT_USER"
+    const val THEME_SETTINGS = "THEME_SETTINGS"
+    const val THEME_FUTURE = "THEME_FUTURE"
+    const val THEME_ZABOR = "THEME_ZABOR"
+    const val SIZE_SETTINGS = "SIZE_SETTINGS"
+    const val SIZE_SMALL = "SIZE_SMALL"
+    const val SIZE_STANDART = "SIZE_STANDART"
+    const val SIZE_LARGE = "SIZE_LARGE"
+    const val ALARM_SETTINGS = "ALARM_SETTINGS"
+    const val URI_STANDART = "content://settings/system/alarm_alert"
+    const val URI_OLD = "URI_OLD"
+
+
+
+
+}

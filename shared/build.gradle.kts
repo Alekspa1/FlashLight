@@ -32,6 +32,16 @@ kotlin {
             implementation(compose.material3)          // Material 3 дизайн
             implementation(compose.components.resources) // Для строк, картинок и шрифтов
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
+            implementation("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose:2.9.6")
+            implementation("org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose:2.9.6")
+            // 1. Аналог libs.koin.core (Базовый движок Koin)
+            implementation("io.insert-koin:koin-core:4.2.2")
+
+            // 2. Аналог libs.koin.compose (Поддержка Koin внутри UI-функций)
+            implementation("io.insert-koin:koin-compose:4.2.2")
+
+            // 3. Аналог libs.koin.compose.viewmodel (Магия функции koinViewModel() для KMP)
+            implementation("io.insert-koin:koin-compose-viewmodel:4.2.2")
         }
 
         commonTest.dependencies {
@@ -60,7 +70,7 @@ kotlin {
 
 android {
     namespace = "com.dragon.shared"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 26

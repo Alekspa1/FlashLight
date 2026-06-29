@@ -27,7 +27,7 @@ import kotlinx.coroutines.launch
 import java.util.Calendar
 import javax.inject.Inject
 
-@AndroidEntryPoint
+//@AndroidEntryPoint
 class AlarmReceiwer : BroadcastReceiver() {
     @Inject
     lateinit var db: Database

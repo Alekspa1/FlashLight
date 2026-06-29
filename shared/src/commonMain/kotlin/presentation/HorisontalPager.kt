@@ -1,15 +1,18 @@
 package presentation
 
+import MainViewModel
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -31,14 +34,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import org.koin.compose.viewmodel.koinViewModel
 import presentation.Notebook
 
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 
 @Composable
-fun MainWeatherPager(onClick: (Int) -> Unit = {}) {
-
+fun MainWeatherPager(paddingValues: PaddingValues, onClick: (Int) -> Unit = {}) {
+    val viewModel: MainViewModel = koinViewModel()
     val titles = listOf("Блокнот","Список дел","Календарь")
 
     val pagerState = rememberPagerState(pageCount = { titles.size })
@@ -50,7 +54,7 @@ fun MainWeatherPager(onClick: (Int) -> Unit = {}) {
 
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().padding(paddingValues),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Row(
@@ -199,7 +203,7 @@ fun MainWeatherPager(onClick: (Int) -> Unit = {}) {
 
 
 
-                0 -> {Notebook(}
+                0 -> {Notebook(viewModel)}
 
 
 
