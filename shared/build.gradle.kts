@@ -1,8 +1,17 @@
+import org.gradle.kotlin.dsl.implementation
+
 plugins {
     id("org.jetbrains.kotlin.multiplatform")
     id("com.android.library")
     id("org.jetbrains.compose")
     id("org.jetbrains.kotlin.plugin.compose")
+    id("com.google.devtools.ksp") version "2.3.0"
+    id("androidx.room") version "2.8.4"
+}
+
+room {
+    // Указывает Room, куда сохранять JSON-схемы базы данных
+    schemaDirectory("$projectDir/schemas")
 }
 
 kotlin {
@@ -34,19 +43,15 @@ kotlin {
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
             implementation("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose:2.9.6")
             implementation("org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose:2.9.6")
-            // 1. Аналог libs.koin.core (Базовый движок Koin)
             implementation("io.insert-koin:koin-core:4.2.2")
-
-            // 2. Аналог libs.koin.compose (Поддержка Koin внутри UI-функций)
             implementation("io.insert-koin:koin-compose:4.2.2")
-
-            // 3. Аналог libs.koin.compose.viewmodel (Магия функции koinViewModel() для KMP)
             implementation("io.insert-koin:koin-compose-viewmodel:4.2.2")
-
-            implementation("org.jetbrains.compose.ui:ui-tooling-preview:1.10.0") // если нужен превью
-
-            // САМАЯ ВАЖНАЯ СТРОЧКА:
+            implementation("org.jetbrains.compose.ui:ui-tooling-preview:1.10.0")
             implementation("org.jetbrains.compose.material:material-icons-extended:1.7.3")
+
+            implementation("androidx.sqlite:sqlite-bundled:2.6.2")
+            implementation("androidx.room:room-runtime:2.8.4")
+            //ksp("com.google.devtools.ksp: ")
         }
 
         commonTest.dependencies {
@@ -57,11 +62,13 @@ kotlin {
             implementation("androidx.activity:activity-compose:1.13.0") // Для setContent и ComponentActivity
             implementation("androidx.appcompat:appcompat:1.7.1")
             implementation("org.jetbrains.compose.ui:ui-tooling-preview:1.10.0")
+            implementation("com.yandex.android:mobileads:8.1.0")
         }
 
         val desktopMain by getting {
             dependencies {
                 implementation(compose.desktop.currentOs)
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.11.0")
             }
         }
 
@@ -85,4 +92,13 @@ android {
 
 dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling:1.10.0")
+    // Отдаем компилятор Room в KSP для метаданных общего кода
+    add("kspCommonMainMetadata", "androidx.room:room-compiler:2.8.4")
+
+    // Отдаем компилятор Room в KSP отдельно для каждой из твоих платформ
+    add("kspAndroid", "androidx.room:room-compiler:2.8.4")
+    add("kspDesktop", "androidx.room:room-compiler:2.8.4")
+
+     add("kspIosSimulatorArm64", "androidx.room:room-compiler:2.8.4")
+     add("kspIosArm64", "androidx.room:room-compiler:2.8.4")
 }

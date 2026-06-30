@@ -3,10 +3,8 @@ package presentation
 import MainViewModel
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -28,28 +26,34 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 
 import org.koin.compose.viewmodel.koinViewModel
-
+import presentation.screens.ListToDo
+import presentation.screens.Notebook
 
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 
 @Composable
-fun MainWeatherPager(paddingValues: PaddingValues, onClick: () -> Unit = {}) {
+fun MainWeatherPager(paddingValues: PaddingValues = PaddingValues(),
+                     onClick: () -> Unit = {},
+                     viewModel: MainViewModel = koinViewModel()
+                     ) {
 
-    val viewModel: MainViewModel = koinViewModel()
     val titles = listOf("Блокнот","Список дел","Календарь")
     val pagerState = rememberPagerState(pageCount = { titles.size })
     val scope = rememberCoroutineScope()
+    val todoList by viewModel.sortedItemsFlow.collectAsStateWithLifecycle()
 
 
     Column(
@@ -76,7 +80,7 @@ fun MainWeatherPager(paddingValues: PaddingValues, onClick: () -> Unit = {}) {
 
             IconButton(
 
-                onClick = { onClick() },
+                onClick = { viewModel.insertitem() },
 
                 modifier = Modifier.fillMaxHeight() // Иконка растягивается на всю высоту вкладок
 
@@ -173,8 +177,12 @@ fun MainWeatherPager(paddingValues: PaddingValues, onClick: () -> Unit = {}) {
 
         ) { pageIndex ->
             when (pageIndex) {
-                0 -> {Notebook(viewModel)}
-                1 -> {Text("2")}
+                0 -> {
+                    Notebook(viewModel)
+                }
+                1 -> {
+                    ListToDo(todoList)
+                }
                 2 -> {Text("3")}
 
             }
@@ -183,10 +191,4 @@ fun MainWeatherPager(paddingValues: PaddingValues, onClick: () -> Unit = {}) {
 
     }
 
-}
-
-@Preview
-@Composable
-fun Preview(){
-    MainWeatherPager(PaddingValues())
 }

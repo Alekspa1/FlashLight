@@ -1,6 +1,8 @@
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -16,6 +18,7 @@ import flashlight.shared.generated.resources.ic_micro_neon
 
 import org.jetbrains.compose.resources.painterResource
 import presentation.MainWeatherPager
+import presentation.YandexBannerAd
 
 @Composable
 fun StartApp() {
@@ -35,7 +38,17 @@ fun StartApp() {
             // 2. СЛЕДУЮЩИЙ СЛОЙ: Накладываем Scaffold ПОВЕРХ картинки
             Scaffold(
                 modifier = Modifier.fillMaxSize(),
-                containerColor = Color.Transparent // Делаем подложку прозрачной, чтобы видеть картинку
+                containerColor = Color.Transparent, // Делаем подложку прозрачной, чтобы видеть картинку
+                bottomBar = {
+                    Box(
+                        modifier = Modifier.fillMaxWidth()
+                            .navigationBarsPadding(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        YandexBannerAd(CommonConst.BANER, Modifier.fillMaxWidth())
+                    }
+
+                }
             ) { innerPadding ->
                MainWeatherPager(innerPadding)
 

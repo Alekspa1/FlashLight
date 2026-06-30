@@ -1,32 +1,21 @@
-package presentation
+package presentation.screens
 
+import CommonConst
 import MainViewModel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,7 +29,8 @@ import flashlight.shared.generated.resources.Res
 import flashlight.shared.generated.resources.ic_del_notebook_neon
 import flashlight.shared.generated.resources.ic_micro_neon
 import org.jetbrains.compose.resources.painterResource
-
+import presentation.dialogs.DeleteDialog
+import presentation.dialogs.DialogState
 
 
 @Composable
@@ -62,12 +52,33 @@ fun Notebook(viewModel: MainViewModel){
         }
     }
 
-    NoteBookContent(viewModel.stateTextNotebook){newtext-> viewModel.stateTextNotebook = newtext}
+    NoteBookContent(
+        text = viewModel.stateTextNotebook,
+        showDialog = viewModel.showDialog,
+        onResultDialog = {dialog-> viewModel.showDialog = dialog},
+        onTextChange = {newtext->
+            viewModel.stateTextNotebook = newtext}
+        )
+
 
 }
 
     @Composable
-    fun NoteBookContent(text: String, onTextChange : (String) -> Unit = {}){
+    fun NoteBookContent(
+        text: String,
+        showDialog : DialogState = DialogState(),
+        onResultDialog : (DialogState) -> Unit = {},
+        onTextChange : (String) -> Unit = {},
+        )
+    {
+
+            if(showDialog.isActive && showDialog.isWho == CommonConst.DELETE_DIALOG){
+            DeleteDialog {result->
+            if(result) onTextChange("")
+             onResultDialog(DialogState(false,CommonConst.DEFAULT_DIALOG))
+            }
+            }
+
         Column(modifier = Modifier.fillMaxWidth()) {
             OutlinedTextField(
                 modifier = Modifier
@@ -105,7 +116,9 @@ fun Notebook(viewModel: MainViewModel){
                         contentDescription = null,
                         modifier = Modifier
                             .align(Alignment.Center)
-                            .size(50.dp) ,
+                            .size(50.dp)
+                            .clickable{onResultDialog(DialogState(true,CommonConst.INSERT_DIALOG))},
+
                     )
                     Image(
                         painter = painterResource(Res.drawable.ic_del_notebook_neon),
@@ -113,7 +126,7 @@ fun Notebook(viewModel: MainViewModel){
                         modifier = Modifier
                             .align(Alignment.CenterEnd)
                             .size(50.dp)
-                            .clickable{onTextChange("")},
+                            .clickable{onResultDialog(DialogState(true,CommonConst.DELETE_DIALOG))},
                         contentScale = ContentScale.Crop
                     )
                 }
