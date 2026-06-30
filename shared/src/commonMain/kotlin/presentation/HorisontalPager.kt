@@ -1,5 +1,13 @@
 package presentation
 
+import CommonConst.ADD
+import CommonConst.ALARM
+import CommonConst.CHANGE
+import CommonConst.CHANGE_ITEM
+import CommonConst.DELETE
+import CommonConst.DELETE_DIALOG
+import CommonConst.IMAGE
+import CommonConst.INSERT_DIALOG
 import MainViewModel
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -26,7 +34,6 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -38,6 +45,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 
 import org.koin.compose.viewmodel.koinViewModel
+import presentation.dialogs.AddOrChangeItemDialog
+import presentation.dialogs.DeleteDialog
+import presentation.dialogs.DialogState
 import presentation.screens.ListToDo
 import presentation.screens.Notebook
 
@@ -46,14 +56,28 @@ import presentation.screens.Notebook
 
 @Composable
 fun MainWeatherPager(paddingValues: PaddingValues = PaddingValues(),
-                     onClick: () -> Unit = {},
-                     viewModel: MainViewModel = koinViewModel()
+                    viewModel: MainViewModel = koinViewModel()
                      ) {
 
     val titles = listOf("Блокнот","Список дел","Календарь")
     val pagerState = rememberPagerState(pageCount = { titles.size })
     val scope = rememberCoroutineScope()
     val todoList by viewModel.sortedItemsFlow.collectAsStateWithLifecycle()
+
+    if(viewModel.showDialog.isActive && viewModel.showDialog.isWho == DELETE_DIALOG){
+        val item = viewModel.showDialog.item
+        DeleteDialog {result->
+            if(result && item != null) viewModel.deleteitem(item)
+            viewModel.showDialog = DialogState()
+        }
+    }
+    if(viewModel.showDialog.isActive && viewModel.showDialog.isWho == INSERT_DIALOG){
+        val item = viewModel.showDialog.item
+        AddOrChangeItemDialog(item) {item,result,alarm->
+            if(result && item != null) viewModel.insertitem(item)
+            viewModel.showDialog = DialogState()
+        }
+    }
 
 
     Column(
@@ -80,7 +104,7 @@ fun MainWeatherPager(paddingValues: PaddingValues = PaddingValues(),
 
             IconButton(
 
-                onClick = { viewModel.insertitem() },
+                onClick = { },
 
                 modifier = Modifier.fillMaxHeight() // Иконка растягивается на всю высоту вкладок
 
@@ -181,7 +205,19 @@ fun MainWeatherPager(paddingValues: PaddingValues = PaddingValues(),
                     Notebook(viewModel)
                 }
                 1 -> {
-                    ListToDo(todoList)
+                    ListToDo(todoList){item,action->
+                        when(action){
+                            ADD->{viewModel.showDialog = DialogState(true,INSERT_DIALOG,item)}
+                            ALARM->{}
+                            IMAGE->{}
+                            CHANGE_ITEM->{viewModel.showDialog = DialogState(true,INSERT_DIALOG,item)}
+                            CHANGE->{(item.let {viewModel.updateitem(it!!) })}
+                            DELETE->{
+                                viewModel.showDialog = DialogState(true,DELETE_DIALOG,item)
+                            }
+
+                        }
+                    }
                 }
                 2 -> {Text("3")}
 

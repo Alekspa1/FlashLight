@@ -7,14 +7,14 @@ import org.koin.dsl.module
 
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.dragon.shared.data.repostitory.DeleteImageInItemImpl
 import java.io.File
 import data.room.myDataBase
+import domain.repostirory.DeleteImageInItemReository
 
-actual val moduleSharedPref: Module = module {
+actual val moduleAnotherPlatform: Module = module {
     single<SharedPrefRepository> { DesktopSharedPrefImpl() }
-}
 
-actual val platformDatabaseModule: Module = module {
     single<RoomDatabase.Builder<myDataBase>> {
         // Указываем путь к файлу на жестком диске ПК
         val dbFile = File(System.getProperty("user.home"), ".focus_app/focus_database.db")
@@ -24,4 +24,5 @@ actual val platformDatabaseModule: Module = module {
             name = dbFile.absolutePath
         )
     }
+    factory<DeleteImageInItemReository> { DeleteImageInItemImpl() }
 }

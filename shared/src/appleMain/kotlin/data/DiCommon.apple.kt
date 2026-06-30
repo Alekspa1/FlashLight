@@ -8,6 +8,8 @@ import org.koin.core.module.Module
 import org.koin.dsl.module
 
 import androidx.room.Room
+import data.repository.DeleteImageInItemImpl
+import domain.repostirory.DeleteImageInItemReository
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSFileManager
@@ -15,12 +17,10 @@ import platform.Foundation.NSUserDomainMask
 import platform.Foundation.stringByAppendingPathComponent
 
 
-actual val moduleSharedPref: Module = module {
+@OptIn(ExperimentalForeignApi::class)
+actual val moduleAnotherPlatform: Module = module {
     single <SharedPrefRepository> { IosSharedPrefImpl() }
 
-}
-@OptIn(ExperimentalForeignApi::class)
-actual val platformDatabaseModule: Module = module {
     single<RoomDatabase.Builder<myDataBase>> {
         // 1. Находим путь к безопасной папке Документов внутри песочницы iOS
         val documentDirectory = NSFileManager.defaultManager.URLForDirectory(
@@ -42,4 +42,7 @@ actual val platformDatabaseModule: Module = module {
             name = dbFilePath
         )
     }
+
+    factory<DeleteImageInItemReository> { DeleteImageInItemImpl() }
+
 }

@@ -1,5 +1,11 @@
 package presentation.screens
 
+import CommonConst.ADD
+import CommonConst.ALARM
+import CommonConst.CHANGE
+import CommonConst.CHANGE_ITEM
+import CommonConst.DELETE
+import CommonConst.IMAGE
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,50 +19,33 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyItemScope
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
-import data.room.Item
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AddAlarm
-import androidx.compose.material.icons.filled.AddBox
-import androidx.compose.material.icons.filled.AddCard
-import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.AddCircleOutline
-import androidx.compose.material.icons.filled.Addchart
-import androidx.compose.material.icons.filled.Alarm
-import androidx.compose.material.icons.filled.AlarmOn
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.CheckBox
-import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import flashlight.shared.generated.resources.Res
-import flashlight.shared.generated.resources.ic_del_notebook_neon
-import flashlight.shared.generated.resources.ic_micro_neon
+import data.room.Item
 import org.jetbrains.compose.resources.painterResource
-import presentation.dialogs.DialogState
+import presentation.theme.Theme
+import presentation.theme.ThemeNeon
 
 @Composable
-fun ListToDo(list: List<Item>){
+fun ListToDo(list: List<Item>, theme: Theme = ThemeNeon(),onClick : (Item?,Int) -> Unit = {_,_->}){
     Column(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
 
@@ -64,7 +53,7 @@ fun ListToDo(list: List<Item>){
 
             // Тот самый отступ между элементами, о котором мы говорили
 
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
 
             // Отступы для всего списка (чтобы не прилипало к краям при скролле)
 
@@ -87,7 +76,10 @@ fun ListToDo(list: List<Item>){
                 items = list,
                 key = { it.id!!}
             ){item->
-                Item(item)
+                Box(modifier = Modifier.animateItem()) {
+                    Item(item) { item, action -> onClick(item, action)
+                    }
+                }
             }
 
         }
@@ -95,12 +87,15 @@ fun ListToDo(list: List<Item>){
 
 
         Row(modifier = Modifier.fillMaxWidth()) {
-            Box(modifier = Modifier.fillMaxWidth().padding(8.dp)){
+            Box(modifier = Modifier.fillMaxWidth()
+                .padding(8.dp)
+
+            ){
                 IconButton(modifier = Modifier.align(Alignment.Center),
                     onClick = {  },
                 ){
                     Image(
-                        painter = painterResource(Res.drawable.ic_micro_neon),
+                        painter = painterResource(theme.iconMicro),
                         contentDescription = null,
                         modifier = Modifier.size(50.dp)
 
@@ -108,13 +103,13 @@ fun ListToDo(list: List<Item>){
                 }
 
                 IconButton(modifier = Modifier.align(Alignment.CenterEnd),
-                    onClick = {  },
+                    onClick = { onClick(null,ADD) },
                 ){
                     Icon(
-                        imageVector = Icons.Default.AddCircleOutline,
+                        imageVector = theme.iconAdd,
                         contentDescription = null,
                         modifier = Modifier.size(50.dp),
-                        tint = Color(0xFF65D4FF)
+                        tint = theme.iconAddTint
 
                     )
                 }
@@ -130,7 +125,7 @@ fun ListToDo(list: List<Item>){
 
 @Composable
 
-fun Item(item: Item) {
+fun Item(item: Item, theme: Theme = ThemeNeon(), onClick : (Item, Int) -> Unit = { _, _->}) {
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -140,7 +135,7 @@ fun Item(item: Item) {
 
                 IconButton(
 
-                    onClick = {  },
+                    onClick = { onClick(item,ALARM) },
 
                     modifier = Modifier.fillMaxHeight() // Иконка растягивается на всю высоту вкладок
 
@@ -148,8 +143,8 @@ fun Item(item: Item) {
 
                     Icon(
                         imageVector = Icons.Default.Alarm, // Нужен импорт androidx.compose.material.icons.Icons
-                        contentDescription = "Меню",
-                       tint =  if(item.changeAlarm) Color.Yellow else Color.White
+                        contentDescription = "Будильник",
+                       tint =  if(item.changeAlarm) theme.tintAlarmOn else theme.tintAlarmOff
                     )
 
                 }
@@ -162,17 +157,21 @@ fun Item(item: Item) {
                     .weight(1f) // Заставляет карточку занять ВСЁ свободное место между кнопками
                     .clip(RoundedCornerShape(16.dp))
                     .border(
-                        3.dp,
-                        if (item.changeAlarm) Color.Yellow else Color.Green,
+                        2.dp,
+                        if(item.change) theme.cardItemBorderTrue
+                        else if (item.changeAlarm) theme.cardItemBorderAlarm
+                        else theme.cardItemBorderFalse,
                         RoundedCornerShape(16.dp)
-                    ),
+                    ).clickable{onClick(item,CHANGE_ITEM)},
 
                 shape = RoundedCornerShape(16.dp),
 
                 colors = CardDefaults.cardColors(
-                    containerColor = Color(0x80ADD8E6) // Твой полупрозрачный неоновый цвет!
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                    containerColor =
+                        if(item.change) theme.cardItemTrue
+                        else if(item.changeAlarm) theme.cardItemAlarm
+                        else theme.cardItemFalse
+                )
             ) {
                 Row(
                     modifier = Modifier
@@ -183,7 +182,7 @@ fun Item(item: Item) {
                 ) {
                     if (item.alarmText != "") IconButton(
 
-                        onClick = {  },
+                        onClick = { onClick(item,IMAGE) },
 
                         //modifier = Modifier.fillMaxHeight() // Иконка растягивается на всю высоту вкладок
 
@@ -191,9 +190,8 @@ fun Item(item: Item) {
 
                         Icon(
 
-                            imageVector = Icons.Default.Image, // Нужен импорт androidx.compose.material.icons.Icons
-                            contentDescription = "Меню",
-                            tint = Color.White
+                            imageVector = theme.iconImage, // Нужен импорт androidx.compose.material.icons.Icons
+                            contentDescription = "Картинка"
                         )
 
                     }
@@ -204,23 +202,26 @@ fun Item(item: Item) {
                             .padding(horizontal = 4.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text(item.name)
-                        if (item.desc?.isNotEmpty() ?: true) item.desc?.let { Text(it) }
-                        if (item.changeAlarm) Text(text = "item.alarmTime", color = Color.Yellow)
+                        Text(
+                            text = item.name,
+                            color = theme.textColor)
+                        if (item.desc!!.isNotEmpty())  { Text(text = item.desc, color = theme.textDecs) }
+                        if (item.changeAlarm) Text(text = "Напоминт в четверг в 18:00", color = theme.textAlarm)
                     }
                     IconButton(
 
-                        onClick = {  },
+                        onClick = { onClick(item,CHANGE) },
 
                         modifier = Modifier.fillMaxHeight() // Иконка растягивается на всю высоту вкладок
 
                     ) {
 
                         Icon(
-                            imageVector = if(item.change) Icons.Default.CheckBoxOutlineBlank
-                            else Icons.Default.CheckBox,
-                            contentDescription = "Меню",
-                            tint = Color.White
+                            imageVector =
+                                if(item.change)  theme.chekBoxOn
+                                else theme.chekBoxOff,
+                            contentDescription = "Chek",
+                            tint = theme.chekBoxTint
                         )
 
                     }
@@ -235,16 +236,16 @@ fun Item(item: Item) {
 
                 IconButton(
 
-                    onClick = {  },
+                    onClick = {onClick(item,DELETE)  },
 
                     modifier = Modifier.fillMaxHeight() // Иконка растягивается на всю высоту вкладок
 
                 ) {
 
                     Icon(
-                        imageVector = Icons.Default.Delete, // Нужен импорт androidx.compose.material.icons.Icons
+                        imageVector = theme.iconDelItem, // Нужен импорт androidx.compose.material.icons.Icons
                         contentDescription = "Меню",
-                        tint = Color.White
+                        tint = theme.iconDelTint
                     )
 
                 }

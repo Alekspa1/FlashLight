@@ -4,7 +4,6 @@ import CommonConst
 import MainViewModel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -75,7 +75,7 @@ fun Notebook(viewModel: MainViewModel){
             if(showDialog.isActive && showDialog.isWho == CommonConst.DELETE_DIALOG){
             DeleteDialog {result->
             if(result) onTextChange("")
-             onResultDialog(DialogState(false,CommonConst.DEFAULT_DIALOG))
+             onResultDialog(DialogState())
             }
             }
 
@@ -111,24 +111,28 @@ fun Notebook(viewModel: MainViewModel){
 
             Row(modifier = Modifier.fillMaxWidth()) {
                 Box(modifier = Modifier.fillMaxWidth().padding(8.dp)){
-                    Image(
-                        painter = painterResource(Res.drawable.ic_micro_neon),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .size(50.dp)
-                            .clickable{onResultDialog(DialogState(true,CommonConst.INSERT_DIALOG))},
+                    IconButton(modifier = Modifier.align(Alignment.Center),
+                        onClick = { },
+                    ) {
+                        Image(
+                            painter = painterResource(Res.drawable.ic_micro_neon),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(50.dp)
 
-                    )
-                    Image(
-                        painter = painterResource(Res.drawable.ic_del_notebook_neon),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .align(Alignment.CenterEnd)
-                            .size(50.dp)
-                            .clickable{onResultDialog(DialogState(true,CommonConst.DELETE_DIALOG))},
-                        contentScale = ContentScale.Crop
-                    )
+                            )
+                    }
+                    IconButton(modifier = Modifier.align(Alignment.CenterEnd),
+                        onClick = {onResultDialog(DialogState(true, CommonConst.DELETE_DIALOG))  },
+                    ){
+                        Image(
+                            painter = painterResource(Res.drawable.ic_del_notebook_neon),
+                            contentDescription = null,
+                            modifier = Modifier.size(50.dp),
+                            contentScale = ContentScale.Crop
+
+                        )
+                    }
                 }
 
             }

@@ -12,8 +12,7 @@ import org.koin.dsl.KoinAppDeclaration
 import org.koin.dsl.module
 
 
-expect val moduleSharedPref: Module
-expect val platformDatabaseModule : Module
+expect val moduleAnotherPlatform: Module
 
 val appModule = module {
     viewModelOf(::MainViewModel)
@@ -42,7 +41,7 @@ fun initKoin(config: KoinAppDeclaration? = null) {
 
         config?.invoke(this)
 
-        modules(appModule, moduleSharedPref,platformDatabaseModule)
+        modules(appModule, moduleAnotherPlatform)
 
     }
 

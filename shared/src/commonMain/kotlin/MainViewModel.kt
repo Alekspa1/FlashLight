@@ -2,35 +2,34 @@
 import CommonConst.SORT_STANDART
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import data.room.CourseDao
 import data.room.Item
+import domain.repostirory.DeleteImageInItemReository
 import domain.repostirory.SharedPrefRepository
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import presentation.dialogs.DeleteDialog
 import presentation.dialogs.DialogState
 
 class MainViewModel(
     private val pref: SharedPrefRepository,
-    private val db: CourseDao
+    private val db: CourseDao,
+    private val deleteImageInitem: DeleteImageInItemReository
 ) : ViewModel() {
 
 
 
     var stateTextNotebook by mutableStateOf(pref.loadTextNoteBook())
     var showDialog by  mutableStateOf(DialogState())
+
     //private val _sortType = MutableStateFlow(settingsPref.getSort())
     private val _sortType = MutableStateFlow(SORT_STANDART)
     val sortType = _sortType.asStateFlow()
@@ -68,8 +67,20 @@ class MainViewModel(
     fun saveText() = pref.saveTextNoteBook(stateTextNotebook)
 
 
-    fun insertitem(){
-        viewModelScope.launch { db.insertItem(Item(null,"тестовое дело",true,"",0,true,true,0,"Повседневные","",0)) }
+    fun insertitem(item: Item){
+        viewModelScope.launch { db.insertItem(item) }
+    }
+    fun deleteitem(item: Item){
+        viewModelScope.launch {
+            db.delete(item)
+            deleteImageInitem.delete(item.alarmText)
+        }
+    }
+
+    fun updateitem(item: Item){
+        viewModelScope.launch {
+            db.updateItem(item.copy(change = !item.change))
+        }
     }
 
 

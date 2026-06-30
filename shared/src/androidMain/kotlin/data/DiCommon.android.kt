@@ -7,15 +7,15 @@ import domain.repostirory.SharedPrefRepository
 import org.koin.core.module.Module
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import data.repostitory.DeleteImageInItemImpl
+import domain.repostirory.DeleteImageInItemReository
 import org.koin.dsl.module
 
 
-actual val moduleSharedPref = module {
+actual val moduleAnotherPlatform = module {
 
     single<SharedPrefRepository> { AndroidSharedPrefIml(get()) }
-}
 
-actual val platformDatabaseModule: Module = module{
     single<myDataBase> {
 
         val context: Context = get()
@@ -30,4 +30,6 @@ actual val platformDatabaseModule: Module = module{
             .setDriver(BundledSQLiteDriver()) // Подключаем SQLite драйвер
             .build() // Создаем готовую базу данных!
     }
-    }
+
+    factory<DeleteImageInItemReository> { DeleteImageInItemImpl()}
+}
