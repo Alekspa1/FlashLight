@@ -1,12 +1,12 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 9,
-    "identityHash": "61c35e1d3b65c8d5a57241d484d54196",
+    "version": 10,
+    "identityHash": "7cf0c55bcffac3c894bb2ffa5d749313",
     "entities": [
       {
         "tableName": "Item",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `change` INTEGER NOT NULL, `alarmText` TEXT NOT NULL DEFAULT '1.0', `alarmTime` INTEGER NOT NULL DEFAULT 1.0, `changeAlarm` INTEGER NOT NULL DEFAULT 1.0, `changeAlarmRepeat` INTEGER NOT NULL DEFAULT 1.0, `interval` INTEGER NOT NULL DEFAULT 1.0, `category` TEXT NOT NULL DEFAULT 'Повседневные', `desc` TEXT NOT NULL DEFAULT '', `sort` INTEGER NOT NULL DEFAULT 0)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `change` INTEGER NOT NULL, `alarmText` TEXT NOT NULL DEFAULT '1.0', `alarmTime` INTEGER NOT NULL DEFAULT 1.0, `changeAlarm` INTEGER NOT NULL DEFAULT 1.0, `interval` INTEGER NOT NULL DEFAULT 1.0, `category` TEXT NOT NULL DEFAULT 'Повседневные', `desc` TEXT NOT NULL DEFAULT '', `sort` INTEGER NOT NULL DEFAULT 0)",
         "fields": [
           {
             "fieldPath": "id",
@@ -43,13 +43,6 @@
           {
             "fieldPath": "changeAlarm",
             "columnName": "changeAlarm",
-            "affinity": "INTEGER",
-            "notNull": true,
-            "defaultValue": "1.0"
-          },
-          {
-            "fieldPath": "changeAlarmRepeat",
-            "columnName": "changeAlarmRepeat",
             "affinity": "INTEGER",
             "notNull": true,
             "defaultValue": "1.0"
@@ -116,7 +109,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '61c35e1d3b65c8d5a57241d484d54196')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7cf0c55bcffac3c894bb2ffa5d749313')"
     ]
   }
 }

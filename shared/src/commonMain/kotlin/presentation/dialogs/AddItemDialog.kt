@@ -23,11 +23,15 @@ import data.room.Item
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddOrChangeItemDialog(item: Item?, onResult :(Item?,Boolean,Boolean) -> Unit ={_,_,_->},){
-    var stateTextName by mutableStateOf(item.let { item?.name ?: "" })
-    var stateTextDecs by mutableStateOf(item.let { item?.desc ?: "" })
-        AlertDialog(
-            onDismissRequest = { onResult(null,false,false) },
+fun AddOrChangeItemDialog(
+    item: Item?,
+    onResult :(item: Item?,result: Boolean,alarm: Boolean) -> Unit ={_,_,_->},){
+
+    var stateTextName by mutableStateOf(item?.name ?: "" )
+    var stateTextDecs by mutableStateOf(item?.desc ?: "" )
+
+    AlertDialog(
+            onDismissRequest = { onResult(null,false,false) }, // когда кудато нажал
             title = { Text("Сфокусироваться") },
 
             text = {
@@ -44,8 +48,8 @@ fun AddOrChangeItemDialog(item: Item?, onResult :(Item?,Boolean,Boolean) -> Unit
                         label = {Text(text = "Название", color = Color.Gray)},
 
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.White,
+                            focusedTextColor = Color.Black,
+                            unfocusedTextColor = Color.Black,
                         )
                     )
                     OutlinedTextField(
@@ -60,8 +64,8 @@ fun AddOrChangeItemDialog(item: Item?, onResult :(Item?,Boolean,Boolean) -> Unit
 
                         // НАСТРАИВАЕМ ЦВЕТА И ВАШУ НЕОНОВУЮ СТИЛИСТИКУ:
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.White,
+                            focusedTextColor = Color.Black,
+                            unfocusedTextColor = Color.Black,
                         )
                     )
 
@@ -70,19 +74,11 @@ fun AddOrChangeItemDialog(item: Item?, onResult :(Item?,Boolean,Boolean) -> Unit
 
             confirmButton = {
                 TextButton(onClick = {
-                    if (item != null){ onResult(item.copy(name = stateTextName,
-                        desc = stateTextDecs),true,false)}
+                    val text = if (stateTextName.trim().isEmpty())  "Без названия" else stateTextName.trim()
+                    if (item != null){ onResult(item.copy(name = text,
+                        desc = stateTextDecs.trim()),true,false)}
                     else{
-                        val item = Item(null
-                            ,stateTextName,
-                            false,
-                            "",
-                            0,false
-                            ,false
-                            ,0
-                            ,"Повседневные"
-                            ,stateTextDecs
-                            ,0)
+                        val item = Item(name = text, desc = stateTextDecs.trim())
                         onResult(item,true,false)
                     }
 
@@ -97,12 +93,12 @@ fun AddOrChangeItemDialog(item: Item?, onResult :(Item?,Boolean,Boolean) -> Unit
                     horizontalArrangement = Arrangement.spacedBy(8.dp) // Отступ между кнопками
                 ) {
                     // Твоя новая ТРЕТЬЯ кнопка (например, для отмены или другого действия)
-                    TextButton(onClick = { /* Твое действие для третьей кнопки */ }) {
+                    TextButton(onClick = { onResult(null,true,true) }) {
                         Text("Установка будильника")
                     }
 
                     // Стандартная кнопка "Нет"
-                    TextButton(onClick = { onResult(null,true,true) }) {
+                    TextButton(onClick = { onResult(null,true,false) }) {
                         Text("Отмена")
                     }
                 }

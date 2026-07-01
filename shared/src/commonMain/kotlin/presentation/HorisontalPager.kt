@@ -40,7 +40,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 
@@ -64,18 +66,24 @@ fun MainWeatherPager(paddingValues: PaddingValues = PaddingValues(),
     val scope = rememberCoroutineScope()
     val todoList by viewModel.sortedItemsFlow.collectAsStateWithLifecycle()
 
-    if(viewModel.showDialog.isActive && viewModel.showDialog.isWho == DELETE_DIALOG){
+
+    if(viewModel.showDialog.isActive){
         val item = viewModel.showDialog.item
-        DeleteDialog {result->
-            if(result && item != null) viewModel.deleteitem(item)
-            viewModel.showDialog = DialogState()
-        }
-    }
-    if(viewModel.showDialog.isActive && viewModel.showDialog.isWho == INSERT_DIALOG){
-        val item = viewModel.showDialog.item
-        AddOrChangeItemDialog(item) {item,result,alarm->
-            if(result && item != null) viewModel.insertitem(item)
-            viewModel.showDialog = DialogState()
+
+        when(viewModel.showDialog.isWho){
+            DELETE_DIALOG->{
+                DeleteDialog {result->
+                    if(result && item != null) viewModel.deleteitem(item)
+                    viewModel.showDialog = DialogState()
+                }
+            }
+
+            INSERT_DIALOG->{
+                AddOrChangeItemDialog(item) {item,result,alarm->
+                    if(result && item != null) viewModel.insertitem(item)
+                    viewModel.showDialog = DialogState()
+                }
+            }
         }
     }
 
@@ -155,33 +163,22 @@ fun MainWeatherPager(paddingValues: PaddingValues = PaddingValues(),
                 titles.forEachIndexed { index, title ->
 
                     val selected = pagerState.currentPage == index
-
-
-
                     Tab(
-
                         selected = selected,
-
                         onClick = {
                             if (pagerState.currentPage != index) {
                                 scope.launch { pagerState.animateScrollToPage(index) }
                             }
-
                         },
                         text = {
-
                             Text(
 
                                 color = if (selected) Color.White else Color.Gray,
-
                                 text = title,
-
                                 style = MaterialTheme.typography.titleSmall,
-
                                 // Дополнительно можно менять жирность
-
-                                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
-
+                                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                                fontSize = 12.sp
                             )
 
                         }
@@ -228,3 +225,4 @@ fun MainWeatherPager(paddingValues: PaddingValues = PaddingValues(),
     }
 
 }
+

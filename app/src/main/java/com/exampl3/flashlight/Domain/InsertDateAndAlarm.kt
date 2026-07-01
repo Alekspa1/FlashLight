@@ -123,10 +123,4 @@ class InsertDateAndAlarm @Inject constructor(
         canendar.add(date, 1) // Добавляем один год или месяц
         return canendar.timeInMillis
     }
-    //   private fun addOneMonth(dateInMillis: Long): Long {
-    //     val canendarMonth = Calendar.getInstance()
-    //     canendarMonth.timeInMillis = dateInMillis
-    //     canendarMonth.add(Calendar.MONTH, 1) // Добавляем один месяц
-    //     return canendarMonth.timeInMillis
-    // }
 }

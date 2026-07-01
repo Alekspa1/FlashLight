@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -45,17 +44,16 @@ import presentation.theme.Theme
 import presentation.theme.ThemeNeon
 
 @Composable
-fun ListToDo(list: List<Item>, theme: Theme = ThemeNeon(),onClick : (Item?,Int) -> Unit = {_,_->}){
+fun ListToDo(list: List<Item>,
+             theme: Theme = ThemeNeon(),
+             onClick : (Item?, Int) -> Unit = { _, _->}){
     Column(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
 
             modifier = Modifier.fillMaxWidth().weight(1f),
 
-            // Тот самый отступ между элементами, о котором мы говорили
-
             verticalArrangement = Arrangement.spacedBy(8.dp),
 
-            // Отступы для всего списка (чтобы не прилипало к краям при скролле)
 
             contentPadding = PaddingValues(8.dp)
 
@@ -144,7 +142,8 @@ fun Item(item: Item, theme: Theme = ThemeNeon(), onClick : (Item, Int) -> Unit =
                     Icon(
                         imageVector = Icons.Default.Alarm, // Нужен импорт androidx.compose.material.icons.Icons
                         contentDescription = "Будильник",
-                       tint =  if(item.changeAlarm) theme.tintAlarmOn else theme.tintAlarmOff
+                       tint =  if(item.changeAlarm) theme.tintAlarmOn else theme.tintAlarmOff,
+                        modifier = Modifier.size(30.dp)
                     )
 
                 }
@@ -180,7 +179,7 @@ fun Item(item: Item, theme: Theme = ThemeNeon(), onClick : (Item, Int) -> Unit =
                     verticalAlignment = Alignment.CenterVertically
 
                 ) {
-                    if (item.alarmText != "") IconButton(
+                    if (item.uri != "") IconButton(
 
                         onClick = { onClick(item,IMAGE) },
 
@@ -200,7 +199,7 @@ fun Item(item: Item, theme: Theme = ThemeNeon(), onClick : (Item, Int) -> Unit =
                         modifier = Modifier
                             .weight(1f)
                             .padding(horizontal = 4.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        verticalArrangement = Arrangement.spacedBy(2.dp)
                     ) {
                         Text(
                             text = item.name,
@@ -245,7 +244,8 @@ fun Item(item: Item, theme: Theme = ThemeNeon(), onClick : (Item, Int) -> Unit =
                     Icon(
                         imageVector = theme.iconDelItem, // Нужен импорт androidx.compose.material.icons.Icons
                         contentDescription = "Меню",
-                        tint = theme.iconDelTint
+                        tint = theme.iconDelTint,
+                        modifier = Modifier.size(30.dp)
                     )
 
                 }
@@ -267,7 +267,7 @@ fun ToDoListPreview() {
     val mockList = listOf(
         Item(id = 1, name = "Купить неоновую лентуКупить неоновую лентуКупить неоновую лентуКупить неоновую лентуКупить неоновую лентуКупить неоновую лентуКупить неоновую лентуКупить неоновую лентуКупить неоновую лентуКупить неоновую лентуКупить неоновую лентуКупить неоновую лентуКупить неоновую ленту", category = "Фокус", alarmTime = 1719750000000L, change = false, sort = 1),
         Item(id = 2, name = "Проверить Koin модули", category = "Фокус", alarmTime = 0L, change = false, sort = 2),
-        Item(id = 3, name = "Починить затыки Skia на Windows", category = "Фокус", alarmTime = 1719753600000L, change = true, sort = 3, alarmText = "трололо", desc = "Описание почему то может быть null"),
+        Item(id = 3, name = "Починить затыки Skia на Windows", category = "Фокус", alarmTime = 1719753600000L, change = true, sort = 3, uri = "трололо", desc = "Описание почему то может быть null"),
         Item(id = 4, name = "Похвалить себя за архитектуру", category = "Фокус", alarmTime = 0L, change = false, sort = 4),
         Item(id = 5, name = "Выпить кофе и размять спину", category = "Фокус", alarmTime = 0L, change = false, sort = 5),
         Item(id = 6, name = "Написать expect/actual для iOS", category = "Фокус", alarmTime = 1719760800000L, change = false, sort = 6, changeAlarm = true),

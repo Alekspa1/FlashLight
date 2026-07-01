@@ -73,7 +73,7 @@ class MainViewModel(
     fun deleteitem(item: Item){
         viewModelScope.launch {
             db.delete(item)
-            deleteImageInitem.delete(item.alarmText)
+            deleteImageInitem.delete(item.uri)
         }
     }
 
