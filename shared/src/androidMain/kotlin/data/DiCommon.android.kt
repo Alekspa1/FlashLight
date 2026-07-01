@@ -31,5 +31,6 @@ actual val moduleAnotherPlatform = module {
             .build() // Создаем готовую базу данных!
     }
 
-    factory<DeleteImageInItemReository> { DeleteImageInItemImpl()}
+    single<DeleteImageInItemReository> { DeleteImageInItemImpl()}
+    single<PermissionRepository> <PermissionImpl(get())>
 }
