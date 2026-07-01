@@ -22,7 +22,8 @@ import presentation.dialogs.DialogState
 class MainViewModel(
     private val pref: SharedPrefRepository,
     private val db: CourseDao,
-    private val deleteImageInitem: DeleteImageInItemReository
+    private val deleteImageInitem: DeleteImageInItemReository,
+    private val permission: PermissionRepository
 ) : ViewModel() {
 
 
@@ -81,6 +82,27 @@ class MainViewModel(
         viewModelScope.launch {
             db.updateItem(item.copy(change = !item.change))
         }
+    }
+
+    fun permission(permissionName: String) {
+        viewModelScope.launch{
+         val isChekedPermission = permission.isChekedPermission(permissionName)
+    
+        if(isChekedPermission) { openDialog(permission) }
+        else {
+            val isGranted = permission.requestPermission(permissionName)
+            if(isGranted){openDialog(permission)}
+            else {}
+            
+        }   
+        }
+        
+    }
+    private fun openDialog(permissionName: String){
+      when(permissionName){
+                NOTIFICATION->{}
+                SOUND->{}
+            }  
     }
 
 
