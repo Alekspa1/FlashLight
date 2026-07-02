@@ -51,7 +51,7 @@ kotlin {
 
             implementation("androidx.sqlite:sqlite-bundled:2.6.2")
             implementation("androidx.room:room-runtime:2.8.4")
-            //ksp("com.google.devtools.ksp: ")
+            implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.1")
         }
 
         commonTest.dependencies {
