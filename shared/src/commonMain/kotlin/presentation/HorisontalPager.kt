@@ -67,10 +67,8 @@ fun MainWeatherPager(paddingValues: PaddingValues = PaddingValues(),
     val todoList by viewModel.sortedItemsFlow.collectAsStateWithLifecycle()
 
 
-    if(viewModel.showDialog.isActive){
-        val item = viewModel.showDialog.item
-
         when(viewModel.showDialog.isWho){
+          val item = viewModel.showDialog.item
             DELETE_DIALOG->{
                 DeleteDialog {result->
                     if(result && item != null) viewModel.deleteitem(item)
@@ -84,8 +82,23 @@ fun MainWeatherPager(paddingValues: PaddingValues = PaddingValues(),
                     viewModel.showDialog = DialogState()
                 }
             }
+
+            NOTIFICATION->{
+              CreateDateInAlarmDialog(viewModel)
+            }
+            TIME ->{
+               if (item != null) {
+            CreateTimeInAlarmDialog(date = item.alarmTime, viewModel = viewModel)
+        } else {
+                 viewModel.showDialog = DialogState()
+                }  
+            }
+
+            ACTION ->{
+              CreateActionInAlarmDialog(viewModel) 
+            }
         }
-    }
+    
 
 
     Column(
