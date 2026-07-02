@@ -4,6 +4,8 @@ object CommonConst {
     const val DELETE_DIALOG = "DELETE_DIALOG"
     const val INSERT_DIALOG = "INSERT_DIALOG"
     const val NOTIFICATION = "NOTIFICATION"
+    const val TIME = "TIME"
+    const val ACTION = "ACTION"
     const val SOUND = "SOUND"
 
 
