@@ -175,20 +175,19 @@ fun Item(item: Item, theme: Theme = ThemeNeon(), onClick : (Item, Int) -> Unit =
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                        .padding(8.dp)
+                    ,
+                    verticalAlignment = Alignment.CenterVertically,
+
 
                 ) {
                     if (item.uri != "") IconButton(
-
-                        onClick = { onClick(item,IMAGE) },
-
-                        //modifier = Modifier.fillMaxHeight() // Иконка растягивается на всю высоту вкладок
-
+                        onClick = { onClick(item,IMAGE) }
+                        ,modifier = Modifier.size(30.dp),
                     ) {
 
                         Icon(
-
+                            modifier = Modifier.fillMaxSize(),
                             imageVector = theme.iconImage, // Нужен импорт androidx.compose.material.icons.Icons
                             contentDescription = "Картинка"
                         )
@@ -198,24 +197,22 @@ fun Item(item: Item, theme: Theme = ThemeNeon(), onClick : (Item, Int) -> Unit =
                     Column(
                         modifier = Modifier
                             .weight(1f)
-                            .padding(horizontal = 4.dp),
+                            .padding(start = 6.dp, end = 6.dp),
                         verticalArrangement = Arrangement.spacedBy(2.dp)
                     ) {
                         Text(
                             text = item.name,
                             color = theme.textColor)
-                        if (item.desc!!.isNotEmpty())  { Text(text = item.desc, color = theme.textDecs) }
+                        if (item.desc.isNotEmpty())  { Text(text = item.desc, color = theme.textDecs) }
                         if (item.changeAlarm) Text(text = "Напоминт в четверг в 18:00", color = theme.textAlarm)
                     }
                     IconButton(
-
                         onClick = { onClick(item,CHANGE) },
-
-                        modifier = Modifier.fillMaxHeight() // Иконка растягивается на всю высоту вкладок
-
+                        modifier = Modifier.size(30.dp)
                     ) {
 
                         Icon(
+                            modifier = Modifier.fillMaxSize(),
                             imageVector =
                                 if(item.change)  theme.chekBoxOn
                                 else theme.chekBoxOff,
@@ -267,7 +264,7 @@ fun ToDoListPreview() {
     val mockList = listOf(
         Item(id = 1, name = "Купить неоновую лентуКупить неоновую лентуКупить неоновую лентуКупить неоновую лентуКупить неоновую лентуКупить неоновую лентуКупить неоновую лентуКупить неоновую лентуКупить неоновую лентуКупить неоновую лентуКупить неоновую лентуКупить неоновую лентуКупить неоновую ленту", category = "Фокус", alarmTime = 1719750000000L, change = false, sort = 1),
         Item(id = 2, name = "Проверить Koin модули", category = "Фокус", alarmTime = 0L, change = false, sort = 2),
-        Item(id = 3, name = "Починить затыки Skia на Windows", category = "Фокус", alarmTime = 1719753600000L, change = true, sort = 3, uri = "трололо", desc = "Описание почему то может быть null"),
+        Item(id = 3, name = "Починить затыки Skia на Windows", category = "Фокус", alarmTime = 1719753600000L, change = true, sort = 3, uri = "трололо", changeAlarm = true, desc = "Описание почему то может быть null"),
         Item(id = 4, name = "Похвалить себя за архитектуру", category = "Фокус", alarmTime = 0L, change = false, sort = 4),
         Item(id = 5, name = "Выпить кофе и размять спину", category = "Фокус", alarmTime = 0L, change = false, sort = 5),
         Item(id = 6, name = "Написать expect/actual для iOS", category = "Фокус", alarmTime = 1719760800000L, change = false, sort = 6, changeAlarm = true),

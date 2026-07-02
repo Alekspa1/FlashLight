@@ -8,6 +8,7 @@ import CommonConst.DELETE
 import CommonConst.DELETE_DIALOG
 import CommonConst.IMAGE
 import CommonConst.INSERT_DIALOG
+import CommonConst.NOTIFICATION
 import MainViewModel
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -58,8 +59,7 @@ import presentation.screens.Notebook
 
 @Composable
 fun MainWeatherPager(paddingValues: PaddingValues = PaddingValues(),
-                    viewModel: MainViewModel = koinViewModel()
-                     ) {
+                    viewModel: MainViewModel) {
 
     val titles = listOf("Блокнот","Список дел","Календарь")
     val pagerState = rememberPagerState(pageCount = { titles.size })
@@ -91,15 +91,16 @@ fun MainWeatherPager(paddingValues: PaddingValues = PaddingValues(),
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(
-                // Достаем из объекта строго верхний системный отступ:
-                top = paddingValues.calculateTopPadding(),
-                // Достаем из объекта строго нижний системный отступ:
-                bottom = paddingValues.calculateBottomPadding(),
-                // Ваши фиксированные аккуратные отступы по бокам:
-                start = 4.dp,
-                end = 4.dp
-            ),
+//            .padding(
+//                // Достаем из объекта строго верхний системный отступ:
+//                top = paddingValues.calculateTopPadding(),
+//                // Достаем из объекта строго нижний системный отступ:
+//                bottom = paddingValues.calculateBottomPadding(),
+//                // Ваши фиксированные аккуратные отступы по бокам:
+//                start = 4.dp,
+//                end = 4.dp
+//            ),
+            .padding(paddingValues),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Row(
@@ -205,7 +206,7 @@ fun MainWeatherPager(paddingValues: PaddingValues = PaddingValues(),
                     ListToDo(todoList){item,action->
                         when(action){
                             ADD->{viewModel.showDialog = DialogState(true,INSERT_DIALOG,item)}
-                            ALARM->{}
+                            ALARM->{viewModel.permission(NOTIFICATION)}
                             IMAGE->{}
                             CHANGE_ITEM->{viewModel.showDialog = DialogState(true,INSERT_DIALOG,item)}
                             CHANGE->{(item.let {viewModel.updateitem(it!!) })}

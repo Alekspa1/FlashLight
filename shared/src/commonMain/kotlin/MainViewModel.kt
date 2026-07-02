@@ -1,5 +1,7 @@
 
+import CommonConst.NOTIFICATION
 import CommonConst.SORT_STANDART
+import CommonConst.SOUND
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -8,10 +10,13 @@ import androidx.lifecycle.viewModelScope
 import data.room.CourseDao
 import data.room.Item
 import domain.repostirory.DeleteImageInItemReository
+import domain.repostirory.PermissionRepository
 import domain.repostirory.SharedPrefRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
@@ -30,6 +35,8 @@ class MainViewModel(
 
     var stateTextNotebook by mutableStateOf(pref.loadTextNoteBook())
     var showDialog by  mutableStateOf(DialogState())
+    var _toast = MutableSharedFlow<String>()
+    var toast = _toast.asSharedFlow()
 
     //private val _sortType = MutableStateFlow(settingsPref.getSort())
     private val _sortType = MutableStateFlow(SORT_STANDART)
@@ -88,11 +95,11 @@ class MainViewModel(
         viewModelScope.launch{
          val isChekedPermission = permission.isChekedPermission(permissionName)
     
-        if(isChekedPermission) { openDialog(permission) }
+        if(isChekedPermission) { openDialog(permissionName) }
         else {
             val isGranted = permission.requestPermission(permissionName)
-            if(isGranted){openDialog(permission)}
-            else {}
+            if(isGranted){openDialog(permissionName)}
+            else {sendMessage("Для стабильной работы, необходимо дать разрешение")}
             
         }   
         }
@@ -100,9 +107,15 @@ class MainViewModel(
     }
     private fun openDialog(permissionName: String){
       when(permissionName){
-                NOTIFICATION->{}
+                NOTIFICATION->{sendMessage("NOTIFICATION")}
                 SOUND->{}
             }  
+    }
+
+    fun sendMessage(value: String){
+        viewModelScope.launch {
+            _toast.emit(value)
+        }
     }
 
 

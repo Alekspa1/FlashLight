@@ -12,11 +12,17 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import data.room.Item
@@ -30,6 +36,17 @@ fun AddOrChangeItemDialog(
     var stateTextName by mutableStateOf(item?.name ?: "" )
     var stateTextDecs by mutableStateOf(item?.desc ?: "" )
 
+    val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
+    LaunchedEffect(Unit) {
+        withFrameMillis { }  // Ждем, пока отрендерится первый кадр окна
+        focusRequester.requestFocus()
+        keyboardController?.show()
+    }
+
+    // 2. Получаем контроллер клавиатуры
+
+
     AlertDialog(
             onDismissRequest = { onResult(null,false,false) }, // когда кудато нажал
             title = { Text("Сфокусироваться") },
@@ -39,7 +56,10 @@ fun AddOrChangeItemDialog(
                     verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
                         modifier = Modifier
-                            .fillMaxWidth(),
+                            .fillMaxWidth() // Настройка ширины применится всегда
+                            .then(
+                                if (item == null) Modifier.focusRequester(focusRequester) else Modifier
+                            ),
                             value = stateTextName,
                         onValueChange = { newText ->
                             stateTextName = newText

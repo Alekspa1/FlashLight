@@ -8,8 +8,10 @@ import org.koin.core.module.Module
 import org.koin.dsl.module
 
 import androidx.room.Room
-import data.repository.DeleteImageInItemImpl
+import data.repository.IosDeleteImageInItemImpl
+import data.repository.IosPermissionImpl
 import domain.repostirory.DeleteImageInItemReository
+import domain.repostirory.PermissionRepository
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSFileManager
@@ -43,6 +45,7 @@ actual val moduleAnotherPlatform: Module = module {
         )
     }
 
-    factory<DeleteImageInItemReository> { DeleteImageInItemImpl() }
+    single <DeleteImageInItemReository> { IosDeleteImageInItemImpl() }
+    single <PermissionRepository> { IosPermissionImpl() }
 
 }

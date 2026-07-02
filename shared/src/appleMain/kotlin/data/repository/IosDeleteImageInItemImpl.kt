@@ -2,6 +2,6 @@ package data.repository
 
 import domain.repostirory.DeleteImageInItemReository
 
-class DeleteImageInItemImpl: DeleteImageInItemReository {
+class IosDeleteImageInItemImpl: DeleteImageInItemReository {
     override fun delete(uri: String) {}
 }

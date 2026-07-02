@@ -7,10 +7,12 @@ import org.koin.dsl.module
 
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.dragon.shared.data.repostitory.DeleteImageInItemImpl
+import com.dragon.shared.data.repostitory.DesktopDeleteImageInItemImpl
+import com.dragon.shared.data.repostitory.DesktopPermissonImp
 import java.io.File
 import data.room.myDataBase
 import domain.repostirory.DeleteImageInItemReository
+import domain.repostirory.PermissionRepository
 
 actual val moduleAnotherPlatform: Module = module {
     single<SharedPrefRepository> { DesktopSharedPrefImpl() }
@@ -24,5 +26,6 @@ actual val moduleAnotherPlatform: Module = module {
             name = dbFile.absolutePath
         )
     }
-    factory<DeleteImageInItemReository> { DeleteImageInItemImpl() }
+    single<DeleteImageInItemReository> { DesktopDeleteImageInItemImpl() }
+    single<PermissionRepository> { DesktopPermissonImp() }
 }

@@ -3,6 +3,13 @@ object CommonConst {
     const val DEFAULT_DIALOG = "DEFAULT_DIALOG"
     const val DELETE_DIALOG = "DELETE_DIALOG"
     const val INSERT_DIALOG = "INSERT_DIALOG"
+    const val NOTIFICATION = "NOTIFICATION"
+    const val SOUND = "SOUND"
+
+
+
+
+
     const val RUSTORE = "https://apps.rustore.ru/app/com.exampl3.flashlight"
     const val AUTHORIZED_RUSTORE = "rustore://auth/"
     const val APP_GALERY = "https://flashlightandtodolist.drru.agconnect.link/d6zW"

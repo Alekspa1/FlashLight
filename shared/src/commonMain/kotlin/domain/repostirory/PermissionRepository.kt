@@ -4,6 +4,6 @@ package domain.repostirory
 
 
 interface PermissionRepository {
-  fun isChekedPermission(permisson: String) : Boolean
-  suspend  fun requestPermission(permisson: String) : Boolean
+  fun isChekedPermission(permissionName: String) : Boolean
+  suspend  fun requestPermission(permissionName: String) : Boolean
 }

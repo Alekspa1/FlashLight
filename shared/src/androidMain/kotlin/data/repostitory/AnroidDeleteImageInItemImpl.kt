@@ -4,7 +4,7 @@ import androidx.core.net.toUri
 import domain.repostirory.DeleteImageInItemReository
 import java.io.File
 
-class DeleteImageInItemImpl : DeleteImageInItemReository {
+class AnroidDeleteImageInItemImpl : DeleteImageInItemReository {
     override fun delete(uri: String) {
         try {
             // Для URI вида "file:///data/data/.../images/123.jpg"
