@@ -107,7 +107,7 @@ class MainViewModel(
     }
 
     fun insertAlarm(item: Item){
-        insertitem(item.copy(desc = item.alarmTime.toString()))
+        insertitem(item.copy(changeAlarm = true))
     }
     fun getPremium() = true
     
