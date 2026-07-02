@@ -1,5 +1,51 @@
 package presentation.dialogs
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberTimePickerState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.LocalTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
+
+import CommonConst.TIME
+import CommonConst.ACTION
+import CommonConst.NOTIFICATION
+import CommonConst.ALARM_ONE
+import CommonConst.ALARM_DAY
+import CommonConst.ALARM_WEEK
+import CommonConst.ALARM_MONTH
+import CommonConst.ALARM_YEAR
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -7,15 +53,27 @@ package presentation.dialogs
 fun CreateDateInAlarmDialog(viewModel: MainViewModel){
  val item = viewModel.showDialog.item ?: return
  val datePickerState = rememberDatePickerState()
+  var errorMessage by remember {mutableStateOf<String?>(null)} 
+  LaunchedEffect(datePickerState.selectedDateMillis) {
+    errorMessage = null // Сбрасываем ошибку, если пользователь выбрал другую дату
+}
         DatePickerDialog(
             onDismissRequest = { viewModel.showDialog = DialogState() },
             confirmButton = {
                 TextButton(onClick = {
                   val date = datePickerState.selectedDateMillis ?: 0L
-                  val currentDate = getTodayMidnightInMillis()
-                 if(date < currentDate) {
-                  viewModel.sendMessage("Вы выбрали время которое прошло") 
-                  viewModel.showDialog = DialogState()
+                 
+                  val selectedDate = Instant.fromEpochMilliseconds(date)
+            .toLocalDateTime(TimeZone.UTC)
+            .date
+
+       
+             val todayDate = Clock.System.now()
+            .toLocalDateTime(TimeZone.currentSystemDefault())
+             .date
+                 
+                 if(selectedDate < todayDate) {
+                  errorMessage = "Вы выбрали дату которая прошла" 
                  }
                  else viewModel.showDialog = DialogState(TIME,item.copy(alarmTime = date))
                 }) {
@@ -28,7 +86,21 @@ fun CreateDateInAlarmDialog(viewModel: MainViewModel){
                 }
             }
         ) {
-            DatePicker(state = datePickerState)
+         Column(){
+          
+          DatePicker(state = datePickerState)
+          errorMessage?.let { errorText ->
+                    Text(
+                        text = errorText,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier
+                         .padding(horizontal = 24.dp) // Выравнивает текст с календарем
+                         .padding(bottom = 8.dp)
+                    )
+                }
+         }
+            
         }
 }
 
@@ -37,7 +109,10 @@ fun CreateDateInAlarmDialog(viewModel: MainViewModel){
 fun CreateTimeInAlarmDialog(date: Long,viewModel: MainViewModel){
   val item = viewModel.showDialog.item ?: return
   val timePickerState = rememberTimePickerState()
-  
+  var errorMessage by remember {mutableStateOf<String?>(null)} 
+  LaunchedEffect(timePickerState.hour, timePickerState.minute) {
+    errorMessage = null // Сбрасываем ошибку, если пользователь выбрал другую дату
+}
  AlertDialog(
             onDismissRequest = { viewModel.showDialog = DialogState() },
             confirmButton = {
@@ -49,8 +124,7 @@ fun CreateTimeInAlarmDialog(date: Long,viewModel: MainViewModel){
                     val timeAlarm = convertTime(date,hour,minute)
                     
                     if(timeAlarm < currentTime){
-                     viewModel.sendMessage("Вы выбрали время которое прошло") 
-                      viewModel.showDialog = DialogState()  
+                     errorMessage = "Вы выбрали время которое прошло"   
                     }
                     else{
                       viewModel.showDialog = DialogState(ACTION,item.copy(alarmTime = timeAlarm)) 
@@ -68,7 +142,18 @@ fun CreateTimeInAlarmDialog(date: Long,viewModel: MainViewModel){
                 }
             },
             text = {
-                TimePicker(state = timePickerState)
+             Column(){
+              TimePicker(state = timePickerState)
+              errorMessage?.let { errorText ->
+                    Text(
+                        text = errorText,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
+             }
+                
             }
         )
 }
@@ -120,7 +205,7 @@ fun CreateActionInAlarmDialog(viewModel: MainViewModel){
                             RadioButton(
                                 selected = (text == selected),
                                 enabled = isOptionEnabled,
-                                onClick = { selected = text }
+                                onClick = null 
                             )
                             Text( text = text, fontSize = 24.sp )
                         }
@@ -129,7 +214,7 @@ fun CreateActionInAlarmDialog(viewModel: MainViewModel){
                     if (!isPremium) {
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "* Повторяющиеся будильники доступны только в Премиум-версии",
+                        text = "* Повторяющиеся будильники доступны в PREMIUM версии",
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.error, // Или заведите свой цвет премиума (например, золотой)
                         style = MaterialTheme.typography.bodySmall
@@ -159,18 +244,5 @@ private fun convertTime(date: Long, hour: Int, minuts: Int): Long {
     return localDateTime.toInstant(systemTimeZone).toEpochMilliseconds()
 }
 
-private fun getTodayMidnightInMillis(): Long {
-    // 1. Получаем текущий часовой пояс устройства
-    val currentZone = TimeZone.currentSystemDefault()
-    
-    // 2. Получаем текущий момент времени
-    val now = Clock.System.now()
-    
-    // 3. Переводим текущее время в локальную дату (год-месяц-день)
-    val todayDate = now.toLocalDateTime(currentZone).date
-    
-    // 4. Получаем начало этого дня (00:00) в миллисекундах UTC
-    return todayDate.atStartOfDayIn(currentZone).toEpochMilliseconds()
-}
 
   
