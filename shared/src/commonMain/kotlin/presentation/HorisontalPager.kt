@@ -51,6 +51,10 @@ import org.koin.compose.viewmodel.koinViewModel
 import presentation.dialogs.AddOrChangeItemDialog
 import presentation.dialogs.DeleteDialog
 import presentation.dialogs.DialogState
+import presentation.dialogs.CreateDateInAlarmDialog
+import presentation.dialogs.CreateTimeInAlarmDialog
+import presentation.dialogs.CreateActionInAlarmDialog
+
 import presentation.screens.ListToDo
 import presentation.screens.Notebook
 
@@ -68,10 +72,10 @@ fun MainWeatherPager(paddingValues: PaddingValues = PaddingValues(),
     val pagerState = rememberPagerState(pageCount = { titles.size })
     val scope = rememberCoroutineScope()
     val todoList by viewModel.sortedItemsFlow.collectAsStateWithLifecycle()
-
+    val item = viewModel.showDialog.item
 
         when(viewModel.showDialog.isWho){
-          val item = viewModel.showDialog.item
+          
             DELETE_DIALOG->{
                 DeleteDialog {result->
                     if(result && item != null) viewModel.deleteitem(item)
@@ -221,10 +225,10 @@ fun MainWeatherPager(paddingValues: PaddingValues = PaddingValues(),
                 1 -> {
                     ListToDo(todoList){item,action->
                         when(action){
-                            ADD->{viewModel.showDialog = DialogState(true,INSERT_DIALOG,item)}
+                            ADD->{viewModel.showDialog = DialogState(INSERT_DIALOG,item)}
                             ALARM->{viewModel.permission(NOTIFICATION)}
                             IMAGE->{}
-                            CHANGE_ITEM->{viewModel.showDialog = DialogState(true,INSERT_DIALOG,item)}
+                            CHANGE_ITEM->{viewModel.showDialog = DialogState(INSERT_DIALOG,item)}
                             CHANGE->{(item.let {viewModel.updateitem(it!!) })}
                             DELETE->{
                                 viewModel.showDialog = DialogState(true,DELETE_DIALOG,item)
