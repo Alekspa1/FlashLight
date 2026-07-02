@@ -91,26 +91,21 @@ class MainViewModel(
         }
     }
 
-    fun permission(permissionName: String) {
+    fun permission(permissionName: String, item: Item) {
         viewModelScope.launch{
          val isChekedPermission = permission.isChekedPermission(permissionName)
     
-        if(isChekedPermission) { openDialog(permissionName) }
+        if(isChekedPermission) { showDialog = DialogState(permissionName,item) }
         else {
             val isGranted = permission.requestPermission(permissionName)
-            if(isGranted){openDialog(permissionName)}
+            if(isGranted){showDialog = DialogState(permissionName,item)}
             else {sendMessage("Для стабильной работы, необходимо дать разрешение")}
             
         }   
         }
         
     }
-    private fun openDialog(permissionName: String){
-      when(permissionName){
-                NOTIFICATION->{sendMessage("NOTIFICATION")}
-                SOUND->{}
-            }  
-    }
+    
 
     fun sendMessage(value: String){
         viewModelScope.launch {
