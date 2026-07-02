@@ -95,7 +95,7 @@ fun MainWeatherPager(paddingValues: PaddingValues = PaddingValues(),
             }
 
             ACTION ->{
-              CreateActionInAlarmDialog(viewModel) 
+              CreateActionInAlarmDialog(viewModel)
             }
         }
     
