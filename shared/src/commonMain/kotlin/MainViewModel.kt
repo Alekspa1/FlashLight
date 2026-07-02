@@ -107,7 +107,7 @@ class MainViewModel(
     }
 
     fun insertAlarm(item: Item){
-        updateitem(item.copy(desc = item.alarmTime))
+        updateitem(item.copy(desc = item.alarmTime.toString()))
     }
     
 
