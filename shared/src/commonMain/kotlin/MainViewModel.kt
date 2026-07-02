@@ -105,6 +105,10 @@ class MainViewModel(
         }
         
     }
+
+    fun insertAlarm(item: Item){
+        updateitem(item.copy(desc = item.alarmTime))
+    }
     
 
     fun sendMessage(value: String){
