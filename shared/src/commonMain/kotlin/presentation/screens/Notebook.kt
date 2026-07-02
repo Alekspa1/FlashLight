@@ -72,7 +72,7 @@ fun Notebook(viewModel: MainViewModel){
         )
     {
 
-            if(showDialog.isActive && showDialog.isWho == CommonConst.DELETE_DIALOG){
+            if(showDialog.isWho == CommonConst.DELETE_DIALOG){
             DeleteDialog {result->
             if(result) onTextChange("")
              onResultDialog(DialogState())
@@ -123,7 +123,7 @@ fun Notebook(viewModel: MainViewModel){
                             )
                     }
                     IconButton(modifier = Modifier.align(Alignment.CenterEnd),
-                        onClick = {onResultDialog(DialogState(true, CommonConst.DELETE_DIALOG))  },
+                        onClick = {onResultDialog(DialogState(CommonConst.DELETE_DIALOG))  },
                     ){
                         Image(
                             painter = painterResource(Res.drawable.ic_del_notebook_neon),
