@@ -47,6 +47,9 @@ import CommonConst.ALARM_WEEK
 import CommonConst.ALARM_MONTH
 import CommonConst.ALARM_YEAR
 
+import MainViewModel
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,8 +67,8 @@ fun CreateDateInAlarmDialog(viewModel: MainViewModel){
                   val date = datePickerState.selectedDateMillis ?: 0L
                  
                   val selectedDate = Instant.fromEpochMilliseconds(date)
-            .toLocalDateTime(TimeZone.UTC)
-            .date
+                  .toLocalDateTime(TimeZone.UTC)
+                  .date
 
        
              val todayDate = Clock.System.now()
