@@ -62,7 +62,7 @@
 
 name: Build and Send Release APK to Telegram & Verify iOS
 
-_on:
+on:
   push:
     branches:
       - '**'
