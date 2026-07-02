@@ -226,12 +226,12 @@ fun MainWeatherPager(paddingValues: PaddingValues = PaddingValues(),
                     ListToDo(todoList){item,action->
                         when(action){
                             ADD->{viewModel.showDialog = DialogState(INSERT_DIALOG,item)}
-                            ALARM->{viewModel.permission(NOTIFICATION)}
+                            ALARM->{viewModel.permission(NOTIFICATION,item)}
                             IMAGE->{}
                             CHANGE_ITEM->{viewModel.showDialog = DialogState(INSERT_DIALOG,item)}
                             CHANGE->{(item.let {viewModel.updateitem(it!!) })}
                             DELETE->{
-                                viewModel.showDialog = DialogState(true,DELETE_DIALOG,item)
+                                viewModel.showDialog = DialogState(DELETE_DIALOG,item)
                             }
 
                         }
