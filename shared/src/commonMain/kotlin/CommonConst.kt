@@ -28,8 +28,10 @@ object CommonConst {
     const val CHANGE = 11
     const val CHANGE_ITEM = 12
     const val ALARM = 13
+
     const val IMAGE = 14
     const val ADD = 15
+    const val ALARM_LONG = 16
     const val CHANNEL_ID = "channelID"
     const val CHANNEL_ID_PASSED = "CHANNEL_ID_PASSED"
     const val KEY_INTENT = "keyId"

@@ -3,6 +3,7 @@ package presentation.screens
 import CommonConst.ADD
 import CommonConst.ALARM
 import CommonConst.ALARM_DAY
+import CommonConst.ALARM_LONG
 import CommonConst.ALARM_MONTH
 import CommonConst.ALARM_ONE
 import CommonConst.ALARM_WEEK
@@ -14,6 +15,7 @@ import CommonConst.IMAGE
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -148,10 +150,13 @@ fun Item(item: Item, theme: Theme = ThemeNeon(), onClick : (Item, Int) -> Unit =
         ) {
             // 1. Левая кнопка/текст
 
-                IconButton(
+                Box(
+                    modifier = Modifier.size(30.dp).combinedClickable(
+                        onClick = {onClick(item,ALARM)},
+                        onLongClick = {onClick(item,ALARM_LONG)}
+                    )
 
-                    onClick = { onClick(item,ALARM) },
-                    modifier = Modifier.size(30.dp)
+
                 ) {
 
                     Icon(
@@ -214,18 +219,23 @@ fun Item(item: Item, theme: Theme = ThemeNeon(), onClick : (Item, Int) -> Unit =
                         modifier = Modifier
                             .weight(1f)
                             .padding(start = 6.dp, end = 6.dp),
-                        verticalArrangement = Arrangement.spacedBy(2.dp)
                     ) {
                         Text(
+                            modifier = Modifier.padding(top = 5.dp, bottom = 5.dp),
                             text = item.name,
                             color = theme.textColor,
+                            lineHeight = 20.sp,
                             fontSize = 18.sp)
                         if (item.desc.isNotEmpty())  {
-                            Text(text = item.desc,
+                            Text(
+                                modifier = Modifier.padding(bottom = 5.dp),
+                                text = item.desc,
                                 color = theme.textDecs,
+                                lineHeight = 14.sp,
                                 fontSize = 12.sp) }
                         if (item.changeAlarm) {
                             Text(
+                                modifier = Modifier.padding(top = 2.dp, bottom = 3.dp),
                                 text = alarmText(item),
                                 color = theme.textAlarm,
                                 fontSize = 12.sp
@@ -363,7 +373,7 @@ fun ToDoListPreview() {
     val mockList = listOf(
         Item(id = 1, name = "Купить неоновую лентуКупить неоновую лентуКупить неоновую лентуКупить неоновую лентуКупить неоновую лентуКупить неоновую лентуКупить неоновую лентуКупить неоновую лентуКупить неоновую лентуКупить неоновую лентуКупить неоновую лентуКупить неоновую лентуКупить неоновую ленту", category = "Фокус", alarmTime = 1719750000000L, change = false, sort = 1),
         Item(id = 2, name = "Проверить Koin модули", category = "Фокус", alarmTime = 0L, change = false, sort = 2),
-        Item(id = 3, name = "Починить затыки Skia на Windows", category = "Фокус", alarmTime = 1719753600000L, change = true, sort = 3, uri = "трололо", changeAlarm = true, desc = "Описание почему то может быть null"),
+        Item(id = 3, name = "Починить затыки Skia на Windows", category = "Фокус", alarmTime = 1719753600000L, change = true, sort = 3, uri = "трололо", changeAlarm = false, desc = "Описание почему то может быть null"),
         Item(id = 4, name = "Похвалить себя за архитектуру", category = "Фокус", alarmTime = 0L, change = false, sort = 4),
         Item(id = 5, name = "Выпить кофе и размять спину", category = "Фокус", alarmTime = 0L, change = false, sort = 5),
         Item(id = 6, name = "Написать expect/actual для iOS", category = "Фокус", alarmTime = 1719760800000L, change = false, sort = 6, changeAlarm = true),

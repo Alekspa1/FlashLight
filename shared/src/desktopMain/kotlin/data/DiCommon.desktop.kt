@@ -7,10 +7,14 @@ import org.koin.dsl.module
 
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.dragon.shared.data.repostitory.DesktopAlarmImpl
 import com.dragon.shared.data.repostitory.DesktopDeleteImageInItemImpl
 import com.dragon.shared.data.repostitory.DesktopPermissonImp
+import data.perository.AlarmRepeadImp
 import java.io.File
 import data.room.myDataBase
+import domain.repostirory.AlarmRepeadRepository
+import domain.repostirory.AlarmRepository
 import domain.repostirory.DeleteImageInItemReository
 import domain.repostirory.PermissionRepository
 
@@ -28,4 +32,5 @@ actual val moduleAnotherPlatform: Module = module {
     }
     single<DeleteImageInItemReository> { DesktopDeleteImageInItemImpl() }
     single<PermissionRepository> { DesktopPermissonImp() }
+    single<AlarmRepository> { DesktopAlarmImpl(alarmRepeatRepositoryLazy = inject(), db = get()) }
 }

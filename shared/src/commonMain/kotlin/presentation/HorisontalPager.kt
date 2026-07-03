@@ -57,6 +57,7 @@ import presentation.screens.Notebook
 
 import CommonConst.TIME
 import CommonConst.ACTION
+import CommonConst.ALARM_LONG
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 
@@ -108,17 +109,8 @@ fun MainWeatherPager(paddingValues: PaddingValues = PaddingValues(),
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
-//            .padding(
-//                // Достаем из объекта строго верхний системный отступ:
-//                top = paddingValues.calculateTopPadding(),
-//                // Достаем из объекта строго нижний системный отступ:
-//                bottom = paddingValues.calculateBottomPadding(),
-//                // Ваши фиксированные аккуратные отступы по бокам:
-//                start = 4.dp,
-//                end = 4.dp
-//            ),
-            .padding(paddingValues),
+            .padding(paddingValues)
+            .fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Row(
@@ -225,17 +217,24 @@ fun MainWeatherPager(paddingValues: PaddingValues = PaddingValues(),
                         onClick = {item,action->
                             when(action){
                                 ALARM->{viewModel.permission(NOTIFICATION,item)}
+                                ALARM_LONG ->{viewModel.insertAlarmRepeat(item)}
                                 IMAGE->{}
                                 CHANGE_ITEM->{
                                     viewModel.showDialog = DialogState(INSERT_DIALOG,item)}
                                 CHANGE->{
                                     val newItem = item.copy(
                                         change = !item.change,
-                                        changeAlarm = if (item.changeAlarm) false else item.changeAlarm)
+                                        changeAlarm = false)
                                     viewModel.updateItem(newItem)
+                                    if (item.changeAlarm) {
+                                        viewModel.deleteAlarm(item.id)
+                                        viewModel.deleteAlarm(item.id * -1)
+                                    }
                                 }
                                 DELETE->{
-                                    viewModel.showDialog = DialogState(DELETE_DIALOG,item)
+                                    if(item.change)viewModel.deleteItem(item)
+                                        else viewModel.showDialog = DialogState(DELETE_DIALOG,item)
+
                                 }
 
                             }

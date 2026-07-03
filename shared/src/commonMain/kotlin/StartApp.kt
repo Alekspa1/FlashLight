@@ -28,6 +28,7 @@ import presentation.YandexBannerAd
 @Composable
 fun StartApp(viewModel : MainViewModel = koinViewModel ()) {
     val snackbarHostState = remember { SnackbarHostState() }
+    viewModel.updateAlarm()
     LaunchedEffect(Unit) {
         viewModel.toast.collect { message ->
             // Как только во Flow прилетает строка, показываем её на экране

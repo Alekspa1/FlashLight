@@ -1,4 +1,5 @@
 
+import CommonConst.ALARM_ONE
 import CommonConst.NOTIFICATION
 import CommonConst.SORT_STANDART
 import androidx.compose.runtime.getValue
@@ -25,7 +26,11 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import presentation.dialogs.DialogState
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 class MainViewModel(
     private val pref: SharedPrefRepository,
@@ -99,7 +104,7 @@ class MainViewModel(
         }
     }
     fun deleteItem(item: Item){
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             db.delete(item)
             deleteImageInitem.delete(item.uri)
             deleteAlarm(item.id)
@@ -107,7 +112,7 @@ class MainViewModel(
     }
 
     fun updateItem(item: Item){
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             db.updateItem(item)
         }
     }
@@ -138,14 +143,60 @@ class MainViewModel(
         alarm.deleteAlarm(id)
     }
 
-    fun insertAlarmRepeat(id: Int){
+    fun insertAlarmRepeat(item: Item){
         viewModelScope.launch(Dispatchers.IO) {
-            alarmRepeat.alarmRepead(id){message -> sendMessage(message)}
+            if (item.changeAlarm) {
+              deleteAlarm(item.id)
+                db.updateItem(item.copy(changeAlarm = false))
+            }
+
+            if ((item.change || !item.changeAlarm) && item.alarmTime > currentTime()) {
+                val newItem = item.copy(change = false, changeAlarm = !item.changeAlarm)
+                insertAlarm(newItem)
+                db.updateItem(newItem)
+            }
+            if (!item.changeAlarm && item.alarmTime < currentTime()) {
+                alarmRepeat.alarmRepead(item.id){message -> sendMessage(message)}
+            }
+
         }
 
     }
 
+    private suspend fun listItem(calendaZero: Long): List<Item> {
+        return db.getUpdateItemRestartPhone(calendaZero).filter { it.changeAlarm }
+    }
+
+    fun updateAlarm() {
+        viewModelScope.launch(Dispatchers.IO) {
+            listItem(currentTime()).forEach { item ->
+                when (item.interval) {
+                    ALARM_ONE -> {
+                        insertAlarm(item)
+                    }
+
+                    else -> {
+                        if (!getPremium()) {
+                            deleteAlarm(item.id)
+                            updateItem(item.copy(changeAlarm = false))
+                        } else {
+                            insertAlarm(item)
+                        }
+
+                    }
+                }
+            }
+        }
+    }
+
     fun getPremium() = true
+
+    private fun currentTime():Long {
+        val nowInstant = Clock.System.now()
+        val currentMillis: Long = nowInstant.toEpochMilliseconds()
+        return currentMillis
+
+    }
     
 
     fun sendMessage(value: String){

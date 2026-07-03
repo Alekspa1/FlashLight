@@ -25,6 +25,7 @@ class AlarmRepeadImp(
 
         when (item.interval) {
             ALARM_ONE -> { sendMessage("Вы выбрали время которое уже прошло")}
+
             ALARM_DAY -> {
                 var nextAlarmTime = item.alarmTime + DAY
                 while (currentMillis > nextAlarmTime){
@@ -79,6 +80,7 @@ class AlarmRepeadImp(
 
 
     }
+
 
     private fun addOneYearOrMonth(dateInMillis: Long, action: Int): Long {
         val tz = kotlinx.datetime.TimeZone.currentSystemDefault()

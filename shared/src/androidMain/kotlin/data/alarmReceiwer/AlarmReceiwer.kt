@@ -14,11 +14,13 @@ import android.content.Intent
 import android.widget.Toast
 
 import android.os.Build
+import android.util.Log
 import data.repostitory.AndroidAlarmImpl
 
 import data.room.CourseDao
 import data.room.Item
 import domain.repostirory.AlarmRepeadRepository
+import domain.repostirory.AlarmRepository
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.SupervisorJob
 
@@ -41,9 +43,8 @@ class AlarmReceiwer : BroadcastReceiver(), KoinComponent {
     private val db: CourseDao by inject()
     private val notificationBuilder: NotificationBuilder by inject()
     private val notificationBuilderPassed: NotificationBuilderPassed by inject()
-    private val alarm : AndroidAlarmImpl by inject ()
+    private val alarm : AlarmRepository by inject ()
     private val alarmRepeat: AlarmRepeadRepository by inject ()
-
 
     private lateinit var calendarZero: Calendar
 
@@ -79,14 +80,17 @@ class AlarmReceiwer : BroadcastReceiver(), KoinComponent {
             } // Когда нажал кнопку готово
 
             KEY_INTENT_CALL_POSTPONE -> {
+
                 val time = calendarZero.timeInMillis + TEN_MINUTES
                 val item = getItemFromIntent(intent, KEY_INTENT_CALL_POSTPONE)
-                withContext(Dispatchers.Main){notificationBuilder.alarmPush().cancel(item.id)}
+                withContext(Dispatchers.Main){
+                    notificationBuilder.alarmPush().cancel(item.id)
+                }
                 when (item.interval) {
                     ALARM_ONE -> {
                         val newItem = item.copy(changeAlarm = true, alarmTime = time)
                             db.updateItem(newItem)
-                           // changeAlarm.exum(newItem, ALARM_ONE)
+
                             alarm.createAlarm(newItem)
                     }
 
@@ -99,12 +103,20 @@ class AlarmReceiwer : BroadcastReceiver(), KoinComponent {
                         alarm.createAlarm(newItemFals)
                     }
                 }
-                withContext(Dispatchers.Main){Toast.makeText(context, "Отложено на 10 минут", Toast.LENGTH_SHORT).show()}
+
+                android.os.Handler(android.os.Looper.getMainLooper()).post {
+                    Toast.makeText(
+                        context.applicationContext,
+                        "Отложено на 10 минут",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             
                 
             } // Когда нажал кнопку отложить
 
             REBOOT -> {
+                Log.d("MyLog", "REBOOT")
                     db.getActiveAlarms().forEach { item ->
                         if (item.alarmTime > calendarZero.timeInMillis) {
                             alarm.createAlarm(item)
@@ -112,16 +124,15 @@ class AlarmReceiwer : BroadcastReceiver(), KoinComponent {
                         else {
                             withContext(Dispatchers.Main){notificationBuilderPassed.input(item)}
                             processingAlarm(item, "(Пропущено)")
-
                         }
                     }
-                
+                Log.d("MyLog", "REBOOT END")
 
             } // После перезагрузки
         }    
             }
             
-            catch(e: Exception){}
+            catch(e: Exception){Log.d("MyLog", "$e -> REBOOT END")}
             
             finally{pendingResult.finish()}
 
@@ -145,7 +156,6 @@ class AlarmReceiwer : BroadcastReceiver(), KoinComponent {
 
                 else -> {
                         alarmRepeat.alarmRepead(item.id)
-
 
                 }
 

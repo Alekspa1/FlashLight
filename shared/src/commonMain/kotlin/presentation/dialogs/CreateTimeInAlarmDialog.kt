@@ -46,6 +46,7 @@ import CommonConst.ALARM_MONTH
 import CommonConst.ALARM_YEAR
 
 import MainViewModel
+import androidx.compose.foundation.layout.Arrangement
 import kotlin.time.Duration.Companion.hours
 
 
@@ -228,7 +229,7 @@ fun CreateActionInAlarmDialog(viewModel: MainViewModel){
             },
 
     text = {
-    Column(){
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)){
       Text("Как часто повторять?")
                 Column(Modifier.selectableGroup()) {
                     listAction.forEachIndexed {index, text ->

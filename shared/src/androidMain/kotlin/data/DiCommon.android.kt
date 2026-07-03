@@ -45,7 +45,9 @@ actual val moduleAnotherPlatform = module {
     single<AlarmManager> {
         val context: Context = get()
         context.getSystemService(Context.ALARM_SERVICE) as AlarmManager }
+
     single<AlarmRepository> { AndroidAlarmImpl( get(),get()) }
+
     factory<NotificationBuilder> { NotificationBuilder(get()) }
     factory<NotificationBuilderPassed> { NotificationBuilderPassed(get()) }
 

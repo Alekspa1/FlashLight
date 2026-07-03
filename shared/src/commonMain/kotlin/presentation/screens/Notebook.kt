@@ -6,6 +6,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -82,6 +83,7 @@ fun Notebook(viewModel: MainViewModel){
         Column(modifier = Modifier.fillMaxWidth()) {
             OutlinedTextField(
                 modifier = Modifier
+                    .padding(8.dp)
                     .fillMaxWidth()
                     .weight(1f)
                     .border(width = 3.dp, color = Color(0x9900E2FF), shape = RoundedCornerShape(10.dp)),

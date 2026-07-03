@@ -5,6 +5,7 @@ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import data.perository.AlarmRepeadImp
 import data.room.myDataBase
 import domain.repostirory.AlarmRepeadRepository
+import domain.repostirory.AlarmRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import org.koin.core.context.startKoin
@@ -12,6 +13,7 @@ import org.koin.core.module.Module
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.KoinAppDeclaration
 import org.koin.dsl.module
+import kotlin.math.sin
 
 
 expect val moduleAnotherPlatform: Module
@@ -30,7 +32,8 @@ val appModule = module {
     }
 
     single { get<myDataBase>().CourseDao() }
-    single<AlarmRepeadRepository> { AlarmRepeadImp(get()) }
+
+    single<AlarmRepeadRepository> { AlarmRepeadImp(get(),get()) }
 
 }
 

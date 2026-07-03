@@ -90,6 +90,22 @@ android {
     }
 }
 
+//compose.desktop {
+//    application {
+//        mainClass = "MainKt" // Имя твоего главного файла запуска десктопа
+//
+//        // Указываем путь к иконке прямо внутри десктопных ресурсов
+//        // Расширение файла писать НЕ нужно — сборщик сам выберет нужный формат под Windows/Mac!
+//        iconFile.set(project.file("src/desktopMain/resources/icon"))
+//
+//        nativeDistributions {
+//            targetFormats(org.jetbrains.compose.desktop.application.dsl.TargetFormat.Msi, org.jetbrains.compose.desktop.application.dsl.TargetFormat.Dmg)
+//            packageName = "FlashLight"
+//            packageVersion = "1.0.0"
+//        }
+//    }
+//}
+
 dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling:1.10.0")
     // Отдаем компилятор Room в KSP для метаданных общего кода
