@@ -1,7 +1,6 @@
 
 import CommonConst.NOTIFICATION
 import CommonConst.SORT_STANDART
-import CommonConst.SOUND
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -9,10 +8,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import data.room.CourseDao
 import data.room.Item
+import domain.repostirory.AlarmRepeadRepository
+import domain.repostirory.AlarmRepository
 import domain.repostirory.DeleteImageInItemReository
 import domain.repostirory.PermissionRepository
 import domain.repostirory.SharedPrefRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -22,13 +24,16 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import presentation.dialogs.DialogState
 
 class MainViewModel(
     private val pref: SharedPrefRepository,
     private val db: CourseDao,
     private val deleteImageInitem: DeleteImageInItemReository,
-    private val permission: PermissionRepository
+    private val permission: PermissionRepository,
+    private val alarm: AlarmRepository,
+    private val alarmRepeat: AlarmRepeadRepository
 ) : ViewModel() {
 
 
@@ -75,19 +80,35 @@ class MainViewModel(
     fun saveText() = pref.saveTextNoteBook(stateTextNotebook)
 
 
-    fun insertitem(item: Item){
-        viewModelScope.launch { db.insertItem(item) }
+    fun insertItem(item: Item, alarm: Boolean = false){
+
+        viewModelScope.launch(Dispatchers.IO) {
+
+            val currentMinSort = db.getItemWithMinSort()?.sort ?: 0
+            val newSortIndex = currentMinSort - 1
+            val newItem = item.copy(sort = newSortIndex)
+
+            val insertedId = db.insertItem(newItem)
+            withContext(Dispatchers.Main){
+                if(alarm) {
+                    val savedItem = newItem.copy(id = insertedId.toInt())
+                    permission(NOTIFICATION, savedItem)
+                } else showDialog = DialogState()
+            }
+
+        }
     }
-    fun deleteitem(item: Item){
+    fun deleteItem(item: Item){
         viewModelScope.launch {
             db.delete(item)
             deleteImageInitem.delete(item.uri)
+            deleteAlarm(item.id)
         }
     }
 
-    fun updateitem(item: Item){
+    fun updateItem(item: Item){
         viewModelScope.launch {
-            db.updateItem(item.copy(change = !item.change))
+            db.updateItem(item)
         }
     }
 
@@ -98,7 +119,10 @@ class MainViewModel(
         if(isChekedPermission) { showDialog = DialogState(permissionName,item) }
         else {
             val isGranted = permission.requestPermission(permissionName)
-            if(isGranted){showDialog = DialogState(permissionName,item)}
+            if(isGranted){
+                showDialog = DialogState(permissionName,item)
+
+            }
             else {sendMessage("Для стабильной работы, необходимо дать разрешение")}
             
         }   
@@ -107,8 +131,20 @@ class MainViewModel(
     }
 
     fun insertAlarm(item: Item){
-        insertitem(item.copy(changeAlarm = true))
+        alarm.createAlarm(item)
     }
+
+    fun deleteAlarm(id: Int){
+        alarm.deleteAlarm(id)
+    }
+
+    fun insertAlarmRepeat(id: Int){
+        viewModelScope.launch(Dispatchers.IO) {
+            alarmRepeat.alarmRepead(id){message -> sendMessage(message)}
+        }
+
+    }
+
     fun getPremium() = true
     
 

@@ -7,6 +7,7 @@ object CommonConst {
     const val TIME = "TIME"
     const val ACTION = "ACTION"
     const val SOUND = "SOUND"
+    const val DAY = 86400000L
 
 
 

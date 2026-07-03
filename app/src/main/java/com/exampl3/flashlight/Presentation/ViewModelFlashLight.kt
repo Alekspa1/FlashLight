@@ -373,8 +373,6 @@ class ViewModelFlashLight @Inject constructor(
                 alarmText = alarmText,
                 sort = newSortIndex
             )
-
-            // 3. Вставляем элемент в БД и СРАЗУ получаем его реальный ID!
             val insertedId = db.CourseDao().insertItem(newItem)
 
             // 4. Если пользователь выбрал будильник И разрешение получено

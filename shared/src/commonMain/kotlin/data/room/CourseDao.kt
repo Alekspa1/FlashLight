@@ -21,7 +21,9 @@ interface CourseDao {
     
     @Query("SELECT * FROM Item ORDER BY sort ASC LIMIT 1")
     suspend fun getItemWithMinSort(): Item?
-    
+
+    @Query("SELECT * FROM Item WHERE id = :id LIMIT 1")
+    suspend fun getItemFromId(id: Int): Item
 
     @Query("SELECT name FROM ListCategory")
     suspend fun getAllCategories(): List<String>

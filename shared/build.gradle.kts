@@ -49,9 +49,9 @@ kotlin {
             implementation("org.jetbrains.compose.ui:ui-tooling-preview:1.10.0")
             implementation("org.jetbrains.compose.material:material-icons-extended:1.7.3")
 
-            implementation("androidx.sqlite:sqlite-bundled:2.6.2")
+            implementation("androidx.sqlite:sqlite-bundled:2.7.0")
             implementation("androidx.room:room-runtime:2.8.4")
-            implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.1")
+            implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.8.0")
         }
 
         commonTest.dependencies {

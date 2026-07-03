@@ -34,6 +34,7 @@ sealed interface Theme{
     val chekBoxOn: ImageVector
     val chekBoxTint: Color
     val iconImage: ImageVector
+    val iconTint: Color
     val iconAdd: ImageVector
     val iconAddTint: Color
     val iconDelItem: ImageVector
@@ -71,7 +72,8 @@ data class ThemeNeon (
     override val iconAdd: ImageVector = Icons.Default.AddCircleOutline,
     override val iconAddTint: Color = Color(0xFF65D4FF),
     override val iconDelItem: ImageVector = Icons.Default.Delete,
-    override val iconDelTint: Color = Color.White
+    override val iconDelTint: Color = Color.White,
+    override val iconTint: Color = Color.White,
 ) : Theme
 
 data class ThemeZabor (
@@ -102,5 +104,6 @@ data class ThemeZabor (
     override  val iconAddTint: Color = Color(0xFF65D4FF),
     override val iconDelItem: ImageVector = Icons.Default.Delete,
     override val iconDelTint: Color = Color.White,
+    override val iconTint: Color = Color.White,
 
     ) : Theme

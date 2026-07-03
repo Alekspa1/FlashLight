@@ -1,6 +1,5 @@
 package presentation
 
-import CommonConst.ADD
 import CommonConst.ALARM
 import CommonConst.CHANGE
 import CommonConst.CHANGE_ITEM
@@ -41,13 +40,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 
-import org.koin.compose.viewmodel.koinViewModel
 import presentation.dialogs.AddOrChangeItemDialog
 import presentation.dialogs.DeleteDialog
 import presentation.dialogs.DialogState
@@ -58,7 +55,6 @@ import presentation.dialogs.CreateActionInAlarmDialog
 import presentation.screens.ListToDo
 import presentation.screens.Notebook
 
-import CommonConst.NOTIFICATION
 import CommonConst.TIME
 import CommonConst.ACTION
 
@@ -72,21 +68,23 @@ fun MainWeatherPager(paddingValues: PaddingValues = PaddingValues(),
     val pagerState = rememberPagerState(pageCount = { titles.size })
     val scope = rememberCoroutineScope()
     val todoList by viewModel.sortedItemsFlow.collectAsStateWithLifecycle()
-    val item = viewModel.showDialog.item
+        val item = viewModel.showDialog.item
 
         when(viewModel.showDialog.isWho){
           
             DELETE_DIALOG->{
                 DeleteDialog {result->
-                    if(result && item != null) viewModel.deleteitem(item)
+                    if(result && item != null) viewModel.deleteItem(item)
                     viewModel.showDialog = DialogState()
                 }
             }
 
             INSERT_DIALOG->{
                 AddOrChangeItemDialog(item) {item,result,alarm->
-                    if(result && item != null) viewModel.insertitem(item)
-                    viewModel.showDialog = DialogState()
+                    if(result && item != null) {
+                        viewModel.insertItem(item,alarm)
+                    } else viewModel.showDialog = DialogState()
+
                 }
             }
 
@@ -223,19 +221,26 @@ fun MainWeatherPager(paddingValues: PaddingValues = PaddingValues(),
                     Notebook(viewModel)
                 }
                 1 -> {
-                    ListToDo(todoList){item,action->
-                        when(action){
-                            ADD->{viewModel.showDialog = DialogState(INSERT_DIALOG,item)}
-                            ALARM->{viewModel.permission(NOTIFICATION,item!!)}
-                            IMAGE->{}
-                            CHANGE_ITEM->{viewModel.showDialog = DialogState(INSERT_DIALOG,item)}
-                            CHANGE->{(item.let {viewModel.updateitem(it!!) })}
-                            DELETE->{
-                                viewModel.showDialog = DialogState(DELETE_DIALOG,item)
-                            }
+                    ListToDo(list = todoList,
+                        onClick = {item,action->
+                            when(action){
+                                ALARM->{viewModel.permission(NOTIFICATION,item)}
+                                IMAGE->{}
+                                CHANGE_ITEM->{
+                                    viewModel.showDialog = DialogState(INSERT_DIALOG,item)}
+                                CHANGE->{
+                                    val newItem = item.copy(
+                                        change = !item.change,
+                                        changeAlarm = if (item.changeAlarm) false else item.changeAlarm)
+                                    viewModel.updateItem(newItem)
+                                }
+                                DELETE->{
+                                    viewModel.showDialog = DialogState(DELETE_DIALOG,item)
+                                }
 
-                        }
-                    }
+                            }
+                        },
+                        onAddItem = {viewModel.showDialog = DialogState(INSERT_DIALOG)})
                 }
                 2 -> {Text("3")}
 

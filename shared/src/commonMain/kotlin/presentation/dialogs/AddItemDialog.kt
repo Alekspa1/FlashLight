@@ -33,8 +33,8 @@ fun AddOrChangeItemDialog(
     item: Item?,
     onResult :(item: Item?,result: Boolean,alarm: Boolean) -> Unit ={_,_,_->},){
 
-    var stateTextName by mutableStateOf(item?.name ?: "" )
-    var stateTextDecs by mutableStateOf(item?.desc ?: "" )
+    var stateTextName by remember { mutableStateOf(item?.name ?: "") }
+    var stateTextDecs by remember { mutableStateOf(item?.desc ?: "") }
 
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -112,13 +112,22 @@ fun AddOrChangeItemDialog(
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp) // Отступ между кнопками
                 ) {
-                    // Твоя новая ТРЕТЬЯ кнопка (например, для отмены или другого действия)
-                    TextButton(onClick = { onResult(null,true,true) }) {
+
+
+                    TextButton(onClick = {
+                        val text = if (stateTextName.trim().isEmpty())  "Без названия" else stateTextName.trim()
+                        if (item != null){ onResult(item.copy(name = text,
+                            desc = stateTextDecs.trim()),true,true)}
+                        else{
+                            val item = Item(name = text, desc = stateTextDecs.trim())
+                            onResult(item,true,true)
+                        }
+                    }) {
                         Text("Установка будильника")
                     }
 
                     // Стандартная кнопка "Нет"
-                    TextButton(onClick = { onResult(null,true,false) }) {
+                    TextButton(onClick = { onResult(null,false,false) }) {
                         Text("Отмена")
                     }
                 }

@@ -2,7 +2,9 @@ package data
 
 import MainViewModel
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import data.perository.AlarmRepeadImp
 import data.room.myDataBase
+import domain.repostirory.AlarmRepeadRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import org.koin.core.context.startKoin
@@ -28,6 +30,7 @@ val appModule = module {
     }
 
     single { get<myDataBase>().CourseDao() }
+    single<AlarmRepeadRepository> { AlarmRepeadImp(get()) }
 
 }
 

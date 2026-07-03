@@ -2,6 +2,11 @@ package presentation.screens
 
 import CommonConst.ADD
 import CommonConst.ALARM
+import CommonConst.ALARM_DAY
+import CommonConst.ALARM_MONTH
+import CommonConst.ALARM_ONE
+import CommonConst.ALARM_WEEK
+import CommonConst.ALARM_YEAR
 import CommonConst.CHANGE
 import CommonConst.CHANGE_ITEM
 import CommonConst.DELETE
@@ -24,6 +29,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Alarm
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -39,14 +45,25 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import data.room.Item
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.daysUntil
+import kotlinx.datetime.number
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.painterResource
 import presentation.theme.Theme
 import presentation.theme.ThemeNeon
+import kotlin.time.Clock
+import kotlinx.datetime.Instant
+import kotlinx.datetime.todayIn
 
 @Composable
 fun ListToDo(list: List<Item>,
              theme: Theme = ThemeNeon(),
-             onClick : (Item?, Int) -> Unit = { _, _->}){
+             onClick : (Item, Int) -> Unit = {_,_->},
+             onAddItem : () -> Unit = {}
+             ){
     Column(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
 
@@ -101,7 +118,7 @@ fun ListToDo(list: List<Item>,
                 }
 
                 IconButton(modifier = Modifier.align(Alignment.CenterEnd),
-                    onClick = { onClick(null,ADD) },
+                    onClick = { onAddItem() },
                 ){
                     Icon(
                         imageVector = theme.iconAdd,
@@ -134,16 +151,14 @@ fun Item(item: Item, theme: Theme = ThemeNeon(), onClick : (Item, Int) -> Unit =
                 IconButton(
 
                     onClick = { onClick(item,ALARM) },
-
-                    modifier = Modifier.fillMaxHeight() // Иконка растягивается на всю высоту вкладок
-
+                    modifier = Modifier.size(30.dp)
                 ) {
 
                     Icon(
                         imageVector = Icons.Default.Alarm, // Нужен импорт androidx.compose.material.icons.Icons
                         contentDescription = "Будильник",
                        tint =  if(item.changeAlarm) theme.tintAlarmOn else theme.tintAlarmOff,
-                        modifier = Modifier.size(30.dp)
+                        modifier = Modifier.fillMaxSize(),
                     )
 
                 }
@@ -154,13 +169,13 @@ fun Item(item: Item, theme: Theme = ThemeNeon(), onClick : (Item, Int) -> Unit =
             Card(
                 modifier = Modifier
                     .weight(1f) // Заставляет карточку занять ВСЁ свободное место между кнопками
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(RoundedCornerShape(15.dp))
                     .border(
                         2.dp,
                         if(item.change) theme.cardItemBorderTrue
                         else if (item.changeAlarm) theme.cardItemBorderAlarm
                         else theme.cardItemBorderFalse,
-                        RoundedCornerShape(16.dp)
+                        RoundedCornerShape(15.dp)
                     ).clickable{onClick(item,CHANGE_ITEM)},
 
                 shape = RoundedCornerShape(16.dp),
@@ -175,21 +190,22 @@ fun Item(item: Item, theme: Theme = ThemeNeon(), onClick : (Item, Int) -> Unit =
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(8.dp)
+                        .padding(start = 6.dp, top = 8.dp, bottom = 8.dp,end = 6.dp)
                     ,
                     verticalAlignment = Alignment.CenterVertically,
 
 
                 ) {
                     if (item.uri != "") IconButton(
-                        onClick = { onClick(item,IMAGE) }
-                        ,modifier = Modifier.size(30.dp),
+                        onClick = { onClick(item,IMAGE) },
+                        modifier = Modifier.size(26.dp)
                     ) {
 
                         Icon(
                             modifier = Modifier.fillMaxSize(),
                             imageVector = theme.iconImage, // Нужен импорт androidx.compose.material.icons.Icons
-                            contentDescription = "Картинка"
+                            contentDescription = "Картинка",
+                            tint = theme.iconTint
                         )
 
                     }
@@ -202,17 +218,28 @@ fun Item(item: Item, theme: Theme = ThemeNeon(), onClick : (Item, Int) -> Unit =
                     ) {
                         Text(
                             text = item.name,
-                            color = theme.textColor)
-                        if (item.desc.isNotEmpty())  { Text(text = item.desc, color = theme.textDecs) }
-                        if (item.changeAlarm) Text(text = "Напоминт в четверг в 18:00", color = theme.textAlarm)
+                            color = theme.textColor,
+                            fontSize = 18.sp)
+                        if (item.desc.isNotEmpty())  {
+                            Text(text = item.desc,
+                                color = theme.textDecs,
+                                fontSize = 12.sp) }
+                        if (item.changeAlarm) {
+                            Text(
+                                text = alarmText(item),
+                                color = theme.textAlarm,
+                                fontSize = 12.sp
+                            )
+                        }
                     }
                     IconButton(
                         onClick = { onClick(item,CHANGE) },
-                        modifier = Modifier.size(30.dp)
+                        modifier = Modifier.size(26.dp)
                     ) {
 
                         Icon(
                             modifier = Modifier.fillMaxSize(),
+
                             imageVector =
                                 if(item.change)  theme.chekBoxOn
                                 else theme.chekBoxOff,
@@ -233,16 +260,17 @@ fun Item(item: Item, theme: Theme = ThemeNeon(), onClick : (Item, Int) -> Unit =
                 IconButton(
 
                     onClick = {onClick(item,DELETE)  },
+                    modifier = Modifier.size(30.dp)
 
-                    modifier = Modifier.fillMaxHeight() // Иконка растягивается на всю высоту вкладок
 
                 ) {
 
                     Icon(
+                        modifier = Modifier.fillMaxSize(),
                         imageVector = theme.iconDelItem, // Нужен импорт androidx.compose.material.icons.Icons
                         contentDescription = "Меню",
                         tint = theme.iconDelTint,
-                        modifier = Modifier.size(30.dp)
+
                     )
 
                 }
@@ -255,6 +283,77 @@ fun Item(item: Item, theme: Theme = ThemeNeon(), onClick : (Item, Int) -> Unit =
 
     }
 
+}
+
+// Вспомогательная функция для форматирования времени в строку HH:mm вручную (чтобы не тащить тяжелые форматировщики в commonMain)
+private fun formatTime(hour: Int, minute: Int): String {
+    val h = if (hour < 10) "0$hour" else "$hour"
+    val m = if (minute < 10) "0$minute" else "$minute"
+    return "$h:$m"
+}
+
+// Вспомогательная функция для ручного форматирования даты dd.MM.yyyy
+private fun formatDate(date: LocalDate): String {
+    val d = if (date.dayOfMonth < 10) "0${date.dayOfMonth}" else "${date.dayOfMonth}"
+    val m = if (date.month.number < 10) "0${date.month.number}" else "${date.month.number}"
+    return "$d.$m.${date.year}"
+}
+
+fun alarmText(item: Item): String {
+    val tz = TimeZone.currentSystemDefault()
+
+    // Явно указываем фабричный метод kotlinx.datetime, чтобы получить правильный тип
+    val instant = kotlinx.datetime.Instant.fromEpochMilliseconds(item.alarmTime)
+    val localDateTime = instant.toLocalDateTime(tz)
+
+    val resultTime = formatTime(localDateTime.hour, localDateTime.minute)
+    val resultDate = getFormattedDate(item.alarmTime)
+    val alarmText = "Напомнит $resultDate в $resultTime"
+
+    return when (item.interval) {
+        ALARM_ONE -> alarmText
+        ALARM_DAY -> "$alarmText и через день"
+        ALARM_WEEK -> "$alarmText и через неделю"
+        ALARM_MONTH -> "$alarmText и через месяц"
+        ALARM_YEAR -> "$alarmText и через год"
+        else -> alarmText
+    }
+}
+
+private fun getFormattedDate(millis: Long): String {
+    val tz = TimeZone.currentSystemDefault()
+
+    // Вместо Clock.System используем обертку ClockSystem из kotlinx-datetime,
+    // которая возвращает совместимый тип даты
+    val currentMillis = kotlin.time.Clock.System.now().toEpochMilliseconds()
+
+// 2. Переводим их в дату через проверенный kotlinx.datetime.Instant
+    val today: LocalDate = kotlinx.datetime.Instant.fromEpochMilliseconds(currentMillis).toLocalDateTime(tz).date
+
+    // Явно создаем целевую дату через правильный пакет
+    val targetDate = kotlinx.datetime.Instant.fromEpochMilliseconds(millis).toLocalDateTime(tz).date
+
+    val daysDiff = today.daysUntil(targetDate)
+
+    return when (daysDiff) {
+        0 -> "сегодня"
+        1 -> "завтра"
+        2 -> "послезавтра"
+        in 3..6 -> getDayOfWeekWithPreposition(targetDate.dayOfWeek)
+        else -> formatDate(targetDate)
+    }
+}
+
+private fun getDayOfWeekWithPreposition(dayOfWeek: DayOfWeek): String {
+    return when (dayOfWeek) {
+        DayOfWeek.MONDAY -> "в понедельник"
+        DayOfWeek.TUESDAY -> "во вторник"
+        DayOfWeek.WEDNESDAY -> "в среду"
+        DayOfWeek.THURSDAY -> "в четверг"
+        DayOfWeek.FRIDAY -> "в пятницу"
+        DayOfWeek.SATURDAY -> "в субботу"
+        DayOfWeek.SUNDAY -> "в воскресенье"
+    }
 }
 
 @Preview(showBackground = true)
