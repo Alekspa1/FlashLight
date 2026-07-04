@@ -215,8 +215,9 @@ fun CreateActionInAlarmDialog(viewModel: MainViewModel){
                     "Каждый год" -> ALARM_YEAR
                      else -> ALARM_ONE
                   }
-                    viewModel.updateItem(item.copy(interval = selectedInterval, change = false, changeAlarm = true))
-                    viewModel.insertAlarm(item)
+                    val newitem = item.copy(interval = selectedInterval, change = false, changeAlarm = true)
+                    viewModel.updateItem(newitem)
+                    viewModel.insertAlarm(newitem)
                  viewModel.showDialog = DialogState()
                 }) {
                     Text("Ок")

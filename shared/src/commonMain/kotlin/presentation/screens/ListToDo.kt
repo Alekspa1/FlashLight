@@ -71,10 +71,7 @@ fun ListToDo(list: List<Item>,
 
             modifier = Modifier.fillMaxWidth().weight(1f),
 
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-
-
-            contentPadding = PaddingValues(8.dp)
+            verticalArrangement = Arrangement.spacedBy(5.dp),
 
         ) {
             val categoryName = list.firstOrNull()?.category ?: "Повседневные"
@@ -82,7 +79,7 @@ fun ListToDo(list: List<Item>,
                 Box(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)){
                     Text(
                         text = categoryName,
-                        color = Color.White, // Твой фирменный сочный сине-голубой неон!
+                        color = Color.White,
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.align(Alignment.Center)
@@ -91,7 +88,7 @@ fun ListToDo(list: List<Item>,
             }
             items(
                 items = list,
-                key = { it.id!!}
+                key = { it.id}
             ){item->
                 Box(modifier = Modifier.animateItem()) {
                     Item(item) { item, action -> onClick(item, action)
@@ -105,27 +102,27 @@ fun ListToDo(list: List<Item>,
 
         Row(modifier = Modifier.fillMaxWidth()) {
             Box(modifier = Modifier.fillMaxWidth()
-                .padding(8.dp)
+                .padding(top=8.dp, bottom = 8.dp, end = 8.dp)
 
             ){
-                IconButton(modifier = Modifier.align(Alignment.Center),
+                IconButton(modifier = Modifier.size(50.dp).align(Alignment.Center),
                     onClick = {  },
                 ){
                     Image(
                         painter = painterResource(theme.iconMicro),
                         contentDescription = null,
-                        modifier = Modifier.size(50.dp)
+                        modifier = Modifier.fillMaxSize()
 
                         )
                 }
 
-                IconButton(modifier = Modifier.align(Alignment.CenterEnd),
+                IconButton(modifier = Modifier.size(50.dp).align(Alignment.CenterEnd),
                     onClick = { onAddItem() },
                 ){
                     Icon(
                         imageVector = theme.iconAdd,
                         contentDescription = null,
-                        modifier = Modifier.size(50.dp),
+                        modifier = Modifier.fillMaxSize(),
                         tint = theme.iconAddTint
 
                     )
@@ -143,7 +140,7 @@ fun ListToDo(list: List<Item>,
 @Composable
 
 fun Item(item: Item, theme: Theme = ThemeNeon(), onClick : (Item, Int) -> Unit = { _, _->}) {
-    Column(modifier = Modifier.fillMaxSize()) {
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically // Все три элемента будут идеально ровно по центру высоты
@@ -151,10 +148,13 @@ fun Item(item: Item, theme: Theme = ThemeNeon(), onClick : (Item, Int) -> Unit =
             // 1. Левая кнопка/текст
 
                 Box(
-                    modifier = Modifier.size(30.dp).combinedClickable(
+                    modifier = Modifier
+                        .padding(start = 8.dp)
+                        .size(35.dp).combinedClickable(
                         onClick = {onClick(item,ALARM)},
                         onLongClick = {onClick(item,ALARM_LONG)}
                     )
+
 
 
                 ) {
@@ -173,6 +173,7 @@ fun Item(item: Item, theme: Theme = ThemeNeon(), onClick : (Item, Int) -> Unit =
 
             Card(
                 modifier = Modifier
+                    .padding(start = 5.dp, end = 5.dp)
                     .weight(1f) // Заставляет карточку занять ВСЁ свободное место между кнопками
                     .clip(RoundedCornerShape(15.dp))
                     .border(
@@ -181,7 +182,9 @@ fun Item(item: Item, theme: Theme = ThemeNeon(), onClick : (Item, Int) -> Unit =
                         else if (item.changeAlarm) theme.cardItemBorderAlarm
                         else theme.cardItemBorderFalse,
                         RoundedCornerShape(15.dp)
-                    ).clickable{onClick(item,CHANGE_ITEM)},
+
+                    ).clickable{onClick(item,CHANGE_ITEM)}
+                    ,
 
                 shape = RoundedCornerShape(16.dp),
 
@@ -203,7 +206,8 @@ fun Item(item: Item, theme: Theme = ThemeNeon(), onClick : (Item, Int) -> Unit =
                 ) {
                     if (item.uri != "") IconButton(
                         onClick = { onClick(item,IMAGE) },
-                        modifier = Modifier.size(26.dp)
+                        modifier = Modifier.padding(start = 8.dp).size(24.dp)
+
                     ) {
 
                         Icon(
@@ -221,21 +225,21 @@ fun Item(item: Item, theme: Theme = ThemeNeon(), onClick : (Item, Int) -> Unit =
                             .padding(start = 6.dp, end = 6.dp),
                     ) {
                         Text(
-                            modifier = Modifier.padding(top = 5.dp, bottom = 5.dp),
+                            modifier = Modifier.padding(start = 5.dp,end = 5.dp),
                             text = item.name,
                             color = theme.textColor,
                             lineHeight = 20.sp,
                             fontSize = 18.sp)
                         if (item.desc.isNotEmpty())  {
                             Text(
-                                modifier = Modifier.padding(bottom = 5.dp),
+                                modifier = Modifier.padding(start = 5.dp,top = 2.dp, end = 5.dp),
                                 text = item.desc,
                                 color = theme.textDecs,
                                 lineHeight = 14.sp,
                                 fontSize = 12.sp) }
                         if (item.changeAlarm) {
                             Text(
-                                modifier = Modifier.padding(top = 2.dp, bottom = 3.dp),
+                                modifier = Modifier.padding(start = 5.dp,top = 4.dp, end = 5.dp),
                                 text = alarmText(item),
                                 color = theme.textAlarm,
                                 fontSize = 12.sp
@@ -244,7 +248,7 @@ fun Item(item: Item, theme: Theme = ThemeNeon(), onClick : (Item, Int) -> Unit =
                     }
                     IconButton(
                         onClick = { onClick(item,CHANGE) },
-                        modifier = Modifier.size(26.dp)
+                        modifier = Modifier.padding(end = 8.dp).size(24.dp)
                     ) {
 
                         Icon(
@@ -270,7 +274,7 @@ fun Item(item: Item, theme: Theme = ThemeNeon(), onClick : (Item, Int) -> Unit =
                 IconButton(
 
                     onClick = {onClick(item,DELETE)  },
-                    modifier = Modifier.size(30.dp)
+                    modifier = Modifier.padding(end = 8.dp).size(35.dp)
 
 
                 ) {
@@ -291,7 +295,7 @@ fun Item(item: Item, theme: Theme = ThemeNeon(), onClick : (Item, Int) -> Unit =
 
 
 
-    }
+
 
 }
 

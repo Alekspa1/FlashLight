@@ -65,14 +65,14 @@ class MainViewModel(
         val filteredList = list.filter { it.category == currentCategory }
 
         // 2. ЗАТЕМ СОРТИРУЕМ ОТФИЛЬТРОВАННЫЙ СПИСОК
-        if (sort == SORT_STANDART) {
-            filteredList.sortedWith(
-                compareBy<Item> { it.change }
-                    .thenBy { if (it.alarmTime > 0L) 0 else 1 }
-                    .thenByDescending { it.alarmTime }
-                    .thenBy { it.sort }
-            )
-        } else {
+         if (sort == SORT_STANDART) {
+             filteredList.sortedWith(
+                 compareBy<Item> { if (it.changeAlarm) 0 else 1 } // 1. Сначала ВСЕ с активным будильником (желтые)
+                     .thenBy { if (it.change) 1 else 0 }          // 2. ОПУСКАЕМ ЗЕЛЕНЫЕ: сначала незавершенные (0), выполненные (1) вниз!
+                     .thenBy { it.alarmTime }                     // 3. Сортируем будильники по времени
+                     .thenBy { it.sort }                          // 4. Стандартная сортировка для остальных
+             )
+         } else {
             filteredList.sortedBy { it.sort }
         }
     }.flowOn(Dispatchers.Default)

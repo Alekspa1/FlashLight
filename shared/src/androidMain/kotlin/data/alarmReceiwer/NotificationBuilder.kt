@@ -89,7 +89,7 @@ class NotificationBuilder(
 
         val canselIntent =
             PendingIntent.getBroadcast(
-                context, item.id!!, intentCancel,
+                context, item.id, intentCancel,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
@@ -108,7 +108,7 @@ class NotificationBuilder(
 
         val contentIntent =
             PendingIntent.getActivity(
-                context, item.id!!, intentPush,
+                context, item.id, intentPush,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
         val bitmap:Bitmap? = try {

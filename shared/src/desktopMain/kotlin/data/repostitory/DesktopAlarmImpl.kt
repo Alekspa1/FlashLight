@@ -14,109 +14,95 @@ import org.koin.core.context.GlobalContext
 import java.awt.SystemTray
 import java.awt.TrayIcon
 import java.awt.image.BufferedImage
+import java.io.File
+import java.nio.charset.Charset
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
 
 class DesktopAlarmImpl(
-    private val alarmRepeatRepositoryLazy:  Lazy<AlarmRepeadRepository>,
     private val db: CourseDao
 ) : AlarmRepository {
 
-    private val alarmRepeatRepository: AlarmRepeadRepository
-        get() = alarmRepeatRepositoryLazy.value
-    // Пул потоков, который будет отсчитывать время в фоне
     private val scheduler = Executors.newScheduledThreadPool(2)
-
-    // Хранилище запущенных таймеров, чтобы их можно было отменять по ID
     private val activeAlarms = ConcurrentHashMap<Int, ScheduledFuture<*>>()
-
     private val scope = CoroutineScope(Dispatchers.IO)
 
     override fun createAlarm(item: Item) {
-        // 1. Если будильник с таким ID уже тикает, сначала сбрасываем его
+        // ОСТАВЛЯЕМ СТРОКУ! Она жизненно необходима для очистки памяти Java
         deleteAlarm(item.id)
 
         val currentMillis = System.currentTimeMillis()
         val delay = item.alarmTime - currentMillis
 
-        // Если время будильника уже в прошлом, игнорируем запуск
         if (delay <= 0) return
 
-        // 2. Планируем задачу на выполнение через нужный delay (в миллисекундах)
         val scheduledTask = scheduler.schedule({
             triggerAlarm(item)
         }, delay, TimeUnit.MILLISECONDS)
 
-        // 3. Сохраняем ссылку на таймер, чтобы удалить его, если юзер передумает
         activeAlarms[item.id] = scheduledTask
     }
 
     override fun deleteAlarm(id: Int) {
-        // Достаем таймер из мапы и жестко отменяем его (true — прервать поток)
         activeAlarms.remove(id)?.cancel(true)
     }
 
     private fun triggerAlarm(item: Item) {
         activeAlarms.remove(item.id)
+        println("⏰ Будильник '${item.name}' СРАБОТАЛ на Десктопе!")
+
+        // Показываем русское уведомление без кракозябр (кодировка windows-1251)
         showDesktopNotification(
             title = item.name,
             message = if (item.desc.isNotEmpty()) item.desc else "Будильник сработал!"
         )
 
         scope.launch {
-            // Точная копия логики processingAlarm из Android ресивера:
+            println(item.interval)
             when (item.interval) {
                 ALARM_ONE -> {
-                    // Если одноразовый — гасим тумблеры и выключаем в БД
-                    val updatedItem = item.copy(
-                        change = false,
-                        changeAlarm = false
-                    )
-                    // Пишем напрямую в db, так как мы уже в фоновом IO потоке
+                    val updatedItem = item.copy(change = false, changeAlarm = false)
                     db.updateItem(updatedItem)
                 }
-
                 else -> {
-                    // Если повторяющийся — вызываем наш KMP репозиторий повторов
-                    alarmRepeatRepository.alarmRepead(item.id) { message ->
+                    // РАЗРЫВАЕМ КРУГ: Достаем репозиторий из Koin на лету строго в момент звонка
+                    val alarmRepeat = GlobalContext.get().get<AlarmRepeadRepository>()
+
+                    alarmRepeat.alarmRepead(item.id) { message ->
                         println("Десктопный лог повтора: $message")
                     }
                 }
             }
         }
-
     }
 
-    private val trayScheduler = Executors.newSingleThreadScheduledExecutor()
-
     private fun showDesktopNotification(title: String, message: String) {
-        if (!SystemTray.isSupported()) return
-
-        val tray = SystemTray.getSystemTray()
-        val image = BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB)
-        val trayIcon = TrayIcon(image, "FlashLight Alarm").apply {
-            isImageAutoSize = true
-        }
+        val os = System.getProperty("os.name").lowercase()
 
         try {
-            tray.add(trayIcon)
-            trayIcon.displayMessage(title, message, TrayIcon.MessageType.INFO)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            // Если упало на displayMessage, гарантированно убираем иконку сразу
-            try { tray.remove(trayIcon) } catch (_: Exception) {}
-            return
-        }
+            if (os.contains("win")) {
+                val tempFile = File.createTempFile("flashlight_push", ".vbs")
+                tempFile.deleteOnExit()
 
-        // Планируем удаление через 5 секунд без блокировки потока (Thread.sleep)
-        trayScheduler.schedule({
-            try {
-                tray.remove(trayIcon)
-            } catch (e: Exception) {
-                e.printStackTrace()
+                // ИСПРАВЛЕНО: Явно пишем текст в кодировке Windows-1251, чтобы не было кракозябр
+                val win1251 = Charset.forName("windows-1251")
+                val scriptContent = "Set objShell = CreateObject(\"WScript.Shell\")\n" +
+                        "objShell.Popup \"$message\", 0, \"$title\", 64"
+
+                tempFile.writeText(scriptContent, win1251)
+
+                ProcessBuilder("wscript", tempFile.absolutePath).start()
+
+            } else if (os.contains("mac")) {
+                val script = "display notification \"$message\" with title \"$title\""
+                ProcessBuilder("osascript", "-e", script).start()
+            } else {
+                ProcessBuilder("notify-send", title, message).start()
             }
-        }, 5, TimeUnit.SECONDS)
+        } catch (e: Exception) {
+            println("❌ Ошибка при отправке уведомления на ПК: ${e.message}")
+        }
     }
 }

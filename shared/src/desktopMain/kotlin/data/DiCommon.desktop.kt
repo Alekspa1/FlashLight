@@ -32,5 +32,5 @@ actual val moduleAnotherPlatform: Module = module {
     }
     single<DeleteImageInItemReository> { DesktopDeleteImageInItemImpl() }
     single<PermissionRepository> { DesktopPermissonImp() }
-    single<AlarmRepository> { DesktopAlarmImpl(alarmRepeatRepositoryLazy = inject(), db = get()) }
+    single<AlarmRepository> { DesktopAlarmImpl(db = get()) }
 }

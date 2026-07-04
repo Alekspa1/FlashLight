@@ -103,20 +103,21 @@ class AlarmReceiwer : BroadcastReceiver(), KoinComponent {
                         alarm.createAlarm(newItemFals)
                     }
                 }
+                    withContext(Dispatchers.Main){
+                        Toast.makeText(
+                            context.applicationContext,
+                            "Отложено на 10 минут",
+                            Toast.LENGTH_SHORT
+                        ).show()
 
-                android.os.Handler(android.os.Looper.getMainLooper()).post {
-                    Toast.makeText(
-                        context.applicationContext,
-                        "Отложено на 10 минут",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            
-                
+
+
+                    }
+
             } // Когда нажал кнопку отложить
 
+
             REBOOT -> {
-                Log.d("MyLog", "REBOOT")
                     db.getActiveAlarms().forEach { item ->
                         if (item.alarmTime > calendarZero.timeInMillis) {
                             alarm.createAlarm(item)
@@ -126,7 +127,6 @@ class AlarmReceiwer : BroadcastReceiver(), KoinComponent {
                             processingAlarm(item, "(Пропущено)")
                         }
                     }
-                Log.d("MyLog", "REBOOT END")
 
             } // После перезагрузки
         }    
