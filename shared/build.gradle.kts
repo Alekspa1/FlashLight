@@ -60,7 +60,7 @@ kotlin {
             
 
             // Зависимости Coil (3.5.0)
-            implementation("io.coil-kt.coil3:coil-compose:3.5.0")
+            implementation("io.coil-kt.coil3:coil-compose:3.3.0")
    
         }
 
