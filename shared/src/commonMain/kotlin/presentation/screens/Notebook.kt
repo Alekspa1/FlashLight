@@ -36,19 +36,17 @@ import androidx.compose.ui.platform.LocalFocusManager
 
 @Composable
 
-fun Notebook(viewModel: MainViewModel){
+fun Notebook(viewModel: MainViewModel,pageIndex: Int){
 
     val lifecycleOwner = LocalLifecycleOwner.current
-     val focusManager = LocalFocusManager.current
-    
+    val focusManager = LocalFocusManager.current
+    if(pageIndex != 0) focusManager.clearFocus()
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_STOP) {
                 viewModel.saveText() // ЖЕЛЕЗНО сохраняем данные на диск!
             }
-            if (event == Lifecycle.Event.ON_PAUSE) {
-                focusManager.clearFocus()
-            }
+            
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose {
