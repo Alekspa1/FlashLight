@@ -54,6 +54,7 @@ kotlin {
             implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.8.0")
 
             implementation("io.github.vinceglb:filekit-compose:0.8.8")
+             implementation("io.github.vinceglb:filekit-coil:0.8.0") 
 // Поменяли 3.5.0 на стабильную 3.0.4
             implementation("io.coil-kt.coil3:coil-compose:3.3.0")
             implementation("io.coil-kt.coil3:coil-network-ktor3:3.3.0")
