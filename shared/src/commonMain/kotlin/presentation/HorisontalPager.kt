@@ -236,7 +236,7 @@ fun MainWeatherPager(paddingValues: PaddingValues = PaddingValues(),
         ) { pageIndex ->
             when (pageIndex) {
                 0 -> {
-                    Notebook(viewModel,pageIndex)
+                    Notebook(viewModel,pagerState)
                 }
                 1 -> {
                     ListToDo(list = todoList,
