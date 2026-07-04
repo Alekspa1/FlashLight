@@ -45,6 +45,8 @@ fun Notebook(viewModel: MainViewModel){
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_STOP) {
                 viewModel.saveText() // ЖЕЛЕЗНО сохраняем данные на диск!
+            }
+            if (event == Lifecycle.Event.ON_PAUSE) {
                 focusManager.clearFocus()
             }
         }
@@ -52,7 +54,6 @@ fun Notebook(viewModel: MainViewModel){
         onDispose {
             viewModel.saveText()
             lifecycleOwner.lifecycle.removeObserver(observer)
-            focusManager.clearFocus()
         }
     }
 
