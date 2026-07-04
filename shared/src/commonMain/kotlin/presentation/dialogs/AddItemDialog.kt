@@ -54,13 +54,17 @@ fun AddOrChangeItemDialog(
     var stateTextDecs by remember { mutableStateOf(item?.desc ?: "") }
     var isImageExpanded by remember { mutableStateOf(false) }
     var uriPhoto by remember { mutableStateOf(item?.uri ?: "") }
+    var selectedFile by remember { mutableStateOf<PlatformFile?>(null) }
     var categorySelected by remember { mutableStateOf(item?.category ?: "Повседневные") }
     val fileLauncher = rememberFilePickerLauncher(type = PickerType.Image) { platformFile ->
-        platformFile?.let { file ->
-            // Просто запоминаем временный путь для отображения на экране!
-            uriPhoto = file.path ?: ""
-        }
+    platformFile?.let { file ->
+        // Запоминаем объект файла целиком
+        selectedFile = file
+        
+        // Для вашей логики сохранения вы всё ещё можете брать строку:
+        uriPhoto = file.path ?: "" 
     }
+}
     var deleteUri by remember { mutableStateOf(false) }
 
     if (isImageExpanded && uriPhoto.isNotEmpty()) {
@@ -144,7 +148,7 @@ fun AddOrChangeItemDialog(
                         if (uriPhoto != "") {
                             // Отображение картинки через Coil (Замена Glide)
                             AsyncImage(
-                                model = uriPhoto,
+                                model = selectedFile,
                                 contentDescription = "Превью фото",
                                 modifier = Modifier
                                     .size(80.dp)
