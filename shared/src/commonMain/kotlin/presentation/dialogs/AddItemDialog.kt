@@ -56,13 +56,18 @@ fun AddOrChangeItemDialog(
     var uriPhoto by remember { mutableStateOf(item?.uri ?: "") }
     var selectedFile by remember { mutableStateOf<PlatformFile?>(null) }
     var categorySelected by remember { mutableStateOf(item?.category ?: "Повседневные") }
-    val fileLauncher = rememberFilePickerLauncher(type = PickerType.Image) { platformFile ->
+ val fileLauncher = rememberFilePickerLauncher(type = PickerType.Image) { platformFile ->
     platformFile?.let { file ->
-        // Запоминаем объект файла целиком
-        selectedFile = file
+        val rawPath = file.path ?: ""
         
-        // Для вашей логики сохранения вы всё ещё можете брать строку:
-        uriPhoto = file.path ?: "" 
+        // Исправляем путь ТОЛЬКО для Android, если это content:// ссылка
+        uriPhoto = if (rawPath.startsWith("content://")) {
+            rawPath // Coil на Android умеет читать content:// строку напрямую, если не путать его файловыми префиксами
+        } else if (!rawPath.startsWith("file://") && !rawPath.contains(":/")) {
+            "file://$rawPath" // Для обычных локальных путей
+        } else {
+            rawPath // Для Десктопа (там пути уже идут как C:/... или /Users/...)
+        }
     }
 }
     var deleteUri by remember { mutableStateOf(false) }
