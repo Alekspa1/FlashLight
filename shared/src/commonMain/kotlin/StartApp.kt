@@ -32,14 +32,7 @@ import io.github.vinceglb.filekit.coil.addPlatformFileSupport
 @Composable
 fun StartApp(viewModel : MainViewModel = koinViewModel ()) {
     val snackbarHostState = remember { SnackbarHostState() }
-     setSingletonImageLoaderFactory { context ->
-        ImageLoader.Builder(context)
-            .components {
-                // Вот тут мы и прописываем эту функцию!
-                addPlatformFileSupport() 
-            }
-            .build()
-    }
+     
     viewModel.updateAlarm()
     LaunchedEffect(Unit) {
         viewModel.toast.collect { message ->
