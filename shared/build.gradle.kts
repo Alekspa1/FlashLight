@@ -52,6 +52,11 @@ kotlin {
             implementation("androidx.sqlite:sqlite-bundled:2.7.0")
             implementation("androidx.room:room-runtime:2.8.4")
             implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.8.0")
+
+            implementation("io.github.vinceglb:filekit-compose:0.8.8")
+// Поменяли 3.5.0 на стабильную 3.0.4
+            implementation("io.coil-kt.coil3:coil-compose:3.3.0")
+            implementation("io.coil-kt.coil3:coil-network-ktor3:3.3.0")
         }
 
         commonTest.dependencies {
@@ -89,22 +94,6 @@ android {
         minSdk = 26
     }
 }
-
-//compose.desktop {
-//    application {
-//        mainClass = "MainKt" // Имя твоего главного файла запуска десктопа
-//
-//        // Указываем путь к иконке прямо внутри десктопных ресурсов
-//        // Расширение файла писать НЕ нужно — сборщик сам выберет нужный формат под Windows/Mac!
-//        iconFile.set(project.file("src/desktopMain/resources/icon"))
-//
-//        nativeDistributions {
-//            targetFormats(org.jetbrains.compose.desktop.application.dsl.TargetFormat.Msi, org.jetbrains.compose.desktop.application.dsl.TargetFormat.Dmg)
-//            packageName = "FlashLight"
-//            packageVersion = "1.0.0"
-//        }
-//    }
-//}
 
 dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling:1.10.0")

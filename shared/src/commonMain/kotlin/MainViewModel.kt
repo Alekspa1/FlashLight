@@ -35,7 +35,7 @@ import kotlin.time.Instant
 class MainViewModel(
     private val pref: SharedPrefRepository,
     private val db: CourseDao,
-    private val deleteImageInitem: DeleteImageInItemReository,
+    val deleteImageInitem: DeleteImageInItemReository,
     private val permission: PermissionRepository,
     private val alarm: AlarmRepository,
     private val alarmRepeat: AlarmRepeadRepository
@@ -188,6 +188,8 @@ class MainViewModel(
             }
         }
     }
+
+
 
     fun getPremium() = true
 

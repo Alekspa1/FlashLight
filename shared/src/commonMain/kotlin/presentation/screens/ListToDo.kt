@@ -76,11 +76,11 @@ fun ListToDo(list: List<Item>,
         ) {
             val categoryName = list.firstOrNull()?.category ?: "Повседневные"
             item(key = categoryName) {
-                Box(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)){
+                Box(modifier = Modifier.fillMaxWidth()){
                     Text(
                         text = categoryName,
                         color = Color.White,
-                        fontSize = 24.sp,
+                        fontSize = 23.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.align(Alignment.Center)
                     )
@@ -102,7 +102,7 @@ fun ListToDo(list: List<Item>,
 
         Row(modifier = Modifier.fillMaxWidth()) {
             Box(modifier = Modifier.fillMaxWidth()
-                .padding(top=8.dp, bottom = 8.dp, end = 8.dp)
+                .padding(8.dp)
 
             ){
                 IconButton(modifier = Modifier.size(50.dp).align(Alignment.Center),

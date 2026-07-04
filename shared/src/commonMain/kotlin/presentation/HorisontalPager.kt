@@ -58,6 +58,12 @@ import presentation.screens.Notebook
 import CommonConst.TIME
 import CommonConst.ACTION
 import CommonConst.ALARM_LONG
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.io.files.Path
+import kotlinx.io.files.SystemFileSystem
+import kotlin.time.Clock
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 
@@ -80,15 +86,35 @@ fun MainWeatherPager(paddingValues: PaddingValues = PaddingValues(),
                 }
             }
 
-            INSERT_DIALOG->{
-                AddOrChangeItemDialog(item) {item,result,alarm->
-                    if(result && item != null) {
-                        viewModel.insertItem(item,alarm)
-                    } else viewModel.showDialog = DialogState()
+            INSERT_DIALOG -> {
+                AddOrChangeItemDialog(item) { returnedItem, result, alarm, delete ->
+                    if (result && returnedItem != null) {
 
+                        viewModel.viewModelScope.launch(Dispatchers.IO) {
+                            var finalUri = returnedItem.uri
+
+                            // 1. Если сработал флаг удаления и у старого элемента РЕАЛЬНО была картинка
+                            if (delete && (item?.uri ?: "").isNotEmpty()) {
+                                // Вызываем наш перенесенный нативный метод удаления
+                               // deleteSavedImageKMP(item!!.uri)
+                            }
+
+                            // 2. Если картинка была изменена в диалоге, копируем её насовсем по твоей логике
+                            if (delete && returnedItem.uri.isNotEmpty()) {
+                                // Передаем временный путь returnedItem.uri и ID дела для перезаписи!
+                               // finalUri = saveImagePermanentlyKMP(returnedItem.uri, returnedItem.id)
+                            }
+
+                            // 3. Отдаем полностью собранный объект во ViewModel для записи в Room
+                            val itemToInsert = returnedItem.copy(uri = finalUri)
+                            viewModel.insertItem(itemToInsert, alarm)
+                        }
+
+                    } else {
+                        viewModel.showDialog = DialogState()
+                    }
                 }
             }
-
             NOTIFICATION->{
               CreateDateInAlarmDialog(viewModel)
             }
