@@ -25,10 +25,6 @@ import org.koin.compose.viewmodel.koinViewModel
 import presentation.MainWeatherPager
 import presentation.YandexBannerAd
 
-import coil3.ImageLoader
-import coil3.compose.setSingletonImageLoaderFactory
-import io.github.vinceglb.filekit.coil.addPlatformFileSupport
-
 @Composable
 fun StartApp(viewModel : MainViewModel = koinViewModel ()) {
     val snackbarHostState = remember { SnackbarHostState() }
