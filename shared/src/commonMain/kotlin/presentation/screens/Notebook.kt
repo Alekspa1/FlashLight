@@ -32,24 +32,27 @@ import flashlight.shared.generated.resources.ic_micro_neon
 import org.jetbrains.compose.resources.painterResource
 import presentation.dialogs.DeleteDialog
 import presentation.dialogs.DialogState
-
+import androidx.compose.ui.platform.LocalFocusManager
 
 @Composable
 
 fun Notebook(viewModel: MainViewModel){
 
     val lifecycleOwner = LocalLifecycleOwner.current
-
+     val focusManager = LocalFocusManager.current
+    
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_STOP) {
                 viewModel.saveText() // ЖЕЛЕЗНО сохраняем данные на диск!
+                focusManager.clearFocus()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose {
             viewModel.saveText()
             lifecycleOwner.lifecycle.removeObserver(observer)
+            focusManager.clearFocus()
         }
     }
 
