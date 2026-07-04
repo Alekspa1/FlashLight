@@ -56,7 +56,7 @@ kotlin {
             // Обновляем оба модуля FileKit до актуальной версии 0.14.2
               // Зависимости FileKit (0.14.2)
             implementation("io.github.vinceglb:filekit-compose:0.8.8")
-            implementation("io.github.vinceglb:filekit-coil:0.8.0")
+          
             
 
             // Зависимости Coil (3.5.0)
