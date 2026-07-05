@@ -59,8 +59,10 @@ import CommonConst.TIME
 import CommonConst.ACTION
 import CommonConst.ALARM_LONG
 import androidx.lifecycle.viewModelScope
+import data.room.Item
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import presentation.screens.Item
 
 
 import kotlin.time.Clock
@@ -76,7 +78,6 @@ fun MainWeatherPager(paddingValues: PaddingValues = PaddingValues(),
     val scope = rememberCoroutineScope()
     val todoList by viewModel.sortedItemsFlow.collectAsStateWithLifecycle()
         val item = viewModel.showDialog.item
-
         when(viewModel.showDialog.isWho){
           
             DELETE_DIALOG->{
@@ -87,32 +88,20 @@ fun MainWeatherPager(paddingValues: PaddingValues = PaddingValues(),
             }
 
             INSERT_DIALOG -> {
-                AddOrChangeItemDialog(item) { returnedItem, result, alarm, delete ->
-                    if (result && returnedItem != null) {
+                AddOrChangeItemDialog(item,
+                    onCancel = {viewModel.showDialog = DialogState()}){ item, name, desc, uri, category, alarlm ->
 
-                        viewModel.viewModelScope.launch(Dispatchers.IO) {
-                            var finalUri = returnedItem.uri
+                    val finalItem = item?.copy(name = name, desc = desc, uri = uri, category = category)
+                        ?: Item(name = name, desc = desc, uri = uri, category = category)
 
-                            // 1. Если сработал флаг удаления и у старого элемента РЕАЛЬНО была картинка
-                            if (delete && (item?.uri ?: "").isNotEmpty()) {
-                                // Вызываем наш перенесенный нативный метод удаления
-                               // deleteSavedImageKMP(item!!.uri)
-                            }
+                    if(item == null) // новый item
+                        viewModel.insertItem(finalItem, alarlm)
+                    else {
+                        viewModel.updateItem(finalItem,alarlm)
 
-                            // 2. Если картинка была изменена в диалоге, копируем её насовсем по твоей логике
-                            if (delete && returnedItem.uri.isNotEmpty()) {
-                                // Передаем временный путь returnedItem.uri и ID дела для перезаписи!
-                               // finalUri = saveImagePermanentlyKMP(returnedItem.uri, returnedItem.id)
-                            }
 
-                            // 3. Отдаем полностью собранный объект во ViewModel для записи в Room
-                            val itemToInsert = returnedItem.copy(uri = finalUri)
-                            viewModel.insertItem(itemToInsert, alarm)
-                        }
+                    } // старый
 
-                    } else {
-                        viewModel.showDialog = DialogState()
-                    }
                 }
             }
             NOTIFICATION->{
@@ -236,7 +225,7 @@ fun MainWeatherPager(paddingValues: PaddingValues = PaddingValues(),
         ) { pageIndex ->
             when (pageIndex) {
                 0 -> {
-                    Notebook(viewModel,pagerState)
+                    Notebook(viewModel,pagerState.currentPage)
                 }
                 1 -> {
                     ListToDo(list = todoList,

@@ -15,6 +15,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import coil3.ImageLoader
+import coil3.compose.setSingletonImageLoaderFactory
 import flashlight.shared.generated.resources.Res
 import flashlight.shared.generated.resources.background_neon
 import flashlight.shared.generated.resources.background_zabor
@@ -25,10 +27,12 @@ import org.koin.compose.viewmodel.koinViewModel
 import presentation.MainWeatherPager
 import presentation.YandexBannerAd
 
+
 @Composable
 fun StartApp(viewModel : MainViewModel = koinViewModel ()) {
     val snackbarHostState = remember { SnackbarHostState() }
-     
+
+
     viewModel.updateAlarm()
     LaunchedEffect(Unit) {
         viewModel.toast.collect { message ->

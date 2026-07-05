@@ -3,9 +3,9 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("com.google.devtools.ksp")
-    id("com.google.dagger.hilt.android")
-    id ("dagger.hilt.android.plugin")
+   // id("com.google.devtools.ksp")
+   // id("com.google.dagger.hilt.android")
+   // id ("dagger.hilt.android.plugin")
 }
 
 android {
@@ -20,9 +20,9 @@ android {
         versionName = "10"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-    ksp {
-        arg("room.schemaLocation", "$projectDir/schemas")
-    }
+//    ksp {
+//        arg("room.schemaLocation", "$projectDir/schemas")
+//    }
 
     buildTypes {
         release {
@@ -77,7 +77,7 @@ dependencies {
     implementation("androidx.fragment:fragment:1.8.9")
     implementation("androidx.cardview:cardview:1.0.0")
 
-    ksp ("com.github.bumptech.glide:compiler:5.0.7")
+    //ksp ("com.github.bumptech.glide:compiler:5.0.7")
 
     implementation("com.yandex.android:mobileads:8.1.0")
 
@@ -85,10 +85,10 @@ dependencies {
     implementation("ru.rustore.sdk:billingclient:7.0.0")
     implementation ("com.google.dagger:hilt-android:2.59.2")
     implementation("androidx.activity:activity-ktx:1.13.0")
-    ksp ("com.google.dagger:hilt-compiler:2.59.2")
+    //ksp ("com.google.dagger:hilt-compiler:2.59.2")
 
     implementation ("androidx.room:room-runtime:2.8.4")
-    ksp ("androidx.room:room-compiler:2.8.4")
+    //ksp ("androidx.room:room-compiler:2.8.4")
     implementation ("androidx.room:room-ktx:2.8.4")
 
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.10.0")

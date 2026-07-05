@@ -111,9 +111,14 @@ class MainViewModel(
         }
     }
 
-    fun updateItem(item: Item){
+    fun updateItem(item: Item,alarm: Boolean = false){
         viewModelScope.launch(Dispatchers.IO) {
             db.updateItem(item)
+            withContext(Dispatchers.Main){
+                if(alarm) permission(NOTIFICATION, item)
+                else showDialog = DialogState()
+            }
+
         }
     }
 

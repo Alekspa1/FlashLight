@@ -2,8 +2,10 @@ package presentation.dialogs
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -22,10 +24,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -33,64 +37,66 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import coil3.compose.AsyncImage
+
 import data.room.Item
-import io.github.vinceglb.filekit.core.PickerType
 import io.github.vinceglb.filekit.compose.rememberFilePickerLauncher
-import io.github.vinceglb.filekit.core.FileKit
-import io.github.vinceglb.filekit.core.PlatformFile
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.withContext
-import kotlin.time.Clock
+import io.github.vinceglb.filekit.core.PickerType
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddOrChangeItemDialog(
     item: Item?,
-    onResult :(item: Item?,result: Boolean,alarm: Boolean,deleteUri : Boolean) -> Unit ={_,_,_,_->},){
-
+    onCancel : ()-> Unit,
+    onSave :(
+        item: Item?,
+        name: String,
+        desc: String,
+        uri: String,
+        category: String,
+        alarlm : Boolean,
+            ) -> Unit ={_,_,_,_,_,_->},
+    ){
     var stateTextName by remember { mutableStateOf(item?.name ?: "") }
     var stateTextDecs by remember { mutableStateOf(item?.desc ?: "") }
     var isImageExpanded by remember { mutableStateOf(false) }
-    var uriPhoto by remember { mutableStateOf(item?.uri ?: "") }
-    var selectedFile by remember { mutableStateOf<PlatformFile?>(null) }
-    var categorySelected by remember { mutableStateOf(item?.category ?: "Повседневные") }
- val fileLauncher = rememberFilePickerLauncher(type = PickerType.Image) { platformFile ->
-    platformFile?.let { file ->
-        val rawPath = file.path ?: ""
-        
-        // Исправляем путь ТОЛЬКО для Android, если это content:// ссылка
-        uriPhoto = if (rawPath.startsWith("content://")) {
-            rawPath // Coil на Android умеет читать content:// строку напрямую, если не путать его файловыми префиксами
-        } else if (!rawPath.startsWith("file://") && !rawPath.contains(":/")) {
-            "file://$rawPath" // Для обычных локальных путей
-        } else {
-            rawPath // Для Десктопа (там пути уже идут как C:/... или /Users/...)
-        }
-    }
-}
-    var deleteUri by remember { mutableStateOf(false) }
+    var selectedFileUri: String by remember { mutableStateOf(item?.uri ?: "") }
 
-    if (isImageExpanded && uriPhoto.isNotEmpty()) {
-        AlertDialog(
+    var categorySelected by remember { mutableStateOf(item?.category ?: "Повседневные") }
+    val fileLauncher = rememberFilePickerLauncher(type = PickerType.Image) { file ->
+        selectedFileUri = (if (file != null) {
+            file.path
+        } else "").toString()
+    }
+
+    if (isImageExpanded && selectedFileUri != "") {
+        Dialog(
             onDismissRequest = { isImageExpanded = false },
-            confirmButton = {},
-            dismissButton = {},
-            text = {
+            properties = DialogProperties(
+                usePlatformDefaultWidth = false // Позволяет картинке занять всю ширину экрана без полей AlertDialog
+            )
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clickable { isImageExpanded = false } // Закрытие при клике в любое место экрана
+                    .padding(16.dp), // Небольшой отступ от краев дисплея для красоты
+                contentAlignment = Alignment.Center
+            ) {
                 AsyncImage(
-                    model = uriPhoto,
+                    model = selectedFileUri,
                     contentDescription = "Крупный план",
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                        .clickable { isImageExpanded = false }, // Закрыть по клику на картинку
-                    contentScale = ContentScale.Fit
+                        .fillMaxWidth() // Растягивается по ширине
+                        .wrapContentHeight(), // Высота подстроится автоматически и корректно
+                    contentScale = ContentScale.Fit // Картинка гарантированно поместится целиком без обрезки
                 )
             }
-        )
+        }
     }
-
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
     LaunchedEffect(Unit) {
@@ -99,11 +105,8 @@ fun AddOrChangeItemDialog(
         keyboardController?.show()
     }
 
-    // 2. Получаем контроллер клавиатуры
-
-
     AlertDialog(
-            onDismissRequest = { onResult(null,false,false,deleteUri) }, // когда кудато нажал
+            onDismissRequest = { onCancel()}, // когда кудато нажал
             title = { Text("Сфокусироваться") },
 
             text = {
@@ -150,27 +153,40 @@ fun AddOrChangeItemDialog(
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        if (uriPhoto != "") {
+                        if (selectedFileUri != "" ) {
                             // Отображение картинки через Coil (Замена Glide)
                             AsyncImage(
-                                model = selectedFile,
+                                model = selectedFileUri,
                                 contentDescription = "Превью фото",
                                 modifier = Modifier
                                     .size(80.dp)
+                                    .clip(RoundedCornerShape(12.dp))
                                     .clickable { isImageExpanded = true }, // Клик открывает на весь экран
-                                contentScale = ContentScale.Crop
+                                contentScale = ContentScale.Crop,
                             )
+                            Column(modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f),
+                                horizontalAlignment = Alignment.End,
+                                verticalArrangement = Arrangement.SpaceBetween){
+                                TextButton(onClick = { fileLauncher.launch() }) {
+                                    Text(text = "Изменить фото")
+                                }
+                                TextButton(onClick = { selectedFileUri = "" }) {
+                                    Text(
+                                        text = "Удалить фото",
+                                        color = MaterialTheme.colorScheme.error,
+                                    )
+                                }
 
+
+                            }
                             // Кнопка удаления фото (deleteText)
-                            Text(
-                                text = "Удалить фото",
-                                color = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.clickable { uriPhoto = "" }
-                            )
+
                         } else {
                             // Кнопка добавления фото (addPhoto)
                             Button(onClick = { fileLauncher.launch() }) {
-                                Text("Добавить фото")
+                                Text(text = "Добавить фото")
                             }
                         }
                     }
@@ -178,63 +194,52 @@ fun AddOrChangeItemDialog(
                     // ТУТ БУДЕТ ТВOЙ СПИННЕР КАТЕГОРИЙ (В Compose это ExposedDropdownMenuBox)
                     // Оставим пока заглушку, чтобы не раздувать код
                     Text("Категория: $categorySelected", modifier = Modifier.padding(top = 8.dp))
-
-
-
-
                 } },
 
             confirmButton = {
                 TextButton(onClick = {
-                    val text = if (stateTextName.trim().isEmpty())  "Без названия" else stateTextName.trim()
-                    if(uriPhoto != item?.uri ) deleteUri = true
-
-                    onResult(
-                        item?.copy(name = text, desc = stateTextDecs.trim(), uri = uriPhoto)
-                            ?: Item(name = text, desc = stateTextDecs.trim(), uri = uriPhoto),
-                        true, // твой result
-                        false, // твой alarm
-                        deleteUri
-                    )
-
-
+                    val text = stateTextName.trim().ifEmpty { "Без названия" }
+                    if(item == null){
+                        onSave(null,text,stateTextDecs.trim(),selectedFileUri,categorySelected,false)
+                    }
+                    else {
+                        onSave(item,text,stateTextDecs.trim(),selectedFileUri,categorySelected,false)
+                    }
                 }) {
                     Text("Ок")
                 }
             },
-
             dismissButton = {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp) // Отступ между кнопками
                 ) {
-
-
                     TextButton(onClick = {
-                        val text = if (stateTextName.trim().isEmpty())  "Без названия" else stateTextName.trim()
-                        if (item != null){ onResult(item.copy(name = text,
-                            desc = stateTextDecs.trim()),true,true,deleteUri)}
-                        else{
-                            val item = Item(name = text, desc = stateTextDecs.trim())
-                            onResult(item,true,true,deleteUri)
+                        val text = stateTextName.trim().ifEmpty { "Без названия" }
+                        if(item == null){
+                            onSave(null,text,stateTextDecs.trim(),selectedFileUri,categorySelected,true)
+                        }
+                        else {
+                            onSave(item,text,stateTextDecs.trim(),selectedFileUri,categorySelected,true)
                         }
                     }) {
                         Text("Установка будильника")
                     }
-
-                    // Стандартная кнопка "Нет"
-                    TextButton(onClick = { onResult(null,false,false,deleteUri) }) {
+                    TextButton(onClick = { onCancel()}) {
                         Text("Отмена")
                     }
                 }
             },
         )
-
-
 }
 
-
-@Preview(showBackground = true)
 @Composable
-fun PreviewAddItemDialog(){
-    AddOrChangeItemDialog(null)
+fun OpenImage(uri: String){
+
 }
+
+
+//@Preview(showBackground = true)
+//@Composable
+//fun PreviewAddItemDialog(){
+//    AddOrChangeItemDialog(null)
+//}
