@@ -89,15 +89,15 @@ fun MainWeatherPager(paddingValues: PaddingValues = PaddingValues(),
 
             INSERT_DIALOG -> {
                 AddOrChangeItemDialog(item,
-                    onCancel = {viewModel.showDialog = DialogState()}){ item, name, desc, uri, category, alarlm ->
+                    onCancel = {viewModel.showDialog = DialogState()}){ item, name, desc, uri, category, alarm ->
 
                     val finalItem = item?.copy(name = name, desc = desc, uri = uri, category = category)
                         ?: Item(name = name, desc = desc, uri = uri, category = category)
 
                     if(item == null) // новый item
-                        viewModel.insertItem(finalItem, alarlm)
+                        viewModel.insertItem(finalItem, alarm)
                     else {
-                        viewModel.updateItem(finalItem,alarlm)
+                        viewModel.updateItem(finalItem,alarm)
 
 
                     } // старый

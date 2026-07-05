@@ -24,7 +24,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Alignment
@@ -35,7 +34,6 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -44,6 +42,7 @@ import coil3.compose.AsyncImage
 import data.room.Item
 import io.github.vinceglb.filekit.compose.rememberFilePickerLauncher
 import io.github.vinceglb.filekit.core.PickerType
+import io.github.vinceglb.filekit.core.PlatformFile
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -62,47 +61,25 @@ fun AddOrChangeItemDialog(
     ){
     var stateTextName by remember { mutableStateOf(item?.name ?: "") }
     var stateTextDecs by remember { mutableStateOf(item?.desc ?: "") }
-    var isImageExpanded by remember { mutableStateOf(false) }
+    var openImageState by remember { mutableStateOf(false) }
     var selectedFileUri: String by remember { mutableStateOf(item?.uri ?: "") }
-
     var categorySelected by remember { mutableStateOf(item?.category ?: "Повседневные") }
     val fileLauncher = rememberFilePickerLauncher(type = PickerType.Image) { file ->
         selectedFileUri = (if (file != null) {
-            file.path
-        } else "").toString()
+        parsePlatformUri(file)
+        } else "")
     }
 
-    if (isImageExpanded && selectedFileUri != "") {
-        Dialog(
-            onDismissRequest = { isImageExpanded = false },
-            properties = DialogProperties(
-                usePlatformDefaultWidth = false // Позволяет картинке занять всю ширину экрана без полей AlertDialog
-            )
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clickable { isImageExpanded = false } // Закрытие при клике в любое место экрана
-                    .padding(16.dp), // Небольшой отступ от краев дисплея для красоты
-                contentAlignment = Alignment.Center
-            ) {
-                AsyncImage(
-                    model = selectedFileUri,
-                    contentDescription = "Крупный план",
-                    modifier = Modifier
-                        .fillMaxWidth() // Растягивается по ширине
-                        .wrapContentHeight(), // Высота подстроится автоматически и корректно
-                    contentScale = ContentScale.Fit // Картинка гарантированно поместится целиком без обрезки
-                )
-            }
-        }
-    }
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
     LaunchedEffect(Unit) {
         withFrameMillis { }  // Ждем, пока отрендерится первый кадр окна
         focusRequester.requestFocus()
         keyboardController?.show()
+    }
+
+    if (openImageState) {
+        OpenImage(selectedFileUri){openImageState = false}
     }
 
     AlertDialog(
@@ -156,12 +133,14 @@ fun AddOrChangeItemDialog(
                         if (selectedFileUri != "" ) {
                             // Отображение картинки через Coil (Замена Glide)
                             AsyncImage(
-                                model = selectedFileUri,
+                                 model = selectedFileUri ,
                                 contentDescription = "Превью фото",
                                 modifier = Modifier
                                     .size(80.dp)
                                     .clip(RoundedCornerShape(12.dp))
-                                    .clickable { isImageExpanded = true }, // Клик открывает на весь экран
+                                    .clickable {
+                                        println(selectedFileUri)
+                                        openImageState = true }, // Клик открывает на весь экран
                                 contentScale = ContentScale.Crop,
                             )
                             Column(modifier = Modifier
@@ -199,12 +178,7 @@ fun AddOrChangeItemDialog(
             confirmButton = {
                 TextButton(onClick = {
                     val text = stateTextName.trim().ifEmpty { "Без названия" }
-                    if(item == null){
-                        onSave(null,text,stateTextDecs.trim(),selectedFileUri,categorySelected,false)
-                    }
-                    else {
-                        onSave(item,text,stateTextDecs.trim(),selectedFileUri,categorySelected,false)
-                    }
+                    onSave(item,text,stateTextDecs.trim(),selectedFileUri,categorySelected,false)
                 }) {
                     Text("Ок")
                 }
@@ -215,12 +189,7 @@ fun AddOrChangeItemDialog(
                 ) {
                     TextButton(onClick = {
                         val text = stateTextName.trim().ifEmpty { "Без названия" }
-                        if(item == null){
-                            onSave(null,text,stateTextDecs.trim(),selectedFileUri,categorySelected,true)
-                        }
-                        else {
-                            onSave(item,text,stateTextDecs.trim(),selectedFileUri,categorySelected,true)
-                        }
+                        onSave(item,text,stateTextDecs.trim(),selectedFileUri,categorySelected,true)
                     }) {
                         Text("Установка будильника")
                     }
@@ -233,9 +202,36 @@ fun AddOrChangeItemDialog(
 }
 
 @Composable
-fun OpenImage(uri: String){
+fun OpenImage(uri: String,onDismiss : () -> Unit){
 
+    if (uri != "") {
+        Dialog(
+            onDismissRequest = { onDismiss() },
+            properties = DialogProperties(
+                usePlatformDefaultWidth = false // Позволяет картинке занять всю ширину экрана без полей AlertDialog
+            )
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clickable { onDismiss() } // Закрытие при клике в любое место экрана
+                    .padding(16.dp), // Небольшой отступ от краев дисплея для красоты
+                contentAlignment = Alignment.Center
+            ) {
+                AsyncImage(
+                    model = uri,
+                    contentDescription = "Крупный план",
+                    modifier = Modifier
+                        .fillMaxWidth() // Растягивается по ширине
+                        .wrapContentHeight(), // Высота подстроится автоматически и корректно
+                    contentScale = ContentScale.Fit // Картинка гарантированно поместится целиком без обрезки
+                )
+            }
+        }
+    }
 }
+
+expect fun parsePlatformUri(uri: PlatformFile?): String
 
 
 //@Preview(showBackground = true)
