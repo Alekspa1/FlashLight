@@ -153,8 +153,6 @@ class AlarmReceiwer : BroadcastReceiver(), KoinComponent {
                         )
                     )
                 }
-                ALARM_REPEAT->{}
-
                 else -> {
                         alarmRepeat.alarmRepead(item.id)
 
