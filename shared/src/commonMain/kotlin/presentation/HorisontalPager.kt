@@ -78,6 +78,11 @@ fun MainWeatherPager(paddingValues: PaddingValues = PaddingValues(),
     val pagerState = rememberPagerState(pageCount = { titles.size })
     val scope = rememberCoroutineScope()
     val todoList by viewModel.sortedItemsFlow.collectAsStateWithLifecycle()
+    var openImageState by remember { mutableStateOf(false) }
+    var selectedFileUri: String by remember { mutableStateOf("") }
+    if (openImageState) {
+        OpenImage(selectedFileUri){openImageState = false}
+    }
         val item = viewModel.showDialog.item
         when(viewModel.showDialog.isWho){
           
@@ -234,7 +239,9 @@ fun MainWeatherPager(paddingValues: PaddingValues = PaddingValues(),
                             when(action){
                                 ALARM->{viewModel.permission(NOTIFICATION,item)}
                                 ALARM_LONG ->{viewModel.insertAlarmRepeat(item)}
-                                IMAGE->{}
+                                IMAGE->
+                              {openImageState = true,
+                              selectedFileUri = item.uri}
                                 CHANGE_ITEM->{
                                     viewModel.showDialog = DialogState(INSERT_DIALOG,item)}
                                 CHANGE->{
