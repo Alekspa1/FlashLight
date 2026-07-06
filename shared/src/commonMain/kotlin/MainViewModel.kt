@@ -90,6 +90,9 @@ class MainViewModel(
     )
 
     fun saveText() = pref.saveTextNoteBook(stateTextNotebook)
+    fun updateCategory(value: String) {
+        _categoryItemFlow.value = value
+    }
 
 
     fun insertItem(item: Item, alarm: Boolean = false){
