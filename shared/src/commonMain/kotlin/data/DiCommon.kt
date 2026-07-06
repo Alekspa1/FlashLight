@@ -3,9 +3,11 @@ package data
 import MainViewModel
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import data.perository.AlarmRepeadImp
+import data.perository.SaveDeleteImageImpl
 import data.room.myDataBase
 import domain.repostirory.AlarmRepeadRepository
 import domain.repostirory.AlarmRepository
+import domain.repostirory.SaveDeleteImageRepositpry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import org.koin.core.context.startKoin
@@ -22,7 +24,7 @@ val appModule = module {
     viewModelOf(::MainViewModel)
 
     single<myDataBase> {
-        // Запрашиваем платформенный строитель под новое имя:
+
         val builder: androidx.room.RoomDatabase.Builder<myDataBase> = get()
 
         builder
@@ -34,6 +36,7 @@ val appModule = module {
     single { get<myDataBase>().CourseDao() }
 
     single<AlarmRepeadRepository> { AlarmRepeadImp(get(),get()) }
+    factory<SaveDeleteImageRepositpry> { SaveDeleteImageImpl(get()) }
 
 }
 

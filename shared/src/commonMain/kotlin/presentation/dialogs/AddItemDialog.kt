@@ -43,6 +43,7 @@ import data.room.Item
 import io.github.vinceglb.filekit.compose.rememberFilePickerLauncher
 import io.github.vinceglb.filekit.core.PickerType
 import io.github.vinceglb.filekit.core.PlatformFile
+import kotlin.time.Clock
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,17 +58,22 @@ fun AddOrChangeItemDialog(
         uri: String,
         category: String,
         alarlm : Boolean,
-            ) -> Unit ={_,_,_,_,_,_->},
+        originalNameImage : String,
+            ) -> Unit ={_,_,_,_,_,_,_->},
+        getUri : (String) -> String,
     ){
     var stateTextName by remember { mutableStateOf(item?.name ?: "") }
     var stateTextDecs by remember { mutableStateOf(item?.desc ?: "") }
     var openImageState by remember { mutableStateOf(false) }
-    var selectedFileUri: String by remember { mutableStateOf(item?.uri ?: "") }
+    var selectedFileUri: String by remember { mutableStateOf(getUri(item?.uri ?: "")) }
+    var originalFileName by remember { mutableStateOf("") }
     var categorySelected by remember { mutableStateOf(item?.category ?: "Повседневные") }
     val fileLauncher = rememberFilePickerLauncher(type = PickerType.Image) { file ->
-        selectedFileUri = (if (file != null) {
-        parsePlatformUri(file)
-        } else "")
+
+         if (file != null) {
+             selectedFileUri =  parsePlatformUri(file)
+             originalFileName = "img_${Clock.System.now().toEpochMilliseconds()}.jpg"
+        }
     }
 
     val focusRequester = remember { FocusRequester() }
@@ -151,7 +157,10 @@ fun AddOrChangeItemDialog(
                                 TextButton(onClick = { fileLauncher.launch() }) {
                                     Text(text = "Изменить фото")
                                 }
-                                TextButton(onClick = { selectedFileUri = "" }) {
+                                TextButton(onClick = {
+                                    selectedFileUri = ""
+
+                                }) {
                                     Text(
                                         text = "Удалить фото",
                                         color = MaterialTheme.colorScheme.error,
@@ -178,7 +187,7 @@ fun AddOrChangeItemDialog(
             confirmButton = {
                 TextButton(onClick = {
                     val text = stateTextName.trim().ifEmpty { "Без названия" }
-                    onSave(item,text,stateTextDecs.trim(),selectedFileUri,categorySelected,false)
+                    onSave(item,text,stateTextDecs.trim(),selectedFileUri,categorySelected,false,originalFileName)
                 }) {
                     Text("Ок")
                 }
@@ -189,7 +198,7 @@ fun AddOrChangeItemDialog(
                 ) {
                     TextButton(onClick = {
                         val text = stateTextName.trim().ifEmpty { "Без названия" }
-                        onSave(item,text,stateTextDecs.trim(),selectedFileUri,categorySelected,true)
+                        onSave(item,text,stateTextDecs.trim(),selectedFileUri,categorySelected,true,originalFileName)
                     }) {
                         Text("Установка будильника")
                     }
@@ -202,7 +211,7 @@ fun AddOrChangeItemDialog(
 }
 
 @Composable
-fun OpenImage(uri: String,onDismiss : () -> Unit){
+fun OpenImage(uri: String, onDismiss : () -> Unit){
 
     if (uri != "") {
         Dialog(
@@ -232,7 +241,7 @@ fun OpenImage(uri: String,onDismiss : () -> Unit){
     }
 }
 
-expect fun parsePlatformUri(uri: PlatformFile?): String
+expect fun parsePlatformUri(uri: PlatformFile): String
 
 
 //@Preview(showBackground = true)

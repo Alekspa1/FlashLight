@@ -12,11 +12,15 @@ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import data.alarmReceiwer.NotificationBuilder
 import data.alarmReceiwer.NotificationBuilderPassed
 import data.repostitory.AndroidAlarmImpl
+import data.repostitory.AndroidPathProviderImp
 import data.repostitory.AnroidDeleteImageInItemImpl
 import data.repostitory.AndroidPermissionImpl
+import data.repostitory.AndroidSaveDeleteImpl
 import domain.repostirory.AlarmRepository
 import domain.repostirory.DeleteImageInItemReository
+import domain.repostirory.PathProviderRepostitory
 import domain.repostirory.PermissionRepository
+import domain.repostirory.SaveDeleteImageRepositpry
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
@@ -50,5 +54,7 @@ actual val moduleAnotherPlatform = module {
 
     factory<NotificationBuilder> { NotificationBuilder(get()) }
     factory<NotificationBuilderPassed> { NotificationBuilderPassed(get()) }
+    factory<PathProviderRepostitory> { AndroidPathProviderImp(get()) }
+    factory<SaveDeleteImageRepositpry> { AndroidSaveDeleteImpl(get()) }
 
 }

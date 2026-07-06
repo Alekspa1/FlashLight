@@ -14,6 +14,7 @@ import domain.repostirory.AlarmRepeadRepository
 import domain.repostirory.AlarmRepository
 import domain.repostirory.DeleteImageInItemReository
 import domain.repostirory.PermissionRepository
+import domain.repostirory.SaveDeleteImageRepositpry
 import domain.repostirory.SharedPrefRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -40,7 +41,8 @@ class MainViewModel(
     val deleteImageInitem: DeleteImageInItemReository,
     private val permission: PermissionRepository,
     private val alarm: AlarmRepository,
-    private val alarmRepeat: AlarmRepeadRepository
+    private val alarmRepeat: AlarmRepeadRepository,
+    private val image: SaveDeleteImageRepositpry
 ) : ViewModel() {
 
 
@@ -63,6 +65,14 @@ class MainViewModel(
         started = SharingStarted.WhileSubscribed(5000), // Засыпает через 5 сек после закрытия экрана
         initialValue = emptyList() // Начальное значение, пока база грузится
     )
+    fun getUri(fileName :  String) = image.getUri(fileName)
+    fun saveImage(temporaryPathString: String, fileName: String) {
+        // Убираем блокировку главного потока, переключаясь на дисковый Dispatchers.IO
+        viewModelScope.launch(Dispatchers.IO) {
+            image.save(temporaryPathString, fileName)
+        }
+    }
+    fun deleteImage(fileName: String) = image.delete(fileName)
 
      val sortedItemsFlow = combine(
         db.getAll(), // Поток всех дел
@@ -118,7 +128,7 @@ class MainViewModel(
     fun deleteItem(item: Item){
         viewModelScope.launch(Dispatchers.IO) {
             db.delete(item)
-            deleteImageInitem.delete(item.uri)
+            deleteImage(item.uri)
             deleteAlarm(item.id)
         }
     }

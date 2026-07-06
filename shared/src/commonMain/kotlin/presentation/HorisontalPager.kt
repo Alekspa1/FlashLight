@@ -97,21 +97,46 @@ fun MainWeatherPager(paddingValues: PaddingValues = PaddingValues(),
             }
 
             INSERT_DIALOG -> {
-                AddOrChangeItemDialog(item,
-                    onCancel = {viewModel.showDialog = DialogState()}){ item, name, desc, uri, category, alarm ->
-
-                    val finalItem = item?.copy(name = name, desc = desc, uri = uri, category = category)
-                        ?: Item(name = name, desc = desc, uri = uri, category = category)
-
-                    if(item == null) // новый item
-                        viewModel.insertItem(finalItem, alarm)
-                    else {
-                        viewModel.updateItem(finalItem,alarm)
+                AddOrChangeItemDialog(item = item,
+                    onCancel = {viewModel.showDialog = DialogState()},
+                    onSave ={ item, name, desc, uri, category, alarm,originalFileName ->
 
 
-                    } // старый
+                        val finalItem = item?.copy(name = name, desc = desc, category = category)
+                            ?: Item(name = name, desc = desc, category = category)
 
-                }
+                        if(item == null) { // новый item
+                            if (originalFileName != "") viewModel.saveImage(uri, originalFileName)
+                            viewModel.insertItem(finalItem.copy(uri = originalFileName), alarm)
+                        }
+                        else { // старый item
+                            when {
+                                // СЦЕНАРИЙ 1: Юзер нажал кнопку "Удалить фото" в диалоге (uri пришел пустым)
+                                uri == "" -> {
+                                    // 1. Затираем путь в Room пустой строкой
+                                    viewModel.updateItem(finalItem.copy(uri = ""), alarm)
+                                    // 2. Стираем старый физический файл с диска устройства
+                                    if (item.uri != "") viewModel.deleteImage(item.uri)
+                                }
+
+                                // СЦЕНАРИЙ 2: Юзер выбрал НОВУЮ картинку в пикере
+                                originalFileName != "" -> {
+                                    viewModel.updateItem(finalItem.copy(uri = originalFileName), alarm)
+                                    viewModel.saveImage(uri, originalFileName)
+                                    if (item.uri != "") viewModel.deleteImage(item.uri)
+                                }
+
+                                // СЦЕНАРИЙ 3: Картинку НЕ ТРОГАЛИ (поменяли только текст)
+                                else -> {
+                                    viewModel.updateItem(finalItem.copy(uri = item.uri), alarm)
+                                }
+                            }
+                        } // старый
+
+                    },
+                    getUri = {file-> viewModel.getUri(file)}
+
+                )
             }
             NOTIFICATION->{
               CreateDateInAlarmDialog(viewModel)
@@ -244,7 +269,7 @@ fun MainWeatherPager(paddingValues: PaddingValues = PaddingValues(),
                                 ALARM_LONG ->{viewModel.insertAlarmRepeat(item)}
                                 IMAGE->
                               {openImageState = true
-                              selectedFileUri = item.uri}
+                              selectedFileUri = viewModel.getUri(item.uri) }
                                 CHANGE_ITEM->{
                                     viewModel.showDialog = DialogState(INSERT_DIALOG,item)}
                                 CHANGE->{
