@@ -48,7 +48,7 @@ import CommonConst.ALARM_YEAR
 import MainViewModel
 import androidx.compose.foundation.layout.Arrangement
 import kotlin.time.Duration.Companion.hours
-
+import androidx.compose.material3.TimePickerSelectionStart
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -176,10 +176,18 @@ fun CreateTimeInAlarmDialog(date: Long,viewModel: MainViewModel){
                 }
             },
             dismissButton = {
-                TextButton(onClick = { viewModel.showDialog = DialogState(NOTIFICATION, item)  }) {
-                    Text("Назад")
-                }
-            },
+    TextButton(onClick = {
+        // Проверяем: если сейчас активны минуты, то возвращаем стрелку на часы
+        if (timePickerState.selection == TimePickerSelectionStart.Minute) {
+            timePickerState.selection = TimePickerSelectionStart.Hour
+        } else {
+            // А вот если пользователь УЖЕ был на часах и нажал назад — тогда возвращаем в календарь!
+            viewModel.showDialog = DialogState(CommonConst.NOTIFICATION, item)
+        }
+    }) {
+        Text("Назад")
+    }
+},
             text = {
              Column(){
               TimePicker(state = timePickerState )
