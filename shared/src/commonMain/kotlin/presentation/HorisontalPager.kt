@@ -46,6 +46,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 
 import presentation.dialogs.AddOrChangeItemDialog
+import presentation.dialogs.OpenImage
 import presentation.dialogs.DeleteDialog
 import presentation.dialogs.DialogState
 import presentation.dialogs.CreateDateInAlarmDialog
