@@ -92,15 +92,15 @@ fun StartApp(viewModel : MainViewModel = koinViewModel ()) {
                     label = { Text("Повседневные") },
                     selected = true,
                     onClick = {
+                         viewModel.updateCategory("Повседневные")
                         scope.launch {
-                            viewModel.updateCategory("Повседневные")
                             drawerState.close() }
                     }
                 )
             }
            item() {
                   NavigationDrawerItem(
-                    label = { Text("Общие дела) },
+                    label = { Text("Общие дела") },
                     selected = false,
                     onClick = {
                         scope.launch { drawerState.close() }
