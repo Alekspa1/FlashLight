@@ -36,12 +36,25 @@ import org.koin.compose.viewmodel.koinViewModel
 import presentation.MainWeatherPager
 import presentation.YandexBannerAd
 
+// Для работы с LazyColumn и его элементами
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.Arrangement
+
+// Для стилизации текста (sp и FontWeight)
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.font.FontWeight
+
+// Для работы делегата 'by' и подписки на StateFlow
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
 @Composable
 fun StartApp(viewModel : MainViewModel = koinViewModel ()) {
     val snackbarHostState = remember { SnackbarHostState() }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope() // Добавлено для работы с корутинами
-    
+    val categories by viewModel.categories.collectAsStateWithLifecycle()
     // Лямбда для открытия Drawer
     val onOpenDrawer = remember {
         {
@@ -65,16 +78,54 @@ fun StartApp(viewModel : MainViewModel = koinViewModel ()) {
             ModalDrawerSheet(
                 modifier = Modifier.fillMaxWidth(0.8f)
             ) {
-                Text("Повседневные", modifier = Modifier.padding(16.dp))
-                Text("Общие дела", modifier = Modifier.padding(16.dp))
-                NavigationDrawerItem(
-                    label = { Text("Настройки") },
+        
+
+                LazyColumn(
+
+            modifier = Modifier.fillMaxWidth().weight(1f),
+
+            verticalArrangement = Arrangement.spacedBy(5.dp),
+
+        ) {
+           item() {
+                Box(modifier = Modifier.fillMaxWidth()){
+                    Text(
+                        text = "Повседневные",
+                        color = Color.White,
+                        fontSize = 23.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+            }
+           item() {
+                Box(modifier = Modifier.fillMaxWidth()){
+                    Text(
+                        text = "Общие дела",
+                        color = Color.White,
+                        fontSize = 23.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+            }
+           
+           
+                 items(
+                items = categories,
+                key = { it.id}
+            ){item->
+                      NavigationDrawerItem(
+                    label = { Text(item.name) },
                     selected = false,
                     onClick = {
-                        // Исправлено: закрываем drawer через scope
                         scope.launch { drawerState.close() }
                     }
-                )
+                )  
+            }   
+           
+           
+        }
             }
         }
     ) {
