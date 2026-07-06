@@ -66,7 +66,7 @@ import kotlinx.coroutines.IO
 import presentation.screens.Item
 import androidx.compose.runtime.mutableStateOf // ДОБАВЛЕНО
 import androidx.compose.runtime.remember // ДОБАВЛЕНО
-
+import androidx.compose.runtime.setValue
 
 import kotlin.time.Clock
 
@@ -243,7 +243,7 @@ fun MainWeatherPager(paddingValues: PaddingValues = PaddingValues(),
                                 ALARM->{viewModel.permission(NOTIFICATION,item)}
                                 ALARM_LONG ->{viewModel.insertAlarmRepeat(item)}
                                 IMAGE->
-                              {openImageState = true,
+                              {openImageState = true
                               selectedFileUri = item.uri}
                                 CHANGE_ITEM->{
                                     viewModel.showDialog = DialogState(INSERT_DIALOG,item)}
