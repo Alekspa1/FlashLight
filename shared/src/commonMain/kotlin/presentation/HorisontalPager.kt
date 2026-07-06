@@ -71,7 +71,8 @@ import kotlin.time.Clock
 
 @Composable
 fun MainWeatherPager(paddingValues: PaddingValues = PaddingValues(),
-                    viewModel: MainViewModel) {
+                    viewModel: MainViewModel,
+                    onMenuClick: () -> Unit) {
 
     val titles = listOf("Блокнот","Список дел","Календарь")
     val pagerState = rememberPagerState(pageCount = { titles.size })
@@ -138,7 +139,7 @@ fun MainWeatherPager(paddingValues: PaddingValues = PaddingValues(),
 
             IconButton(
 
-                onClick = { },
+                onClick = {onMenuClick() },
 
                 modifier = Modifier.fillMaxHeight() // Иконка растягивается на всю высоту вкладок
 
