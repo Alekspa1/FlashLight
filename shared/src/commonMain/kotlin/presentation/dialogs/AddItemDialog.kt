@@ -224,7 +224,7 @@ fun OpenImage(uri: String,onDismiss : () -> Unit){
                     modifier = Modifier
                         .fillMaxWidth() // Растягивается по ширине
                         .wrapContentHeight(), // Высота подстроится автоматически и корректно
-                     .clip(RoundedCornerShape(12.dp))
+                     .clip(RoundedCornerShape(12.dp)),
                     contentScale = ContentScale.Fit // Картинка гарантированно поместится целиком без обрезки
                 )
             }
