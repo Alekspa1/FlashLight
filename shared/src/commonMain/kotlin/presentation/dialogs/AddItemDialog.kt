@@ -139,7 +139,7 @@ fun AddOrChangeItemDialog(
                                     .size(80.dp)
                                     .clip(RoundedCornerShape(12.dp))
                                     .clickable {
-                                        println(selectedFileUri)
+                                       
                                         openImageState = true }, // Клик открывает на весь экран
                                 contentScale = ContentScale.Crop,
                             )
@@ -224,6 +224,7 @@ fun OpenImage(uri: String,onDismiss : () -> Unit){
                     modifier = Modifier
                         .fillMaxWidth() // Растягивается по ширине
                         .wrapContentHeight(), // Высота подстроится автоматически и корректно
+                     .clip(RoundedCornerShape(12.dp))
                     contentScale = ContentScale.Fit // Картинка гарантированно поместится целиком без обрезки
                 )
             }
