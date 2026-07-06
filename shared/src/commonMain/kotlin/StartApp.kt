@@ -111,7 +111,7 @@ fun StartApp(viewModel : MainViewModel = koinViewModel ()) {
            
                  items(
                 items = categories,
-                key = { it.id}
+                key = { it.id!!}
             ){item->
                       NavigationDrawerItem(
                     label = { Text(item.name) },
