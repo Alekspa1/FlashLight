@@ -55,6 +55,13 @@ class MainViewModel(
     private val _categoryItemFlow = MutableStateFlow("Повседневные")
     val categoryItemFlow = _categoryItemFlow.asStateFlow()
 
+    val categories: StateFlow<List<ListCategory>> = db.getAllListCategory()
+    .stateIn(
+        scope = viewModelScope, // Привязываем к жизненному циклу ViewModel
+        started = SharingStarted.WhileSubscribed(5000), // Засыпает через 5 сек после закрытия экрана
+        initialValue = emptyList() // Начальное значение, пока база грузится
+    )
+
      val sortedItemsFlow = combine(
         db.getAll(), // Поток всех дел
         sortType,                         // Поток типа сортировки
