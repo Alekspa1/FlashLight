@@ -88,26 +88,24 @@ fun StartApp(viewModel : MainViewModel = koinViewModel ()) {
 
         ) {
            item() {
-                Box(modifier = Modifier.fillMaxWidth()){
-                    Text(
-                        text = "Повседневные",
-                        color = Color.White,
-                        fontSize = 23.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
+                  NavigationDrawerItem(
+                    label = { Text("Повседневные") },
+                    selected = true,
+                    onClick = {
+                        scope.launch {
+                            viewModel.updateCategory("Повседневные")
+                            drawerState.close() }
+                    }
+                )
             }
            item() {
-                Box(modifier = Modifier.fillMaxWidth()){
-                    Text(
-                        text = "Общие дела",
-                        color = Color.White,
-                        fontSize = 23.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
+                  NavigationDrawerItem(
+                    label = { Text("Общие дела) },
+                    selected = false,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                    }
+                )
             }
            
            
@@ -119,6 +117,7 @@ fun StartApp(viewModel : MainViewModel = koinViewModel ()) {
                     label = { Text(item.name) },
                     selected = false,
                     onClick = {
+                        viewModel.updateCategory(item.name)
                         scope.launch { drawerState.close() }
                     }
                 )  
