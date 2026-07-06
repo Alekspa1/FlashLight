@@ -153,6 +153,7 @@ class AlarmReceiwer : BroadcastReceiver(), KoinComponent {
                         )
                     )
                 }
+                ALARM_REPEAT->{}
 
                 else -> {
                         alarmRepeat.alarmRepead(item.id)
@@ -163,12 +164,16 @@ class AlarmReceiwer : BroadcastReceiver(), KoinComponent {
 
     } // Установка повторяющихся будильников
 
-   private suspend fun getItemFromIntent(intent: Intent, key: String): Item {
-        val rawId = intent.getIntExtra(key, 0)
-        val id = if (rawId > 0) rawId else rawId * -1
-        
-       return db.getItemFromId(id)
-        }
+  private suspend fun getItemFromIntent(intent: Intent, key: String): Item {
+    val rawId = intent.getIntExtra(key, 0)
+    val item = if (rawId > 0) {
+        db.getItemFromId(rawId)
+    } else {
+        db.getItemFromId(rawId * -1).copy(interval = ALARM_REPEAT)
+    }
+   
+    return item
+}
 
 
 }
