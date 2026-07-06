@@ -44,8 +44,17 @@ class AndroidSaveDeleteImpl(private val context: Context) : SaveDeleteImageRepos
     }
 
     override fun getUri(fileName: String): String {
+        // 1. Если строка пустая — возвращаем пустоту
         if (fileName.isEmpty()) return ""
-        // Возвращает полный путь, который Coil на Android прочитает без лагов
+
+        // 2. ЗАЩИТА СТАРЫХ ДАННЫХ:
+        // Если в строке уже содержится полный путь (начинается с "/" или содержит "content:")
+        // значит это старая запись из прошлой версии приложения. Отдаем её КАК ЕСТЬ!
+        if (fileName.startsWith("/") || fileName.contains("content:")) {
+            return fileName
+        }
+
+        // 3. НОВЫЙ ФОРМАТ: Если это просто имя (например, "img_123.jpg"), склеиваем с базовой папкой
         return File(File(context.filesDir, "images"), fileName).absolutePath
     }
 }
