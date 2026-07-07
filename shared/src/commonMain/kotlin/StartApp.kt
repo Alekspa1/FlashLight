@@ -263,7 +263,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 4.dp)
+                    .padding(vertical = 4.dp)
             ) {
                 IconButton(
                     modifier = Modifier
