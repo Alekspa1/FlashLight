@@ -61,14 +61,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.ui.draw.clip
 import org.jetbrains.compose.resources.DrawableResource
+import androidx.compose.foundation.layout.Column
 
 @Composable
-fun StartApp(viewModel : MainViewModel = koinViewModel ()) {
+fun StartApp(viewModel: MainViewModel = koinViewModel()) {
     val snackbarHostState = remember { SnackbarHostState() }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val scope = rememberCoroutineScope() // Добавлено для работы с корутинами
+    val scope = rememberCoroutineScope()
     val categories by viewModel.categories.collectAsStateWithLifecycle()
-    // Лямбда для открытия Drawer
+
     val onOpenDrawer = remember {
         {
             scope.launch {
@@ -77,7 +78,7 @@ fun StartApp(viewModel : MainViewModel = koinViewModel ()) {
             Unit
         }
     }
-    
+
     viewModel.updateAlarm()
     LaunchedEffect(Unit) {
         viewModel.toast.collect { message ->
@@ -91,128 +92,108 @@ fun StartApp(viewModel : MainViewModel = koinViewModel ()) {
             ModalDrawerSheet(
                 modifier = Modifier.fillMaxWidth(0.8f)
             ) {
-        
-				Column(
-        modifier = Modifier.fillMaxSize() // Занимает всю высоту шторки
-    ) {
-                LazyColumn(
-
-            modifier = Modifier.fillMaxWidth().weight(1f),
-
-            verticalArrangement = Arrangement.spacedBy(5.dp),
-
-        ) {
-           item {
-                  NavigationDrawerItem(
-                    label = { Text("Повседневные") },
-                    selected = true,
-                    onClick = {
-                         viewModel.updateCategory("Повседневные")
-                        scope.launch {
-                            drawerState.close() }
-                    }
-                )
-            }
-           item {
-                  NavigationDrawerItem(
-                    label = { Text("Общие дела") },
-                    selected = false,
-                    onClick = {
-                        scope.launch { drawerState.close() }
-                    }
-                )
-            }
-           
-           
-                 items(
-                items = categories,
-                key = { it.id!!}
-            ){item->
-                      NavigationDrawerItem(
-                    label = {  Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically // Все три элемента будут идеально ровно по центру высоты
-        ) {
-				Card(
-                modifier = Modifier
-                    .padding(start = 5.dp, end = 5.dp)
-                    .weight(1f) // Заставляет карточку занять ВСЁ свободное место между кнопками
-                    .clip(RoundedCornerShape(15.dp))
-                    .border(
-                        2.dp,
-                        Color.Black,
-                        RoundedCornerShape(15.dp)
-
-                    ).clickable{/*меняю категорию*/}
-                    ,
-
-                shape = RoundedCornerShape(16.dp),
-
-                colors = CardDefaults.cardColors(
-                    containerColor = Color.White
-                )
-           		 ) {
-                Text(
-                            modifier = Modifier.padding(start = 5.dp,end = 5.dp),
-                            text = item.name,
-                            color = Color.White,
-                            lineHeight = 20.sp,
-                            fontSize = 18.sp)
-            		}
-                 IconButton(
-
-                    onClick = { /*удалить категорию*/  },
-                    modifier = Modifier.padding(end = 8.dp).size(35.dp)
-
+                Column(
+                    modifier = Modifier.fillMaxSize()
                 ) {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxWidth().weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(5.dp),
+                    ) {
+                        item {
+                            NavigationDrawerItem(
+                                label = { Text("Повседневные") },
+                                selected = true,
+                                onClick = {
+                                    viewModel.updateCategory("Повседневные")
+                                    scope.launch { drawerState.close() }
+                                }
+                            )
+                        }
+                        item {
+                            NavigationDrawerItem(
+                                label = { Text("Общие дела") },
+                                selected = false,
+                                onClick = {
+                                    scope.launch { drawerState.close() }
+                                }
+                            )
+                        }
 
-                    Icon(
-                        modifier = Modifier.fillMaxSize(),
-                        imageVector = ThemeNeon().iconDelItem, 
-                        contentDescription = "Меню",
-                        tint = ThemeNeon().iconDelTint,
-
-                    )
-
-                }
-
-        }  },
-                    selected = false,
-                    onClick = {
-                        viewModel.updateCategory(item.name)
-                        scope.launch { drawerState.close() }
+                        items(
+                            items = categories,
+                            key = { it.id!! }
+                        ) { item ->
+                            NavigationDrawerItem(
+                                label = {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Card(
+                                            modifier = Modifier
+                                                .padding(start = 5.dp, end = 5.dp)
+                                                .weight(1f)
+                                                .clip(RoundedCornerShape(15.dp))
+                                                .border(2.dp, Color.Black, RoundedCornerShape(15.dp))
+                                                .clickable { /*меняю категорию*/ },
+                                            shape = RoundedCornerShape(16.dp),
+                                            colors = CardDefaults.cardColors(containerColor = Color.White)
+                                        ) {
+                                            Text(
+                                                modifier = Modifier.padding(start = 5.dp, end = 5.dp),
+                                                text = item.name,
+                                                color = Color.Black,
+                                                lineHeight = 20.sp,
+                                                fontSize = 18.sp
+                                            )
+                                        }
+                                        IconButton(
+                                            onClick = { /*удалить категорию*/ },
+                                            modifier = Modifier.padding(end = 8.dp).size(35.dp)
+                                        ) {
+                                            Icon(
+                                                modifier = Modifier.fillMaxSize(),
+                                                imageVector = ThemeNeon().iconDelItem,
+                                                contentDescription = "Удалить",
+                                                tint = ThemeNeon().iconDelTint
+                                            )
+                                        }
+                                    }
+                                },
+                                selected = false,
+                                onClick = {
+                                    viewModel.updateCategory(item.name)
+                                    scope.launch { drawerState.close() }
+                                }
+                            )
+                        }
                     }
-                )  
-            }   
-           
-           
-        }
-		Box(modifier = Modifier.fillMaxWidth()
-                .padding(8.dp)
 
-            ){
-                IconButton(modifier = Modifier.size(50.dp).align(Alignment.CenterEnd),
-                    onClick = {  },
-                ){
-                    Icon(
-                        imageVector = ThemeNeon().iconAdd,
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxSize(),
-                        tint = ThemeNeon().iconAddTint
-
-                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    ) {
+                        IconButton(
+                            modifier = Modifier
+                                .size(50.dp)
+                                .align(Alignment.CenterEnd),
+                            onClick = { /* Логика добавления */ }
+                        ) {
+                            Icon(
+                                imageVector = ThemeNeon().iconAdd,
+                                contentDescription = "Добавить",
+                                modifier = Modifier.fillMaxSize(),
+                                tint = ThemeNeon().iconAddTint
+                            )
+                        }
+                    }
                 }
-            }
-				
-				}
             }
         }
     ) {
         MaterialTheme {
-            // 1. САМЫЙ НИЖНИЙ СЛОЙ
-            Box(
-                modifier = Modifier.fillMaxSize()
-            ) {
+            Box(modifier = Modifier.fillMaxSize()) {
                 Image(
                     painter = painterResource(Res.drawable.background_neon),
                     contentDescription = null,
@@ -220,7 +201,6 @@ fun StartApp(viewModel : MainViewModel = koinViewModel ()) {
                     contentScale = ContentScale.FillBounds
                 )
 
-                // 2. СЛЕДУЮЩИЙ СЛОЙ
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     containerColor = Color.Transparent,
@@ -229,15 +209,14 @@ fun StartApp(viewModel : MainViewModel = koinViewModel ()) {
                             modifier = Modifier.fillMaxWidth().navigationBarsPadding(),
                             contentAlignment = Alignment.Center
                         ) {
-                            // Внимание: убедитесь, что CommonConst импортирован в вашем проекте
                             YandexBannerAd(CommonConst.BANER, Modifier.fillMaxWidth())
                         }
                     },
                     snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
                 ) { innerPadding ->
-                    MainWeatherPager(innerPadding, viewModel){onOpenDrawer ()}
+                    MainWeatherPager(innerPadding, viewModel) { onOpenDrawer() }
                 }
             }
-        }              
+        }
     }
 }
