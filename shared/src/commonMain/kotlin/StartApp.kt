@@ -146,15 +146,15 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
     colors = CardDefaults.cardColors(containerColor = Color.Transparent) 
 ) {
                             Text(
-                                text = "Повседневные",
-                                color = Color.White,
-                                fontSize = 18.sp,
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
-                            )
+                            modifier = Modifier.padding(start = 5.dp,end = 5.dp),
+                            text = "Повседневные",
+                            color = Color.Wgite,
+                            lineHeight = 16.sp,
+                            fontSize = 14.sp)
                         }
                         IconButton(
                             onClick = { /* Логика меню */ },
-                            modifier = Modifier.padding(start = 8.dp, end = 8.dp).size(35.dp)
+                            modifier = Modifier.padding(8.dp).size(35.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.MyLocation, // Или ваша иконка ic_menu
@@ -170,7 +170,8 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 8.dp),
+                            //.padding(horizontal = 8.dp)
+                        ,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Card(
@@ -191,12 +192,11 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
     colors = CardDefaults.cardColors(containerColor = Color.Transparent) 
 ) {
                             Text(
-                                text = "Общие дела",
-                                color = Color.White,
-                                fontSize = 18.sp,
-                               // modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
-                                 modifier = Modifier.padding(horizontal = 16.dp)
-                            )
+                            modifier = Modifier.padding(8.dp),
+                            text = "Общие дела",
+                            color = Color.Wgite,
+                            lineHeight = 16.sp,
+                            fontSize = 14.sp)
                         }
                         IconButton(
                             onClick = { /* Логика Поделиться */ },
@@ -239,12 +239,12 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
     // Прозрачный контейнер у Card обязателен, чтобы работал наш кастомный background
     colors = CardDefaults.cardColors(containerColor = Color.Transparent) 
 ) {
-                            Text(
-                                text = item.name,
-                                color = Color.Black,
-                                fontSize = 18.sp,
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
-                            )
+                             Text(
+                            modifier = Modifier.padding(8.dp),
+                            text = item.name,
+                            color = Color.Wgite,
+                            lineHeight = 16.sp,
+                            fontSize = 14.sp)
                         }
                         IconButton(
                             onClick = { /* Удаление категории */ },
