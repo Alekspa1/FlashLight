@@ -42,7 +42,7 @@ import flashlight.shared.generated.resources.background_zabor
 import flashlight.shared.generated.resources.ic_micro_neon
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
-
+import androidx.compose.material3.NavigationDrawerItemDefaults
 // Корутины и Архитектура (DI / UI)
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
