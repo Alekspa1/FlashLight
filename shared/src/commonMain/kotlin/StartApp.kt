@@ -181,7 +181,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
         .border(3.dp, BorderNeonColor, RoundedCornerShape(10.dp)) 
         // 3. Добавляем клик (эффект волны подстроится под форму автоматически)
         .clickable { 
-            viewModel.updateCategory(item.name)
+            
             scope.launch { drawerState.close() }
         },
     shape = RoundedCornerShape(10.dp),
