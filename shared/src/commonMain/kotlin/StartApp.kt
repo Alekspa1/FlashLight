@@ -110,54 +110,57 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                             items = categories,
                             key = { it.id!! }
                         ) { item ->
-                            NavigationDrawerItem(
-    label = {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Текст теперь занимает всё свободное место слева
-            Text(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 12.dp),
-                text = item.name,
-                color = Color.Black, // Цвет текста для выбранного/невыбранного состояния можно настроить ниже
-                lineHeight = 20.sp,
-                fontSize = 18.sp
-            )
-            
-            // Кнопка удаления остается справа и кликается отдельно
-            IconButton(
-                onClick = { /* Вызов удаления в viewModel */ },
-                modifier = Modifier.padding(end = 8.dp).size(35.dp)
-            ) {
-                Icon(
-                    modifier = Modifier.fillMaxSize(),
-                    imageVector = ThemeNeon().iconDelItem,
-                    contentDescription = "Удалить",
-                    tint = ThemeNeon().iconDelTint
-                )
-            }
-        }
-    },
-    selected = false, // Или завязать на состояние: viewModel.selectedCategory.value == item.name
-    onClick = {
-        viewModel.updateCategory(item.name)
-        scope.launch { drawerState.close() }
-    },
-    // 🎨 Навешиваем рамку, скругление и отступы на сам элемент меню
+                           Row(
     modifier = Modifier
         .fillMaxWidth()
         .padding(horizontal = 8.dp, vertical = 2.dp)
-        .clip(RoundedCornerShape(15.dp))
-        .border(2.dp, Color.Black, RoundedCornerShape(15.dp)),
-    // 🖌️ Задаем белый цвет контейнера (вместо бывшей Card)
-    colors = NavigationDrawerItemDefaults.colors(
-        unselectedContainerColor = Color.White,
-        selectedContainerColor = Color.LightGray // Можно задать другой цвет для выделенного элемента
+        .clip(RoundedCornerShape(15.dp)) // Скругляем углы всей строки
+        .background(Color.White) // Белый фон для всего элемента (вместо Card)
+        .border(2.dp, Color.Black, RoundedCornerShape(15.dp)), // Общая черная рамка
+    verticalAlignment = Alignment.CenterVertically
+) {
+    // 1. ЭЛЕМЕНТ МЕНЮ (Занимает ВСЁ доступное пространство, кроме иконки)
+    NavigationDrawerItem(
+        label = {
+            Text(
+                text = item.name,
+                color = Color.Black,
+                lineHeight = 20.sp,
+                fontSize = 18.sp,
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
+        selected = false,
+        onClick = {
+            viewModel.updateCategory(item.name)
+            scope.launch { drawerState.close() }
+        },
+        // Отдаем весь приоритет ширины элементу меню
+        modifier = Modifier.weight(1f), 
+        shape = RoundedCornerShape(15.dp),
+        // Делаем фон самого элемента прозрачным, так как белый фон уже задан у Row
+        colors = NavigationDrawerItemDefaults.colors(
+            unselectedContainerColor = Color.Transparent,
+            selectedContainerColor = Color.LightGray 
+        ),
+        contentPadding = PaddingValues(start = 12.dp, end = 4.dp)
     )
-)
+
+    // 2. КНОПКА УДАЛЕНИЯ (Всегда справа, текст на неё физически не залезет)
+    IconButton(
+        onClick = { /* Логика удаления */ },
+        modifier = Modifier
+            .padding(end = 8.dp)
+            .size(35.dp)
+    ) {
+        Icon(
+            modifier = Modifier.fillMaxSize(),
+            imageVector = ThemeNeon().iconDelItem,
+            contentDescription = "Удалить",
+            tint = ThemeNeon().iconDelTint
+        )
+    }
+}
                         }
                     }
 
