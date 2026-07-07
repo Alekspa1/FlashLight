@@ -97,8 +97,9 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                 contentScale = ContentScale.FillBounds
             )
         Column(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(horizontal = 8.dp)
+            modifier = Modifier.fillMaxSize()
+            .padding(horizontal = 8.dp)
+           
         ) {
             // 1. ЗАГОЛОВОК ШТОРКИ (tvCategoryDrawer из XML)
             Text(
