@@ -98,7 +98,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
             )
         Column(
             modifier = Modifier.fillMaxSize()
-            .padding(horizontal = 8.dp)
+            .padding(horizontal = 3.dp)
            
         ) {
             // 1. ЗАГОЛОВОК ШТОРКИ (tvCategoryDrawer из XML)
