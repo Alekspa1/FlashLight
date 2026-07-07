@@ -49,6 +49,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import presentation.MainWeatherPager
 import presentation.YandexBannerAd
 import presentation.theme.ThemeNeon
+import androidx.compose.foundation.background
 
 @Composable
 fun StartApp(viewModel: MainViewModel = koinViewModel()) {
@@ -113,13 +114,10 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                            Row(
     modifier = Modifier
         .fillMaxWidth()
-        .padding(horizontal = 8.dp, vertical = 2.dp)
-        .clip(RoundedCornerShape(15.dp)) // Скругляем углы всей строки
-        .background(Color.White) // Белый фон для всего элемента (вместо Card)
-        .border(2.dp, Color.Black, RoundedCornerShape(15.dp)), // Общая черная рамка
+        .padding(horizontal = 8.dp, vertical = 2.dp),
     verticalAlignment = Alignment.CenterVertically
 ) {
-    // 1. ЭЛЕМЕНТ МЕНЮ (Занимает ВСЁ доступное пространство, кроме иконки)
+    // 1. ЭЛЕМЕНТ МЕНЮ (Вместо Card: сам получает рамку, фон и забирает ВСЁ свободное место)
     NavigationDrawerItem(
         label = {
             Text(
@@ -135,22 +133,24 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
             viewModel.updateCategory(item.name)
             scope.launch { drawerState.close() }
         },
-        // Отдаем весь приоритет ширины элементу меню
-        modifier = Modifier.weight(1f), 
+        // Рамка, скругление и вес применяются строго к NavigationDrawerItem
+        modifier = Modifier
+            .weight(1f)
+            .clip(RoundedCornerShape(15.dp))
+            .border(2.dp, Color.Black, RoundedCornerShape(15.dp)),
         shape = RoundedCornerShape(15.dp),
-        // Делаем фон самого элемента прозрачным, так как белый фон уже задан у Row
         colors = NavigationDrawerItemDefaults.colors(
-            unselectedContainerColor = Color.Transparent,
-            selectedContainerColor = Color.LightGray 
+            unselectedContainerColor = Color.White,
+            selectedContainerColor = Color.LightGray
         ),
-        contentPadding = PaddingValues(start = 12.dp, end = 4.dp)
+        contentPadding = PaddingValues(start = 12.dp, end = 12.dp)
     )
 
-    // 2. КНОПКА УДАЛЕНИЯ (Всегда справа, текст на неё физически не залезет)
+    // 2. ИКОНКА УДАЛЕНИЯ (Идет следом за элементом меню, полностью независима)
     IconButton(
         onClick = { /* Логика удаления */ },
         modifier = Modifier
-            .padding(end = 8.dp)
+            .padding(start = 8.dp, end = 8.dp) // Отступы, чтобы кнопка не липла к рамке
             .size(35.dp)
     ) {
         Icon(
