@@ -1,10 +1,16 @@
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+// Звездочка гарантирует импорт ВСЕХ модификаторов размеров (weight, fillMaxSize, padding, size, Arrangement и т.д.)
+import androidx.compose.foundation.layout.* 
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
@@ -16,52 +22,33 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import coil3.ImageLoader
-import coil3.compose.setSingletonImageLoaderFactory
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
+// Ресурсы JetBrains Compose
 import flashlight.shared.generated.resources.Res
 import flashlight.shared.generated.resources.background_neon
 import flashlight.shared.generated.resources.background_zabor
 import flashlight.shared.generated.resources.ic_micro_neon
-import kotlinx.coroutines.launch
-
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+
+// Корутины и Архитектура (DI / UI)
+import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 import presentation.MainWeatherPager
 import presentation.YandexBannerAd
-
-// Для работы с LazyColumn и его элементами
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.layout.Arrangement
-
-// Для стилизации текста (sp и FontWeight)
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.text.font.FontWeight
-
-// Для работы делегата 'by' и подписки на StateFlow
-import androidx.compose.runtime.getValue
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import presentation.theme.ThemeNeon
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.border
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.weight // Нужен для Модификатора weight в Row/Column
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.ui.draw.clip
-import org.jetbrains.compose.resources.DrawableResource
-import androidx.compose.foundation.layout.Column
 
 @Composable
 fun StartApp(viewModel: MainViewModel = koinViewModel()) {
