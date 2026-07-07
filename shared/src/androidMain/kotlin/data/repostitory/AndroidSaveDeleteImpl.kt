@@ -50,7 +50,7 @@ class AndroidSaveDeleteImpl(private val context: Context) : SaveDeleteImageRepos
         // 2. ЗАЩИТА СТАРЫХ ДАННЫХ:
         // Если в строке уже содержится полный путь (начинается с "/" или содержит "content:")
         // значит это старая запись из прошлой версии приложения. Отдаем её КАК ЕСТЬ!
-        if (fileName.startsWith("/") || fileName.contains("content:")) {
+        if (fileName.contains("/")) {
             return fileName
         }
 
