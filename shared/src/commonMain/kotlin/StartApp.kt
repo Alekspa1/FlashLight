@@ -61,6 +61,8 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val categories by viewModel.categories.collectAsStateWithLifecycle()
+    val CardSolidColor = Color(0x6500BCD4)  // solid android:color
+    val BorderNeonColor = Color(0x9900E2FF) // @color/vPagerCant
 
     val onOpenDrawer = remember {
         {
@@ -125,17 +127,22 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Card(
-                            modifier = Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(15.dp))
-                                .border(2.dp, Color.Black, RoundedCornerShape(15.dp))
-                                .clickable {
-                                    viewModel.updateCategory("Повседневные")
-                                    scope.launch { drawerState.close() }
-                                },
-                            shape = RoundedCornerShape(15.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color.White)
-                        ) {
+    modifier = Modifier
+        .weight(1f)
+        .clip(RoundedCornerShape(10.dp)) // corners android:radius="10dp"
+        // 1. Задаем фоновый цвет карточки
+        .background(CardSolidColor) 
+        // 2. Рисуем рамку толщиной 3dp
+        .border(3.dp, BorderNeonColor, RoundedCornerShape(10.dp)) 
+        // 3. Добавляем клик (эффект волны подстроится под форму автоматически)
+        .clickable { 
+            viewModel.updateCategory(item.name)
+            scope.launch { drawerState.close() }
+        },
+    shape = RoundedCornerShape(10.dp),
+    // Прозрачный контейнер у Card обязателен, чтобы работал наш кастомный background
+    colors = CardDefaults.cardColors(containerColor = Color.Transparent) 
+) {
                             Text(
                                 text = "Повседневные",
                                 color = Color.Black,
@@ -165,17 +172,22 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Card(
-                            modifier = Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(15.dp))
-                                .border(2.dp, Color.Black, RoundedCornerShape(15.dp))
-                                .clickable {
-                                    //viewModel.updateCategory("Общие дела")
-                                    scope.launch { drawerState.close() }
-                                },
-                            shape = RoundedCornerShape(15.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color.White)
-                        ) {
+    modifier = Modifier
+        .weight(1f)
+        .clip(RoundedCornerShape(10.dp)) // corners android:radius="10dp"
+        // 1. Задаем фоновый цвет карточки
+        .background(CardSolidColor) 
+        // 2. Рисуем рамку толщиной 3dp
+        .border(3.dp, BorderNeonColor, RoundedCornerShape(10.dp)) 
+        // 3. Добавляем клик (эффект волны подстроится под форму автоматически)
+        .clickable { 
+            viewModel.updateCategory(item.name)
+            scope.launch { drawerState.close() }
+        },
+    shape = RoundedCornerShape(10.dp),
+    // Прозрачный контейнер у Card обязателен, чтобы работал наш кастомный background
+    colors = CardDefaults.cardColors(containerColor = Color.Transparent) 
+) {
                             Text(
                                 text = "Общие дела",
                                 color = Color.Black,
@@ -208,17 +220,22 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Card(
-                            modifier = Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(15.dp))
-                                .border(2.dp, Color.Black, RoundedCornerShape(15.dp))
-                                .clickable {
-                                    viewModel.updateCategory(item.name)
-                                    scope.launch { drawerState.close() }
-                                },
-                            shape = RoundedCornerShape(15.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color.White)
-                        ) {
+    modifier = Modifier
+        .weight(1f)
+        .clip(RoundedCornerShape(10.dp)) // corners android:radius="10dp"
+        // 1. Задаем фоновый цвет карточки
+        .background(CardSolidColor) 
+        // 2. Рисуем рамку толщиной 3dp
+        .border(3.dp, BorderNeonColor, RoundedCornerShape(10.dp)) 
+        // 3. Добавляем клик (эффект волны подстроится под форму автоматически)
+        .clickable { 
+            viewModel.updateCategory(item.name)
+            scope.launch { drawerState.close() }
+        },
+    shape = RoundedCornerShape(10.dp),
+    // Прозрачный контейнер у Card обязателен, чтобы работал наш кастомный background
+    colors = CardDefaults.cardColors(containerColor = Color.Transparent) 
+) {
                             Text(
                                 text = item.name,
                                 color = Color.Black,
