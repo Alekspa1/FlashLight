@@ -78,163 +78,230 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            ModalDrawerSheet(
-                modifier = Modifier.fillMaxWidth(0.8f)
-            ) {
-                Column(
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxWidth().weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(5.dp),
-                    ) {
-                        item {
-                            NavigationDrawerItem(
-                                label = { Text("Повседневные") },
-                                selected = true,
-                                onClick = {
-                                    viewModel.updateCategory("Повседневные")
-                                    scope.launch { drawerState.close() }
-                                }
-                            )
-                        }
-                        item {
-                            NavigationDrawerItem(
-                                label = { Text("Общие дела") },
-                                selected = false,
-                                onClick = {
-                                    scope.launch { drawerState.close() }
-                                }
-                            )
-                        }
-
-                        items(
-                            items = categories,
-                            key = { it.id!! }
-                        ) { item ->
-                           Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 2.dp),
-        verticalAlignment = Alignment.CenterVertically
+    ModalDrawerSheet(
+        modifier = Modifier.fillMaxWidth(0.8f),
+        drawerContainerColor = Color.Transparent // Позволит увидеть фон, если шторка кастомная
     ) {
-        Card(
-            modifier = Modifier
-                .weight(1f) // Выталкивает иконку вправо и держит границы
-                .clip(RoundedCornerShape(15.dp))
-                .border(2.dp, Color.Black, RoundedCornerShape(15.dp))
-                .clickable { 
-                    viewModel.updateCategory(item.name)
-                    scope.launch { drawerState.close() }
-                },
-            shape = RoundedCornerShape(15.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = Color.White
-            )
+        Column(
+            modifier = Modifier.fillMaxSize()
         ) {
+            // 1. ЗАГОЛОВОК ШТОРКИ (tvCategoryDrawer из XML)
             Text(
-                text = item.name,
-                color = Color.Black,
-                lineHeight = 20.sp,
-                fontSize = 18.sp,
+                text = "Категории",
+                color = Color.White,
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp) // Аккуратные отступы внутри карточки
+                    .padding(vertical = 16.dp),
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
-        }
 
-        // 2. ИКОНКА УДАЛЕНИЯ (Идет следом, полностью независима)
-        IconButton(
-            onClick = { /* Логика удаления категории */ },
-            modifier = Modifier
-                .padding(start = 8.dp, end = 8.dp)
-                .size(35.dp)
-        ) {
-            Icon(
-                modifier = Modifier.fillMaxSize(),
-                imageVector = ThemeNeon().iconDelItem,
-                contentDescription = "Удалить",
-                tint = ThemeNeon().iconDelTint
-            )
-        }
-    }                       }
-                    }
-                    HorizontalDivider(
-    modifier = Modifier.padding(vertical = 8.dp), // Отступы сверху и снизу полоски
-    thickness = 1.dp,                             // Толщина полоски
-    color = Color.Black                           // Цвет полоски
-)
-                    Column( modifier = Modifier.fillMaxSize()){
-                     Text(
-                text = "Премиум",
-                color = Color.Black,
-                lineHeight = 20.sp,
-                fontSize = 18.sp,
+            // 2. ДИНАМИЧЕСКИЙ СПИСОК (Заменяет RecyclerView и системные пункты)
+            LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp) // Аккуратные отступы внутри карточки
-            )
-                                      HorizontalDivider(
-    modifier = Modifier.padding(vertical = 8.dp), // Отступы сверху и снизу полоски
-    thickness = 1.dp,                             // Толщина полоски
-    color = Color.Black                           // Цвет полоски
-)
-           
-                     Text(
-                text = "Проверить обновления",
-                color = Color.Black,
-                lineHeight = 20.sp,
-                fontSize = 18.sp,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp) // Аккуратные отступы внутри карточки
-            )
-                                      HorizontalDivider(
-    modifier = Modifier.padding(vertical = 8.dp), // Отступы сверху и снизу полоски
-    thickness = 1.dp,                             // Толщина полоски
-    color = Color.Black                           // Цвет полоски
-)
-
-                      
-                     Text(
-                text = "Настройки",
-                color = Color.Black,
-                lineHeight = 20.sp,
-                fontSize = 18.sp,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp) // Аккуратные отступы внутри карточки
-            )
-                                      HorizontalDivider(
-    modifier = Modifier.padding(vertical = 8.dp), // Отступы сверху и снизу полоски
-    thickness = 1.dp,                             // Толщина полоски
-    color = Color.Black                           // Цвет полоски
-)
-             
-                    }
-
-                    Box(
+                    .weight(1f), // Прижимает всё, что ниже, к нижнему краю
+                verticalArrangement = Arrangement.spacedBy(5.dp),
+            ) {
+                // Категория: Повседневные
+                item {
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(8.dp)
+                            .padding(horizontal = 8.dp, vertical = 2.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        IconButton(
+                        Card(
                             modifier = Modifier
-                                        .size(50.dp)
-                                        .align(Alignment.CenterEnd),
-                            onClick = { /* Логика добавления */ }
+                                .weight(1f)
+                                .clip(RoundedCornerShape(15.dp))
+                                .border(2.dp, Color.Black, RoundedCornerShape(15.dp))
+                                .clickable {
+                                    viewModel.updateCategory("Повседневные")
+                                    scope.launch { drawerState.close() }
+                                },
+                            shape = RoundedCornerShape(15.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White)
+                        ) {
+                            Text(
+                                text = "Повседневные",
+                                color = Color.Black,
+                                fontSize = 18.sp,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+                            )
+                        }
+                        IconButton(
+                            onClick = { /* Логика меню */ },
+                            modifier = Modifier.padding(start = 8.dp, end = 8.dp).size(35.dp)
                         ) {
                             Icon(
-                                imageVector = ThemeNeon().iconAdd,
-                                contentDescription = "Добавить",
-                                modifier = Modifier.fillMaxSize(),
+                                imageVector = ThemeNeon().iconDelItem, // Или ваша иконка ic_menu
+                                contentDescription = "Меню",
+                                tint = ThemeNeon().iconDelTint
+                            )
+                        }
+                    }
+                }
+
+                // Категория: Общие дела
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp, vertical = 2.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Card(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(15.dp))
+                                .border(2.dp, Color.Black, RoundedCornerShape(15.dp))
+                                .clickable {
+                                    viewModel.updateCategory("Общие дела")
+                                    scope.launch { drawerState.close() }
+                                },
+                            shape = RoundedCornerShape(15.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White)
+                        ) {
+                            Text(
+                                text = "Общие дела",
+                                color = Color.Black,
+                                fontSize = 18.sp,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+                            )
+                        }
+                        IconButton(
+                            onClick = { /* Логика Поделиться */ },
+                            modifier = Modifier.padding(start = 8.dp, end = 8.dp).size(35.dp)
+                        ) {
+                            Icon(
+                                imageVector = ThemeNeon().iconAdd, // Замените на иконку Share, если добавлена в тему
+                                contentDescription = "Поделиться",
                                 tint = ThemeNeon().iconAddTint
                             )
                         }
                     }
                 }
+
+                // Кастомные категории из базы данных (бывший RecyclerView)
+                items(
+                    items = categories,
+                    key = { it.id!! }
+                ) { item ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp, vertical = 2.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Card(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(15.dp))
+                                .border(2.dp, Color.Black, RoundedCornerShape(15.dp))
+                                .clickable {
+                                    viewModel.updateCategory(item.name)
+                                    scope.launch { drawerState.close() }
+                                },
+                            shape = RoundedCornerShape(15.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White)
+                        ) {
+                            Text(
+                                text = item.name,
+                                color = Color.Black,
+                                fontSize = 18.sp,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+                            )
+                        }
+                        IconButton(
+                            onClick = { /* Удаление категории */ },
+                            modifier = Modifier.padding(start = 8.dp, end = 8.dp).size(35.dp)
+                        ) {
+                            Icon(
+                                modifier = Modifier.fillMaxSize(),
+                                imageVector = ThemeNeon().iconDelItem,
+                                contentDescription = "Удалить",
+                                tint = ThemeNeon().iconDelTint
+                            )
+                        }
+                    }
+                }
+            }
+
+            // 3. КНОПКА ДОБАВЛЕНИЯ (imBAddMenu из XML - над нижним меню)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp)
+            ) {
+                IconButton(
+                    modifier = Modifier
+                        .size(50.dp)
+                        .align(Alignment.CenterEnd),
+                    onClick = { /* Логика добавления новой категории */ }
+                ) {
+                    Icon(
+                        imageVector = ThemeNeon().iconAdd,
+                        contentDescription = "Добавить категорию",
+                        modifier = Modifier.fillMaxSize(),
+                        tint = ThemeNeon().iconAddTint
+                    )
+                }
+            }
+
+            // 4. НИЖНЕЕ МЕНЮ (Заменяет LinearLayout @id/drawerL из XML)
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                // Полоска 1
+                HorizontalDivider(thickness = 2.dp, color = Color.White)
+                
+                // Кнопка Премиум
+                Text(
+                    text = "Премиум отключен", // Отвечает tvNewPremium
+                    color = Color.White,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { /* Логика Премиума */ }
+                        .padding(vertical = 10.dp)
+                )
+
+                // Полоска 2
+                HorizontalDivider(thickness = 2.dp, color = Color.White)
+
+                // Кнопка Обновления
+                Text(
+                    text = "Обновлений нет", // Отвечает tvNewUpgrate
+                    color = Color.White,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { /* Проверка обновлений */ }
+                        .padding(vertical = 10.dp)
+                )
+
+                // Полоска 3
+                HorizontalDivider(thickness = 2.dp, color = Color.White)
+
+                // Кнопка Настройки
+                Text(
+                    text = "Настройки", // Отвечает tvNewSettings
+                    color = Color.White,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { /* Открыть настройки */ }
+                        .padding(vertical = 10.dp)
+                )
+
+                // Полоска 4
+                HorizontalDivider(thickness = 2.dp, color = Color.White)
             }
         }
+    }
+}
     ) {
         MaterialTheme {
             Box(modifier = Modifier.fillMaxSize()) {
