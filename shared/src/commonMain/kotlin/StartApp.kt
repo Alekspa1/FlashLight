@@ -117,13 +117,13 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                     .fillMaxWidth()
                     .weight(1f), // Прижимает всё, что ниже, к нижнему краю
                 verticalArrangement = Arrangement.spacedBy(5.dp),
+                contentPadding = PaddingValues(horizontal = 8.dp)
             ) {
                 // Категория: Повседневные
                 item {
                     Row(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp, vertical = 2.dp),
+                            .fillMaxWidth()),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Card(
