@@ -297,7 +297,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { /* Логика Премиума */ }
-                        .padding(vertical = 10.dp)
+                        .padding(10.dp)
                 )
 
                 // Полоска 2
@@ -310,7 +310,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { /* Проверка обновлений */ }
-                        .padding(vertical = 10.dp)
+                        .padding(10.dp)
                 )
 
                 // Полоска 3
@@ -323,7 +323,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { /* Открыть настройки */ }
-                        .padding(vertical = 10.dp)
+                        .padding(10.dp)
                 )
 
                 // Полоска 4
