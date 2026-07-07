@@ -92,7 +92,9 @@ fun StartApp(viewModel : MainViewModel = koinViewModel ()) {
                 modifier = Modifier.fillMaxWidth(0.8f)
             ) {
         
-
+				Column(
+        modifier = Modifier.fillMaxSize() // Занимает всю высоту шторки
+    ) {
                 LazyColumn(
 
             modifier = Modifier.fillMaxWidth().weight(1f),
@@ -100,7 +102,7 @@ fun StartApp(viewModel : MainViewModel = koinViewModel ()) {
             verticalArrangement = Arrangement.spacedBy(5.dp),
 
         ) {
-           item() {
+           item {
                   NavigationDrawerItem(
                     label = { Text("Повседневные") },
                     selected = true,
@@ -111,7 +113,7 @@ fun StartApp(viewModel : MainViewModel = koinViewModel ()) {
                     }
                 )
             }
-           item() {
+           item {
                   NavigationDrawerItem(
                     label = { Text("Общие дела") },
                     selected = false,
@@ -168,13 +170,13 @@ fun StartApp(viewModel : MainViewModel = koinViewModel ()) {
                         modifier = Modifier.fillMaxSize(),
                         imageVector = ThemeNeon().iconDelItem, 
                         contentDescription = "Меню",
-                        tint = theme.iconDelTint,
+                        tint = ThemeNeon().iconDelTint,
 
                     )
 
                 }
 
-        } // Конец Row },
+        }  },
                     selected = false,
                     onClick = {
                         viewModel.updateCategory(item.name)
@@ -185,6 +187,24 @@ fun StartApp(viewModel : MainViewModel = koinViewModel ()) {
            
            
         }
+		Box(modifier = Modifier.fillMaxWidth()
+                .padding(8.dp)
+
+            ){
+                IconButton(modifier = Modifier.size(50.dp).align(Alignment.CenterEnd),
+                    onClick = {  },
+                ){
+                    Icon(
+                        imageVector = ThemeNeon().iconAdd,
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        tint = ThemeNeon().iconAddTint
+
+                    )
+                }
+            }
+				
+				}
             }
         }
     ) {
