@@ -170,7 +170,6 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            //.padding(horizontal = 8.dp)
                         ,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -200,7 +199,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                         }
                         IconButton(
                             onClick = { /* Логика Поделиться */ },
-                            modifier = Modifier.padding(start = 8.dp, end = 8.dp).size(35.dp)
+                            modifier = Modifier.size(35.dp)
                         ) {
                             Icon(
                                  imageVector = Icons.Default.Share, // Замените на иконку Share, если добавлена в тему
@@ -247,7 +246,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                         }
                         IconButton(
                             onClick = { /* Удаление категории */ },
-                            modifier = Modifier.padding(start = 8.dp, end = 8.dp).size(35.dp)
+                            modifier = Modifier.size(35.dp)
                         ) {
                             Icon(
                                 modifier = Modifier.fillMaxSize(),
@@ -285,7 +284,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    .padding(vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 // Полоска 1
