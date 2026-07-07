@@ -112,18 +112,19 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                         ) { item ->
                             NavigationDrawerItem(
                                 label = {
-                                    // 🛠️ Row возвращен на место для выравнивания карточки и иконки удаления в ряд
+                                   
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Card(
                                             modifier = Modifier
+                                                .fillMaxSize()
                                                 .padding(start = 5.dp, end = 5.dp)
                                                 .weight(1f)
                                                 .clip(RoundedCornerShape(15.dp))
                                                 .border(2.dp, Color.Black, RoundedCornerShape(15.dp))
-                                                .clickable { /*меняю категорию*/ },
+                                                .clickable { null },
                                             shape = RoundedCornerShape(16.dp),
                                             colors = CardDefaults.cardColors(containerColor = Color.White)
                                         ) {
