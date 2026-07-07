@@ -50,6 +50,7 @@ import presentation.MainWeatherPager
 import presentation.YandexBannerAd
 import presentation.theme.ThemeNeon
 import androidx.compose.foundation.background
+import androidx.compose.material3.HorizontalDivider
 
 @Composable
 fun StartApp(viewModel: MainViewModel = koinViewModel()) {
@@ -117,7 +118,6 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
             .padding(horizontal = 8.dp, vertical = 2.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // 1. КАРТОЧКА КАТЕГОРИИ (Занимает всё свободное место слева)
         Card(
             modifier = Modifier
                 .weight(1f) // Выталкивает иконку вправо и держит границы
@@ -158,6 +158,59 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
             )
         }
     }                       }
+                    }
+                    HorizontalDivider(
+    modifier = Modifier.padding(vertical = 8.dp), // Отступы сверху и снизу полоски
+    thickness = 1.dp,                             // Толщина полоски
+    color = Color.Black                           // Цвет полоски
+)
+                    Column( modifier = Modifier.fillMaxSize()){
+                     Text(
+                text = "Премиум",
+                color = Color.Black,
+                lineHeight = 20.sp,
+                fontSize = 18.sp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp) // Аккуратные отступы внутри карточки
+            )
+                                      HorizontalDivider(
+    modifier = Modifier.padding(vertical = 8.dp), // Отступы сверху и снизу полоски
+    thickness = 1.dp,                             // Толщина полоски
+    color = Color.Black                           // Цвет полоски
+)
+           
+                     Text(
+                text = "Проверить обновления",
+                color = Color.Black,
+                lineHeight = 20.sp,
+                fontSize = 18.sp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp) // Аккуратные отступы внутри карточки
+            )
+                                      HorizontalDivider(
+    modifier = Modifier.padding(vertical = 8.dp), // Отступы сверху и снизу полоски
+    thickness = 1.dp,                             // Толщина полоски
+    color = Color.Black                           // Цвет полоски
+)
+
+                      
+                     Text(
+                text = "Настройки",
+                color = Color.Black,
+                lineHeight = 20.sp,
+                fontSize = 18.sp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp) // Аккуратные отступы внутри карточки
+            )
+                                      HorizontalDivider(
+    modifier = Modifier.padding(vertical = 8.dp), // Отступы сверху и снизу полоски
+    thickness = 1.dp,                             // Толщина полоски
+    color = Color.Black                           // Цвет полоски
+)
+             
                     }
 
                     Box(
