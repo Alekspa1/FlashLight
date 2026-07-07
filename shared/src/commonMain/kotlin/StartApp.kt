@@ -188,7 +188,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                             modifier = Modifier.padding(start = 8.dp, end = 8.dp).size(35.dp)
                         ) {
                             Icon(
-                                 imageVector = Icons.Default.Outbound, // Замените на иконку Share, если добавлена в тему
+                                 imageVector = Icons.Default.Share, // Замените на иконку Share, если добавлена в тему
                                 contentDescription = "Поделиться",
                                 tint = ThemeNeon().iconAddTint
                             )
