@@ -123,7 +123,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                 item {
                     Row(
                         modifier = Modifier
-                            .fillMaxWidth()),
+                            .fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Card(
