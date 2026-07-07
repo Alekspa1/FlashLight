@@ -51,6 +51,8 @@ import presentation.YandexBannerAd
 import presentation.theme.ThemeNeon
 import androidx.compose.foundation.background
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material.icons.filled.MyLocation 
+import androidx.compose.material.icons.filled.Share
 
 @Composable
 fun StartApp(viewModel: MainViewModel = koinViewModel()) {
@@ -82,6 +84,15 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
         modifier = Modifier.fillMaxWidth(0.8f),
         drawerContainerColor = Color.Transparent // Позволит увидеть фон, если шторка кастомная
     ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            
+            // СЛОЙ 1: Ваша фоновая неоновая картинка
+            Image(
+                painter = painterResource(Res.drawable.background_neon),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.FillBounds
+            )
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
@@ -136,7 +147,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                             modifier = Modifier.padding(start = 8.dp, end = 8.dp).size(35.dp)
                         ) {
                             Icon(
-                                imageVector = ThemeNeon().iconDelItem, // Или ваша иконка ic_menu
+                                imageVector = Icons.Default.MyLocation, // Или ваша иконка ic_menu
                                 contentDescription = "Меню",
                                 tint = ThemeNeon().iconDelTint
                             )
@@ -158,7 +169,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                                 .clip(RoundedCornerShape(15.dp))
                                 .border(2.dp, Color.Black, RoundedCornerShape(15.dp))
                                 .clickable {
-                                    viewModel.updateCategory("Общие дела")
+                                    //viewModel.updateCategory("Общие дела")
                                     scope.launch { drawerState.close() }
                                 },
                             shape = RoundedCornerShape(15.dp),
@@ -176,7 +187,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                             modifier = Modifier.padding(start = 8.dp, end = 8.dp).size(35.dp)
                         ) {
                             Icon(
-                                imageVector = ThemeNeon().iconAdd, // Замените на иконку Share, если добавлена в тему
+                                 imageVector = Icons.Default.Outbound, // Замените на иконку Share, если добавлена в тему
                                 contentDescription = "Поделиться",
                                 tint = ThemeNeon().iconAddTint
                             )
@@ -299,6 +310,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                 // Полоска 4
                 HorizontalDivider(thickness = 2.dp, color = Color.White)
             }
+        }
         }
     }
 }
