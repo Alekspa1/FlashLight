@@ -146,15 +146,15 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
     colors = CardDefaults.cardColors(containerColor = Color.Transparent) 
 ) {
                             Text(
-                            modifier = Modifier.padding(start = 5.dp,end = 5.dp),
+                            modifier = Modifier.padding(8.dp),
                             text = "Повседневные",
                             color = Color.White,
-                            lineHeight = 16.sp,
-                            fontSize = 14.sp)
+                            lineHeight = 20.sp,
+                            fontSize = 18.sp)
                         }
                         IconButton(
                             onClick = { /* Логика меню */ },
-                            modifier = Modifier.padding(8.dp).size(35.dp)
+                            modifier = Modifier.size(35.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.MyLocation, // Или ваша иконка ic_menu
@@ -195,8 +195,8 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                             modifier = Modifier.padding(8.dp),
                             text = "Общие дела",
                             color = Color.White,
-                            lineHeight = 16.sp,
-                            fontSize = 14.sp)
+                            lineHeight = 20.sp,
+                            fontSize = 18.sp)
                         }
                         IconButton(
                             onClick = { /* Логика Поделиться */ },
@@ -218,9 +218,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                 ) { item ->
                     Row(
                         modifier = Modifier
-                            .fillMaxWidth()
-                           // .padding(horizontal = 8.dp, vertical = 2.dp)
-                        ,
+                            .fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Card(
@@ -244,8 +242,8 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                             modifier = Modifier.padding(8.dp),
                             text = item.name,
                             color = Color.White,
-                            lineHeight = 16.sp,
-                            fontSize = 14.sp)
+                           lineHeight = 20.sp,
+                            fontSize = 18.sp)
                         }
                         IconButton(
                             onClick = { /* Удаление категории */ },
