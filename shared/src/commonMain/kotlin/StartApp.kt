@@ -148,7 +148,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                             Text(
                             modifier = Modifier.padding(start = 5.dp,end = 5.dp),
                             text = "Повседневные",
-                            color = Color.Wgite,
+                            color = Color.White,
                             lineHeight = 16.sp,
                             fontSize = 14.sp)
                         }
