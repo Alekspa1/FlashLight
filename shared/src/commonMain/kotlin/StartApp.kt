@@ -97,7 +97,8 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                 contentScale = ContentScale.FillBounds
             )
         Column(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(horizontal = 8.dp)
         ) {
             // 1. ЗАГОЛОВОК ШТОРКИ (tvCategoryDrawer из XML)
             Text(
@@ -117,7 +118,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                     .fillMaxWidth()
                     .weight(1f), // Прижимает всё, что ниже, к нижнему краю
                 verticalArrangement = Arrangement.spacedBy(5.dp),
-                contentPadding = PaddingValues(horizontal = 8.dp)
+                
             ) {
                 // Категория: Повседневные
                 item {
@@ -145,7 +146,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
 ) {
                             Text(
                                 text = "Повседневные",
-                                color = Color.Black,
+                                color = Color.White,
                                 fontSize = 18.sp,
                                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
                             )
@@ -168,7 +169,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 8.dp, vertical = 2.dp),
+                            .padding(horizontal = 8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Card(
@@ -190,9 +191,10 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
 ) {
                             Text(
                                 text = "Общие дела",
-                                color = Color.Black,
+                                color = Color.White,
                                 fontSize = 18.sp,
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+                               // modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+                                 modifier = Modifier.padding(horizontal = 16.dp)
                             )
                         }
                         IconButton(
