@@ -34,7 +34,8 @@ class AndroidSaveDeleteImpl(private val context: Context) : SaveDeleteImageRepos
         try {
             if (fileName.isEmpty()) return
             // Находим файл по имени в папке images и удаляем его
-            val file = File(File(context.filesDir, "images"), fileName)
+            val fullPath = getUri(fileName) 
+        val file = File(fullPath)
             if (file.exists()) {
                 file.delete()
             }
