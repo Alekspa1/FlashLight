@@ -194,7 +194,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                             Text(
                             modifier = Modifier.padding(8.dp),
                             text = "Общие дела",
-                            color = Color.Wgite,
+                            color = Color.White,
                             lineHeight = 16.sp,
                             fontSize = 14.sp)
                         }
@@ -219,7 +219,8 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 8.dp, vertical = 2.dp),
+                           // .padding(horizontal = 8.dp, vertical = 2.dp)
+                        ,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Card(
@@ -242,7 +243,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                              Text(
                             modifier = Modifier.padding(8.dp),
                             text = item.name,
-                            color = Color.Wgite,
+                            color = Color.White,
                             lineHeight = 16.sp,
                             fontSize = 14.sp)
                         }
