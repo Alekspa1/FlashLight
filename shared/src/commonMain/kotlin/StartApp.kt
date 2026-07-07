@@ -112,56 +112,52 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                             key = { it.id!! }
                         ) { item ->
                            Row(
-    modifier = Modifier
-        .fillMaxWidth()
-        .padding(horizontal = 8.dp, vertical = 2.dp),
-    verticalAlignment = Alignment.CenterVertically
-) {
-    // 1. ЭЛЕМЕНТ МЕНЮ (Вместо Card: сам получает рамку, фон и забирает ВСЁ свободное место)
-    NavigationDrawerItem(
-        label = {
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 2.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // 1. КАРТОЧКА КАТЕГОРИИ (Занимает всё свободное место слева)
+        Card(
+            modifier = Modifier
+                .weight(1f) // Выталкивает иконку вправо и держит границы
+                .clip(RoundedCornerShape(15.dp))
+                .border(2.dp, Color.Black, RoundedCornerShape(15.dp))
+                .clickable { 
+                    viewModel.updateCategory(item.name)
+                    scope.launch { drawerState.close() }
+                },
+            shape = RoundedCornerShape(15.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = Color.White
+            )
+        ) {
             Text(
                 text = item.name,
                 color = Color.Black,
                 lineHeight = 20.sp,
                 fontSize = 18.sp,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp) // Аккуратные отступы внутри карточки
             )
-        },
-        selected = false,
-        onClick = {
-            viewModel.updateCategory(item.name)
-            scope.launch { drawerState.close() }
-        },
-        // Рамка, скругление и вес применяются строго к NavigationDrawerItem
-        modifier = Modifier
-            .weight(1f)
-            .clip(RoundedCornerShape(15.dp))
-            .border(2.dp, Color.Black, RoundedCornerShape(15.dp)),
-        shape = RoundedCornerShape(15.dp),
-        colors = NavigationDrawerItemDefaults.colors(
-            unselectedContainerColor = Color.White,
-            selectedContainerColor = Color.LightGray
-        ),
-        contentPadding = PaddingValues(start = 12.dp, end = 12.dp)
-    )
+        }
 
-    // 2. ИКОНКА УДАЛЕНИЯ (Идет следом за элементом меню, полностью независима)
-    IconButton(
-        onClick = { /* Логика удаления */ },
-        modifier = Modifier
-            .padding(start = 8.dp, end = 8.dp) // Отступы, чтобы кнопка не липла к рамке
-            .size(35.dp)
-    ) {
-        Icon(
-            modifier = Modifier.fillMaxSize(),
-            imageVector = ThemeNeon().iconDelItem,
-            contentDescription = "Удалить",
-            tint = ThemeNeon().iconDelTint
-        )
-    }
-}
-                        }
+        // 2. ИКОНКА УДАЛЕНИЯ (Идет следом, полностью независима)
+        IconButton(
+            onClick = { /* Логика удаления категории */ },
+            modifier = Modifier
+                .padding(start = 8.dp, end = 8.dp)
+                .size(35.dp)
+        ) {
+            Icon(
+                modifier = Modifier.fillMaxSize(),
+                imageVector = ThemeNeon().iconDelItem,
+                contentDescription = "Удалить",
+                tint = ThemeNeon().iconDelTint
+            )
+        }
+    }                       }
                     }
 
                     Box(
