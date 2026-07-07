@@ -48,6 +48,19 @@ import androidx.compose.ui.text.font.FontWeight
 // Для работы делегата 'by' и подписки на StateFlow
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import presentation.theme.ThemeNeon
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.weight // Нужен для Модификатора weight в Row/Column
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.ui.draw.clip
+import org.jetbrains.compose.resources.DrawableResource
 
 @Composable
 fun StartApp(viewModel : MainViewModel = koinViewModel ()) {
@@ -114,7 +127,54 @@ fun StartApp(viewModel : MainViewModel = koinViewModel ()) {
                 key = { it.id!!}
             ){item->
                       NavigationDrawerItem(
-                    label = { Text(item.name) },
+                    label = {  Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically // Все три элемента будут идеально ровно по центру высоты
+        ) {
+				Card(
+                modifier = Modifier
+                    .padding(start = 5.dp, end = 5.dp)
+                    .weight(1f) // Заставляет карточку занять ВСЁ свободное место между кнопками
+                    .clip(RoundedCornerShape(15.dp))
+                    .border(
+                        2.dp,
+                        Color.Black,
+                        RoundedCornerShape(15.dp)
+
+                    ).clickable{/*меняю категорию*/}
+                    ,
+
+                shape = RoundedCornerShape(16.dp),
+
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White
+                )
+           		 ) {
+                Text(
+                            modifier = Modifier.padding(start = 5.dp,end = 5.dp),
+                            text = item.name,
+                            color = Color.White,
+                            lineHeight = 20.sp,
+                            fontSize = 18.sp)
+            		}
+                 IconButton(
+
+                    onClick = { /*удалить категорию*/  },
+                    modifier = Modifier.padding(end = 8.dp).size(35.dp)
+
+                ) {
+
+                    Icon(
+                        modifier = Modifier.fillMaxSize(),
+                        imageVector = ThemeNeon().iconDelItem, 
+                        contentDescription = "Меню",
+                        tint = theme.iconDelTint,
+
+                    )
+
+                }
+
+        } // Конец Row },
                     selected = false,
                     onClick = {
                         viewModel.updateCategory(item.name)
