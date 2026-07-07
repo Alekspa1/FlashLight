@@ -53,6 +53,7 @@ import androidx.compose.foundation.background
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material.icons.filled.MyLocation 
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.Icons
 
 @Composable
 fun StartApp(viewModel: MainViewModel = koinViewModel()) {
