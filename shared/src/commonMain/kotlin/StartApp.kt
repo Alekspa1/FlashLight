@@ -125,6 +125,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                         ) { item ->
                             NavigationDrawerItem(
                                 label = {
+                                    // 🛠️ Row возвращен на место для выравнивания карточки и иконки удаления в ряд
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),
                                         verticalAlignment = Alignment.CenterVertically
@@ -176,8 +177,8 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                     ) {
                         IconButton(
                             modifier = Modifier
-                                .size(50.dp)
-                                .align(Alignment.CenterEnd),
+                                        .size(50.dp)
+                                        .align(Alignment.CenterEnd),
                             onClick = { /* Логика добавления */ }
                         ) {
                             Icon(
