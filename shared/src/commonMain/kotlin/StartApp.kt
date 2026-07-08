@@ -153,19 +153,14 @@ fun StartAppContent(
                                     Card(
                                         modifier = Modifier
                                             .weight(1f)
-                                            .clip(RoundedCornerShape(10.dp)) // corners android:radius="10dp"
-                                            // 1. Задаем фоновый цвет карточки
-                                            .background(CardSolidColor)
-                                            // 2. Рисуем рамку толщиной 3dp
                                             .border(3.dp, BorderNeonColor, RoundedCornerShape(10.dp))
-                                            // 3. Добавляем клик (эффект волны подстроится под форму автоматически)
+                                            .clip(RoundedCornerShape(10.dp))                       
                                             .clickable {
                                                 updateCategory("Повседневные")
                                                 scope.launch { drawerState.close() }
                                             },
                                         shape = RoundedCornerShape(10.dp),
-                                        // Прозрачный контейнер у Card обязателен, чтобы работал наш кастомный background
-                                        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+                                        colors = CardDefaults.cardColors(containerColor = CardSolidColor)
                                     ) {
                                         Text(
                                             modifier = Modifier.padding(8.dp),
