@@ -45,6 +45,13 @@ import io.github.vinceglb.filekit.core.PickerType
 import io.github.vinceglb.filekit.core.PlatformFile
 import kotlin.time.Clock
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -210,31 +217,74 @@ fun AddOrChangeItemDialog(
         )
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun OpenImage(uri: String, onDismiss : () -> Unit){
+fun OpenImage(uri: String, onDismiss: () -> Unit) {
 
-    if (uri != "") {
+    if (uri.isNotEmpty()) {
+        // 1. Состояния для хранения масштаба и координат сдвига картинки
+        var scale by remember { mutableStateOf(1f) }
+        var offsetX by remember { mutableStateOf(0f) }
+        var offsetY by remember { mutableStateOf(0f) }
+
         Dialog(
             onDismissRequest = { onDismiss() },
-            properties = DialogProperties(
-                usePlatformDefaultWidth = false // Позволяет картинке занять всю ширину экрана без полей AlertDialog
-            )
+            properties = DialogProperties(usePlatformDefaultWidth = false)
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .clickable { onDismiss() } // Закрытие при клике в любое место экрана
-                    .padding(16.dp), // Небольшой отступ от краев дисплея для красоты
+                    .padding(16.dp)
+                    // 2. Обычный клик по фону закроет диалог, ТОЛЬКО если картинка не увеличена
+                    .combinedClickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null, // Убираем вспышку клика на фоне для красоты
+                        onClick = { if (scale == 1f) onDismiss() },
+                        onDoubleClick = {
+                            // Сброс по двойному тапу, если увеличена, или быстрый зум до 2x
+                            if (scale > 1f) {
+                                scale = 1f
+                                offsetX = 0f
+                                offsetY = 0f
+                            } else {
+                                scale = 2f
+                            }
+                        }
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 AsyncImage(
                     model = uri,
                     contentDescription = "Крупный план",
                     modifier = Modifier
-                        .fillMaxWidth() // Растягивается по ширине
-                        .wrapContentHeight() // Высота подстроится автоматически и корректно
-                         .clip(RoundedCornerShape(12.dp)),
-                    contentScale = ContentScale.Fit // Картинка гарантированно поместится целиком без обрезки
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                        .clip(RoundedCornerShape(12.dp))
+                        // 3. Перехват жестов зума и панорамирования
+                        .pointerInput(Unit) {
+                            detectTransformGestures { _, pan, gestureZoom, _ ->
+                                // Ограничиваем масштаб от 1x до 4x
+                                scale = (scale * gestureZoom).coerceIn(1f, 4f)
+
+                                if (scale > 1f) {
+                                    // Двигаем картинку вслед за пальцем с учетом текущего зума
+                                    offsetX += pan.x * scale
+                                    offsetY += pan.y * scale
+                                } else {
+                                    // Сбрасываем координаты в центр, если масштаб вернулся к 1x
+                                    offsetX = 0f
+                                    offsetY = 0f
+                                }
+                            }
+                        }
+                        // 4. Применяем трансформации на уровне GPU для максимальной плавности
+                        .graphicsLayer(
+                            scaleX = scale,
+                            scaleY = scale,
+                            translationX = offsetX,
+                            translationY = offsetY
+                        ),
+                    contentScale = ContentScale.Fit
                 )
             }
         }
