@@ -236,7 +236,6 @@ fun OpenImage(uri: String, onDismiss: () -> Unit) {
             onDismissRequest = { onDismiss() },
             properties = DialogProperties(
                 usePlatformDefaultWidth = false,
-                decorFitsSystemWindows = false // Полноэкранный режим
             )
         ) {
             Box(
