@@ -251,9 +251,10 @@ fun StartAppContent(
                                             // 3. Добавляем клик (эффект волны подстроится под форму автоматически)
                                             .clickable {
                                                 scope.launch { 
-                                                    launch { drawerState.close() }               // Поехало закрытие
-                                                     launch { pagerState.animateScrollToPage(1) } // Поехал скролл одновременно
+                                                    drawerState.close()                
+                                                     pagerState.animateScrollToPage(1)  
                                                             }
+                                            
                                                 updateCategory(item.name)
                                                
                                             },
