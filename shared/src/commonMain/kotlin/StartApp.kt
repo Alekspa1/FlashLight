@@ -64,7 +64,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
     viewModel.updateAlarm()
     StartAppContent(
         categories = categories,
-        toastEvent = viewModel.toast,
+        toastEvents = viewModel.toast,
         updateCategory = {category -> viewModel.updateCategory(category) },
         openPager = {innerPadding, onOpenDrawer ->
             MainPager(innerPadding,viewModel,onOpenDrawer)
@@ -94,7 +94,7 @@ fun StartAppContent(
         }
     }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(toastEvents) {
         toastEvents.collect { message->
             snackbarHostState.showSnackbar(message)
         }
