@@ -64,6 +64,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
     viewModel.updateAlarm()
     StartAppContent(
         categories = categories,
+        toastEvent = viewModel.toast,
         updateCategory = {category -> viewModel.updateCategory(category) },
         openPager = {innerPadding, onOpenDrawer ->
             MainPager(innerPadding,viewModel,onOpenDrawer)
