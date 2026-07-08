@@ -71,7 +71,7 @@ import androidx.compose.foundation.pager.PagerState
 fun MainPager(paddingValues: PaddingValues = PaddingValues(),
               viewModel: MainViewModel,
               onMenuClick: () -> Unit,
-             pagerStateUp :PagerState ) {
+             pagerState :PagerState ) {
 
     val titles = listOf("Блокнот","Список дел","Календарь")
 
@@ -248,7 +248,7 @@ fun MainPager(paddingValues: PaddingValues = PaddingValues(),
         }
 
         HorizontalPager(
-            state = pagerStateUp,
+            state = pagerState,
             modifier = Modifier
                 .fillMaxSize()
 
