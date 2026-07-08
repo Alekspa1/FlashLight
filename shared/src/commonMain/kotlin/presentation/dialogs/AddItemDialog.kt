@@ -226,31 +226,35 @@ fun AddOrChangeItemDialog(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun OpenImage(uri: String, onDismiss: () -> Unit) {
-
     if (uri.isNotEmpty()) {
         var scale by remember { mutableStateOf(1f) }
         var offsetX by remember { mutableStateOf(0f) }
         var offsetY by remember { mutableStateOf(0f) }
 
+        // Переменная для сохранения реальных физических размеров экрана
+        var boxWidth by remember { mutableIntStateOf(0) }
+        var boxHeight by remember { mutableIntStateOf(0) }
+
         Dialog(
             onDismissRequest = { onDismiss() },
-            properties = DialogProperties(
-                usePlatformDefaultWidth = false,
-            )
+            properties = DialogProperties(usePlatformDefaultWidth = false)
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.Black) // Чистый абсолютно чёрный фон
+                    .background(Color.Black)
+                    // Считываем точные размеры экрана смартфона при отрисовке
+                    .onGloballyPositioned { coordinates ->
+                        boxWidth = coordinates.size.width
+                        boxHeight = coordinates.size.height
+                    }
                     .combinedClickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
                         onClick = { if (scale == 1f) onDismiss() },
                         onDoubleClick = {
                             if (scale > 1f) {
-                                scale = 1f
-                                offsetX = 0f
-                                offsetY = 0f
+                                scale = 1f; offsetX = 0f; offsetY = 0f
                             } else {
                                 scale = 3f
                             }
@@ -258,18 +262,23 @@ fun OpenImage(uri: String, onDismiss: () -> Unit) {
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                // Слои отрисовки: 1. Картинка (снизу)
                 AsyncImage(
                     model = uri,
                     contentDescription = "Крупный план",
                     modifier = Modifier
                         .fillMaxSize()
-                        .pointerInput(Unit) {
+                        .pointerInput(boxWidth, boxHeight) { // Пересоздаем при изменении размеров экрана
                             detectTransformGestures { _, pan, gestureZoom, _ ->
                                 scale = (scale * gestureZoom).coerceIn(1f, 5f)
+
                                 if (scale > 1f) {
-                                    offsetX += pan.x * scale
-                                    offsetY += pan.y * scale
+                                    // 1. Вычисляем максимальный разрешенный сдвиг для краев картинки
+                                    val maxOffsetX = (boxWidth * (scale - 1f)) / 2f
+                                    val maxOffsetY = (boxHeight * (scale - 1f)) / 2f
+
+                                    // 2. Жестко ограничиваем координаты сдвига в этих пределах
+                                    offsetX = (offsetX + pan.x * scale).coerceIn(-maxOffsetX, maxOffsetX)
+                                    offsetY = (offsetY + pan.y * scale).coerceIn(-maxOffsetY, maxOffsetY)
                                 } else {
                                     offsetX = 0f
                                     offsetY = 0f
@@ -285,24 +294,21 @@ fun OpenImage(uri: String, onDismiss: () -> Unit) {
                     contentScale = ContentScale.Fit
                 )
 
-                // Слои отрисовки: 2. Кнопка-крестик (сверху в углу)
-                // Отображаем её только тогда, когда картинка не увеличена, чтобы не мешала обзору
                 if (scale == 1f) {
                     IconButton(
                         onClick = { onDismiss() },
                         modifier = Modifier
-                            .align(Alignment.TopEnd) // Прижимаем к правому верхнему углу
-                            .statusBarsPadding() // Отступ от шторки уведомлений/чёлки, чтобы не накладывался на часы
+                            .align(Alignment.TopEnd)
+                            .statusBarsPadding()
                             .padding(16.dp)
                             .size(40.dp)
                             .clip(CircleShape)
-                            // Делаем легкую темную подложку, чтобы белый крестик не терялся на светлых картинках
-                            .background(Color.Black.copy(alpha = 0.4f)) 
+                            .background(Color.Black.copy(alpha = 0.4f))
                     ) {
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "Закрыть",
-                            tint = Color.White // Белый контрастный крестик
+                            tint = Color.White
                         )
                     }
                 }
