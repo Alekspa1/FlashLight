@@ -80,7 +80,7 @@ fun StartAppContent(
     categories: List<ListCategory> = emptyList(),
     toastEvents: Flow<String> = emptyFlow(),
     updateCategory :(String) ->Unit = {},
-    openPager: @Composable (innerPadding: PaddingValues, onOpenDrawer: () -> Unit, pagerStateUp : PagerState) -> Unit = {_,_,_,_> }
+    openPager: @Composable (innerPadding: PaddingValues, onOpenDrawer: () -> Unit, pagerStateUp : PagerState) -> Unit = {_,_,_,_}
                     ){
     val CardSolidColor = Color(0x6500BCD4)  // solid android:color
     val BorderNeonColor = Color(0x9900E2FF) // @color/vPagerCant
