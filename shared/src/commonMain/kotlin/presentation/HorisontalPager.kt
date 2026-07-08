@@ -63,6 +63,7 @@ import data.room.Item
 import androidx.compose.runtime.mutableStateOf // ДОБАВЛЕНО
 import androidx.compose.runtime.remember // ДОБАВЛЕНО
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.pager.PagerState
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 
