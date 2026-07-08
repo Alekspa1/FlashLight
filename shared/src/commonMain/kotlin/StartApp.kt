@@ -160,7 +160,10 @@ fun StartAppContent(
                                             .clip(RoundedCornerShape(10.dp))                       
                                             .clickable {
                                                 updateCategory("Повседневные")
-                                                scope.launch { drawerState.close() }
+                                                scope.launch {  scope.launch {
+                                                    pagerState.animateScrollToPage(1)  
+                                                    drawerState.close()                
+                                                            } }
                                             },
                                         shape = RoundedCornerShape(10.dp),
                                         colors = CardDefaults.cardColors(containerColor = CardSolidColor)
@@ -203,8 +206,9 @@ fun StartAppContent(
                                             .border(3.dp, BorderNeonColor, RoundedCornerShape(10.dp))
                                             // 3. Добавляем клик (эффект волны подстроится под форму автоматически)
                                             .clickable {
-
-                                                scope.launch { drawerState.close() }
+                                                 scope.launch {  
+                                                    drawerState.close()                
+                                                            }
                                             },
                                         shape = RoundedCornerShape(10.dp),
                                         // Прозрачный контейнер у Card обязателен, чтобы работал наш кастомный background
@@ -250,9 +254,9 @@ fun StartAppContent(
                                             .border(3.dp, BorderNeonColor, RoundedCornerShape(10.dp))
                                             // 3. Добавляем клик (эффект волны подстроится под форму автоматически)
                                             .clickable {
-                                                scope.launch { 
+                                                scope.launch {
+                                                    pagerState.animateScrollToPage(1)  
                                                     drawerState.close()                
-                                                     pagerState.animateScrollToPage(1)  
                                                             }
                                             
                                                 updateCategory(item.name)
