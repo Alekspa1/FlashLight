@@ -69,10 +69,11 @@ import androidx.compose.runtime.setValue
 @Composable
 fun MainPager(paddingValues: PaddingValues = PaddingValues(),
               viewModel: MainViewModel,
-              onMenuClick: () -> Unit) {
+              onMenuClick: () -> Unit,
+             pagerStateUp :PagerState ) {
 
     val titles = listOf("Блокнот","Список дел","Календарь")
-    val pagerState = rememberPagerState(pageCount = { titles.size })
+
     val scope = rememberCoroutineScope()
     val todoList by viewModel.sortedItemsFlow.collectAsStateWithLifecycle()
     var openImageState by remember { mutableStateOf(false) }
@@ -246,7 +247,7 @@ fun MainPager(paddingValues: PaddingValues = PaddingValues(),
         }
 
         HorizontalPager(
-            state = pagerState,
+            state = pagerStateUp,
             modifier = Modifier
                 .fillMaxSize()
 
