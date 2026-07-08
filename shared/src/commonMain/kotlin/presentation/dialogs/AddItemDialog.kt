@@ -300,7 +300,7 @@ fun OpenImage(uri: String, onDismiss: () -> Unit) {
                     contentScale = ContentScale.Fit
                 )
 
-                if (scale == 1f) {
+               
                     IconButton(
                         onClick = { onDismiss() },
                         modifier = Modifier
@@ -317,7 +317,7 @@ fun OpenImage(uri: String, onDismiss: () -> Unit) {
                             tint = Color.White
                         )
                     }
-                }
+                
             }
         }
     }
