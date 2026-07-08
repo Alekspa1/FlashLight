@@ -57,13 +57,13 @@ import data.room.ListCategory
 import flashlight.shared.generated.resources.background_drawer_neon
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
+import androidx.compose.foundation.pager.rememberPagerState
 
 @Composable
 fun StartApp(viewModel: MainViewModel = koinViewModel()) {
     val categories by viewModel.categories.collectAsStateWithLifecycle()
     viewModel.updateAlarm()
     StartAppContent(
-        pagerStateClick: (PagerState) -> Unit ={},
         categories = categories,
         toastEvents = viewModel.toast,
         updateCategory = {category -> viewModel.updateCategory(category) },
