@@ -59,23 +59,17 @@ import presentation.screens.Notebook
 import CommonConst.TIME
 import CommonConst.ACTION
 import CommonConst.ALARM_LONG
-import androidx.lifecycle.viewModelScope
 import data.room.Item
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import presentation.screens.Item
 import androidx.compose.runtime.mutableStateOf // ДОБАВЛЕНО
 import androidx.compose.runtime.remember // ДОБАВЛЕНО
 import androidx.compose.runtime.setValue
 
-import kotlin.time.Clock
-
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 
 @Composable
-fun MainWeatherPager(paddingValues: PaddingValues = PaddingValues(),
-                    viewModel: MainViewModel,
-                    onMenuClick: () -> Unit) {
+fun MainPager(paddingValues: PaddingValues = PaddingValues(),
+              viewModel: MainViewModel,
+              onMenuClick: () -> Unit) {
 
     val titles = listOf("Блокнот","Список дел","Календарь")
     val pagerState = rememberPagerState(pageCount = { titles.size })

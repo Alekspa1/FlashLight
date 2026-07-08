@@ -59,7 +59,7 @@ kotlin {
 
             // Зависимости Coil (3.5.0)
             implementation("io.coil-kt.coil3:coil-compose:3.3.0")
-            implementation("org.jetbrains.androidx.navigation:navigation-compose:2.8.0")
+            implementation("org.jetbrains.androidx.navigation:navigation-compose:2.9.2")
         }
 
         commonTest.dependencies {
@@ -70,7 +70,7 @@ kotlin {
             implementation("androidx.activity:activity-compose:1.13.0") // Для setContent и ComponentActivity
             implementation("androidx.appcompat:appcompat:1.7.1")
             implementation("org.jetbrains.compose.ui:ui-tooling-preview:1.10.0")
-            implementation("com.yandex.android:mobileads:8.1.0")
+            implementation("com.yandex.android:mobileads:8.2.0")
         }
 
         val desktopMain by getting {
