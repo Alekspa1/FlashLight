@@ -250,11 +250,12 @@ fun StartAppContent(
                                             .border(3.dp, BorderNeonColor, RoundedCornerShape(10.dp))
                                             // 3. Добавляем клик (эффект волны подстроится под форму автоматически)
                                             .clickable {
-                                                scope.launch {
-                                                        pagerState.animateScrollToPage(1)
-                                                        }
+                                                scope.launch { 
+                                                    launch { drawerState.close() }               // Поехало закрытие
+                                                     launch { pagerState.animateScrollToPage(1) } // Поехал скролл одновременно
+                                                            }
                                                 updateCategory(item.name)
-                                                scope.launch { drawerState.close() }
+                                               
                                             },
                                         shape = RoundedCornerShape(10.dp),
                                         // Прозрачный контейнер у Card обязателен, чтобы работал наш кастомный background
