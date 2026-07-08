@@ -161,8 +161,8 @@ fun StartAppContent(
                                             .clickable {
                                                 updateCategory("Повседневные")
                                                 scope.launch {  scope.launch {
-                                                    pagerState.animateScrollToPage(1)  
-                                                    drawerState.close()                
+                                                    launch{ drawerState.close()} 
+                                                   launch{ pagerState.animateScrollToPage(1) }               
                                                             } }
                                             },
                                         shape = RoundedCornerShape(10.dp),
@@ -255,8 +255,9 @@ fun StartAppContent(
                                             // 3. Добавляем клик (эффект волны подстроится под форму автоматически)
                                             .clickable {
                                                 scope.launch {
-                                                    pagerState.animateScrollToPage(1)  
-                                                    drawerState.close()                
+                                                   launch{ drawerState.close()} 
+                                                   launch{ pagerState.animateScrollToPage(1) } 
+                                                                   
                                                             }
                                             
                                                 updateCategory(item.name)
