@@ -63,11 +63,12 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
     val categories by viewModel.categories.collectAsStateWithLifecycle()
     viewModel.updateAlarm()
     StartAppContent(
+        pagerStateClick: (PagerState) -> Unit ={},
         categories = categories,
         toastEvents = viewModel.toast,
         updateCategory = {category -> viewModel.updateCategory(category) },
-        openPager = {innerPadding, onOpenDrawer ->
-            MainPager(innerPadding,viewModel,onOpenDrawer)
+        openPager = {innerPadding, onOpenDrawer,pagerState ->
+            MainPager(innerPadding,viewModel,onOpenDrawer,pagerState)
         }
     )
 
@@ -78,13 +79,14 @@ fun StartAppContent(
     categories: List<ListCategory> = emptyList(),
     toastEvents: Flow<String> = emptyFlow(),
     updateCategory :(String) ->Unit = {},
-    openPager: @Composable (innerPadding: PaddingValues, onOpenDrawer: () -> Unit) -> Unit = {_,_-> }
+    openPager: @Composable (innerPadding: PaddingValues, onOpenDrawer: () -> Unit, pagerStateUp : PagerState) -> Unit = {_,_,_-,_> }
                     ){
     val CardSolidColor = Color(0x6500BCD4)  // solid android:color
     val BorderNeonColor = Color(0x9900E2FF) // @color/vPagerCant
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+    val pagerState = rememberPagerState(pageCount = { 2 })
     val onOpenDrawer = remember {
         {
             scope.launch {
@@ -247,6 +249,7 @@ fun StartAppContent(
                                             .border(3.dp, BorderNeonColor, RoundedCornerShape(10.dp))
                                             // 3. Добавляем клик (эффект волны подстроится под форму автоматически)
                                             .clickable {
+                                                pagerState.animateScrollToPage(1)
                                                 updateCategory(item.name)
                                                 scope.launch { drawerState.close() }
                                             },
@@ -402,7 +405,7 @@ fun StartAppContent(
                     },
                     snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
                 ) { innerPadding ->
-                    openPager(innerPadding, onOpenDrawer)
+                    openPager(innerPadding, onOpenDrawer,pagerState)
                 }
             }
         }
