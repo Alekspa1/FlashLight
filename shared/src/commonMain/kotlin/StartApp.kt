@@ -250,7 +250,9 @@ fun StartAppContent(
                                             .border(3.dp, BorderNeonColor, RoundedCornerShape(10.dp))
                                             // 3. Добавляем клик (эффект волны подстроится под форму автоматически)
                                             .clickable {
-                                                pagerState.animateScrollToPage(1)
+                                                scope.launch {
+                                                        pagerState.animateScrollToPage(1)
+                                                        }
                                                 updateCategory(item.name)
                                                 scope.launch { drawerState.close() }
                                             },
