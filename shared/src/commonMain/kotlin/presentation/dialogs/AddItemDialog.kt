@@ -58,6 +58,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.background
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -231,9 +234,12 @@ fun OpenImage(uri: String, onDismiss: () -> Unit) {
         var offsetX by remember { mutableStateOf(0f) }
         var offsetY by remember { mutableStateOf(0f) }
 
-        // Переменная для сохранения реальных физических размеров экрана
-        var boxWidth by remember { mutableIntStateOf(0) }
-        var boxHeight by remember { mutableIntStateOf(0) }
+        // Точные размеры картинки в px для KMP
+        var imageWidthPx by remember { mutableStateOf(0f) }
+        var imageHeightPx by remember { mutableStateOf(0f) }
+
+        // Плотность экрана (iOS/Android)
+        val density = LocalDensity.current
 
         Dialog(
             onDismissRequest = { onDismiss() },
@@ -243,11 +249,6 @@ fun OpenImage(uri: String, onDismiss: () -> Unit) {
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color.Black)
-                    // Считываем точные размеры экрана смартфона при отрисовке
-                    .onGloballyPositioned { coordinates ->
-                        boxWidth = coordinates.size.width
-                        boxHeight = coordinates.size.height
-                    }
                     .combinedClickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
@@ -267,16 +268,21 @@ fun OpenImage(uri: String, onDismiss: () -> Unit) {
                     contentDescription = "Крупный план",
                     modifier = Modifier
                         .fillMaxSize()
-                        .pointerInput(boxWidth, boxHeight) { // Пересоздаем при изменении размеров экрана
+                        // Замеряем РЕАЛЬНЫЕ координаты и размеры самого изображения
+                        .onGloballyPositioned { coordinates ->
+                            imageWidthPx = coordinates.size.width.toFloat()
+                            imageHeightPx = coordinates.size.height.toFloat()
+                        }
+                        .pointerInput(Unit) {
                             detectTransformGestures { _, pan, gestureZoom, _ ->
                                 scale = (scale * gestureZoom).coerceIn(1f, 5f)
 
                                 if (scale > 1f) {
-                                    // 1. Вычисляем максимальный разрешенный сдвиг для краев картинки
-                                    val maxOffsetX = (boxWidth * (scale - 1f)) / 2f
-                                    val maxOffsetY = (boxHeight * (scale - 1f)) / 2f
+                                    // Формула Telegram: вычисляем, насколько картинка вышла за свои исходные границы
+                                    val maxOffsetX = (imageWidthPx * (scale - 1f)) / 2f
+                                    val maxOffsetY = (imageHeightPx * (scale - 1f)) / 2f
 
-                                    // 2. Жестко ограничиваем координаты сдвига в этих пределах
+                                    // Жесткое удержание в границах
                                     offsetX = (offsetX + pan.x * scale).coerceIn(-maxOffsetX, maxOffsetX)
                                     offsetY = (offsetY + pan.y * scale).coerceIn(-maxOffsetY, maxOffsetY)
                                 } else {
