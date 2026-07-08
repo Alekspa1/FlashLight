@@ -51,6 +51,12 @@ import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.foundation.layout.statusBarsPadding
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -228,18 +234,17 @@ fun OpenImage(uri: String, onDismiss: () -> Unit) {
         Dialog(
             onDismissRequest = { onDismiss() },
             properties = DialogProperties(
-                usePlatformDefaultWidth = false, // 1. Убирает сжатие окна по бокам
-                decorFitsSystemWindows = false    // 2. Включает Edge-to-Edge (настоящий полный экран)
+                usePlatformDefaultWidth = false,
+                decorFitsSystemWindows = false // Полноэкранный режим
             )
         ) {
-            // 3. Главный контейнер на 100% физического дисплея смартфона
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.95f)) // Глубокий темный фон
+                    .background(Color.Black) // Чистый абсолютно чёрный фон
                     .combinedClickable(
                         interactionSource = remember { MutableInteractionSource() },
-                        indication = null, // Без вспышки при клике на фон
+                        indication = null,
                         onClick = { if (scale == 1f) onDismiss() },
                         onDoubleClick = {
                             if (scale > 1f) {
@@ -247,17 +252,18 @@ fun OpenImage(uri: String, onDismiss: () -> Unit) {
                                 offsetX = 0f
                                 offsetY = 0f
                             } else {
-                                scale = 3f // Мгновенный крупный зум
+                                scale = 3f
                             }
                         }
                     ),
                 contentAlignment = Alignment.Center
             ) {
+                // Слои отрисовки: 1. Картинка (снизу)
                 AsyncImage(
                     model = uri,
-                    contentDescription = "Полноэкранный крупный план",
+                    contentDescription = "Крупный план",
                     modifier = Modifier
-                        .fillMaxSize() // Границы картинки теперь равны границам экрана
+                        .fillMaxSize()
                         .pointerInput(Unit) {
                             detectTransformGestures { _, pan, gestureZoom, _ ->
                                 scale = (scale * gestureZoom).coerceIn(1f, 5f)
@@ -276,8 +282,30 @@ fun OpenImage(uri: String, onDismiss: () -> Unit) {
                             translationX = offsetX,
                             translationY = offsetY
                         ),
-                    contentScale = ContentScale.Fit // Идеально центрирует узкие изображения
+                    contentScale = ContentScale.Fit
                 )
+
+                // Слои отрисовки: 2. Кнопка-крестик (сверху в углу)
+                // Отображаем её только тогда, когда картинка не увеличена, чтобы не мешала обзору
+                if (scale == 1f) {
+                    IconButton(
+                        onClick = { onDismiss() },
+                        modifier = Modifier
+                            .align(Alignment.TopEnd) // Прижимаем к правому верхнему углу
+                            .statusBarsPadding() // Отступ от шторки уведомлений/чёлки, чтобы не накладывался на часы
+                            .padding(16.dp)
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            // Делаем легкую темную подложку, чтобы белый крестик не терялся на светлых картинках
+                            .background(Color.Black.copy(alpha = 0.4f)) 
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Закрыть",
+                            tint = Color.White // Белый контрастный крестик
+                        )
+                    }
+                }
             }
         }
     }
