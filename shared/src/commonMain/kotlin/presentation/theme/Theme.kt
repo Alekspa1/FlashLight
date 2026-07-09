@@ -1,11 +1,21 @@
 package presentation.theme
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.filled.AddCircleOutline
+import androidx.compose.material.icons.filled.Assignment
 import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.GroupAdd
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.PlaylistAddCheck
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.SystemUpdate
+import androidx.compose.material.icons.filled.Update
+import androidx.compose.material.icons.filled.Upgrade
+import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import flashlight.shared.generated.resources.Res
@@ -39,6 +49,15 @@ sealed interface Theme{
     val iconAddTint: Color
     val iconDelItem: ImageVector
     val iconDelTint: Color
+    val iconDrawerEveryday : ImageVector
+    val iconDrawerShare : ImageVector
+    val iconDrawerPremium : ImageVector
+    val tintPremiumOn : Color
+    val tintPremiumOff : Color
+    val iconDrawerUpdateOff : ImageVector
+    val iconDrawerUpdateOn : ImageVector
+    val iconDrawerSettigs : ImageVector
+
 }
 
 data class ThemeNeon (
@@ -74,6 +93,20 @@ data class ThemeNeon (
     override val iconDelItem: ImageVector = Icons.Default.Delete,
     override val iconDelTint: Color = Color.White,
     override val iconTint: Color = Color.White,
+    override val iconDrawerEveryday: ImageVector = Icons.AutoMirrored.Filled.Assignment,
+    override val iconDrawerShare: ImageVector = Icons.Default.GroupAdd,
+    override val iconDrawerPremium: ImageVector = Icons.Default.WorkspacePremium,
+    override val tintPremiumOn: Color = Color.Yellow,
+    override val tintPremiumOff: Color = Color.White,
+    override val iconDrawerUpdateOff: ImageVector = Icons.Default.SystemUpdate,
+    override val iconDrawerUpdateOn: ImageVector = Icons.Default.Upgrade,
+    override val iconDrawerSettigs: ImageVector = Icons.Default.Settings
+
+    //override val iconDrawerPremiumOff: ImageVector = ,
+    //override val iconDrawerSettigs: ImageVector = ,
+
+    //Дравер
+
 ) : Theme
 
 data class ThemeZabor (
@@ -105,5 +138,15 @@ data class ThemeZabor (
     override val iconDelItem: ImageVector = Icons.Default.Delete,
     override val iconDelTint: Color = Color.White,
     override val iconTint: Color = Color.White,
+    override val iconDrawerEveryday: ImageVector = Icons.AutoMirrored.Filled.Assignment,
+    override val iconDrawerShare: ImageVector = Icons.Default.PlaylistAddCheck,
+    override val iconDrawerPremium: ImageVector,
+    override val tintPremiumOn: Color = Color.Yellow,
+    override val tintPremiumOff: Color = Color.Black,
+    override val iconDrawerUpdateOff: ImageVector = Icons.Default.SystemUpdate,
+    override val iconDrawerUpdateOn: ImageVector = Icons.Default.Update,
+    override val iconDrawerSettigs: ImageVector,
+   // override val iconDrawerPremiumOff: ImageVector,
+   // override val iconDrawerSettigs: ImageVector,
 
     ) : Theme

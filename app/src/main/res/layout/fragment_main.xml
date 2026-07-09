@@ -3,13 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/drawer"
-
+    tools:openDrawer="start"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="start"
     android:background="@drawable/img"
-    tools:context=".Presentation.MainActivity"
-    >
+    tools:context=".Presentation.MainActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/content"
@@ -196,16 +195,16 @@
                     style="@style/StyleButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:drawablePadding="8dp"
                     android:padding="10dp"
                     android:text="@string/premium_off"
-                    app:drawableStartCompat="@drawable/ic_premium_off"
-                    android:drawablePadding="8dp"
-                    />
+                    app:drawableStartCompat="@drawable/ic_premium_off" />
+
                 <androidx.cardview.widget.CardView
                     android:id="@+id/cardZone2"
                     android:layout_width="match_parent"
                     android:layout_height="2dp"
-                    app:cardBackgroundColor="@color/white"/>
+                    app:cardBackgroundColor="@color/white" />
 
                 <TextView
                     android:id="@+id/tvNewUpgrate"
@@ -216,11 +215,12 @@
                     android:padding="10dp"
                     android:text="Обновлений нет"
                     app:drawableStartCompat="@drawable/ic_update" />
+
                 <androidx.cardview.widget.CardView
                     android:id="@+id/cardZone3"
                     android:layout_width="match_parent"
                     android:layout_height="2dp"
-                    app:cardBackgroundColor="@color/white"/>
+                    app:cardBackgroundColor="@color/white" />
 
                 <TextView
                     android:id="@+id/tvNewSettings"
@@ -231,11 +231,12 @@
                     android:padding="10dp"
                     android:text="Настройки"
                     app:drawableStartCompat="@drawable/ic_settings" />
+
                 <androidx.cardview.widget.CardView
                     android:id="@+id/cardZone4"
                     android:layout_width="match_parent"
                     android:layout_height="2dp"
-                    app:cardBackgroundColor="@color/white"/>
+                    app:cardBackgroundColor="@color/white" />
 
 
             </LinearLayout>

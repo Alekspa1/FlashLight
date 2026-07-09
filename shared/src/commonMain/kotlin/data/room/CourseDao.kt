@@ -28,8 +28,8 @@ interface CourseDao {
     @Query("SELECT name FROM ListCategory")
     suspend fun getAllCategories(): List<String>
 
-    @Query("SELECT * FROM Item WHERE category == :value")
-    suspend fun getAllNewNoFlow(value: String): List<Item>
+    @Query("UPDATE Item SET category = :newName WHERE category = :oldName")
+    suspend fun updateAllitemInCategory(newName: String, oldName: String)
 
     @Query("SELECT * FROM Item WHERE alarmTime > :time ")
     suspend fun getUpdateItemRestartPhone(time: Long): List<Item>
@@ -66,6 +66,8 @@ interface CourseDao {
 
 
     //MENU
+
+
     @Query("SELECT COUNT(*) FROM ListCategory WHERE name = :name")
     suspend fun isCategoryExists(name: String): Int
 

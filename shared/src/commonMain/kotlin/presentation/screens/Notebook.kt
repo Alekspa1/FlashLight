@@ -6,7 +6,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -41,6 +40,7 @@ fun Notebook(viewModel: MainViewModel,pageIndex: Int){
     val lifecycleOwner = LocalLifecycleOwner.current
     val focusManager = LocalFocusManager.current
     if(pageIndex != 0) focusManager.clearFocus()
+
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_STOP) {
@@ -75,7 +75,7 @@ fun Notebook(viewModel: MainViewModel,pageIndex: Int){
         )
     {
 
-            if(showDialog.isWho == CommonConst.DELETE_DIALOG){
+            if(showDialog.isWho == CommonConst.DELETE_DIALOG_ITEM){
             DeleteDialog {result->
             if(result) onTextChange("")
              onResultDialog(DialogState())
@@ -127,7 +127,7 @@ fun Notebook(viewModel: MainViewModel,pageIndex: Int){
                             )
                     }
                     IconButton(modifier = Modifier.align(Alignment.CenterEnd),
-                        onClick = {onResultDialog(DialogState(CommonConst.DELETE_DIALOG))  },
+                        onClick = {onResultDialog(DialogState(CommonConst.DELETE_DIALOG_ITEM))  },
                     ){
                         Image(
                             painter = painterResource(Res.drawable.ic_del_notebook_neon),

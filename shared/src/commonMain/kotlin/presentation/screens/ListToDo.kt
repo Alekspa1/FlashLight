@@ -64,7 +64,8 @@ import kotlinx.datetime.todayIn
 fun ListToDo(list: List<Item>,
              theme: Theme = ThemeNeon(),
              onClick : (Item, Int) -> Unit = {_,_->},
-             onAddItem : () -> Unit = {}
+             onAddItem : () -> Unit = {},
+             category : String = "Тест"
              ){
     Column(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
@@ -74,7 +75,7 @@ fun ListToDo(list: List<Item>,
             verticalArrangement = Arrangement.spacedBy(5.dp),
 
         ) {
-            val categoryName = list.firstOrNull()?.category ?: "Повседневные"
+            val categoryName = category
             item(key = categoryName) {
                 Box(modifier = Modifier.fillMaxWidth()){
                     Text(

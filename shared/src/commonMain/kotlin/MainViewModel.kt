@@ -7,6 +7,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.room.Transaction
 import data.room.CourseDao
 import data.room.Item
 import data.room.ListCategory
@@ -28,12 +30,12 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import presentation.dialogs.DialogState
 import kotlin.time.Clock
-import kotlin.time.Instant
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import presentation.theme.SizeNormal
+import presentation.theme.ThemeNeon
 
 class MainViewModel(
     private val pref: SharedPrefRepository,
@@ -51,6 +53,21 @@ class MainViewModel(
     var showDialog by  mutableStateOf(DialogState())
     var _toast = MutableSharedFlow<String>()
     var toast = _toast.asSharedFlow()
+
+    var premiumState by mutableStateOf(true)
+    var updateState by mutableStateOf(false)
+    var themeState by mutableStateOf(ThemeNeon())
+    var sizeState by mutableStateOf(SizeNormal())
+
+    fun premiumOn(){
+        premiumState = true
+        sendMessage("PREMIUM версия активирована")
+    }
+    fun premiumOf(){
+        premiumState = false
+        sendMessage("PREMIUM версия отключена")
+    }
+
 
     //private val _sortType = MutableStateFlow(settingsPref.getSort())
     private val _sortType = MutableStateFlow(SORT_STANDART)
@@ -72,6 +89,17 @@ class MainViewModel(
             image.save(temporaryPathString, fileName)
         }
     }
+
+    val spinnerCategories: StateFlow<List<String>> = categories
+        .map { listFromDb ->
+            listOf("Повседневные") + listFromDb.map { it.name }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = listOf("Повседневные") // Чтобы на старте spinner не был пустым
+        )
+
     fun deleteImage(fileName: String) = image.delete(fileName)
 
      val sortedItemsFlow = combine(
@@ -102,6 +130,7 @@ class MainViewModel(
     )
 
     fun saveText() = pref.saveTextNoteBook(stateTextNotebook)
+
     fun updateCategory(value: String) {
         _categoryItemFlow.value = value
     }
@@ -213,6 +242,69 @@ class MainViewModel(
                     }
                 }
             }
+        }
+    }
+
+    suspend fun getAllCategories(item: Item?, calendar: Boolean) : List<String> {
+        val listCategory = mutableListOf("Повседневные")
+        listCategory.addAll(db.getAllCategories())
+        if (!calendar) {
+            if (item == null) {
+                val currentCategory = categoryItemFlow.value
+                listCategory.remove(currentCategory)
+                listCategory.add(0, currentCategory)
+            } else {
+                listCategory.remove(item.category)
+                listCategory.add(0, item.category)
+            }
+        } else {
+            if (item != null) {
+                listCategory.remove(item.category)
+                listCategory.add(0, item.category)
+            }
+
+        }
+        return listCategory
+    }
+
+    suspend fun getAllCategoriesTwo() : List<String> {
+        val listCategory = mutableListOf("Повседневные")
+        listCategory.addAll(db.getAllCategories())
+        return listCategory
+    }
+
+    fun insertCategory(name: String) {
+        viewModelScope.launch {
+            if (isCategoryNameExists(name) || name == "Повседневные" || name ==  "Общие дела") sendMessage("Такая категория уже есть")
+            else db.insertCategory(ListCategory(null, name))
+        }
+    }
+
+    fun upgrateListCategory(category: ListCategory, name: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val newitem = category.copy(name = name)
+            if (isCategoryNameExists(name) || name == "Повседневные" || name ==  "Общие дела") sendMessage("Такая категория уже есть")
+            else {
+                db.updateCategory(newitem)
+                db.updateAllitemInCategory(name,category.name)
+            }
+        }
+    }
+
+
+    fun deleteCategory(category: ListCategory){
+        viewModelScope.launch(Dispatchers.IO) {
+            db.deleteItemInCategory(category.name) // удаляю все из бд
+            db.deleteCategoryMenu(category) // удаляю из меню
+        }
+    }
+
+    private suspend fun isCategoryNameExists(name: String): Boolean {
+        return try {
+            val count = db.isCategoryExists(name)
+            count > 0
+        } catch (e: Exception) {
+            false
         }
     }
 

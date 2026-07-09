@@ -179,7 +179,8 @@ class ViewModelFlashLight @Inject constructor(
     }
 
 
-    fun getAllCategories(onResult: (List<String>) -> Unit, item: Item?, calendar: Boolean) {
+
+     fun getAllCategories(onResult: (List<String>) -> Unit, item: Item?, calendar: Boolean) {
         val listCategory = mutableListOf("Повседневные")
         viewModelScope.launch {
             listCategory.addAll(db.CourseDao().getAllCategories())

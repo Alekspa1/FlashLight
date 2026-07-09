@@ -58,15 +58,22 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.background
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.tooling.preview.Preview
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddOrChangeItemDialog(
-    item: Item?,
-    onCancel : ()-> Unit,
+    item: Item? = null,
+    onCancel : ()-> Unit = {},
+    listCategory : List<String> = emptyList(),
+    calendar : Boolean = false,
+    category: String = "Повседневные",
     onSave :(
         item: Item?,
         name: String,
@@ -76,16 +83,16 @@ fun AddOrChangeItemDialog(
         alarlm : Boolean,
         originalNameImage : String,
             ) -> Unit ={_,_,_,_,_,_,_->},
-        getUri : (String) -> String,
+        getUri : (String) -> String = {""},
     ){
     var stateTextName by remember { mutableStateOf(item?.name ?: "") }
     var stateTextDecs by remember { mutableStateOf(item?.desc ?: "") }
     var openImageState by remember { mutableStateOf(false) }
     var selectedFileUri: String by remember { mutableStateOf(getUri(item?.uri ?: "")) }
     var originalFileName by remember { mutableStateOf("") }
-    var categorySelected by remember { mutableStateOf(item?.category ?: "Повседневные") }
+    var categorySelected by remember { mutableStateOf(item?.category ?:
+    if(calendar) "Повседневные" else category) }
     val fileLauncher = rememberFilePickerLauncher(type = PickerType.Image) { file ->
-
          if (file != null) {
              selectedFileUri =  parsePlatformUri(file)
              originalFileName = "img_${Clock.System.now().toEpochMilliseconds()}.jpg"
@@ -195,10 +202,21 @@ fun AddOrChangeItemDialog(
                         }
                     }
 
-                    // ТУТ БУДЕТ ТВOЙ СПИННЕР КАТЕГОРИЙ (В Compose это ExposedDropdownMenuBox)
-                    // Оставим пока заглушку, чтобы не раздувать код
-                    Text("Категория: $categorySelected", modifier = Modifier.padding(top = 8.dp))
-                } },
+
+
+
+                    // Отображаем наш KMP Спиннер, когда список загрузился
+                        KmpSpinnerInput(
+                            selectedCategory = categorySelected,
+                            list = listCategory,
+                            onCategorySelected = { selected ->
+                                categorySelected = selected
+
+                            }
+                        )
+
+                }
+                } ,
 
             confirmButton = {
                 TextButton(onClick = {
@@ -226,108 +244,54 @@ fun AddOrChangeItemDialog(
         )
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OpenImage(uri: String, onDismiss: () -> Unit) {
-    if (uri.isNotEmpty()) {
-        var scale by remember { mutableStateOf(1f) }
-        var offsetX by remember { mutableStateOf(0f) }
-        var offsetY by remember { mutableStateOf(0f) }
+fun KmpSpinnerInput(
+    selectedCategory: String,            // Текущее выбранное значение (всегда первое из списка на старте)
+    list: List<String>,                  // Ваш отсортированный во ViewModel список
+    onCategorySelected: (String) -> Unit // Колбэк изменения
+) {
+    var expanded by remember { mutableStateOf(false) }
 
-        // Точные размеры картинки в px для KMP
-        var imageWidthPx by remember { mutableStateOf(0f) }
-        var imageHeightPx by remember { mutableStateOf(0f) }
+    // Контейнер для выпадающего списка
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded }
+    ) {
+        // Поле ввода, которое имитирует сам Спиннер
+        OutlinedTextField(
+            value = selectedCategory,
+            onValueChange = {},
+            readOnly = true, // Запрещаем ввод с клавиатуры
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier = Modifier.menuAnchor().fillMaxWidth(),
+            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+        )
 
-        // Плотность экрана (iOS/Android)
-        val density = LocalDensity.current
-
-        Dialog(
-            onDismissRequest = { onDismiss() },
-            properties = DialogProperties(usePlatformDefaultWidth = false)
+        // Само выпадающее меню с элементами
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black)
-                    .combinedClickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                        onClick = { if (scale == 1f) onDismiss() },
-                        onDoubleClick = {
-                            if (scale > 1f) {
-                                scale = 1f; offsetX = 0f; offsetY = 0f
-                            } else {
-                                scale = 3f
-                            }
-                        }
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                AsyncImage(
-                    model = uri,
-                    contentDescription = "Крупный план",
-                    modifier = Modifier
-                        .fillMaxSize()
-                        // Замеряем РЕАЛЬНЫЕ координаты и размеры самого изображения
-                        .onGloballyPositioned { coordinates ->
-                            imageWidthPx = coordinates.size.width.toFloat()
-                            imageHeightPx = coordinates.size.height.toFloat()
-                        }
-                        .pointerInput(Unit) {
-                            detectTransformGestures { _, pan, gestureZoom, _ ->
-                                scale = (scale * gestureZoom).coerceIn(1f, 5f)
-
-                                if (scale > 1f) {
-                                    // Формула Telegram: вычисляем, насколько картинка вышла за свои исходные границы
-                                    val maxOffsetX = (imageWidthPx * (scale - 1f)) / 2f
-                                    val maxOffsetY = (imageHeightPx * (scale - 1f)) / 2f
-
-                                    // Жесткое удержание в границах
-                                    offsetX = (offsetX + pan.x * scale).coerceIn(-maxOffsetX, maxOffsetX)
-                                    offsetY = (offsetY + pan.y * scale).coerceIn(-maxOffsetY, maxOffsetY)
-                                } else {
-                                    offsetX = 0f
-                                    offsetY = 0f
-                                }
-                            }
-                        }
-                        .graphicsLayer(
-                            scaleX = scale,
-                            scaleY = scale,
-                            translationX = offsetX,
-                            translationY = offsetY
-                        ),
-                    contentScale = ContentScale.Fit
-                )
-
-               
-                    IconButton(
-                        onClick = { onDismiss() },
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .statusBarsPadding()
-                            .padding(16.dp)
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .background(Color.Black.copy(alpha = 0.4f))
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Закрыть",
-                            tint = Color.White
-                        )
+            list.forEach { item ->
+                DropdownMenuItem(
+                    text = { Text(text = item) },
+                    onClick = {
+                        onCategorySelected(item) // Передаем наверх выбранную строку
+                        expanded = false
                     }
-                
+                )
             }
         }
     }
 }
 
+
 expect fun parsePlatformUri(uri: PlatformFile): String
 
 
-//@Preview(showBackground = true)
-//@Composable
-//fun PreviewAddItemDialog(){
-//    AddOrChangeItemDialog(null)
-//}
+@Preview(showBackground = true)
+@Composable
+fun PreviewAddItemDialog(){
+    AddOrChangeItemDialog(listCategory = listOf("хер","тыква"))
+}

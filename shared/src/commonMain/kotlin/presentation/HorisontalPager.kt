@@ -4,9 +4,9 @@ import CommonConst.ALARM
 import CommonConst.CHANGE
 import CommonConst.CHANGE_ITEM
 import CommonConst.DELETE
-import CommonConst.DELETE_DIALOG
+import CommonConst.DELETE_DIALOG_ITEM
 import CommonConst.IMAGE
-import CommonConst.INSERT_DIALOG
+import CommonConst.INSERT_DIALOG_ITEM
 import CommonConst.NOTIFICATION
 import MainViewModel
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
@@ -64,6 +63,7 @@ import androidx.compose.runtime.mutableStateOf // ДОБАВЛЕНО
 import androidx.compose.runtime.remember // ДОБАВЛЕНО
 import androidx.compose.runtime.setValue
 import androidx.compose.foundation.pager.PagerState
+import androidx.compose.runtime.LaunchedEffect
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 
@@ -77,6 +77,11 @@ fun MainPager(paddingValues: PaddingValues = PaddingValues(),
 
     val scope = rememberCoroutineScope()
     val todoList by viewModel.sortedItemsFlow.collectAsStateWithLifecycle()
+
+    val listCategory by viewModel.spinnerCategories.collectAsStateWithLifecycle()
+
+    val category by viewModel.categoryItemFlow.collectAsStateWithLifecycle()
+
     var openImageState by remember { mutableStateOf(false) }
     var selectedFileUri: String by remember { mutableStateOf("") }
     if (openImageState) {
@@ -84,16 +89,19 @@ fun MainPager(paddingValues: PaddingValues = PaddingValues(),
     }
         val item = viewModel.showDialog.item
         when(viewModel.showDialog.isWho){
-          
-            DELETE_DIALOG->{
+
+            DELETE_DIALOG_ITEM->{
                 DeleteDialog {result->
                     if(result && item != null) viewModel.deleteItem(item)
                     viewModel.showDialog = DialogState()
                 }
             }
 
-            INSERT_DIALOG -> {
-                AddOrChangeItemDialog(item = item,
+            INSERT_DIALOG_ITEM -> {
+                AddOrChangeItemDialog(
+                    item = item,
+                    listCategory = listCategory,
+                    category = category,
                     onCancel = {viewModel.showDialog = DialogState()},
                     onSave ={ item, name, desc, uri, category, alarm,originalFileName ->
 
@@ -259,6 +267,7 @@ fun MainPager(paddingValues: PaddingValues = PaddingValues(),
                 }
                 1 -> {
                     ListToDo(list = todoList,
+                        category = category,
                         onClick = {item,action->
                             when(action){
                                 ALARM->{viewModel.permission(NOTIFICATION,item)}
@@ -267,7 +276,7 @@ fun MainPager(paddingValues: PaddingValues = PaddingValues(),
                               {openImageState = true
                               selectedFileUri = viewModel.getUri(item.uri) }
                                 CHANGE_ITEM->{
-                                    viewModel.showDialog = DialogState(INSERT_DIALOG,item)}
+                                    viewModel.showDialog = DialogState(INSERT_DIALOG_ITEM,item)}
                                 CHANGE->{
                                     val newItem = item.copy(
                                         change = !item.change,
@@ -280,13 +289,13 @@ fun MainPager(paddingValues: PaddingValues = PaddingValues(),
                                 }
                                 DELETE->{
                                     if(item.change)viewModel.deleteItem(item)
-                                        else viewModel.showDialog = DialogState(DELETE_DIALOG,item)
+                                        else viewModel.showDialog = DialogState(DELETE_DIALOG_ITEM,item)
 
                                 }
 
                             }
                         },
-                        onAddItem = {viewModel.showDialog = DialogState(INSERT_DIALOG)})
+                        onAddItem = {viewModel.showDialog = DialogState(INSERT_DIALOG_ITEM)})
                 }
                 2 -> {Text("3")}
 
