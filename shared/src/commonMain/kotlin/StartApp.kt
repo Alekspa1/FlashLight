@@ -111,43 +111,46 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
         }
     }
     viewModel.updateAlarm()
-
-    StartAppContent(
-        categories = categories,
-        toastEvents = viewModel.toast,
-        updateCategory = {category -> viewModel.updateCategory(category) },
-        openPager = {innerPadding, onOpenDrawer,pagerState ->
-            MainPager(innerPadding,viewModel,onOpenDrawer,pagerState)
-        },
-        drawerState = drawerState,
-        theme = viewModel.themeState,
-        size = viewModel.sizeState,
-        premium = viewModel.premiumState,
-        update = viewModel.updateState,
-        onClick = {click->
-            when(click){
-                PREMIUM_CLICK->{}
-                UPGRATE_CLICK->{}
-                SETTINGS_CLICK->{}
-            }
-
-        },
-        onClickCategory = {listCategory, action ->
-            when(action){
-                INSERT_DIALOG_CATEGORY->{
-                    if(viewModel.premiumState){
-                    viewModel.showDialog = DialogState(INSERT_DIALOG_CATEGORY, category = listCategory)
+    MaterialTheme {
+        StartAppContent(
+            categories = categories,
+            toastEvents = viewModel.toast,
+            updateCategory = { category -> viewModel.updateCategory(category) },
+            openPager = { innerPadding, onOpenDrawer, pagerState ->
+                MainPager(innerPadding, viewModel, onOpenDrawer, pagerState)
+            },
+            drawerState = drawerState,
+            theme = viewModel.themeState,
+            size = viewModel.sizeState,
+            premium = viewModel.premiumState,
+            update = viewModel.updateState,
+            onClick = { click ->
+                when (click) {
+                    PREMIUM_CLICK -> {}
+                    UPGRATE_CLICK -> {}
+                    SETTINGS_CLICK -> {}
                 }
-                else viewModel.sendMessage("Категории доступны в PREMIUM версии")}
-                DELETE_DIALOG_CATEGORY->{
-                viewModel.showDialog = DialogState(DELETE_DIALOG_CATEGORY,category = listCategory)
+
+            },
+            onClickCategory = { listCategory, action ->
+                when (action) {
+                    INSERT_DIALOG_CATEGORY -> {
+                        if (viewModel.premiumState) {
+                            viewModel.showDialog =
+                                DialogState(INSERT_DIALOG_CATEGORY, category = listCategory)
+                        } else viewModel.sendMessage("Категории доступны в PREMIUM версии")
+                    }
+
+                    DELETE_DIALOG_CATEGORY -> {
+                        viewModel.showDialog =
+                            DialogState(DELETE_DIALOG_CATEGORY, category = listCategory)
+                    }
                 }
-            }
 
             }
 
-    )
-
+        )
+    }
 }
 
 @Composable
@@ -185,7 +188,7 @@ fun StartAppContent(
 
     }
 
-    MaterialTheme {
+
             Box(modifier = Modifier.fillMaxSize()){
                 ModalNavigationDrawer(
                     drawerState = drawerState,
@@ -402,7 +405,7 @@ fun StartAppContent(
                                         HorizontalDivider(thickness = 2.dp, color = theme.iconTint)
 
                                         // Кнопка Премиум
-                                        Row(modifier = Modifier.fillMaxWidth().padding(10.dp),
+                                        Row(modifier = Modifier.fillMaxWidth().padding(6.dp),
                                             verticalAlignment = Alignment.CenterVertically){
                                             Icon(
                                                 imageVector = theme.iconDrawerPremium,
@@ -417,7 +420,8 @@ fun StartAppContent(
                                                 fontSize = size.drawerBottomMenuText,
                                                 modifier = Modifier
                                                     .fillMaxWidth().padding(start = 4.dp)
-                                                    .clickable { onClick(PREMIUM_CLICK) }
+                                                    .clickable { onClick(PREMIUM_CLICK) },
+                                                fontWeight = FontWeight.Bold
 
                                             )
                                         }
@@ -427,7 +431,7 @@ fun StartAppContent(
                                         HorizontalDivider(thickness = 2.dp, color = Color.White)
 
                                         // Кнопка Обновления
-                                        Row(modifier = Modifier.fillMaxWidth().padding(10.dp),
+                                        Row(modifier = Modifier.fillMaxWidth().padding(6.dp),
                                             verticalAlignment = Alignment.CenterVertically){
                                             Icon(
                                                 imageVector = if(update) theme.iconDrawerUpdateOn else theme.iconDrawerUpdateOff,
@@ -441,7 +445,8 @@ fun StartAppContent(
                                                 fontSize = size.drawerBottomMenuText,
                                                 modifier = Modifier
                                                     .fillMaxWidth().padding(start = 4.dp)
-                                                    .clickable { onClick(UPGRATE_CLICK) }
+                                                    .clickable { onClick(UPGRATE_CLICK) },
+                                                fontWeight = FontWeight.Bold
 
                                             )
                                         }
@@ -450,7 +455,7 @@ fun StartAppContent(
                                         HorizontalDivider(thickness = 2.dp, color = Color.White)
 
                                         // Кнопка Настройки
-                                        Row(modifier = Modifier.fillMaxWidth().padding(10.dp),
+                                        Row(modifier = Modifier.fillMaxWidth().padding(6.dp),
                                             verticalAlignment = Alignment.CenterVertically){
                                             Icon(
                                                 imageVector = theme.iconDrawerSettigs,
@@ -464,7 +469,8 @@ fun StartAppContent(
                                                 fontSize = size.drawerBottomMenuText,
                                                 modifier = Modifier
                                                     .fillMaxWidth().padding(start = 4.dp)
-                                                    .clickable { onClick(SETTINGS_CLICK) }
+                                                    .clickable { onClick(SETTINGS_CLICK) },
+                                                fontWeight = FontWeight.Bold
 
                                             )
                                         }
@@ -523,7 +529,6 @@ fun StartAppContent(
 
             }
 
-    }
 }
 
 

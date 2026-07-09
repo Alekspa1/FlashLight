@@ -59,10 +59,13 @@ import presentation.theme.ThemeNeon
 import kotlin.time.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.todayIn
+import presentation.theme.Size
+import presentation.theme.SizeNormal
 
 @Composable
 fun ListToDo(list: List<Item>,
              theme: Theme = ThemeNeon(),
+             size : Size = SizeNormal(),
              onClick : (Item, Int) -> Unit = {_,_->},
              onAddItem : () -> Unit = {},
              category : String = "Тест"
@@ -80,8 +83,8 @@ fun ListToDo(list: List<Item>,
                 Box(modifier = Modifier.fillMaxWidth()){
                     Text(
                         text = categoryName,
-                        color = Color.White,
-                        fontSize = 23.sp,
+                        color = theme.textColor,
+                        fontSize = size.textMenu,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.align(Alignment.Center)
                     )
@@ -92,7 +95,9 @@ fun ListToDo(list: List<Item>,
                 key = { it.id}
             ){item->
                 Box(modifier = Modifier.animateItem()) {
-                    Item(item) { item, action -> onClick(item, action)
+                    Item(item = item,
+                        theme = theme,
+                        size = size) { item, action -> onClick(item, action)
                     }
                 }
             }
@@ -140,7 +145,10 @@ fun ListToDo(list: List<Item>,
 
 @Composable
 
-fun Item(item: Item, theme: Theme = ThemeNeon(), onClick : (Item, Int) -> Unit = { _, _->}) {
+fun Item(item: Item,
+         theme: Theme = ThemeNeon(),
+         size: Size = SizeNormal(),
+         onClick : (Item, Int) -> Unit = { _, _->}) {
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -229,21 +237,22 @@ fun Item(item: Item, theme: Theme = ThemeNeon(), onClick : (Item, Int) -> Unit =
                             modifier = Modifier.padding(start = 5.dp,end = 5.dp),
                             text = item.name,
                             color = theme.textColor,
-                            lineHeight = 20.sp,
-                            fontSize = 18.sp)
+                            lineHeight = size.lineHeightItem,
+                            fontSize = size.textItem)
                         if (item.desc.isNotEmpty())  {
                             Text(
                                 modifier = Modifier.padding(start = 5.dp,top = 2.dp, end = 5.dp),
                                 text = item.desc,
                                 color = theme.textDecs,
-                                lineHeight = 14.sp,
-                                fontSize = 12.sp) }
+                                lineHeight = size.lineHeightDescAndAlarm,
+                                fontSize = size.textDesc) }
                         if (item.changeAlarm) {
                             Text(
                                 modifier = Modifier.padding(start = 5.dp,top = 4.dp, end = 5.dp),
                                 text = alarmText(item),
                                 color = theme.textAlarm,
-                                fontSize = 12.sp
+                                fontSize = size.textAlarm,
+                                lineHeight = size.lineHeightDescAndAlarm
                             )
                         }
                     }

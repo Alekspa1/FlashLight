@@ -7,6 +7,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -32,6 +33,10 @@ import org.jetbrains.compose.resources.painterResource
 import presentation.dialogs.DeleteDialog
 import presentation.dialogs.DialogState
 import androidx.compose.ui.platform.LocalFocusManager
+import presentation.theme.Size
+import presentation.theme.SizeNormal
+import presentation.theme.Theme
+import presentation.theme.ThemeNeon
 
 @Composable
 
@@ -60,7 +65,9 @@ fun Notebook(viewModel: MainViewModel,pageIndex: Int){
         showDialog = viewModel.showDialog,
         onResultDialog = {dialog-> viewModel.showDialog = dialog},
         onTextChange = {newtext->
-            viewModel.stateTextNotebook = newtext}
+            viewModel.stateTextNotebook = newtext},
+        theme = viewModel.themeState,
+        size = viewModel.sizeState
         )
 
 
@@ -72,6 +79,8 @@ fun Notebook(viewModel: MainViewModel,pageIndex: Int){
         showDialog : DialogState = DialogState(),
         onResultDialog : (DialogState) -> Unit = {},
         onTextChange : (String) -> Unit = {},
+        theme: Theme = ThemeNeon(),
+        size: Size = SizeNormal()
         )
     {
 
@@ -90,6 +99,7 @@ fun Notebook(viewModel: MainViewModel,pageIndex: Int){
                     .weight(1f)
                     .border(width = 3.dp, color = Color(0x9900E2FF), shape = RoundedCornerShape(10.dp)),
                 value = text,
+
                 onValueChange = { newText ->
                     onTextChange( newText)
                 },
@@ -97,8 +107,8 @@ fun Notebook(viewModel: MainViewModel,pageIndex: Int){
 
                 // НАСТРАИВАЕМ ЦВЕТА И ВАШУ НЕОНОВУЮ СТИЛИСТИКУ:
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White,
+                    focusedTextColor = theme.textColor,
+                    unfocusedTextColor = theme.textColor,
 
                     // 1. ТВОЙ БИРЮЗОВЫЙ НЕОН НА ФОНЕ (Solid):
                     focusedContainerColor = Color(0x9900BCD4),
@@ -115,24 +125,24 @@ fun Notebook(viewModel: MainViewModel,pageIndex: Int){
 
             Row(modifier = Modifier.fillMaxWidth()) {
                 Box(modifier = Modifier.fillMaxWidth().padding(8.dp)){
-                    IconButton(modifier = Modifier.align(Alignment.Center),
+                    IconButton(modifier = Modifier.size(50.dp).align(Alignment.Center),
                         onClick = { },
                     ) {
                         Image(
                             painter = painterResource(Res.drawable.ic_micro_neon),
                             contentDescription = null,
-                            modifier = Modifier
-                                .size(50.dp)
+                            modifier = Modifier.fillMaxSize()
+
 
                             )
                     }
-                    IconButton(modifier = Modifier.align(Alignment.CenterEnd),
+                    IconButton(modifier = Modifier.size(50.dp).align(Alignment.CenterEnd),
                         onClick = {onResultDialog(DialogState(CommonConst.DELETE_DIALOG_ITEM))  },
                     ){
                         Image(
                             painter = painterResource(Res.drawable.ic_del_notebook_neon),
                             contentDescription = null,
-                            modifier = Modifier.size(50.dp),
+                            modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop
 
                         )

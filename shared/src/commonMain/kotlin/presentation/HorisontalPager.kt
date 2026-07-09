@@ -268,6 +268,8 @@ fun MainPager(paddingValues: PaddingValues = PaddingValues(),
                 1 -> {
                     ListToDo(list = todoList,
                         category = category,
+                        theme = viewModel.themeState,
+                        size = viewModel.sizeState,
                         onClick = {item,action->
                             when(action){
                                 ALARM->{viewModel.permission(NOTIFICATION,item)}

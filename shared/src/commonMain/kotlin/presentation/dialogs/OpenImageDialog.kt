@@ -1,5 +1,6 @@
 package presentation.dialogs
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -22,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil3.compose.AsyncImage
+import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -42,29 +45,24 @@ import coil3.compose.AsyncImage
 fun OpenImage(uri: String, onDismiss: () -> Unit) {
     if (uri.isEmpty()) return
 
-    // 1. Создаем БАЗОВЫЕ состояния (целевые значения для анимации)
-    var targetScale by remember { mutableStateOf(1f) }
-    var targetOffsetX by remember { mutableStateOf(0f) }
-    var targetOffsetY by remember { mutableStateOf(0f) }
+    // Скоуп для запуска анимаций в ответ на жесты
+    val scope = rememberCoroutineScope()
 
-    // Размеры контейнера и картинки для расчетов
+    // Аниматоры для плавных переходов и мгновенных привязок (snap)
+    val scaleAnim = remember { Animatable(1f) }
+    val offsetXAnim = remember { Animatable(0f) }
+    val offsetYAnim = remember { Animatable(0f) }
+
+    // Размеры контейнера и картинки для расчетов ограничений экрана
     var containerWidth by remember { mutableStateOf(0f) }
     var containerHeight by remember { mutableStateOf(0f) }
     var intrinsicWidth by remember { mutableStateOf(0f) }
     var intrinsicHeight by remember { mutableStateOf(0f) }
 
-    // 2. Оборачиваем их в анимацию (spring дает красивый естественный эффект без рывков)
-    val animatedScale by animateFloatAsState(
-        targetValue = targetScale,
-        animationSpec = spring(stiffness = Spring.StiffnessMediumLow)
-    )
-    val animatedOffsetX by animateFloatAsState(
-        targetValue = targetOffsetX,
-        animationSpec = spring(stiffness = Spring.StiffnessMediumLow)
-    )
-    val animatedOffsetY by animateFloatAsState(
-        targetValue = targetOffsetY,
-        animationSpec = spring(stiffness = Spring.StiffnessMediumLow)
+    // Настройка пружины для двойного клика (с высокой жесткостью, чтобы сброс был четким)
+    val springSpec = spring<Float>(
+        stiffness = Spring.StiffnessMedium,
+        dampingRatio = Spring.DampingRatioNoBouncy
     )
 
     Dialog(
@@ -82,15 +80,18 @@ fun OpenImage(uri: String, onDismiss: () -> Unit) {
                 .combinedClickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
-                    onClick = { if (targetScale == 1f) onDismiss() },
+                    onClick = { /* Можно закрывать по клику на фон при scale == 1 */ },
                     onDoubleClick = {
-                        // 3. ПЛАВНЫЙ СБРОС ИЛИ УВЕЛИЧЕНИЕ
-                        if (targetScale > 1f) {
-                            targetScale = 1f
-                            targetOffsetX = 0f
-                            targetOffsetY = 0f
-                        } else {
-                            targetScale = 3f
+                        scope.launch {
+                            if (scaleAnim.value > 1f) {
+                                // Плавно сбрасываем всё к исходному состоянию
+                                launch { scaleAnim.animateTo(1f, springSpec) }
+                                launch { offsetXAnim.animateTo(0f, springSpec) }
+                                launch { offsetYAnim.animateTo(0f, springSpec) }
+                            } else {
+                                // Плавно увеличиваем в 3 раза по центру
+                                launch { scaleAnim.animateTo(3f, springSpec) }
+                            }
                         }
                     }
                 ),
@@ -100,34 +101,38 @@ fun OpenImage(uri: String, onDismiss: () -> Unit) {
                 model = uri,
                 contentDescription = "Крупный план",
                 modifier = Modifier
-                    // 4. Применяем АНИМИРОВАННЫЕ значения к слою отрисовки
                     .graphicsLayer(
-                        scaleX = animatedScale,
-                        scaleY = animatedScale,
-                        translationX = animatedOffsetX,
-                        translationY = animatedOffsetY
+                        scaleX = scaleAnim.value,
+                        scaleY = scaleAnim.value,
+                        translationX = offsetXAnim.value,
+                        translationY = offsetYAnim.value
                     )
                     .pointerInput(Unit) {
                         detectTransformGestures { _, pan, gestureZoom, _ ->
-                            // Изменяем целевое значение масштаба пальцами
-                            targetScale = (targetScale * gestureZoom).coerceIn(1f, 5f)
+                            scope.launch {
+                                // Расчет нового масштаба
+                                val nextScale = (scaleAnim.value * gestureZoom).coerceIn(1f, 5f)
+                                scaleAnim.snapTo(nextScale) // Мгновенно меняем без "киселя"
 
-                            if (targetScale > 1f && intrinsicWidth > 0 && intrinsicHeight > 0) {
-                                val srcRatio = intrinsicWidth / intrinsicHeight
-                                val dstRatio = containerWidth / containerHeight
+                                if (nextScale > 1f && intrinsicWidth > 0 && intrinsicHeight > 0) {
+                                    val srcRatio = intrinsicWidth / intrinsicHeight
+                                    val dstRatio = containerWidth / containerHeight
 
-                                val actualImageWidth = if (srcRatio > dstRatio) containerWidth else containerHeight * srcRatio
-                                val actualImageHeight = if (srcRatio > dstRatio) containerWidth / srcRatio else containerHeight
+                                    val actualImageWidth = if (srcRatio > dstRatio) containerWidth else containerHeight * srcRatio
+                                    val actualImageHeight = if (srcRatio > dstRatio) containerWidth / srcRatio else containerHeight
 
-                                val maxOffsetX = (actualImageWidth * (targetScale - 1f)) / 2f
-                                val maxOffsetY = (actualImageHeight * (targetScale - 1f)) / 2f
+                                    // Границы, за которые картинка не должна улетать
+                                    val maxOffsetX = (actualImageWidth * (nextScale - 1f)) / 2f
+                                    val maxOffsetY = (actualImageHeight * (nextScale - 1f)) / 2f
 
-                                // Изменяем целевые координаты смещения пальцами
-                                targetOffsetX = (targetOffsetX + pan.x).coerceIn(-maxOffsetX, maxOffsetX)
-                                targetOffsetY = (targetOffsetY + pan.y).coerceIn(-maxOffsetY, maxOffsetY)
-                            } else {
-                                targetOffsetX = 0f
-                                targetOffsetY = 0f
+                                    // Мгновенно двигаем за пальцем строго в границах
+                                    offsetXAnim.snapTo((offsetXAnim.value + pan.x).coerceIn(-maxOffsetX, maxOffsetX))
+                                    offsetYAnim.snapTo((offsetYAnim.value + pan.y).coerceIn(-maxOffsetY, maxOffsetY))
+                                } else {
+                                    // Если картинка вернулась к исходному размеру, центрируем её обратно
+                                    offsetXAnim.snapTo(0f)
+                                    offsetYAnim.snapTo(0f)
+                                }
                             }
                         }
                     },
