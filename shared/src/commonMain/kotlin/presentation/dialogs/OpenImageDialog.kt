@@ -60,10 +60,12 @@ fun OpenImage(uri: String, onDismiss: () -> Unit) {
     var intrinsicHeight by remember { mutableStateOf(0f) }
 
     // Настройка пружины для двойного клика (с высокой жесткостью, чтобы сброс был четким)
-    val springSpec = spring<Float>(
-        stiffness = Spring.StiffnessMedium,
-        dampingRatio = Spring.DampingRatioNoBouncy
-    )
+    val springSpec = remember {
+        spring<Float>(
+            stiffness = Spring.StiffnessMedium,
+            dampingRatio = Spring.DampingRatioNoBouncy
+        )
+    }
 
     Dialog(
         onDismissRequest = { onDismiss() },
@@ -115,6 +117,7 @@ fun OpenImage(uri: String, onDismiss: () -> Unit) {
                                 scaleAnim.snapTo(nextScale) // Мгновенно меняем без "киселя"
 
                                 if (nextScale > 1f && intrinsicWidth > 0 && intrinsicHeight > 0) {
+                                    val sensitivity = 2.0f
                                     val srcRatio = intrinsicWidth / intrinsicHeight
                                     val dstRatio = containerWidth / containerHeight
 
@@ -126,8 +129,8 @@ fun OpenImage(uri: String, onDismiss: () -> Unit) {
                                     val maxOffsetY = (actualImageHeight * (nextScale - 1f)) / 2f
 
                                     // Мгновенно двигаем за пальцем строго в границах
-                                    offsetXAnim.snapTo((offsetXAnim.value + pan.x).coerceIn(-maxOffsetX, maxOffsetX))
-                                    offsetYAnim.snapTo((offsetYAnim.value + pan.y).coerceIn(-maxOffsetY, maxOffsetY))
+                                    offsetXAnim.snapTo((offsetXAnim.value + (pan.x * sensitivity)).coerceIn(-maxOffsetX, maxOffsetX))
+                                    offsetYAnim.snapTo((offsetYAnim.value + (pan.y * sensitivity)).coerceIn(-maxOffsetY, maxOffsetY))
                                 } else {
                                     // Если картинка вернулась к исходному размеру, центрируем её обратно
                                     offsetXAnim.snapTo(0f)
