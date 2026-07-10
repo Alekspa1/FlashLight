@@ -41,7 +41,6 @@ import kotlinx.coroutines.launch
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.gestures.detectTransformGestures
-import androidx.compose.animation.core.SplineBasedFloatDecayAnimationSpec
 import androidx.compose.animation.core.generateDecayAnimationSpec
 import kotlin.math.abs
 
