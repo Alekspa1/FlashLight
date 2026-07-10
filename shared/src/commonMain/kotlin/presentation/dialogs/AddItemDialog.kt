@@ -301,7 +301,7 @@ fun AddOrChangeItemDialog(
 
     AlertDialog(
         onDismissRequest = { onCancel() },
-        containerColor = Color.Grey,
+        containerColor = Color(0xFFD3D3D3),
 
         title = { Text("Сфокусироваться", color = theme.textColor) },
 
