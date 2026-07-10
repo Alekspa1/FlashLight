@@ -499,15 +499,14 @@ fun KmpSpinnerInput(
         )
 
         // Само выпадающее окно
-        ExposedDropdownMenu(
+       ExposedDropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-           modifier = Modifier
-                .width(with(LocalDensity.current) { coordinates?.size?.width?.toDp() ?: 200.dp })
+            modifier = Modifier
+                // ✅ ИСПРАВЛЕНО: Убрали проблемный .width с coordinates
                 .border(1.dp, theme.cardItemBorderFalse.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
                 .clip(RoundedCornerShape(12.dp))
-                .background(Color(0xFF121214)),
-            // Отключаем дефолтные системные цвета контейнера M3
+                .background(Color(0xFF121214))
         ) {
             list.forEach { item ->
                 DropdownMenuItem(
