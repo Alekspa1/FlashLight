@@ -18,8 +18,8 @@ sealed interface Size {
 
 data class SizeNormal(
     override val textMenu: TextUnit = 23.sp,
-    override val textItem: TextUnit = 16.sp,
-    override val lineHeightItem: TextUnit = 18.sp,
+    override val textItem: TextUnit = 18.sp,
+    override val lineHeightItem: TextUnit = 20.sp,
     override val drawerBottomMenuText: TextUnit = 14.sp,
     override val textNoteBook: TextUnit = 17.sp,
     override val textDesc: TextUnit = 12.sp,
