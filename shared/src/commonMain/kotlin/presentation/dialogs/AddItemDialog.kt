@@ -445,44 +445,127 @@ fun AddOrChangeItemDialog(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun KmpSpinnerInput(
-    selectedCategory: String,            // Текущее выбранное значение (всегда первое из списка на старте)
-    list: List<String>,                  // Ваш отсортированный во ViewModel список
-    onCategorySelected: (String) -> Unit // Колбэк изменения
+    selectedCategory: String,            
+    list: List<String>,                  
+    theme: Theme = ThemeNeon(), // Твой базовый класс/интерфейс темы
+    onCategorySelected: (String) -> Unit 
 ) {
     var expanded by remember { mutableStateOf(false) }
 
-    // Контейнер для выпадающего списка
     ExposedDropdownMenuBox(
         expanded = expanded,
         onExpandedChange = { expanded = !expanded }
     ) {
-        // Поле ввода, которое имитирует сам Спиннер
         OutlinedTextField(
             value = selectedCategory,
             onValueChange = {},
-            readOnly = true, // Запрещаем ввод с клавиатуры
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier.menuAnchor().fillMaxWidth(),
-            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+            readOnly = true, 
+            trailingIcon = { 
+                ExposedDropdownMenuDefaults.TrailingIcon(
+                    expanded = expanded
+                ) 
+            },
+            modifier = Modifier
+                // В актуальном Material 3 нужно явно указывать тип анкора
+                .menuAnchor(MenuAnchorType.PrimaryNotEditable, true) 
+                .fillMaxWidth(),
+            shape = RoundedCornerShape(10.dp),
+            label = { Text("Категория") }, // Добавили красивый лейбл в стиле остальных полей
+            
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = theme.textColor,
+                unfocusedTextColor = theme.textColor,
+                focusedBorderColor = theme.iconAddTint, // Голубой неон при открытии списка
+                unfocusedBorderColor = theme.cardItemBorderFalse.copy(alpha = 0.4f),
+                focusedLabelColor = theme.iconAddTint,
+                unfocusedLabelColor = theme.textDecs,
+                focusedTrailingIconColor = theme.iconAddTint,
+                unfocusedTrailingIconColor = theme.textDecs
+            )
         )
 
-        // Само выпадающее меню с элементами
+        // Само выпадающее окно
         ExposedDropdownMenu(
             expanded = expanded,
-            onDismissRequest = { expanded = false }
+            onDismissRequest = { expanded = false },
+            modifier = Modifier
+                // Принудительно закрашиваем контейнер, чтобы не было дефолтных "белых краев"
+                .background(Color(0xFF121214), RoundedCornerShape(10.dp)) 
+                .border(1.dp, theme.cardItemBorderFalse.copy(alpha = 0.6f), RoundedCornerShape(10.dp)),
+            // Отключаем дефолтные системные цвета контейнера M3
+            colors = ExposedDropdownMenuDefaults.customColors(
+                containerColor = Color(0xFF121214) 
+            )
         ) {
             list.forEach { item ->
                 DropdownMenuItem(
-                    text = { Text(text = item) },
+                    text = { 
+                        Text(
+                            text = item, 
+                            color = theme.textColor, // Белый текст
+                            style = MaterialTheme.typography.bodyLarge
+                        ) 
+                    },
                     onClick = {
-                        onCategorySelected(item) // Передаем наверх выбранную строку
+                        onCategorySelected(item) 
                         expanded = false
-                    }
+                    },
+                    // Настройка эффекта пульсации/клика внутри меню
+                    colors = MenuDefaults.itemColors(
+                        textColor = theme.textColor,
+                        // Цвет фона элемента при клике (делаем легкий неоновый отсвет)
+                        leadingIconColor = theme.iconAddTint,
+                        trailingIconColor = theme.iconAddTint
+                    ),
+                    // Небольшой внутренний отступ для аккуратности
+                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
                 )
             }
         }
     }
 }
+
+// @OptIn(ExperimentalMaterial3Api::class)
+// @Composable
+// fun KmpSpinnerInput(
+//     selectedCategory: String,            // Текущее выбранное значение (всегда первое из списка на старте)
+//     list: List<String>,                  // Ваш отсортированный во ViewModel список
+//     onCategorySelected: (String) -> Unit // Колбэк изменения
+// ) {
+//     var expanded by remember { mutableStateOf(false) }
+
+//     // Контейнер для выпадающего списка
+//     ExposedDropdownMenuBox(
+//         expanded = expanded,
+//         onExpandedChange = { expanded = !expanded }
+//     ) {
+//         // Поле ввода, которое имитирует сам Спиннер
+//         OutlinedTextField(
+//             value = selectedCategory,
+//             onValueChange = {},
+//             readOnly = true, // Запрещаем ввод с клавиатуры
+//             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+//             modifier = Modifier.menuAnchor().fillMaxWidth(),
+//             colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+//         )
+
+//         // Само выпадающее меню с элементами
+//         ExposedDropdownMenu(
+//             expanded = expanded,
+//             onDismissRequest = { expanded = false }
+//         ) {
+//             list.forEach { item ->
+//                 DropdownMenuItem(
+//                     text = { Text(text = item) },
+//                     onClick = {
+//                         onCategorySelected(item) // Передаем наверх выбранную строку
+//                         expanded = false
+//                     }
+//                 )
+//             }
+//         }
+//     }
+// }
 
 
 expect fun parsePlatformUri(uri: PlatformFile): String
