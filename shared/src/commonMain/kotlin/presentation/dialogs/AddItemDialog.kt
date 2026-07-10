@@ -303,12 +303,11 @@ fun AddOrChangeItemDialog(
         onDismissRequest = { onCancel() },
         
         // Модификатор окна: скругление и неоновая рамка (по умолчанию берем false-статус, как на карточке)
-        modifier = Modifier
-            .clip(RoundedCornerShape(16.dp))
-            .border(2.dp, theme.cardItemBorderFalse, RoundedCornerShape(16.dp)),
+       modifier = Modifier
+            .clip(RoundedCornerShape(16.dp)) // Обрезка контента окна
+            .border(2.dp, theme.cardItemBorderFalse, RoundedCornerShape(16.dp)), // Бордер ложится точь-в-точь
 
-        // Цвета контейнера под вашу темную тему
-        containerColor = theme.noteBookBackground,
+        containerColor = Color(0xFF121214),
 
         title = { Text("Сфокусироваться", color = theme.textColor) },
 
@@ -389,13 +388,17 @@ fun AddOrChangeItemDialog(
                             }
                         }
                     } else {
-                        OutlinedButton(
+                        // Пружина: забирает всё пространство слева и толкает кнопку вправо
+                        Spacer(modifier = Modifier.weight(1f)) 
+                        
+                        Button(
                             onClick = { fileLauncher.launch() },
-                            border = BorderStroke(1.dp, theme.iconAddTint),
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = theme.iconAddTint)
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = theme.cardItemAlarm, 
+                                contentColor = theme.textColor
+                            ),
+                            modifier = Modifier.border(1.dp, theme.iconAddTint, RoundedCornerShape(10.dp))
                         ) {
-                            Icon(imageVector = theme.iconAdd, contentDescription = null, tint = theme.iconAddTint)
-                            Spacer(Modifier.size(4.dp))
                             Text(text = "Добавить фото")
                         }
                     }
