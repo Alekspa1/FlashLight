@@ -304,8 +304,14 @@ fun AddOrChangeItemDialog(
         
         // Модификатор окна: скругление и неоновая рамка (по умолчанию берем false-статус, как на карточке)
        modifier = Modifier
-            .clip(RoundedCornerShape(16.dp)) // Обрезка контента окна
-            .border(2.dp, theme.cardItemBorderFalse, RoundedCornerShape(16.dp)), // Бордер ложится точь-в-точь
+            .border(
+                2.dp, 
+                if (item?.change == true) theme.cardItemBorderTrue
+                else if (item?.changeAlarm == true) theme.cardItemBorderAlarm
+                else theme.cardItemBorderFalse, 
+                RoundedCornerShape(16.dp)
+            )
+            .clip(RoundedCornerShape(16.dp)),
 
         containerColor = Color(0xFF121214),
 
@@ -365,7 +371,7 @@ fun AddOrChangeItemDialog(
                             modifier = Modifier
                                 .size(80.dp)
                                 .clip(RoundedCornerShape(12.dp))
-                                .border(1.dp, theme.iconAddTint, RoundedCornerShape(12.dp))
+                                .border(1.dp, theme.cardItemBorderFalse, RoundedCornerShape(12.dp))
                                 .clickable { openImageState = true },
                             contentScale = ContentScale.Crop,
                         )
@@ -391,13 +397,13 @@ fun AddOrChangeItemDialog(
                         // Пружина: забирает всё пространство слева и толкает кнопку вправо
                         Spacer(modifier = Modifier.weight(1f)) 
                         
-                        Button(
+                        TextButton(
                             onClick = { fileLauncher.launch() },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = theme.cardItemAlarm, 
+                            colors = ButtonDefaults.textButtonColors(
+                                
                                 contentColor = theme.textColor
                             ),
-                            modifier = Modifier.border(1.dp, theme.iconAddTint, RoundedCornerShape(10.dp))
+                            modifier = Modifier.border(1.dp, theme.cardItemBorderFalse, RoundedCornerShape(10.dp))
                         ) {
                             Text(text = "Добавить фото")
                         }
@@ -483,11 +489,11 @@ fun KmpSpinnerInput(
             colors = OutlinedTextFieldDefaults.colors(
                 focusedTextColor = theme.textColor,
                 unfocusedTextColor = theme.textColor,
-                focusedBorderColor = theme.iconAddTint, // Голубой неон при открытии списка
+                focusedBorderColor = theme.cardItemBorderFalse,
                 unfocusedBorderColor = theme.cardItemBorderFalse.copy(alpha = 0.4f),
                 focusedLabelColor = theme.iconAddTint,
                 unfocusedLabelColor = theme.textDecs,
-                focusedTrailingIconColor = theme.iconAddTint,
+                focusedTrailingIconColor = theme.cardItemBorderFalse,
                 unfocusedTrailingIconColor = theme.textDecs
             )
         )
@@ -496,10 +502,11 @@ fun KmpSpinnerInput(
         ExposedDropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            modifier = Modifier
-                // Принудительно закрашиваем контейнер, чтобы не было дефолтных "белых краев"
-                .background(Color(0xFF121214), RoundedCornerShape(10.dp)) 
-                .border(1.dp, theme.cardItemBorderFalse.copy(alpha = 0.6f), RoundedCornerShape(10.dp)),
+           modifier = Modifier
+                .width(with(LocalDensity.current) { coordinates?.size?.width?.toDp() ?: 200.dp })
+                .border(1.dp, theme.cardItemBorderFalse.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+                .clip(RoundedCornerShape(12.dp))
+                .background(Color(0xFF121214)),
             // Отключаем дефолтные системные цвета контейнера M3
         ) {
             list.forEach { item ->
