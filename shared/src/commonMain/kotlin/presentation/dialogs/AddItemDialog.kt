@@ -64,7 +64,185 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
+import presentation.theme.ThemeNeon
 
+// @OptIn(ExperimentalMaterial3Api::class)
+// @Composable
+// fun AddOrChangeItemDialog(
+//     item: Item? = null,
+//     onCancel : ()-> Unit = {},
+//     listCategory : List<String> = emptyList(),
+//     calendar : Boolean = false,
+//     category: String = "Повседневные",
+//     onSave :(
+//         item: Item?,
+//         name: String,
+//         desc: String,
+//         uri: String,
+//         category: String,
+//         alarlm : Boolean,
+//         originalNameImage : String,
+//             ) -> Unit ={_,_,_,_,_,_,_->},
+//         getUri : (String) -> String = {""},
+//     ){
+//     var stateTextName by remember { mutableStateOf(item?.name ?: "") }
+//     var stateTextDecs by remember { mutableStateOf(item?.desc ?: "") }
+//     var openImageState by remember { mutableStateOf(false) }
+//     var selectedFileUri: String by remember { mutableStateOf(getUri(item?.uri ?: "")) }
+//     var originalFileName by remember { mutableStateOf("") }
+//     var categorySelected by remember { mutableStateOf(item?.category ?:
+//     if(calendar) "Повседневные" else category) }
+//     val fileLauncher = rememberFilePickerLauncher(type = PickerType.Image) { file ->
+//          if (file != null) {
+//              selectedFileUri =  parsePlatformUri(file)
+//              originalFileName = "img_${Clock.System.now().toEpochMilliseconds()}.jpg"
+//         }
+//     }
+
+//     val focusRequester = remember { FocusRequester() }
+//     val keyboardController = LocalSoftwareKeyboardController.current
+//     LaunchedEffect(Unit) {
+//         withFrameMillis { }  // Ждем, пока отрендерится первый кадр окна
+//         focusRequester.requestFocus()
+//         keyboardController?.show()
+//     }
+
+//     if (openImageState) {
+//         OpenImage(selectedFileUri){openImageState = false}
+//     }
+
+//     AlertDialog(
+//             onDismissRequest = { onCancel()}, // когда кудато нажал
+//             title = { Text("Сфокусироваться") },
+
+//             text = {
+//                 Column(modifier = Modifier.fillMaxWidth(),
+//                     verticalArrangement = Arrangement.spacedBy(8.dp)) {
+//                     OutlinedTextField(
+//                         modifier = Modifier
+//                             .fillMaxWidth() // Настройка ширины применится всегда
+//                             .then(
+//                                 if (item == null) Modifier.focusRequester(focusRequester) else Modifier
+//                             ),
+//                             value = stateTextName,
+//                         onValueChange = { newText ->
+//                             stateTextName = newText
+//                         },
+//                         shape = RoundedCornerShape(10.dp),
+//                         label = {Text(text = "Название", color = Color.Gray)},
+
+//                         colors = OutlinedTextFieldDefaults.colors(
+//                             focusedTextColor = Color.Black,
+//                             unfocusedTextColor = Color.Black,
+//                         )
+//                     )
+//                     OutlinedTextField(
+//                         modifier = Modifier
+//                             .fillMaxWidth(),
+//                         value = stateTextDecs,
+//                         onValueChange = { newText ->
+//                             stateTextDecs = newText
+//                         },
+//                         shape = RoundedCornerShape(10.dp),
+//                         label = {Text("Описание",color = Color.Gray)},
+
+//                         // НАСТРАИВАЕМ ЦВЕТА И ВАШУ НЕОНОВУЮ СТИЛИСТИКУ:
+//                         colors = OutlinedTextFieldDefaults.colors(
+//                             focusedTextColor = Color.Black,
+//                             unfocusedTextColor = Color.Black,
+//                         )
+//                     )
+
+//                     // Блок работы с картинкой (ImageView + Кнопки добавить/удалить)
+//                     Row(
+//                         modifier = Modifier.fillMaxWidth(),
+//                         horizontalArrangement = Arrangement.spacedBy(16.dp),
+//                         verticalAlignment = Alignment.CenterVertically
+//                     ) {
+//                         if (selectedFileUri != "" ) {
+//                             // Отображение картинки через Coil (Замена Glide)
+//                             AsyncImage(
+//                                  model = selectedFileUri ,
+//                                 contentDescription = "Превью фото",
+//                                 modifier = Modifier
+//                                     .size(80.dp)
+//                                     .clip(RoundedCornerShape(12.dp))
+//                                     .clickable {
+                                       
+//                                         openImageState = true }, // Клик открывает на весь экран
+//                                 contentScale = ContentScale.Crop,
+//                             )
+//                             Column(modifier = Modifier
+//                                 .fillMaxWidth()
+//                                 .weight(1f),
+//                                 horizontalAlignment = Alignment.End,
+//                                 verticalArrangement = Arrangement.SpaceBetween){
+//                                 TextButton(onClick = { fileLauncher.launch() }) {
+//                                     Text(text = "Изменить фото")
+//                                 }
+//                                 TextButton(onClick = {
+//                                     selectedFileUri = ""
+
+//                                 }) {
+//                                     Text(
+//                                         text = "Удалить фото",
+//                                         color = MaterialTheme.colorScheme.error,
+//                                     )
+//                                 }
+
+
+//                             }
+//                             // Кнопка удаления фото (deleteText)
+
+//                         } else {
+//                             // Кнопка добавления фото (addPhoto)
+//                             Button(onClick = { fileLauncher.launch() }) {
+//                                 Text(text = "Добавить фото")
+//                             }
+//                         }
+//                     }
+
+
+
+
+//                     // Отображаем наш KMP Спиннер, когда список загрузился
+//                         KmpSpinnerInput(
+//                             selectedCategory = categorySelected,
+//                             list = listCategory,
+//                             onCategorySelected = { selected ->
+//                                 categorySelected = selected
+
+//                             }
+//                         )
+
+//                 }
+//                 } ,
+
+//             confirmButton = {
+//                 TextButton(onClick = {
+//                     val text = stateTextName.trim().ifEmpty { "Без названия" }
+//                     onSave(item,text,stateTextDecs.trim(),selectedFileUri,categorySelected,false,originalFileName)
+//                 }) {
+//                     Text("Ок")
+//                 }
+//             },
+//             dismissButton = {
+//                 Row(
+//                     horizontalArrangement = Arrangement.spacedBy(8.dp) // Отступ между кнопками
+//                 ) {
+//                     TextButton(onClick = {
+//                         val text = stateTextName.trim().ifEmpty { "Без названия" }
+//                         onSave(item,text,stateTextDecs.trim(),selectedFileUri,categorySelected,true,originalFileName)
+//                     }) {
+//                         Text("Установка будильника")
+//                     }
+//                     TextButton(onClick = { onCancel()}) {
+//                         Text("Отмена")
+//                     }
+//                 }
+//             },
+//         )
+// }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -74,27 +252,28 @@ fun AddOrChangeItemDialog(
     listCategory : List<String> = emptyList(),
     calendar : Boolean = false,
     category: String = "Повседневные",
+    theme: Theme = ThemeNeon(), // Используйте имя вашего БАЗОВОГО класса/интерфейса тем!
     onSave :(
         item: Item?,
         name: String,
         desc: String,
         uri: String,
         category: String,
-        alarlm : Boolean,
+        alarlm : Boolean, // Оставил старое имя, чтобы не ломать лямбду в INSERT_DIALOG_ITEM
         originalNameImage : String,
-            ) -> Unit ={_,_,_,_,_,_,_->},
-        getUri : (String) -> String = {""},
-    ){
+    ) -> Unit ={_,_,_,_,_,_,_->},
+    getUri : (String) -> String = {""},
+) {
     var stateTextName by remember { mutableStateOf(item?.name ?: "") }
     var stateTextDecs by remember { mutableStateOf(item?.desc ?: "") }
     var openImageState by remember { mutableStateOf(false) }
     var selectedFileUri: String by remember { mutableStateOf(getUri(item?.uri ?: "")) }
     var originalFileName by remember { mutableStateOf("") }
-    var categorySelected by remember { mutableStateOf(item?.category ?:
-    if(calendar) "Повседневные" else category) }
+    var categorySelected by remember { mutableStateOf(item?.category ?: if(calendar) "Повседневные" else category) }
+    
     val fileLauncher = rememberFilePickerLauncher(type = PickerType.Image) { file ->
          if (file != null) {
-             selectedFileUri =  parsePlatformUri(file)
+             selectedFileUri = parsePlatformUri(file)
              originalFileName = "img_${Clock.System.now().toEpochMilliseconds()}.jpg"
         }
     }
@@ -102,146 +281,165 @@ fun AddOrChangeItemDialog(
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
     LaunchedEffect(Unit) {
-        withFrameMillis { }  // Ждем, пока отрендерится первый кадр окна
+        withFrameMillis { }
         focusRequester.requestFocus()
         keyboardController?.show()
     }
 
     if (openImageState) {
-        OpenImage(selectedFileUri){openImageState = false}
+        OpenImage(selectedFileUri){ openImageState = false }
     }
 
     AlertDialog(
-            onDismissRequest = { onCancel()}, // когда кудато нажал
-            title = { Text("Сфокусироваться") },
+        onDismissRequest = { onCancel() },
+        
+        // Модификатор окна: скругление и неоновая рамка (по умолчанию берем false-статус, как на карточке)
+        modifier = Modifier
+            .clip(RoundedCornerShape(16.dp))
+            .border(2.dp, theme.cardItemBorderFalse, RoundedCornerShape(16.dp)),
 
-            text = {
-                Column(modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(
-                        modifier = Modifier
-                            .fillMaxWidth() // Настройка ширины применится всегда
-                            .then(
-                                if (item == null) Modifier.focusRequester(focusRequester) else Modifier
-                            ),
-                            value = stateTextName,
-                        onValueChange = { newText ->
-                            stateTextName = newText
-                        },
-                        shape = RoundedCornerShape(10.dp),
-                        label = {Text(text = "Название", color = Color.Gray)},
+        // Цвета контейнера под вашу темную тему
+        colors = AlertDialogDefaults.colors(
+            containerColor = Color(0xFF121214), // Глубокий темный фон для сочности неона
+            titleContentColor = theme.textColor,
+            textContentColor = theme.textColor
+        ),
 
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedTextColor = Color.Black,
-                            unfocusedTextColor = Color.Black,
-                        )
+        title = { Text("Сфокусироваться", color = theme.textColor) },
+
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                // Поле Название
+                OutlinedTextField(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .then(if (item == null) Modifier.focusRequester(focusRequester) else Modifier),
+                    value = stateTextName,
+                    onValueChange = { stateTextName = it },
+                    shape = RoundedCornerShape(10.dp),
+                    label = { Text(text = "Название") },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = theme.textColor,
+                        unfocusedTextColor = theme.textColor,
+                        focusedBorderColor = theme.iconAddTint, // Свечение при фокусе
+                        unfocusedBorderColor = theme.cardItemBorderFalse.copy(alpha = 0.4f),
+                        focusedLabelColor = theme.iconAddTint,
+                        unfocusedLabelColor = theme.textDecs
                     )
-                    OutlinedTextField(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        value = stateTextDecs,
-                        onValueChange = { newText ->
-                            stateTextDecs = newText
-                        },
-                        shape = RoundedCornerShape(10.dp),
-                        label = {Text("Описание",color = Color.Gray)},
+                )
 
-                        // НАСТРАИВАЕМ ЦВЕТА И ВАШУ НЕОНОВУЮ СТИЛИСТИКУ:
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedTextColor = Color.Black,
-                            unfocusedTextColor = Color.Black,
-                        )
+                // Поле Описание
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = stateTextDecs,
+                    onValueChange = { stateTextDecs = it },
+                    shape = RoundedCornerShape(10.dp),
+                    label = { Text("Описание") },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = theme.textColor,
+                        unfocusedTextColor = theme.textColor,
+                        focusedBorderColor = theme.iconAddTint,
+                        unfocusedBorderColor = theme.cardItemBorderFalse.copy(alpha = 0.4f),
+                        focusedLabelColor = theme.iconAddTint,
+                        unfocusedLabelColor = theme.textDecs
                     )
+                )
 
-                    // Блок работы с картинкой (ImageView + Кнопки добавить/удалить)
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        if (selectedFileUri != "" ) {
-                            // Отображение картинки через Coil (Замена Glide)
-                            AsyncImage(
-                                 model = selectedFileUri ,
-                                contentDescription = "Превью фото",
-                                modifier = Modifier
-                                    .size(80.dp)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .clickable {
-                                       
-                                        openImageState = true }, // Клик открывает на весь экран
-                                contentScale = ContentScale.Crop,
-                            )
-                            Column(modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(1f),
-                                horizontalAlignment = Alignment.End,
-                                verticalArrangement = Arrangement.SpaceBetween){
-                                TextButton(onClick = { fileLauncher.launch() }) {
-                                    Text(text = "Изменить фото")
-                                }
-                                TextButton(onClick = {
-                                    selectedFileUri = ""
-
-                                }) {
-                                    Text(
-                                        text = "Удалить фото",
-                                        color = MaterialTheme.colorScheme.error,
-                                    )
-                                }
-
-
+                // Блок работы с фото
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (selectedFileUri.isNotEmpty()) {
+                        AsyncImage(
+                            model = selectedFileUri,
+                            contentDescription = "Превью фото",
+                            modifier = Modifier
+                                .size(80.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .border(1.dp, theme.iconAddTint, RoundedCornerShape(12.dp))
+                                .clickable { openImageState = true },
+                            contentScale = ContentScale.Crop,
+                        )
+                        Column(
+                            modifier = Modifier.fillMaxWidth().weight(1f),
+                            horizontalAlignment = Alignment.End,
+                            verticalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            TextButton(
+                                onClick = { fileLauncher.launch() },
+                                colors = ButtonDefaults.textButtonColors(contentColor = theme.iconAddTint)
+                            ) {
+                                Text(text = "Изменить фото")
                             }
-                            // Кнопка удаления фото (deleteText)
-
-                        } else {
-                            // Кнопка добавления фото (addPhoto)
-                            Button(onClick = { fileLauncher.launch() }) {
-                                Text(text = "Добавить фото")
+                            TextButton(
+                                onClick = { selectedFileUri = "" },
+                                colors = ButtonDefaults.textButtonColors(contentColor = theme.cardItemBorderFalse)
+                            ) {
+                                Text(text = "Удалить фото")
                             }
                         }
+                    } else {
+                        OutlinedButton(
+                            onClick = { fileLauncher.launch() },
+                            border = BorderStroke(1.dp, theme.iconAddTint),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = theme.iconAddTint)
+                        ) {
+                            Icon(imageVector = theme.iconAdd, contentDescription = null, tint = theme.iconAddTint)
+                            Spacer(Modifier.size(4.dp))
+                            Text(text = "Добавить фото")
+                        }
                     }
-
-
-
-
-                    // Отображаем наш KMP Спиннер, когда список загрузился
-                        KmpSpinnerInput(
-                            selectedCategory = categorySelected,
-                            list = listCategory,
-                            onCategorySelected = { selected ->
-                                categorySelected = selected
-
-                            }
-                        )
-
                 }
-                } ,
 
-            confirmButton = {
-                TextButton(onClick = {
+                // Спиннер
+                KmpSpinnerInput(
+                    selectedCategory = categorySelected,
+                    list = listCategory,
+                    theme = theme, // Передаем абстрактную тему дальше
+                    onCategorySelected = { categorySelected = it }
+                )
+            }
+        },
+
+        confirmButton = {
+            TextButton(
+                onClick = {
                     val text = stateTextName.trim().ifEmpty { "Без названия" }
-                    onSave(item,text,stateTextDecs.trim(),selectedFileUri,categorySelected,false,originalFileName)
-                }) {
-                    Text("Ок")
-                }
-            },
-            dismissButton = {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp) // Отступ между кнопками
-                ) {
-                    TextButton(onClick = {
+                    onSave(item, text, stateTextDecs.trim(), selectedFileUri, categorySelected, false, originalFileName)
+                },
+                colors = ButtonDefaults.textButtonColors(contentColor = theme.cardItemBorderTrue)
+            ) {
+                Text("Ок", fontWeight = FontWeight.Bold)
+            }
+        },
+
+        dismissButton = {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                TextButton(
+                    onClick = {
                         val text = stateTextName.trim().ifEmpty { "Без названия" }
-                        onSave(item,text,stateTextDecs.trim(),selectedFileUri,categorySelected,true,originalFileName)
-                    }) {
-                        Text("Установка будильника")
-                    }
-                    TextButton(onClick = { onCancel()}) {
-                        Text("Отмена")
-                    }
+                        onSave(item, text, stateTextDecs.trim(), selectedFileUri, categorySelected, true, originalFileName)
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = theme.textAlarm)
+                ) {
+                    Text("Установка будильника")
                 }
-            },
-        )
+                TextButton(
+                    onClick = { onCancel() },
+                    colors = ButtonDefaults.textButtonColors(contentColor = theme.textDecs)
+                ) {
+                    Text("Отмена")
+                }
+            }
+        },
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
