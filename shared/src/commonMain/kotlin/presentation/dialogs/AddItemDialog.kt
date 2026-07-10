@@ -301,7 +301,7 @@ fun AddOrChangeItemDialog(
 
     AlertDialog(
         onDismissRequest = { onCancel() },
-        containerColor = Color(0xFFD3D3D3),
+        containerColor = Color(0xFF424242),
 
         title = { Text("Сфокусироваться", color = theme.textColor) },
 
@@ -322,9 +322,9 @@ fun AddOrChangeItemDialog(
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedTextColor = theme.textColor,
                         unfocusedTextColor = theme.textColor,
-                        focusedBorderColor = theme.iconAddTint, // Свечение при фокусе
+                        focusedBorderColor = Color(0xFFA9A9A9), // Свечение при фокусе
                         unfocusedBorderColor = theme.cardItemBorderFalse.copy(alpha = 0.4f),
-                        focusedLabelColor = theme.iconAddTint,
+                        focusedLabelColor = Color(0xFFA9A9A9),
                         unfocusedLabelColor = theme.textDecs
                     )
                 )
