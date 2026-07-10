@@ -301,7 +301,7 @@ fun AddOrChangeItemDialog(
 
     AlertDialog(
         onDismissRequest = { onCancel() },
-        containerColor = Color(0xFF121214),
+        containerColor = Color.Grey,
 
         title = { Text("Сфокусироваться", color = theme.textColor) },
 
@@ -491,7 +491,6 @@ fun KmpSpinnerInput(
             expanded = expanded,
             onDismissRequest = { expanded = false },
             modifier = Modifier 
-               .clip(RoundedCornerShape(12.dp))
                 .background(Color(0xFF121214))
         ) {
             list.forEach { item ->
