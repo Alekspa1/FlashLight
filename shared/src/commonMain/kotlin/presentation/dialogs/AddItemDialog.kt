@@ -308,11 +308,7 @@ fun AddOrChangeItemDialog(
             .border(2.dp, theme.cardItemBorderFalse, RoundedCornerShape(16.dp)),
 
         // Цвета контейнера под вашу темную тему
-        colors = AlertDialogDefaults.colors(
-            containerColor = Color(0xFF121214), // Глубокий темный фон для сочности неона
-            titleContentColor = theme.textColor,
-            textContentColor = theme.textColor
-        ),
+        containerColor = theme.noteBookBackground,
 
         title = { Text("Сфокусироваться", color = theme.textColor) },
 
@@ -502,9 +498,6 @@ fun KmpSpinnerInput(
                 .background(Color(0xFF121214), RoundedCornerShape(10.dp)) 
                 .border(1.dp, theme.cardItemBorderFalse.copy(alpha = 0.6f), RoundedCornerShape(10.dp)),
             // Отключаем дефолтные системные цвета контейнера M3
-            colors = ExposedDropdownMenuDefaults.customColors(
-                containerColor = Color(0xFF121214) 
-            )
         ) {
             list.forEach { item ->
                 DropdownMenuItem(
