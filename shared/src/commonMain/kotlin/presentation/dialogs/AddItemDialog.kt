@@ -301,18 +301,6 @@ fun AddOrChangeItemDialog(
 
     AlertDialog(
         onDismissRequest = { onCancel() },
-        
-        // Модификатор окна: скругление и неоновая рамка (по умолчанию берем false-статус, как на карточке)
-       modifier = Modifier
-            .border(
-                2.dp, 
-                if (item?.change == true) theme.cardItemBorderTrue
-                else if (item?.changeAlarm == true) theme.cardItemBorderAlarm
-                else theme.cardItemBorderFalse, 
-                RoundedCornerShape(16.dp)
-            )
-            .clip(RoundedCornerShape(16.dp)),
-
         containerColor = Color(0xFF121214),
 
         title = { Text("Сфокусироваться", color = theme.textColor) },
@@ -502,10 +490,8 @@ fun KmpSpinnerInput(
        ExposedDropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            modifier = Modifier
-                // ✅ ИСПРАВЛЕНО: Убрали проблемный .width с coordinates
-                .border(1.dp, theme.cardItemBorderFalse.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
-                .clip(RoundedCornerShape(12.dp))
+            modifier = Modifie 
+               .clip(RoundedCornerShape(12.dp))
                 .background(Color(0xFF121214))
         ) {
             list.forEach { item ->
