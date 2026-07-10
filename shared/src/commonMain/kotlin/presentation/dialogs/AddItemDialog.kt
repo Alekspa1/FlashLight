@@ -490,7 +490,7 @@ fun KmpSpinnerInput(
        ExposedDropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            modifier = Modifie 
+            modifier = Modifier 
                .clip(RoundedCornerShape(12.dp))
                 .background(Color(0xFF121214))
         ) {
