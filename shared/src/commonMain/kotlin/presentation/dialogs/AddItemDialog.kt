@@ -321,11 +321,13 @@ fun AddOrChangeItemDialog(
                     label = { Text(text = "Название") },
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedTextColor = theme.textColor,
-                        unfocusedTextColor = theme.textColor,
-                        focusedBorderColor = Color(0xFFA9A9A9), // Свечение при фокусе
-                        unfocusedBorderColor = theme.textColor,
-                        focusedLabelColor = Color(0xFFA9A9A9),
-                        unfocusedLabelColor = theme.textColor
+                        unfocusedTextColor = theme.textDecs,
+                        focusedBorderColor = theme.textColor, // Свечение при фокусе
+                        unfocusedBorderColor = theme.textDecs,
+                        focusedLabelColor = theme.textColor,
+                        unfocusedLabelColor = theme.textDecs,
+                        cursorColor = theme.textColor, // Цвет самой вертикальной черточки
+                        selectionHandleColor = theme.textColor // Цвет капли (ползунка) при выделении текста
                     )
                 )
 
@@ -338,11 +340,13 @@ fun AddOrChangeItemDialog(
                     label = { Text("Описание") },
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedTextColor = theme.textColor,
-                        unfocusedTextColor = theme.textColor,
-                        focusedBorderColor = Color(0xFFA9A9A9), // Свечение при фокусе
-                        unfocusedBorderColor = theme.textColor,
-                        focusedLabelColor = Color(0xFFA9A9A9),
-                        unfocusedLabelColor = theme.textColor
+                        unfocusedTextColor = theme.textDecs,
+                        focusedBorderColor = theme.textColor, // Свечение при фокусе
+                        unfocusedBorderColor = theme.textDecs,
+                        focusedLabelColor = theme.textColor,
+                        unfocusedLabelColor = theme.textDecs,
+                        cursorColor = theme.textColor, // Цвет самой вертикальной черточки
+                        selectionHandleColor = theme.textColor // Цвет капли (ползунка) при выделении текста
                     )
                 )
 
@@ -369,7 +373,7 @@ fun AddOrChangeItemDialog(
                         ) {
                             TextButton(
                                 onClick = { fileLauncher.launch() },
-                                colors = ButtonDefaults.textButtonColors(contentColor = theme.textDecs)
+                                colors = ButtonDefaults.textButtonColors(contentColor = theme.textColor)
                             ) {
                                 Text(text = "Изменить фото")
                             }
@@ -412,7 +416,7 @@ fun AddOrChangeItemDialog(
                     val text = stateTextName.trim().ifEmpty { "Без названия" }
                     onSave(item, text, stateTextDecs.trim(), selectedFileUri, categorySelected, false, originalFileName)
                 },
-                colors = ButtonDefaults.textButtonColors(contentColor = theme.cardItemBorderTrue)
+                colors = ButtonDefaults.textButtonColors(contentColor = theme.textColor)
             ) {
                 Text("Ок", fontWeight = FontWeight.Bold)
             }
@@ -427,7 +431,7 @@ fun AddOrChangeItemDialog(
                         val text = stateTextName.trim().ifEmpty { "Без названия" }
                         onSave(item, text, stateTextDecs.trim(), selectedFileUri, categorySelected, true, originalFileName)
                     },
-                    colors = ButtonDefaults.textButtonColors(contentColor = theme.textDecs)
+                    colors = ButtonDefaults.textButtonColors(contentColor = theme.textColor)
                 ) {
                     Text("Установка будильника")
                 }
@@ -452,10 +456,16 @@ fun KmpSpinnerInput(
 ) {
     var expanded by remember { mutableStateOf(false) }
 
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = !expanded }
-    ) {
+    ExposedDropdownMenu(
+    expanded = expanded,
+    onDismissRequest = { expanded = false },
+    // 1. Изменяем форму (закругление углов)
+    shape = RoundedCornerShape(12.dp), 
+    // 2. Настраиваем цвета контейнера выпадающего окна
+    colors = ExposedDropdownMenuDefaults.colors(
+        containerColor = Color(0xFF121214) // Ваш цвет фона
+    )
+) {
         OutlinedTextField(
             value = selectedCategory,
             onValueChange = {},
@@ -474,11 +484,13 @@ fun KmpSpinnerInput(
             
             colors = OutlinedTextFieldDefaults.colors(
                         focusedTextColor = theme.textColor,
-                        unfocusedTextColor = theme.textColor,
-                        focusedBorderColor = Color(0xFFA9A9A9), // Свечение при фокусе
-                        unfocusedBorderColor = theme.textColor,
-                        focusedLabelColor = Color(0xFFA9A9A9),
-                        unfocusedLabelColor = theme.textColor
+                        unfocusedTextColor = theme.textDecs,
+                        focusedBorderColor = theme.textColor, // Свечение при фокусе
+                        unfocusedBorderColor = theme.textDecs,
+                        focusedLabelColor = theme.textColor,
+                        unfocusedLabelColor = theme.textDecs,
+                        cursorColor = theme.textColor, // Цвет самой вертикальной черточки
+                        selectionHandleColor = theme.textColor // Цвет капли (ползунка) при выделении текста
                     )
         )
 
