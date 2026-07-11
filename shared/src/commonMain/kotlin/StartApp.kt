@@ -42,6 +42,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -76,42 +78,54 @@ import presentation.theme.Size
 import presentation.theme.SizeNormal
 import presentation.theme.Theme
 import presentation.theme.ThemeNeon
+import presentation.theme.ThemeZabor
 
 @Composable
 fun StartApp(viewModel: MainViewModel = koinViewModel()) {
-    val categories by viewModel.categories.collectAsStateWithLifecycle()
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val theme = viewModel.themeState
 
-    val category = viewModel.showDialog.category
+    MaterialTheme(
+        colorScheme = if(viewModel.themeState == ThemeNeon()) darkColorScheme(
+            primary = theme.textColor,
+            surfaceContainerHigh = theme.backgroundDialog,
+            primaryContainer =  Color(0xFF616161),
+            onPrimaryContainer = theme.textColor,
+            surfaceContainerHighest = Color(0xFF616161),
+            onSurfaceVariant = theme.textColor
 
+        ) else lightColorScheme(primary = theme.textColor)
+    ) {
 
-    when(viewModel.showDialog.isWho){
-        DELETE_DIALOG_CATEGORY -> {
-            DeleteDialog{result->
-                if(result && category != null){
-                    viewModel.deleteCategory(category)
-                    viewModel.updateCategory("Повседневные")
-                    viewModel.showDialog = DialogState()
-                }
-                else {
-                    viewModel.showDialog = DialogState()
+        val categories by viewModel.categories.collectAsStateWithLifecycle()
+        val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+        val category = viewModel.showDialog.category
+        when(viewModel.showDialog.isWho){
+            DELETE_DIALOG_CATEGORY -> {
+                DeleteDialog(theme = theme){result->
+                    if(result && category != null){
+                        viewModel.deleteCategory(category)
+                        viewModel.updateCategory("Повседневные")
+                        viewModel.showDialog = DialogState()
+                    }
+                    else {
+                        viewModel.showDialog = DialogState()
+                    }
                 }
             }
+            INSERT_DIALOG_CATEGORY -> {
+                AddOrChangeCategoryDialog(
+                    category = category,
+                    theme = theme,
+                    onSave = {listCategory,name->
+                        if(listCategory == null) {
+                            viewModel.insertCategory(name)
+                            viewModel.showDialog = DialogState()
+                        } else viewModel.upgrateListCategory(listCategory,name)
+                    },
+                    onCancel = {viewModel.showDialog = DialogState()})
+            }
         }
-        INSERT_DIALOG_CATEGORY -> {
-            AddOrChangeCategoryDialog(
-                category = category,
-                onSave = {listCategory,name->
-                    if(listCategory == null) {
-                        viewModel.insertCategory(name)
-                        viewModel.showDialog = DialogState()
-                    } else viewModel.upgrateListCategory(listCategory,name)
-                },
-                onCancel = {viewModel.showDialog = DialogState()})
-        }
-    }
-    viewModel.updateAlarm()
-    MaterialTheme {
+        viewModel.updateAlarm()
         StartAppContent(
             categories = categories,
             toastEvents = viewModel.toast,
@@ -126,7 +140,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
             update = viewModel.updateState,
             onClick = { click ->
                 when (click) {
-                    PREMIUM_CLICK -> {}
+                    PREMIUM_CLICK -> {viewModel.themeState = if(theme == ThemeNeon()) ThemeZabor() else ThemeNeon()}
                     UPGRATE_CLICK -> {}
                     SETTINGS_CLICK -> {}
                 }
@@ -151,6 +165,8 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
 
         )
     }
+
+
 }
 
 @Composable
@@ -201,7 +217,7 @@ fun StartAppContent(
 
                                 // СЛОЙ 1: Ваша фоновая неоновая картинка
                                 Image(
-                                    painter = painterResource(Res.drawable.background_drawer_neon),
+                                    painter = painterResource(theme.backgroundDrawer),
                                     contentDescription = null,
                                     modifier = Modifier.fillMaxSize(),
                                     contentScale = ContentScale.FillBounds
@@ -485,7 +501,7 @@ fun StartAppContent(
                 ) {
                     Box(modifier = Modifier.fillMaxSize()) {
                         Image(
-                            painter = painterResource(Res.drawable.background_neon),
+                            painter = painterResource(theme.backgroundStart),
                             contentDescription = null,
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.FillBounds

@@ -1,18 +1,15 @@
 package presentation.dialogs
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -35,8 +32,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import coil3.compose.AsyncImage
 
 import data.room.Item
@@ -45,33 +40,14 @@ import io.github.vinceglb.filekit.core.PickerType
 import io.github.vinceglb.filekit.core.PlatformFile
 import kotlin.time.Clock
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.gestures.detectTransformGestures
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.background
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import presentation.theme.ThemeNeon
 import presentation.theme.Theme
-import androidx.compose.foundation.border
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.ui.text.font.FontWeight
@@ -301,7 +277,6 @@ fun AddOrChangeItemDialog(
 
     AlertDialog(
         onDismissRequest = { onCancel() },
-        containerColor = Color(0xFF424242),
 
         title = { Text("Сфокусироваться", color = theme.textColor) },
 
@@ -319,14 +294,14 @@ fun AddOrChangeItemDialog(
                     onValueChange = { stateTextName = it },
                     shape = RoundedCornerShape(10.dp),
                     label = { Text(text = "Название") },
-                     colors = OutlinedTextFieldDefaults.colors(
-                      focusedTextColor = theme.textColor, 
-                      unfocusedTextColor = theme.textDecs, 
-                      focusedBorderColor = theme.textDecs, // Свечение при фокусе 
-                      unfocusedBorderColor = theme.textDecs, 
-                      focusedLabelColor = theme.textDecs, 
-                      unfocusedLabelColor = theme.textDecs
-                    )
+//                     colors = OutlinedTextFieldDefaults.colors(
+//                     focusedTextColor = Color.White,
+//                      unfocusedTextColor = Color.Gray,
+//                      focusedBorderColor = theme.textColor, // Свечение при фокусе
+//                      unfocusedBorderColor = theme.textColor,
+//                      focusedLabelColor = theme.textColor,
+//                      unfocusedLabelColor = theme.textColor
+//                    )
                 )
 
                 // Поле Описание
@@ -336,14 +311,14 @@ fun AddOrChangeItemDialog(
                     onValueChange = { stateTextDecs = it },
                     shape = RoundedCornerShape(10.dp),
                     label = { Text("Описание") },
-                   colors = OutlinedTextFieldDefaults.colors(
-                      focusedTextColor = theme.textColor, 
-                      unfocusedTextColor = theme.textDecs, 
-                      focusedBorderColor = theme.textDecs, // Свечение при фокусе 
-                      unfocusedBorderColor = theme.textDecs, 
-                      focusedLabelColor = theme.textDecs, 
-                      unfocusedLabelColor = theme.textDecs
-                    )
+//                   colors = OutlinedTextFieldDefaults.colors(
+//                      focusedTextColor = theme.textColor,
+//                      unfocusedTextColor = theme.textDesc,
+//                      focusedBorderColor = theme.textDesc, // Свечение при фокусе
+//                      unfocusedBorderColor = theme.textDesc,
+//                      focusedLabelColor = theme.textDesc,
+//                      unfocusedLabelColor = theme.textDesc
+//                    )
                 )
 
                 // Блок работы с фото
@@ -388,10 +363,10 @@ fun AddOrChangeItemDialog(
                             onClick = { fileLauncher.launch() },
                             colors = ButtonDefaults.textButtonColors(
                                 
-                                contentColor = theme.textDecs
+                                contentColor = theme.textDesc
                             ),
                                                    ) {
-                            Text(text = "Добавить фото")
+                            Text(text = "Добавить фото", color = theme.textColor)
                         }
                     }
                 }
@@ -427,13 +402,13 @@ fun AddOrChangeItemDialog(
                         val text = stateTextName.trim().ifEmpty { "Без названия" }
                         onSave(item, text, stateTextDecs.trim(), selectedFileUri, categorySelected, true, originalFileName)
                     },
-                    colors = ButtonDefaults.textButtonColors(contentColor = theme.textDecs)
+                    //colors = ButtonDefaults.textButtonColors(contentColor = theme.textColor)
                 ) {
                     Text("Установка будильника")
                 }
                 TextButton(
                     onClick = { onCancel() },
-                    colors = ButtonDefaults.textButtonColors(contentColor = theme.cardItemBorderFalse)
+                   // colors = ButtonDefaults.textButtonColors(contentColor = theme.cardItemBorderFalse)
                 ) {
                     Text("Отмена")
                 }
@@ -472,12 +447,12 @@ fun KmpSpinnerInput(
             shape = RoundedCornerShape(10.dp),
             label = { Text("Категория") }, 
             colors = OutlinedTextFieldDefaults.colors(
-                      focusedTextColor = theme.textDecs, 
-                      unfocusedTextColor = theme.textDecs, 
-                      focusedBorderColor = theme.textDecs, // Свечение при фокусе 
-                      unfocusedBorderColor = theme.textDecs, 
-                      focusedLabelColor = theme.textDecs, 
-                      unfocusedLabelColor = theme.textDecs
+                     // focusedTextColor = theme.textDesc,
+                    //  unfocusedTextColor = theme.textDesc,
+                      focusedBorderColor = theme.textDesc, // Свечение при фокусе
+                      unfocusedBorderColor = theme.textDesc,
+                     // focusedLabelColor = theme.textDesc,
+                     // unfocusedLabelColor = theme.textDesc
                     )
         )
 

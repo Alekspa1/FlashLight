@@ -8,6 +8,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -23,9 +24,12 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import data.room.ListCategory
+import presentation.theme.Theme
+import presentation.theme.ThemeNeon
 
 @Composable
 fun AddOrChangeCategoryDialog(category: ListCategory? = null,
+                              theme: Theme = ThemeNeon(),
                               onSave : (ListCategory?,String) -> Unit = {_,_->},
                               onCancel : ()-> Unit = {},){
 
@@ -40,6 +44,7 @@ fun AddOrChangeCategoryDialog(category: ListCategory? = null,
 
         AlertDialog(
             onDismissRequest = { onCancel()},
+            title = { Text("Введите название категории", color = theme.textColor) },
             text = {
                 OutlinedTextField(
                     modifier = Modifier
@@ -52,12 +57,14 @@ fun AddOrChangeCategoryDialog(category: ListCategory? = null,
                         stateTextName = newText
                     },
                     shape = RoundedCornerShape(10.dp),
-                    label = {Text(text = "Название категории", color = Color.Gray)},
+                    label = {Text(text = "Название категории",)
+                        //color = Color.Gray)
+                    },
 
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color.Black,
-                        unfocusedTextColor = Color.Black,
-                    )
+//                    colors = OutlinedTextFieldDefaults.colors(
+//                        focusedTextColor = Color.Black,
+//                        unfocusedTextColor = Color.Black,
+//                    )
                 )
             },
             confirmButton = {
@@ -76,6 +83,8 @@ fun AddOrChangeCategoryDialog(category: ListCategory? = null,
 
             }
         )
+
+
 
 
 }

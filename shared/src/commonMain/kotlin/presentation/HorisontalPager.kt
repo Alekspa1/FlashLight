@@ -91,7 +91,7 @@ fun MainPager(paddingValues: PaddingValues = PaddingValues(),
         when(viewModel.showDialog.isWho){
 
             DELETE_DIALOG_ITEM->{
-                DeleteDialog {result->
+                DeleteDialog(theme = viewModel.themeState) {result->
                     if(result && item != null) viewModel.deleteItem(item)
                     viewModel.showDialog = DialogState()
                 }

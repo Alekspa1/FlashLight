@@ -114,10 +114,7 @@ fun OpenImage(uri: String, onDismiss: () -> Unit) {
                 .combinedClickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
-                    onClick = { 
-                        // Если картинка не приближена — закрываем экран по клику на фон
-                        if (scaleAnim.value == 1f) onDismiss() 
-                    },
+                    onClick = { },
                     onDoubleClick = {
                         scope.launch {
                             if (scaleAnim.value > 1f) {

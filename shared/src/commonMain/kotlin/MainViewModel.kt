@@ -35,6 +35,7 @@ import kotlin.time.Clock
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import presentation.theme.SizeNormal
+import presentation.theme.Theme
 import presentation.theme.ThemeNeon
 
 class MainViewModel(
@@ -56,7 +57,7 @@ class MainViewModel(
 
     var premiumState by mutableStateOf(true)
     var updateState by mutableStateOf(false)
-    var themeState by mutableStateOf(ThemeNeon())
+    var themeState by mutableStateOf<Theme>(ThemeNeon())
     var sizeState by mutableStateOf(SizeNormal())
 
     fun premiumOn(){
@@ -232,7 +233,7 @@ class MainViewModel(
                     }
 
                     else -> {
-                        if (!getPremium()) {
+                        if (!premiumState) {
                             deleteAlarm(item.id)
                             updateItem(item.copy(changeAlarm = false))
                         } else {
@@ -310,7 +311,6 @@ class MainViewModel(
 
 
 
-    fun getPremium() = true
 
     private fun currentTime():Long {
         val nowInstant = Clock.System.now()

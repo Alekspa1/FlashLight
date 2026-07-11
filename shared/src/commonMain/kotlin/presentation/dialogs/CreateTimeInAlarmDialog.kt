@@ -203,7 +203,7 @@ fun CreateActionInAlarmDialog(viewModel: MainViewModel){
    val item = viewModel.showDialog.item ?: return
    val listAction = listOf("Один раз", "Каждый день", "Каждую неделю","Каждый месяц", "Каждый год")
    var selected by remember { mutableStateOf(listAction[0]) }
-   val isPremium = viewModel.getPremium()
+   val isPremium = viewModel.premiumState
   AlertDialog(
     onDismissRequest = { viewModel.showDialog = DialogState() },
     confirmButton = {
@@ -233,7 +233,8 @@ fun CreateActionInAlarmDialog(viewModel: MainViewModel){
     text = {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)){
       Text("Как часто повторять?")
-                Column(Modifier.selectableGroup()) {
+                Column(Modifier.selectableGroup(),
+                    verticalArrangement = Arrangement.spacedBy(10.dp) ) {
                     listAction.forEachIndexed {index, text ->
                       val isOptionEnabled = index == 0 || isPremium
                         Row( Modifier.fillMaxWidth()

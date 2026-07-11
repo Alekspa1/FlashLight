@@ -7,13 +7,19 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import data.room.Item
+import presentation.theme.Theme
+import presentation.theme.ThemeNeon
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DeleteDialog(onResult :(Boolean) -> Unit ={},){
+fun DeleteDialog(
+    theme: Theme = ThemeNeon(),
+    onResult :(Boolean) -> Unit ={},
+
+){
     AlertDialog(onDismissRequest = { onResult(false) },
         title = {
-            Text("Вы действительно хотите это удалить?")
+            Text("Вы действительно хотите это удалить?", color = theme.textColor)
         },
         confirmButton = {
             TextButton(onClick = {onResult(true)}){

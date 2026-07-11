@@ -85,7 +85,7 @@ fun Notebook(viewModel: MainViewModel,pageIndex: Int){
     {
 
             if(showDialog.isWho == CommonConst.DELETE_DIALOG_ITEM){
-            DeleteDialog {result->
+            DeleteDialog(theme = theme) {result->
             if(result) onTextChange("")
              onResultDialog(DialogState())
             }
