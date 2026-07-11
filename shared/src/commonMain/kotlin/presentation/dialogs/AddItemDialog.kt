@@ -320,11 +320,11 @@ fun AddOrChangeItemDialog(
                     shape = RoundedCornerShape(10.dp),
                     label = { Text(text = "Название") },
                      colors = OutlinedTextFieldDefaults.colors(
-                      focusedTextColor = theme.textColor, 
+                      focusedTextColor = theme.textDecs, 
                       unfocusedTextColor = theme.textDecs, 
-                      focusedBorderColor = theme.textColor, // Свечение при фокусе 
+                      focusedBorderColor = theme.textDecs, // Свечение при фокусе 
                       unfocusedBorderColor = theme.textDecs, 
-                      focusedLabelColor = theme.textColor, 
+                      focusedLabelColor = theme.textDecs, 
                       unfocusedLabelColor = theme.textDecs
                     )
                 )
@@ -337,11 +337,11 @@ fun AddOrChangeItemDialog(
                     shape = RoundedCornerShape(10.dp),
                     label = { Text("Описание") },
                    colors = OutlinedTextFieldDefaults.colors(
-                      focusedTextColor = theme.textColor, 
+                      focusedTextColor = theme.textDecs, 
                       unfocusedTextColor = theme.textDecs, 
-                      focusedBorderColor = theme.textColor, // Свечение при фокусе 
+                      focusedBorderColor = theme.textDecs, // Свечение при фокусе 
                       unfocusedBorderColor = theme.textDecs, 
-                      focusedLabelColor = theme.textColor, 
+                      focusedLabelColor = theme.textDecs, 
                       unfocusedLabelColor = theme.textDecs
                     )
                 )
@@ -455,7 +455,11 @@ fun KmpSpinnerInput(
     // 1. РОДИТЕЛЬ (Всегда идет самым первым)
     ExposedDropdownMenuBox(
         expanded = expanded,
-        onExpandedChange = { expanded = !expanded }
+        onExpandedChange = { expanded = !expanded },
+       modifier = Modifier
+                .clip(RoundedCornerShape(34.dp)) // Закругляем список
+                .background(Color.Green)   // Меням фон списка
+        
     ) {
         // 2. ПОЛЕ ВВОДА (Отображается на экране)
         OutlinedTextField(
@@ -466,16 +470,19 @@ fun KmpSpinnerInput(
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) 
             },
             modifier = Modifier
+          .clip(RoundedCornerShape(48.dp)) // Закругляем список
+                .background(Color.Red)   // Меням фон списка
                 .menuAnchor(MenuAnchorType.PrimaryNotEditable, true) 
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                ,
             shape = RoundedCornerShape(10.dp),
             label = { Text("Категория") }, 
             colors = OutlinedTextFieldDefaults.colors(
-                      focusedTextColor = theme.textColor, 
+                      focusedTextColor = theme.textDecs, 
                       unfocusedTextColor = theme.textDecs, 
-                      focusedBorderColor = theme.textColor, // Свечение при фокусе 
+                      focusedBorderColor = theme.textDecs, // Свечение при фокусе 
                       unfocusedBorderColor = theme.textDecs, 
-                      focusedLabelColor = theme.textColor, 
+                      focusedLabelColor = theme.textDecs, 
                       unfocusedLabelColor = theme.textDecs
                     )
         )
