@@ -320,15 +320,21 @@ fun AddOrChangeItemDialog(
                     shape = RoundedCornerShape(10.dp),
                     label = { Text(text = "Название") },
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = theme.textColor,
-                        unfocusedTextColor = theme.textDecs,
-                        focusedBorderColor = theme.textColor, // Свечение при фокусе
-                        unfocusedBorderColor = theme.textDecs,
-                        focusedLabelColor = theme.textColor,
-                        unfocusedLabelColor = theme.textDecs,
-                        cursorColor = theme.textColor, // Цвет самой вертикальной черточки
-                        selectionHandleColor = theme.textColor // Цвет капли (ползунка) при выделении текста
-                    )
+    focusedTextColor = theme.textColor,
+    unfocusedTextColor = theme.textDecs,
+    
+    // ИСПРАВЛЕНО: Для границ OutlinedTextField используются *IndicatorColor
+    focusedIndicatorColor = theme.textColor, 
+    unfocusedIndicatorColor = theme.textDecs,
+    
+    // ИСПРАВЛЕНО: Цвета лейбла настраиваются через отдельные стейты
+    focusedLabelColor = theme.textColor,
+    unfocusedLabelColor = theme.textDecs,
+    
+    // ИСПРАВЛЕНО: Эти параметры поддерживаются вашей версией
+    cursorColor = theme.textColor, 
+    selectionHandleColor = theme.textColor 
+)
                 )
 
                 // Поле Описание
@@ -338,16 +344,22 @@ fun AddOrChangeItemDialog(
                     onValueChange = { stateTextDecs = it },
                     shape = RoundedCornerShape(10.dp),
                     label = { Text("Описание") },
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = theme.textColor,
-                        unfocusedTextColor = theme.textDecs,
-                        focusedBorderColor = theme.textColor, // Свечение при фокусе
-                        unfocusedBorderColor = theme.textDecs,
-                        focusedLabelColor = theme.textColor,
-                        unfocusedLabelColor = theme.textDecs,
-                        cursorColor = theme.textColor, // Цвет самой вертикальной черточки
-                        selectionHandleColor = theme.textColor // Цвет капли (ползунка) при выделении текста
-                    )
+                   colors = OutlinedTextFieldDefaults.colors(
+    focusedTextColor = theme.textColor,
+    unfocusedTextColor = theme.textDecs,
+    
+    // ИСПРАВЛЕНО: Для границ OutlinedTextField используются *IndicatorColor
+    focusedIndicatorColor = theme.textColor, 
+    unfocusedIndicatorColor = theme.textDecs,
+    
+    // ИСПРАВЛЕНО: Цвета лейбла настраиваются через отдельные стейты
+    focusedLabelColor = theme.textColor,
+    unfocusedLabelColor = theme.textDecs,
+    
+    // ИСПРАВЛЕНО: Эти параметры поддерживаются вашей версией
+    cursorColor = theme.textColor, 
+    selectionHandleColor = theme.textColor 
+)
                 )
 
                 // Блок работы с фото
@@ -475,13 +487,21 @@ fun KmpSpinnerInput(
             shape = RoundedCornerShape(10.dp),
             label = { Text("Категория") }, 
             colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = theme.textColor,
-                unfocusedTextColor = theme.textDecs,
-                focusedBorderColor = theme.textColor, 
-                unfocusedBorderColor = theme.textDecs,
-                focusedLabelColor = theme.textColor,
-                unfocusedLabelColor = theme.textDecs
-            )
+    focusedTextColor = theme.textColor,
+    unfocusedTextColor = theme.textDecs,
+    
+    // ИСПРАВЛЕНО: Для границ OutlinedTextField используются *IndicatorColor
+    focusedIndicatorColor = theme.textColor, 
+    unfocusedIndicatorColor = theme.textDecs,
+    
+    // ИСПРАВЛЕНО: Цвета лейбла настраиваются через отдельные стейты
+    focusedLabelColor = theme.textColor,
+    unfocusedLabelColor = theme.textDecs,
+    
+    // ИСПРАВЛЕНО: Эти параметры поддерживаются вашей версией
+    cursorColor = theme.textColor, 
+    selectionHandleColor = theme.textColor 
+)
         )
 
         // 3. ВЫПАДАЮЩИЙ СПИСОК (Появляется только при клике)
