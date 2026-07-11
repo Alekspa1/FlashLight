@@ -319,14 +319,14 @@ fun AddOrChangeItemDialog(
                     onValueChange = { stateTextName = it },
                     shape = RoundedCornerShape(10.dp),
                     label = { Text(text = "Название") },
-                    colors = OutlinedTextFieldDefaults.colors(
-                      focusedTextColor = Color.Black, 
-                      unfocusedTextColor = Color.Black, 
-                      focusedBorderColor = Color.Black,  
-                      unfocusedBorderColor = Color.Black, 
-                      focusedLabelColor = Color.Black, 
-                      unfocusedLabelColor = Color.Black
-                    )
+                    // colors = OutlinedTextFieldDefaults.colors(
+                    //   focusedTextColor = Color.Black, 
+                    //   unfocusedTextColor = Color.Black, 
+                    //   focusedBorderColor = Color.Black,  
+                    //   unfocusedBorderColor = Color.Black, 
+                    //   focusedLabelColor = Color.Black, 
+                    //   unfocusedLabelColor = Color.Black
+                    // )
                 )
 
                 // Поле Описание
