@@ -459,12 +459,9 @@ fun KmpSpinnerInput(
     ExposedDropdownMenu(
     expanded = expanded,
     onDismissRequest = { expanded = false },
-    // 1. Изменяем форму (закругление углов)
-    shape = RoundedCornerShape(12.dp), 
-    // 2. Настраиваем цвета контейнера выпадающего окна
-    colors = ExposedDropdownMenuDefaults.colors(
-        containerColor = Color(0xFF121214) // Ваш цвет фона
-    )
+    modifier = Modifier
+        .clip(RoundedCornerShape(12.dp)) // Сначала обрезаем углы
+        .background(Color(0xFF121214))   // Затем красим фон
 ) {
         OutlinedTextField(
             value = selectedCategory,
