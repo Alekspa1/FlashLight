@@ -321,11 +321,11 @@ fun AddOrChangeItemDialog(
                     label = { Text(text = "Название") },
                     colors = OutlinedTextFieldDefaults.colors(
                       focusedTextColor = theme.textColor, 
-                      unfocusedTextColor = theme.textDecs, 
-                      focusedBorderColor = theme.textColor, // Свечение при фокусе 
+                      unfocusedTextColor = theme.textColor, 
+                      focusedBorderColor = theme.textDecs,  
                       unfocusedBorderColor = theme.textDecs, 
-                      focusedLabelColor = theme.textColor, 
-                      unfocusedLabelColor = theme.textDecs
+                      focusedLabelColor = theme.textDecs, 
+                      unfocusedLabelColor = theme.textColor
                     )
                 )
 
