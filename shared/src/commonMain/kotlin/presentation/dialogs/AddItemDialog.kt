@@ -303,7 +303,7 @@ fun AddOrChangeItemDialog(
         onDismissRequest = { onCancel() },
         containerColor = Color(0xFF424242),
 
-        title = { Text("Сфокусироваться блеат!", color = theme.textColor) },
+        title = { Text("Сфокусироваться", color = theme.textColor) },
 
         text = {
             Column(
@@ -320,14 +320,12 @@ fun AddOrChangeItemDialog(
                     shape = RoundedCornerShape(10.dp),
                     label = { Text(text = "Название") },
                      colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = theme.textColor,
-                        unfocusedTextColor = theme.textColor,
-                        focusedBorderColor = theme.iconAddTint, // Свечение при фокусе
-                        //focusedBorderColor = Color(0xFFA9A9A9), // Свечение при фокусе
-                        unfocusedBorderColor = theme.cardItemBorderFalse.copy(alpha = 0.4f),
-                        focusedLabelColor = theme.iconAddTint,
-                       // focusedLabelColor = Color(0xFFA9A9A9),
-                        unfocusedLabelColor = theme.textDecs
+                      focusedTextColor = theme.textColor, 
+                      unfocusedTextColor = theme.textDecs, 
+                      focusedBorderColor = theme.textColor, // Свечение при фокусе 
+                      unfocusedBorderColor = theme.textDecs, 
+                      focusedLabelColor = theme.textColor, 
+                      unfocusedLabelColor = theme.textDecs
                     )
                 )
 
@@ -435,7 +433,7 @@ fun AddOrChangeItemDialog(
                 }
                 TextButton(
                     onClick = { onCancel() },
-                    colors = ButtonDefaults.textButtonColors(contentColor = theme.cardItemBorderTrue)
+                    colors = ButtonDefaults.textButtonColors(contentColor = theme.cardItemBorderFalse)
                 ) {
                     Text("Отмена")
                 }
@@ -487,7 +485,7 @@ fun KmpSpinnerInput(
             expanded = expanded,
             onDismissRequest = { expanded = false },
             modifier = Modifier
-                .clip(RoundedCornerShape(12.dp)) // Закругляем список
+                .clip(RoundedCornerShape(22.dp)) // Закругляем список
                 .background(Color(0xFF121214))   // Меням фон списка
         ) {
             list.forEach { item ->
