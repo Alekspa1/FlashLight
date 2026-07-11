@@ -324,8 +324,8 @@ fun AddOrChangeItemDialog(
                       unfocusedTextColor = theme.textColor, 
                       focusedBorderColor = theme.textDecs,  
                       unfocusedBorderColor = theme.textDecs, 
-                      focusedLabelColor = theme.textDecs, 
-                      unfocusedLabelColor = theme.textColor
+                      focusedLabelColor = theme.cardItemBorderFalse, 
+                      unfocusedLabelColor = theme.cardItemBorderTrue
                     )
                 )
 
