@@ -492,7 +492,7 @@ fun KmpSpinnerInput(
         )
 
         // Само выпадающее окно
-       ExposedDropdownMenu(
+       ExposedDropdownMenuBox(
             expanded = expanded,
             onDismissRequest = { expanded = false },
             modifier = Modifier 
