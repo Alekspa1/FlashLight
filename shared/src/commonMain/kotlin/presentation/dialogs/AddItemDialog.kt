@@ -412,7 +412,7 @@ fun AddOrChangeItemDialog(
                     val text = stateTextName.trim().ifEmpty { "Без названия" }
                     onSave(item, text, stateTextDecs.trim(), selectedFileUri, categorySelected, false, originalFileName)
                 },
-                colors = ButtonDefaults.textButtonColors(contentColor = theme.textColor)
+                colors = ButtonDefaults.textButtonColors(contentColor = theme.textDecs)
             ) {
                 Text("Ок", fontWeight = FontWeight.Bold)
             }
@@ -427,7 +427,7 @@ fun AddOrChangeItemDialog(
                         val text = stateTextName.trim().ifEmpty { "Без названия" }
                         onSave(item, text, stateTextDecs.trim(), selectedFileUri, categorySelected, true, originalFileName)
                     },
-                    colors = ButtonDefaults.textButtonColors(contentColor = theme.textColor)
+                    colors = ButtonDefaults.textButtonColors(contentColor = theme.textDecs)
                 ) {
                     Text("Установка будильника")
                 }
@@ -470,8 +470,6 @@ fun KmpSpinnerInput(
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) 
             },
             modifier = Modifier
-          .clip(RoundedCornerShape(48.dp)) // Закругляем список
-                .background(Color.Red)   // Меням фон списка
                 .menuAnchor(MenuAnchorType.PrimaryNotEditable, true) 
                 .fillMaxWidth()
                 ,
