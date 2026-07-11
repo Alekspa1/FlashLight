@@ -320,14 +320,15 @@ fun AddOrChangeItemDialog(
                     shape = RoundedCornerShape(10.dp),
                     label = { Text(text = "Название") },
                      colors = OutlinedTextFieldDefaults.colors(
-                     focusedTextColor = theme.textColor,
-                      unfocusedTextColor = theme.textColor,
-                      focusedBorderColor = Color(0xFFA9A9A9),
-                       unfocusedBorderColor = theme.cardItemBorderFalse.copy(alpha = 0.4f),
-                       focusedLabelColor = Color(0xFFA9A9A9),
+                        focusedTextColor = theme.textColor,
+                        unfocusedTextColor = theme.textColor,
+                        focusedBorderColor = theme.iconAddTint, // Свечение при фокусе
+                        //focusedBorderColor = Color(0xFFA9A9A9), // Свечение при фокусе
+                        unfocusedBorderColor = theme.cardItemBorderFalse.copy(alpha = 0.4f),
+                        focusedLabelColor = theme.iconAddTint,
+                       // focusedLabelColor = Color(0xFFA9A9A9),
                         unfocusedLabelColor = theme.textDecs
-                       
-                     )
+                    )
                 )
 
                 // Поле Описание
