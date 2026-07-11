@@ -323,9 +323,9 @@ fun AddOrChangeItemDialog(
                         focusedTextColor = theme.textColor,
                         unfocusedTextColor = theme.textColor,
                         focusedBorderColor = Color(0xFFA9A9A9), // Свечение при фокусе
-                        unfocusedBorderColor = theme.cardItemBorderFalse.copy(alpha = 0.4f),
+                        unfocusedBorderColor = theme.textColor,
                         focusedLabelColor = Color(0xFFA9A9A9),
-                        unfocusedLabelColor = theme.textDecs
+                        unfocusedLabelColor = theme.textColor
                     )
                 )
 
@@ -339,10 +339,10 @@ fun AddOrChangeItemDialog(
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedTextColor = theme.textColor,
                         unfocusedTextColor = theme.textColor,
-                        focusedBorderColor = theme.iconAddTint,
-                        unfocusedBorderColor = theme.cardItemBorderFalse.copy(alpha = 0.4f),
-                        focusedLabelColor = theme.iconAddTint,
-                        unfocusedLabelColor = theme.textDecs
+                        focusedBorderColor = Color(0xFFA9A9A9), // Свечение при фокусе
+                        unfocusedBorderColor = theme.textColor,
+                        focusedLabelColor = Color(0xFFA9A9A9),
+                        unfocusedLabelColor = theme.textColor
                     )
                 )
 
@@ -359,7 +359,6 @@ fun AddOrChangeItemDialog(
                             modifier = Modifier
                                 .size(80.dp)
                                 .clip(RoundedCornerShape(12.dp))
-                                .border(1.dp, theme.cardItemBorderFalse, RoundedCornerShape(12.dp))
                                 .clickable { openImageState = true },
                             contentScale = ContentScale.Crop,
                         )
@@ -370,7 +369,7 @@ fun AddOrChangeItemDialog(
                         ) {
                             TextButton(
                                 onClick = { fileLauncher.launch() },
-                                colors = ButtonDefaults.textButtonColors(contentColor = theme.iconAddTint)
+                                colors = ButtonDefaults.textButtonColors(contentColor = theme.textDecs)
                             ) {
                                 Text(text = "Изменить фото")
                             }
@@ -391,8 +390,7 @@ fun AddOrChangeItemDialog(
                                 
                                 contentColor = theme.textColor
                             ),
-                            modifier = Modifier.border(1.dp, theme.cardItemBorderFalse, RoundedCornerShape(10.dp))
-                        ) {
+                                                   ) {
                             Text(text = "Добавить фото")
                         }
                     }
@@ -429,13 +427,13 @@ fun AddOrChangeItemDialog(
                         val text = stateTextName.trim().ifEmpty { "Без названия" }
                         onSave(item, text, stateTextDecs.trim(), selectedFileUri, categorySelected, true, originalFileName)
                     },
-                    colors = ButtonDefaults.textButtonColors(contentColor = theme.textAlarm)
+                    colors = ButtonDefaults.textButtonColors(contentColor = theme.textDesc)
                 ) {
                     Text("Установка будильника")
                 }
                 TextButton(
                     onClick = { onCancel() },
-                    colors = ButtonDefaults.textButtonColors(contentColor = theme.textDecs)
+                    colors = ButtonDefaults.textButtonColors(contentColor = theme.cardItemBorderFalse)
                 ) {
                     Text("Отмена")
                 }
@@ -475,15 +473,13 @@ fun KmpSpinnerInput(
             label = { Text("Категория") }, // Добавили красивый лейбл в стиле остальных полей
             
             colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = theme.textColor,
-                unfocusedTextColor = theme.textColor,
-                focusedBorderColor = theme.cardItemBorderFalse,
-                unfocusedBorderColor = theme.cardItemBorderFalse.copy(alpha = 0.4f),
-                focusedLabelColor = theme.iconAddTint,
-                unfocusedLabelColor = theme.textDecs,
-                focusedTrailingIconColor = theme.cardItemBorderFalse,
-                unfocusedTrailingIconColor = theme.textDecs
-            )
+                        focusedTextColor = theme.textColor,
+                        unfocusedTextColor = theme.textColor,
+                        focusedBorderColor = Color(0xFFA9A9A9), // Свечение при фокусе
+                        unfocusedBorderColor = theme.textColor,
+                        focusedLabelColor = Color(0xFFA9A9A9),
+                        unfocusedLabelColor = theme.textColor
+                    )
         )
 
         // Само выпадающее окно
