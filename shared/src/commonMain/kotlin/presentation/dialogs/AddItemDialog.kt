@@ -427,7 +427,7 @@ fun AddOrChangeItemDialog(
                         val text = stateTextName.trim().ifEmpty { "Без названия" }
                         onSave(item, text, stateTextDecs.trim(), selectedFileUri, categorySelected, true, originalFileName)
                     },
-                    colors = ButtonDefaults.textButtonColors(contentColor = theme.textDesc)
+                    colors = ButtonDefaults.textButtonColors(contentColor = theme.textDecs)
                 ) {
                     Text("Установка будильника")
                 }
