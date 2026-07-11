@@ -303,7 +303,7 @@ fun AddOrChangeItemDialog(
         onDismissRequest = { onCancel() },
         containerColor = Color(0xFF424242),
 
-        title = { Text("Сфокусироваться", color = theme.textColor) },
+        title = { Text("Сфокусироваться блеат!", color = theme.textColor) },
 
         text = {
             Column(
@@ -435,7 +435,7 @@ fun AddOrChangeItemDialog(
                 }
                 TextButton(
                     onClick = { onCancel() },
-                    colors = ButtonDefaults.textButtonColors(contentColor = theme.cardItemBorderFalse)
+                    colors = ButtonDefaults.textButtonColors(contentColor = theme.cardItemBorderTrue)
                 ) {
                     Text("Отмена")
                 }
