@@ -451,59 +451,53 @@ fun AddOrChangeItemDialog(
 fun KmpSpinnerInput(
     selectedCategory: String,            
     list: List<String>,                  
-    theme: Theme = ThemeNeon(), // Твой базовый класс/интерфейс темы
+    theme: Theme = ThemeNeon(), 
     onCategorySelected: (String) -> Unit 
 ) {
     var expanded by remember { mutableStateOf(false) }
 
-    ExposedDropdownMenu(
-    expanded = expanded,
-    onDismissRequest = { expanded = false },
-    modifier = Modifier
-        .clip(RoundedCornerShape(12.dp)) // Сначала обрезаем углы
-        .background(Color(0xFF121214))   // Затем красим фон
-) {
+    // 1. РОДИТЕЛЬ (Всегда идет самым первым)
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded }
+    ) {
+        // 2. ПОЛЕ ВВОДА (Отображается на экране)
         OutlinedTextField(
             value = selectedCategory,
             onValueChange = {},
             readOnly = true, 
             trailingIcon = { 
-                ExposedDropdownMenuDefaults.TrailingIcon(
-                    expanded = expanded
-                ) 
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) 
             },
             modifier = Modifier
-                // В актуальном Material 3 нужно явно указывать тип анкора
                 .menuAnchor(MenuAnchorType.PrimaryNotEditable, true) 
                 .fillMaxWidth(),
             shape = RoundedCornerShape(10.dp),
-            label = { Text("Категория") }, // Добавили красивый лейбл в стиле остальных полей
-            
+            label = { Text("Категория") }, 
             colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = theme.textColor,
-                        unfocusedTextColor = theme.textDecs,
-                        focusedBorderColor = theme.textColor, // Свечение при фокусе
-                        unfocusedBorderColor = theme.textDecs,
-                        focusedLabelColor = theme.textColor,
-                        unfocusedLabelColor = theme.textDecs,
-                        cursorColor = theme.textColor, // Цвет самой вертикальной черточки
-                        selectionHandleColor = theme.textColor // Цвет капли (ползунка) при выделении текста
-                    )
+                focusedTextColor = theme.textColor,
+                unfocusedTextColor = theme.textDecs,
+                focusedBorderColor = theme.textColor, 
+                unfocusedBorderColor = theme.textDecs,
+                focusedLabelColor = theme.textColor,
+                unfocusedLabelColor = theme.textDecs
+            )
         )
 
-        // Само выпадающее окно
-       ExposedDropdownMenuBox(
+        // 3. ВЫПАДАЮЩИЙ СПИСОК (Появляется только при клике)
+        ExposedDropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            modifier = Modifier 
-                .background(Color(0xFF121214))
+            modifier = Modifier
+                .clip(RoundedCornerShape(12.dp)) // Закругляем список
+                .background(Color(0xFF121214))   // Меням фон списка
         ) {
             list.forEach { item ->
                 DropdownMenuItem(
                     text = { 
                         Text(
                             text = item, 
-                            color = theme.textColor, // Белый текст
+                            color = theme.textColor, 
                             style = MaterialTheme.typography.bodyLarge
                         ) 
                     },
@@ -511,14 +505,11 @@ fun KmpSpinnerInput(
                         onCategorySelected(item) 
                         expanded = false
                     },
-                    // Настройка эффекта пульсации/клика внутри меню
                     colors = MenuDefaults.itemColors(
                         textColor = theme.textColor,
-                        // Цвет фона элемента при клике (делаем легкий неоновый отсвет)
                         leadingIconColor = theme.iconAddTint,
                         trailingIconColor = theme.iconAddTint
                     ),
-                    // Небольшой внутренний отступ для аккуратности
                     modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
                 )
             }
