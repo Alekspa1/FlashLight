@@ -320,7 +320,7 @@ fun AddOrChangeItemDialog(
                     shape = RoundedCornerShape(10.dp),
                     label = { Text(text = "Название") },
                      colors = OutlinedTextFieldDefaults.colors(
-                      focusedTextColor = theme.textDecs, 
+                      focusedTextColor = theme.textColor, 
                       unfocusedTextColor = theme.textDecs, 
                       focusedBorderColor = theme.textDecs, // Свечение при фокусе 
                       unfocusedBorderColor = theme.textDecs, 
@@ -337,7 +337,7 @@ fun AddOrChangeItemDialog(
                     shape = RoundedCornerShape(10.dp),
                     label = { Text("Описание") },
                    colors = OutlinedTextFieldDefaults.colors(
-                      focusedTextColor = theme.textDecs, 
+                      focusedTextColor = theme.textColor, 
                       unfocusedTextColor = theme.textDecs, 
                       focusedBorderColor = theme.textDecs, // Свечение при фокусе 
                       unfocusedBorderColor = theme.textDecs, 
@@ -388,7 +388,7 @@ fun AddOrChangeItemDialog(
                             onClick = { fileLauncher.launch() },
                             colors = ButtonDefaults.textButtonColors(
                                 
-                                contentColor = theme.textColor
+                                contentColor = theme.textDecs
                             ),
                                                    ) {
                             Text(text = "Добавить фото")
@@ -412,7 +412,7 @@ fun AddOrChangeItemDialog(
                     val text = stateTextName.trim().ifEmpty { "Без названия" }
                     onSave(item, text, stateTextDecs.trim(), selectedFileUri, categorySelected, false, originalFileName)
                 },
-                colors = ButtonDefaults.textButtonColors(contentColor = theme.textDecs)
+                colors = ButtonDefaults.textButtonColors(contentColor = theme.textColor)
             ) {
                 Text("Ок", fontWeight = FontWeight.Bold)
             }
@@ -456,10 +456,6 @@ fun KmpSpinnerInput(
     ExposedDropdownMenuBox(
         expanded = expanded,
         onExpandedChange = { expanded = !expanded },
-       modifier = Modifier
-                .clip(RoundedCornerShape(34.dp)) // Закругляем список
-                .background(Color.Green)   // Меням фон списка
-        
     ) {
         // 2. ПОЛЕ ВВОДА (Отображается на экране)
         OutlinedTextField(
@@ -488,10 +484,7 @@ fun KmpSpinnerInput(
         // 3. ВЫПАДАЮЩИЙ СПИСОК (Появляется только при клике)
         ExposedDropdownMenu(
             expanded = expanded,
-            onDismissRequest = { expanded = false },
-            modifier = Modifier
-                .clip(RoundedCornerShape(22.dp)) // Закругляем список
-                .background(Color(0xFF121214))   // Меням фон списка
+            onDismissRequest = { expanded = false }
         ) {
             list.forEach { item ->
                 DropdownMenuItem(
