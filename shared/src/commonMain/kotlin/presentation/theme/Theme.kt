@@ -128,7 +128,7 @@ data class ThemeZabor (
 
     // Список дел
     override val tintAlarmOn: Color = Color(0xFFF57C00),  // Насыщенный янтарный/оранжевый
-    override val tintAlarmOff: Color = Color(0xFFBCAAA4),  // Приглушенный серо-коричневый
+    override val tintAlarmOff: Color = Color.Black,  // Приглушенный серо-коричневый
     override val textDesc: Color = Color(0xFF7A6E60),      // Древесно-серый для описаний
 
     // Контуры карточек (делаем их помягче для светлой темы)

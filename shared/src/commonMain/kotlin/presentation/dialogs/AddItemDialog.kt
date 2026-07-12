@@ -3,6 +3,7 @@ package presentation.dialogs
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -47,187 +48,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import presentation.theme.ThemeNeon
 import presentation.theme.Theme
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.ui.text.font.FontWeight
-// @OptIn(ExperimentalMaterial3Api::class)
-// @Composable
-// fun AddOrChangeItemDialog(
-//     item: Item? = null,
-//     onCancel : ()-> Unit = {},
-//     listCategory : List<String> = emptyList(),
-//     calendar : Boolean = false,
-//     category: String = "Повседневные",
-//     onSave :(
-//         item: Item?,
-//         name: String,
-//         desc: String,
-//         uri: String,
-//         category: String,
-//         alarlm : Boolean,
-//         originalNameImage : String,
-//             ) -> Unit ={_,_,_,_,_,_,_->},
-//         getUri : (String) -> String = {""},
-//     ){
-//     var stateTextName by remember { mutableStateOf(item?.name ?: "") }
-//     var stateTextDecs by remember { mutableStateOf(item?.desc ?: "") }
-//     var openImageState by remember { mutableStateOf(false) }
-//     var selectedFileUri: String by remember { mutableStateOf(getUri(item?.uri ?: "")) }
-//     var originalFileName by remember { mutableStateOf("") }
-//     var categorySelected by remember { mutableStateOf(item?.category ?:
-//     if(calendar) "Повседневные" else category) }
-//     val fileLauncher = rememberFilePickerLauncher(type = PickerType.Image) { file ->
-//          if (file != null) {
-//              selectedFileUri =  parsePlatformUri(file)
-//              originalFileName = "img_${Clock.System.now().toEpochMilliseconds()}.jpg"
-//         }
-//     }
+import androidx.compose.ui.unit.sp
 
-//     val focusRequester = remember { FocusRequester() }
-//     val keyboardController = LocalSoftwareKeyboardController.current
-//     LaunchedEffect(Unit) {
-//         withFrameMillis { }  // Ждем, пока отрендерится первый кадр окна
-//         focusRequester.requestFocus()
-//         keyboardController?.show()
-//     }
-
-//     if (openImageState) {
-//         OpenImage(selectedFileUri){openImageState = false}
-//     }
-
-//     AlertDialog(
-//             onDismissRequest = { onCancel()}, // когда кудато нажал
-//             title = { Text("Сфокусироваться") },
-
-//             text = {
-//                 Column(modifier = Modifier.fillMaxWidth(),
-//                     verticalArrangement = Arrangement.spacedBy(8.dp)) {
-//                     OutlinedTextField(
-//                         modifier = Modifier
-//                             .fillMaxWidth() // Настройка ширины применится всегда
-//                             .then(
-//                                 if (item == null) Modifier.focusRequester(focusRequester) else Modifier
-//                             ),
-//                             value = stateTextName,
-//                         onValueChange = { newText ->
-//                             stateTextName = newText
-//                         },
-//                         shape = RoundedCornerShape(10.dp),
-//                         label = {Text(text = "Название", color = Color.Gray)},
-
-//                         colors = OutlinedTextFieldDefaults.colors(
-//                             focusedTextColor = Color.Black,
-//                             unfocusedTextColor = Color.Black,
-//                         )
-//                     )
-//                     OutlinedTextField(
-//                         modifier = Modifier
-//                             .fillMaxWidth(),
-//                         value = stateTextDecs,
-//                         onValueChange = { newText ->
-//                             stateTextDecs = newText
-//                         },
-//                         shape = RoundedCornerShape(10.dp),
-//                         label = {Text("Описание",color = Color.Gray)},
-
-//                         // НАСТРАИВАЕМ ЦВЕТА И ВАШУ НЕОНОВУЮ СТИЛИСТИКУ:
-//                         colors = OutlinedTextFieldDefaults.colors(
-//                             focusedTextColor = Color.Black,
-//                             unfocusedTextColor = Color.Black,
-//                         )
-//                     )
-
-//                     // Блок работы с картинкой (ImageView + Кнопки добавить/удалить)
-//                     Row(
-//                         modifier = Modifier.fillMaxWidth(),
-//                         horizontalArrangement = Arrangement.spacedBy(16.dp),
-//                         verticalAlignment = Alignment.CenterVertically
-//                     ) {
-//                         if (selectedFileUri != "" ) {
-//                             // Отображение картинки через Coil (Замена Glide)
-//                             AsyncImage(
-//                                  model = selectedFileUri ,
-//                                 contentDescription = "Превью фото",
-//                                 modifier = Modifier
-//                                     .size(80.dp)
-//                                     .clip(RoundedCornerShape(12.dp))
-//                                     .clickable {
-                                       
-//                                         openImageState = true }, // Клик открывает на весь экран
-//                                 contentScale = ContentScale.Crop,
-//                             )
-//                             Column(modifier = Modifier
-//                                 .fillMaxWidth()
-//                                 .weight(1f),
-//                                 horizontalAlignment = Alignment.End,
-//                                 verticalArrangement = Arrangement.SpaceBetween){
-//                                 TextButton(onClick = { fileLauncher.launch() }) {
-//                                     Text(text = "Изменить фото")
-//                                 }
-//                                 TextButton(onClick = {
-//                                     selectedFileUri = ""
-
-//                                 }) {
-//                                     Text(
-//                                         text = "Удалить фото",
-//                                         color = MaterialTheme.colorScheme.error,
-//                                     )
-//                                 }
-
-
-//                             }
-//                             // Кнопка удаления фото (deleteText)
-
-//                         } else {
-//                             // Кнопка добавления фото (addPhoto)
-//                             Button(onClick = { fileLauncher.launch() }) {
-//                                 Text(text = "Добавить фото")
-//                             }
-//                         }
-//                     }
-
-
-
-
-//                     // Отображаем наш KMP Спиннер, когда список загрузился
-//                         KmpSpinnerInput(
-//                             selectedCategory = categorySelected,
-//                             list = listCategory,
-//                             onCategorySelected = { selected ->
-//                                 categorySelected = selected
-
-//                             }
-//                         )
-
-//                 }
-//                 } ,
-
-//             confirmButton = {
-//                 TextButton(onClick = {
-//                     val text = stateTextName.trim().ifEmpty { "Без названия" }
-//                     onSave(item,text,stateTextDecs.trim(),selectedFileUri,categorySelected,false,originalFileName)
-//                 }) {
-//                     Text("Ок")
-//                 }
-//             },
-//             dismissButton = {
-//                 Row(
-//                     horizontalArrangement = Arrangement.spacedBy(8.dp) // Отступ между кнопками
-//                 ) {
-//                     TextButton(onClick = {
-//                         val text = stateTextName.trim().ifEmpty { "Без названия" }
-//                         onSave(item,text,stateTextDecs.trim(),selectedFileUri,categorySelected,true,originalFileName)
-//                     }) {
-//                         Text("Установка будильника")
-//                     }
-//                     TextButton(onClick = { onCancel()}) {
-//                         Text("Отмена")
-//                     }
-//                 }
-//             },
-//         )
-// }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -324,6 +152,13 @@ fun AddOrChangeItemDialog(
 //                    )
                 )
 
+                KmpSpinnerInput(
+                    selectedCategory = categorySelected,
+                    list = listCategory,
+                    theme = theme, // Передаем абстрактную тему дальше
+                    onCategorySelected = { categorySelected = it }
+                )
+
                 // Блок работы с фото
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -373,14 +208,7 @@ fun AddOrChangeItemDialog(
                         }
                     }
                 }
-
-                // Спиннер
-                KmpSpinnerInput(
-                    selectedCategory = categorySelected,
-                    list = listCategory,
-                    theme = theme, // Передаем абстрактную тему дальше
-                    onCategorySelected = { categorySelected = it }
-                )
+                
             }
         },
 
@@ -431,106 +259,80 @@ fun KmpSpinnerInput(
     var expanded by remember { mutableStateOf(false) }
 
     // 1. РОДИТЕЛЬ (Всегда идет самым первым)
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = !expanded },
+    Box(
+        modifier = Modifier.fillMaxWidth(),
+        contentAlignment = Alignment.CenterEnd // Прижимает содержимое к правому краю
     ) {
-        // 2. ПОЛЕ ВВОДА (Отображается на экране)
-        OutlinedTextField(
-            value = selectedCategory,
-            onValueChange = {},
-            readOnly = true, 
-            trailingIcon = { 
-                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) 
-            },
-            modifier = Modifier
-                .menuAnchor(MenuAnchorType.PrimaryNotEditable, true) 
-                .fillMaxWidth()
-                ,
-            shape = RoundedCornerShape(10.dp),
-            label = { Text("Категория") }, 
-            colors = OutlinedTextFieldDefaults.colors(
-                     // focusedTextColor = theme.textDesc,
-                    //  unfocusedTextColor = theme.textDesc,
-                      focusedBorderColor = theme.textDesc, // Свечение при фокусе
-                      unfocusedBorderColor = theme.textDesc,
-                     // focusedLabelColor = theme.textDesc,
-                     // unfocusedLabelColor = theme.textDesc
-                    )
-        )
-
-        // 3. ВЫПАДАЮЩИЙ СПИСОК (Появляется только при клике)
-        ExposedDropdownMenu(
+        ExposedDropdownMenuBox(
             expanded = expanded,
-            onDismissRequest = { expanded = false }
+            onExpandedChange = {  },
         ) {
-            list.forEach { item ->
-                DropdownMenuItem(
-                    text = { 
-                        Text(
-                            text = item, 
-                            color = theme.textColor, 
-                            style = MaterialTheme.typography.bodyLarge
-                        ) 
-                    },
-                    onClick = {
-                        onCategorySelected(item) 
-                        expanded = false
-                    },
-                    colors = MenuDefaults.itemColors(
-                        textColor = theme.textColor,
-                        leadingIconColor = theme.iconAddTint,
-                        trailingIconColor = theme.iconAddTint
-                    ),
-                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
-                )
+
+            TextButton(
+                onClick = {expanded = !expanded },
+
+                ) {
+                Row(
+                    modifier = Modifier
+                        .menuAnchor(MenuAnchorType.PrimaryNotEditable, true)
+                        .padding(start = 16.dp), // Отступ только слева, чтобы не зажимать клик
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Text(
+                        text = selectedCategory,
+                        color = theme.textColor,
+                        fontSize = 15.sp,
+                        modifier = Modifier.padding(end = 8.dp)
+                    )
+                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                }
+
             }
+
+
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                list.forEachIndexed { index, item -> // <--- Используем forEachIndexed вместо обычного forEach
+                    DropdownMenuItem(
+                        text = {
+                            // Возвращаем сюда чистый текст без лишних колонок внутри
+                            Text(
+                                text = item,
+                                color = theme.textColor,
+                                style = MaterialTheme.typography.bodyLarge,
+                            )
+                        },
+                        onClick = {
+                            onCategorySelected(item)
+                            expanded = false
+                        },
+                        colors = MenuDefaults.itemColors(
+                            textColor = theme.textColor,
+                            leadingIconColor = theme.iconAddTint,
+                            trailingIconColor = theme.iconAddTint
+                        )
+                    )
+
+                    // ПРОГРАММИРУЕМ РАЗДЕЛИТЕЛЬ:
+                    // Рисуем полосу ПОСЛЕ элемента, только если это НЕ самый последний элемент в списке
+                    if (index < list.lastIndex) {
+                        HorizontalDivider(
+                            thickness = 1.dp, // 2.dp обычно выглядит слишком жирно для разделителя, лучше 1.dp или 0.5.dp
+                            color = theme.textDesc.copy(alpha = 0.3f), // Делаем полоску слегка прозрачной, чтобы она не резала глаз
+                            modifier = Modifier.padding(horizontal = 8.dp) // Небольшой отступ по бокам, чтобы полоса не упиралась в края меню
+                        )
+                    }
+                }
+            }
+           }
+
+            // 3. ВЫПАДАЮЩИЙ СПИСОК (Появляется только при клике)
+
         }
     }
-}
-
-// @OptIn(ExperimentalMaterial3Api::class)
-// @Composable
-// fun KmpSpinnerInput(
-//     selectedCategory: String,            // Текущее выбранное значение (всегда первое из списка на старте)
-//     list: List<String>,                  // Ваш отсортированный во ViewModel список
-//     onCategorySelected: (String) -> Unit // Колбэк изменения
-// ) {
-//     var expanded by remember { mutableStateOf(false) }
-
-//     // Контейнер для выпадающего списка
-//     ExposedDropdownMenuBox(
-//         expanded = expanded,
-//         onExpandedChange = { expanded = !expanded }
-//     ) {
-//         // Поле ввода, которое имитирует сам Спиннер
-//         OutlinedTextField(
-//             value = selectedCategory,
-//             onValueChange = {},
-//             readOnly = true, // Запрещаем ввод с клавиатуры
-//             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-//             modifier = Modifier.menuAnchor().fillMaxWidth(),
-//             colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
-//         )
-
-//         // Само выпадающее меню с элементами
-//         ExposedDropdownMenu(
-//             expanded = expanded,
-//             onDismissRequest = { expanded = false }
-//         ) {
-//             list.forEach { item ->
-//                 DropdownMenuItem(
-//                     text = { Text(text = item) },
-//                     onClick = {
-//                         onCategorySelected(item) // Передаем наверх выбранную строку
-//                         expanded = false
-//                     }
-//                 )
-//             }
-//         }
-//     }
-// }
-
 
 expect fun parsePlatformUri(uri: PlatformFile): String
 

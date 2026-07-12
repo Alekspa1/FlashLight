@@ -76,6 +76,7 @@ import presentation.theme.Size
 import presentation.theme.SizeNormal
 import presentation.theme.Theme
 import presentation.theme.ThemeNeon
+import presentation.theme.ThemeZabor
 import kotlin.time.Clock
 import kotlin.time.Instant
 
@@ -90,8 +91,10 @@ fun Calendar(
     val listItems by viewModel.getItemCalendarCombine.collectAsStateWithLifecycle(emptyList())
     CalendarContent(
         listItems = listItems,
+        theme = viewModel.themeState,
+        size = viewModel.sizeState,
         onClick = onClick,
-        onAddItem = onAddItem)
+        onAddItem = onAddItem,)
 
 }
 
@@ -149,251 +152,257 @@ fun CalendarContent(
         ) {
 
             item {
-                if (selectedDateTasks.isEmpty()){
+                    HorizontalCalendar(
+                        modifier = Modifier.fillMaxWidth(),
+                        state = state,
+                        dayContent = { day ->
+                            val hasTasks = tasksByDate.containsKey(day.date)
+                            Day(day,
+                                isSelected = selectedDate == day.date,
+                                theme = theme,
+                                hasTasks = hasTasks,
+                                isToday = day.date == today) { day ->
+                                selectedDate = day.date
+                            }} ,
+                        monthHeader = { month ->
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                            ) {
+                                // Панель управления: Стрелка влево -> Месяц по центру -> Стрелка вправо
+                                Row(
+                                    modifier = Modifier
+                                        .padding(horizontal = 16.dp)
+                                        .fillMaxWidth()
+                                    ,
+
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    // Кнопка назад
+                                    IconButton(
+                                        onClick = {
+                                            // Используем coroutineScope, чтобы прокрутить календарь назад
+                                            coroutineScope.launch {
+                                                state.animateScrollToMonth(month.yearMonth.minusMonths(1))
+                                            }
+                                        }
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft, // или ваша иконка стрелки
+                                            contentDescription = "Предыдущий месяц",
+                                            tint = theme.tintAlarmOff
+                                        )
+                                    }
+
+                                    // Название месяца СТРОГО ПО ЦЕНТРУ
+                                    Text(
+                                        text = month.yearMonth.month.displayText(),
+                                        color = theme.textColor,
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.weight(1f)
+                                    )
+
+                                    // Кнопка вперед
+                                    IconButton(
+                                        onClick = {
+                                            coroutineScope.launch {
+                                                state.animateScrollToMonth(month.yearMonth.plusMonths(1))
+                                            }
+                                        }
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                            contentDescription = "Следующий месяц",
+                                            tint = theme.tintAlarmOff
+                                        )
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                // Дни недели (Пн, Вт, Ср...), которые теперь будут четко над цифрами
+                                MonthHeader(daysOfWeek = daysOfWeek, theme = theme)
+                            }
+                        }
+                    )
+
+                }
+            if (selectedDateTasks.isEmpty()) {
+                item {
                     Box(
-                        modifier = Modifier.fillMaxSize(), // Контейнер занимает весь экран
-                        contentAlignment = Alignment.Center // Центрирует всё, что внутри него
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 60.dp), // Задаем красивый фиксированный отступ от календаря вниз
+                        contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = "Список дел пуст",
                             fontSize = 34.sp,
                             color = theme.textColor,
-                            textAlign = TextAlign.Center // Выравнивание текста по горизонтали
+                            textAlign = TextAlign.Center
                         )
                     }
-                } else
-                { HorizontalCalendar(
+                }
+            } else items(selectedDateTasks) { item ->
+                Row(
                     modifier = Modifier.fillMaxWidth(),
-                    state = state,
-                    dayContent = { day ->
-                        val hasTasks = tasksByDate.containsKey(day.date)
-                        Day(day,
-                            isSelected = selectedDate == day.date,
-                            hasTasks = hasTasks,
-                            isToday = day.date == today) { day ->
-                            selectedDate = day.date
-                        }} ,
-                    monthHeader = { month ->
-                        Column(
+                    verticalAlignment = Alignment.CenterVertically // Все три элемента будут идеально ровно по центру высоты
+                ) {
+                    // 1. Левая кнопка/текст
+
+                    Box(
+                        modifier = Modifier
+                            .padding(start = 8.dp)
+                            .size(35.dp).combinedClickable(
+                                onClick = {onClick(item,ALARM)},
+                                onLongClick = {onClick(item,ALARM_LONG)}
+                            )
+
+
+
+                    ) {
+
+                        Icon(
+                            imageVector = Icons.Default.Alarm, // Нужен импорт androidx.compose.material.icons.Icons
+                            contentDescription = "Будильник",
+                            tint =  if(item.changeAlarm) theme.tintAlarmOn else theme.tintAlarmOff,
+                            modifier = Modifier.fillMaxSize(),
+                        )
+
+                    }
+
+
+                    // 2. Центральная карточка (занимает всё оставшееся пространство)
+
+                    Card(
+                        modifier = Modifier
+                            .padding(start = 5.dp, end = 5.dp)
+                            .weight(1f) // Заставляет карточку занять ВСЁ свободное место между кнопками
+                            .clip(RoundedCornerShape(15.dp))
+                            .border(
+                                2.dp,
+                                if(item.change) theme.cardItemBorderTrue
+                                else if (item.changeAlarm) theme.cardItemBorderAlarm
+                                else theme.cardItemBorderFalse,
+                                RoundedCornerShape(15.dp)
+
+                            ).clickable{onClick(item,CHANGE_ITEM)}
+                        ,
+
+                        shape = RoundedCornerShape(16.dp),
+
+                        colors = CardDefaults.cardColors(
+                            containerColor =
+                                if(item.change) theme.cardItemTrue
+                                else if(item.changeAlarm) theme.cardItemAlarm
+                                else theme.cardItemFalse
+                        )
+                    ) {
+                        Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                        ) {
-                            // Панель управления: Стрелка влево -> Месяц по центру -> Стрелка вправо
-                            Row(
-                                modifier = Modifier
-                                    .padding(horizontal = 16.dp)
-                                    .fillMaxWidth()
-                                ,
+                                .padding(start = 6.dp, top = 8.dp, bottom = 8.dp,end = 6.dp)
+                            ,
+                            verticalAlignment = Alignment.CenterVertically,
 
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
+
                             ) {
-                                // Кнопка назад
-                                IconButton(
-                                    onClick = {
-                                        // Используем coroutineScope, чтобы прокрутить календарь назад
-                                        coroutineScope.launch {
-                                            state.animateScrollToMonth(month.yearMonth.minusMonths(1))
-                                        }
-                                    }
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft, // или ваша иконка стрелки
-                                        contentDescription = "Предыдущий месяц",
-                                        tint = Color.White
-                                    )
-                                }
+                            if (item.uri != "") IconButton(
+                                onClick = { onClick(item,IMAGE) },
+                                modifier = Modifier.padding(start = 8.dp).size(24.dp)
 
-                                // Название месяца СТРОГО ПО ЦЕНТРУ
-                                Text(
-                                    text = month.yearMonth.month.displayText(),
-                                    color = Color.White,
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier.weight(1f)
+                            ) {
+
+                                Icon(
+                                    modifier = Modifier.fillMaxSize(),
+                                    imageVector = theme.iconImage, // Нужен импорт androidx.compose.material.icons.Icons
+                                    contentDescription = "Картинка",
+                                    tint = theme.iconTint
                                 )
 
-                                // Кнопка вперед
-                                IconButton(
-                                    onClick = {
-                                        coroutineScope.launch {
-                                            state.animateScrollToMonth(month.yearMonth.plusMonths(1))
-                                        }
-                                    }
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                                        contentDescription = "Следующий месяц",
-                                        tint = Color.White
+                            }
+
+                            Column(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(start = 6.dp, end = 6.dp),
+                            ) {
+                                Text(
+                                    modifier = Modifier.padding(start = 5.dp,end = 5.dp),
+                                    text = item.name,
+                                    color = theme.textColor,
+                                    lineHeight = size.lineHeightItem,
+                                    fontSize = size.textItem)
+                                if (item.desc.isNotEmpty())  {
+                                    Text(
+                                        modifier = Modifier.padding(start = 5.dp,top = 2.dp, end = 5.dp),
+                                        text = item.desc,
+                                        color = theme.textDesc,
+                                        lineHeight = size.lineHeightDescAndAlarm,
+                                        fontSize = size.textDesc) }
+                                if (item.changeAlarm) {
+                                    Text(
+                                        modifier = Modifier.padding(start = 5.dp,top = 4.dp, end = 5.dp),
+                                        text = alarmText(item),
+                                        color = theme.textAlarm,
+                                        fontSize = size.textAlarm,
+                                        lineHeight = size.lineHeightDescAndAlarm
                                     )
                                 }
                             }
+                            IconButton(
+                                onClick = { onClick(item,CHANGE) },
+                                modifier = Modifier.padding(end = 8.dp).size(24.dp)
+                            ) {
 
-                            Spacer(modifier = Modifier.height(8.dp))
+                                Icon(
+                                    modifier = Modifier.fillMaxSize(),
 
-                            // Дни недели (Пн, Вт, Ср...), которые теперь будут четко над цифрами
-                            MonthHeader(daysOfWeek = daysOfWeek)
+                                    imageVector =
+                                        if(item.change)  theme.chekBoxOn
+                                        else theme.chekBoxOff,
+                                    contentDescription = "Chek",
+                                    tint = theme.chekBoxTint
+                                )
+
+                            }
                         }
                     }
-                )}
-                }
 
 
-                items(selectedDateTasks) { item ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically // Все три элемента будут идеально ровно по центру высоты
+
+                    // 3. Правая кнопка/текст
+
+
+
+                    IconButton(
+
+                        onClick = {onClick(item,DELETE)  },
+                        modifier = Modifier.padding(end = 8.dp).size(35.dp)
+
+
                     ) {
-                        // 1. Левая кнопка/текст
 
-                        Box(
-                            modifier = Modifier
-                                .padding(start = 8.dp)
-                                .size(35.dp).combinedClickable(
-                                    onClick = {onClick(item,ALARM)},
-                                    onLongClick = {onClick(item,ALARM_LONG)}
-                                )
+                        Icon(
+                            modifier = Modifier.fillMaxSize(),
+                            imageVector = theme.iconDelItem, // Нужен импорт androidx.compose.material.icons.Icons
+                            contentDescription = "Меню",
+                            tint = theme.iconDelTint,
 
-
-
-                        ) {
-
-                            Icon(
-                                imageVector = Icons.Default.Alarm, // Нужен импорт androidx.compose.material.icons.Icons
-                                contentDescription = "Будильник",
-                                tint =  if(item.changeAlarm) theme.tintAlarmOn else theme.tintAlarmOff,
-                                modifier = Modifier.fillMaxSize(),
                             )
 
-                        }
-
-
-                        // 2. Центральная карточка (занимает всё оставшееся пространство)
-
-                        Card(
-                            modifier = Modifier
-                                .padding(start = 5.dp, end = 5.dp)
-                                .weight(1f) // Заставляет карточку занять ВСЁ свободное место между кнопками
-                                .clip(RoundedCornerShape(15.dp))
-                                .border(
-                                    2.dp,
-                                    if(item.change) theme.cardItemBorderTrue
-                                    else if (item.changeAlarm) theme.cardItemBorderAlarm
-                                    else theme.cardItemBorderFalse,
-                                    RoundedCornerShape(15.dp)
-
-                                ).clickable{onClick(item,CHANGE_ITEM)}
-                            ,
-
-                            shape = RoundedCornerShape(16.dp),
-
-                            colors = CardDefaults.cardColors(
-                                containerColor =
-                                    if(item.change) theme.cardItemTrue
-                                    else if(item.changeAlarm) theme.cardItemAlarm
-                                    else theme.cardItemFalse
-                            )
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(start = 6.dp, top = 8.dp, bottom = 8.dp,end = 6.dp)
-                                ,
-                                verticalAlignment = Alignment.CenterVertically,
-
-
-                                ) {
-                                if (item.uri != "") IconButton(
-                                    onClick = { onClick(item,IMAGE) },
-                                    modifier = Modifier.padding(start = 8.dp).size(24.dp)
-
-                                ) {
-
-                                    Icon(
-                                        modifier = Modifier.fillMaxSize(),
-                                        imageVector = theme.iconImage, // Нужен импорт androidx.compose.material.icons.Icons
-                                        contentDescription = "Картинка",
-                                        tint = theme.iconTint
-                                    )
-
-                                }
-
-                                Column(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .padding(start = 6.dp, end = 6.dp),
-                                ) {
-                                    Text(
-                                        modifier = Modifier.padding(start = 5.dp,end = 5.dp),
-                                        text = item.name,
-                                        color = theme.textColor,
-                                        lineHeight = size.lineHeightItem,
-                                        fontSize = size.textItem)
-                                    if (item.desc.isNotEmpty())  {
-                                        Text(
-                                            modifier = Modifier.padding(start = 5.dp,top = 2.dp, end = 5.dp),
-                                            text = item.desc,
-                                            color = theme.textDesc,
-                                            lineHeight = size.lineHeightDescAndAlarm,
-                                            fontSize = size.textDesc) }
-                                    if (item.changeAlarm) {
-                                        Text(
-                                            modifier = Modifier.padding(start = 5.dp,top = 4.dp, end = 5.dp),
-                                            text = alarmText(item),
-                                            color = theme.textAlarm,
-                                            fontSize = size.textAlarm,
-                                            lineHeight = size.lineHeightDescAndAlarm
-                                        )
-                                    }
-                                }
-                                IconButton(
-                                    onClick = { onClick(item,CHANGE) },
-                                    modifier = Modifier.padding(end = 8.dp).size(24.dp)
-                                ) {
-
-                                    Icon(
-                                        modifier = Modifier.fillMaxSize(),
-
-                                        imageVector =
-                                            if(item.change)  theme.chekBoxOn
-                                            else theme.chekBoxOff,
-                                        contentDescription = "Chek",
-                                        tint = theme.chekBoxTint
-                                    )
-
-                                }
-                            }
-                        }
+                    }
 
 
 
-                        // 3. Правая кнопка/текст
+                } // Конец Row
+            }
 
 
 
-                        IconButton(
-
-                            onClick = {onClick(item,DELETE)  },
-                            modifier = Modifier.padding(end = 8.dp).size(35.dp)
-
-
-                        ) {
-
-                            Icon(
-                                modifier = Modifier.fillMaxSize(),
-                                imageVector = theme.iconDelItem, // Нужен импорт androidx.compose.material.icons.Icons
-                                contentDescription = "Меню",
-                                tint = theme.iconDelTint,
-
-                                )
-
-                        }
-
-
-
-                    } // Конец Row
-                }
 
         }
         Box(modifier = Modifier.fillMaxWidth()
@@ -467,10 +476,10 @@ fun Day(
                 text = day.date.dayOfMonth.toString(),
                 // Если день сегодняшний, можно сделать текст белым, даже если он не выбран
                 color = when {
-                    isSelected -> Color.White
-                    isToday -> Color.White
-                    isCurrentMonth -> Color.White
-                    else -> Color.Gray
+                    isSelected -> theme.textColor
+                    isToday -> theme.textColor
+                    isCurrentMonth -> theme.textColor
+                    else -> theme.textDesc
                 },
                 fontSize = 16.sp,
                 fontWeight = if (isToday) FontWeight.Medium else FontWeight.Normal,
@@ -486,7 +495,7 @@ fun Day(
                 modifier = Modifier
                     .padding(top = 2.dp)
                     .size(8.dp),
-                tint = if (isSelected) Color.White else Color.Red
+                tint = if (isSelected) Color.White else Color.Yellow
             )
         } else {
             Spacer(modifier = Modifier.size(8.dp).padding(top = 2.dp))
@@ -496,14 +505,14 @@ fun Day(
 
 
 @Composable
-fun MonthHeader(daysOfWeek: List<DayOfWeek>) {
+fun MonthHeader(daysOfWeek: List<DayOfWeek>, theme: Theme) {
     Row(modifier = Modifier.fillMaxWidth()) {
         for (dayOfWeek in daysOfWeek) {
             Text(
                 modifier = Modifier.weight(1f), // Занимает ровно 1/7 ширины экрана
                 textAlign = TextAlign.Center,    // Текст строго по центру своей колонки
                 text = dayOfWeek.displayText(),
-                color = Color.Gray, // Сделаем чуть блеклыми, чтобы не сливались с числами
+                color = theme.textDesc, // Сделаем чуть блеклыми, чтобы не сливались с числами
                 fontSize = 14.sp
             )
         }
@@ -543,5 +552,5 @@ fun Month.displayText(): String {
 @Preview
 @Composable
 fun PrevCalendar(){
-    CalendarContent()
+    CalendarContent(theme = ThemeZabor())
 }
