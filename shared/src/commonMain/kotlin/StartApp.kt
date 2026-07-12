@@ -83,7 +83,7 @@ import presentation.theme.ThemeZabor
 @Composable
 fun StartApp(viewModel: MainViewModel = koinViewModel()) {
     val theme = viewModel.themeState
-
+    val premiumState by viewModel.premiumState.collectAsStateWithLifecycle()
     MaterialTheme(
         colorScheme = if(viewModel.themeState == ThemeNeon()) darkColorScheme(
             primary = theme.textColor,
@@ -136,7 +136,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
             drawerState = drawerState,
             theme = viewModel.themeState,
             size = viewModel.sizeState,
-            premium = viewModel.premiumState,
+            premium = premiumState,
             update = viewModel.updateState,
             onClick = { click ->
                 when (click) {
@@ -149,7 +149,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
             onClickCategory = { listCategory, action ->
                 when (action) {
                     INSERT_DIALOG_CATEGORY -> {
-                        if (viewModel.premiumState) {
+                        if (premiumState) {
                             viewModel.showDialog =
                                 DialogState(INSERT_DIALOG_CATEGORY, category = listCategory)
                         } else viewModel.sendMessage("Категории доступны в PREMIUM версии")

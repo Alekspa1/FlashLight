@@ -64,6 +64,7 @@ import androidx.compose.runtime.remember // ДОБАВЛЕНО
 import androidx.compose.runtime.setValue
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.LaunchedEffect
+import presentation.screens.Calendar
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 
@@ -102,16 +103,17 @@ fun MainPager(paddingValues: PaddingValues = PaddingValues(),
                     item = item,
                     listCategory = listCategory,
                     category = category,
+                    calendar = viewModel.showDialog.calendar,
+                    date = viewModel.showDialog.date,
                     onCancel = {viewModel.showDialog = DialogState()},
-                    onSave ={ item, name, desc, uri, category, alarm,originalFileName ->
-
+                    onSave ={ item, name, desc, uri, category, calendar,alarm,originalFileName,date ->
 
                         val finalItem = item?.copy(name = name, desc = desc, category = category)
-                            ?: Item(name = name, desc = desc, category = category)
+                            ?: Item(name = name, desc = desc, category = category, alarmTime = date)
 
                         if(item == null) { // новый item
                             if (originalFileName != "") viewModel.saveImage(uri, originalFileName)
-                            viewModel.insertItem(finalItem.copy(uri = originalFileName), alarm)
+                            viewModel.insertItem(finalItem.copy(uri = originalFileName), alarm = alarm,calendar = calendar)
                         }
                         else { // старый item
                             when {
@@ -283,7 +285,7 @@ fun MainPager(paddingValues: PaddingValues = PaddingValues(),
                                     val newItem = item.copy(
                                         change = !item.change,
                                         changeAlarm = false)
-                                    viewModel.updateItem(newItem)
+                                    viewModel.updateItem(newItem, calendar = false)
                                     if (item.changeAlarm) {
                                         viewModel.deleteAlarm(item.id)
                                         viewModel.deleteAlarm(item.id * -1)
@@ -299,7 +301,41 @@ fun MainPager(paddingValues: PaddingValues = PaddingValues(),
                         },
                         onAddItem = {viewModel.showDialog = DialogState(INSERT_DIALOG_ITEM)})
                 }
-                2 -> {Text("3")}
+                2 -> {
+                    Calendar(viewModel,
+                        onClick = {item,action->
+                            when(action){
+                                ALARM->{viewModel.permission(NOTIFICATION,item)}
+                                ALARM_LONG ->{viewModel.insertAlarmRepeat(item)}
+                                IMAGE->
+                                {openImageState = true
+                                    selectedFileUri = viewModel.getUri(item.uri) }
+                                CHANGE_ITEM->{
+                                    viewModel.showDialog = DialogState(INSERT_DIALOG_ITEM,item)}
+                                CHANGE->{
+                                    val newItem = item.copy(
+                                        change = !item.change,
+                                        changeAlarm = false)
+                                    viewModel.updateItem(newItem, calendar = true)
+                                    if (item.changeAlarm) {
+                                        viewModel.deleteAlarm(item.id)
+                                        viewModel.deleteAlarm(item.id * -1)
+                                    }
+                                }
+                                DELETE->{
+                                    if(item.change)viewModel.deleteItem(item)
+                                    else viewModel.showDialog = DialogState(DELETE_DIALOG_ITEM,item)
+
+                                }
+
+                            }
+                        },
+                        onAddItem = {date->
+                            viewModel.showDialog = DialogState(
+                            INSERT_DIALOG_ITEM,
+                            calendar = true,
+                            date = date)})
+                }
 
             }
 

@@ -55,7 +55,7 @@ kotlin {
 
 
             implementation("io.github.vinceglb:filekit-compose:0.8.7")
-            
+            implementation("com.kizitonwose.calendar:compose-multiplatform:2.10.1")
 
             // Зависимости Coil (3.5.0)
             implementation("io.coil-kt.coil3:coil-compose:3.3.0")

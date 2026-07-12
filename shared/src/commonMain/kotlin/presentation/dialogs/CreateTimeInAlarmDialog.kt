@@ -48,6 +48,7 @@ import CommonConst.ALARM_YEAR
 import MainViewModel
 import androidx.compose.foundation.layout.Arrangement
 import kotlin.time.Duration.Companion.hours
+import androidx.compose.runtime.collectAsState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -236,7 +237,7 @@ fun CreateActionInAlarmDialog(viewModel: MainViewModel){
                 Column(Modifier.selectableGroup(),
                     verticalArrangement = Arrangement.spacedBy(10.dp) ) {
                     listAction.forEachIndexed {index, text ->
-                      val isOptionEnabled = index == 0 || isPremium
+                      val isOptionEnabled = index == 0 || isPremium.collectAsState().value
                         Row( Modifier.fillMaxWidth()
                             .selectable(
                                 selected = (text == selected),
@@ -253,7 +254,7 @@ fun CreateActionInAlarmDialog(viewModel: MainViewModel){
                         }
                     }
 
-                    if (!isPremium) {
+                    if (!isPremium.collectAsState().value) {
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         text = "* Повторяющиеся будильники доступны в PREMIUM версии",

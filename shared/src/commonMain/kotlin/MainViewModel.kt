@@ -2,6 +2,7 @@
 import CommonConst.ALARM_ONE
 import CommonConst.NOTIFICATION
 import CommonConst.SORT_STANDART
+import CommonConst.TIME
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -55,19 +56,11 @@ class MainViewModel(
     var _toast = MutableSharedFlow<String>()
     var toast = _toast.asSharedFlow()
 
-    var premiumState by mutableStateOf(true)
+    var premiumState = MutableStateFlow(true)
     var updateState by mutableStateOf(false)
     var themeState by mutableStateOf<Theme>(ThemeNeon())
     var sizeState by mutableStateOf(SizeNormal())
 
-    fun premiumOn(){
-        premiumState = true
-        sendMessage("PREMIUM версия активирована")
-    }
-    fun premiumOf(){
-        premiumState = false
-        sendMessage("PREMIUM версия отключена")
-    }
 
 
     //private val _sortType = MutableStateFlow(settingsPref.getSort())
@@ -77,12 +70,17 @@ class MainViewModel(
     private val _categoryItemFlow = MutableStateFlow("Повседневные")
     val categoryItemFlow = _categoryItemFlow.asStateFlow()
 
+    val getItemsInCalendar = db.getItemsInCalendar()
     val categories: StateFlow<List<ListCategory>> = db.getAllListCategory()
     .stateIn(
         scope = viewModelScope, // Привязываем к жизненному циклу ViewModel
         started = SharingStarted.WhileSubscribed(5000), // Засыпает через 5 сек после закрытия экрана
         initialValue = emptyList() // Начальное значение, пока база грузится
     )
+    val getItemCalendarCombine = combine(getItemsInCalendar, premiumState) { list, premium ->
+        if (premium) list
+        else emptyList()
+    }
     fun getUri(fileName :  String) = image.getUri(fileName)
     fun saveImage(temporaryPathString: String, fileName: String) {
         // Убираем блокировку главного потока, переключаясь на дисковый Dispatchers.IO
@@ -137,7 +135,7 @@ class MainViewModel(
     }
 
 
-    fun insertItem(item: Item, alarm: Boolean = false){
+    fun insertItem(item: Item, alarm: Boolean = false,calendar: Boolean){
 
         viewModelScope.launch(Dispatchers.IO) {
 
@@ -149,7 +147,7 @@ class MainViewModel(
             withContext(Dispatchers.Main){
                 if(alarm) {
                     val savedItem = newItem.copy(id = insertedId.toInt())
-                    permission(NOTIFICATION, savedItem)
+                    permission(NOTIFICATION, savedItem,calendar)
                 } else showDialog = DialogState()
             }
 
@@ -163,27 +161,29 @@ class MainViewModel(
         }
     }
 
-    fun updateItem(item: Item,alarm: Boolean = false){
+    fun updateItem(item: Item,alarm: Boolean = false,calendar: Boolean = false){
         viewModelScope.launch(Dispatchers.IO) {
             db.updateItem(item)
             withContext(Dispatchers.Main){
-                if(alarm) permission(NOTIFICATION, item)
+                if(alarm) permission(NOTIFICATION, item, calendar)
                 else showDialog = DialogState()
             }
 
         }
     }
 
-    fun permission(permissionName: String, item: Item) {
+    fun permission(permissionName: String, item: Item,calendar: Boolean = false) {
         viewModelScope.launch{
          val isChekedPermission = permission.isChekedPermission(permissionName)
     
-        if(isChekedPermission) { showDialog = DialogState(permissionName,item) }
+        if(isChekedPermission) {
+            val dialog = if(calendar) TIME else NOTIFICATION
+            sendMessage(dialog)
+            showDialog = DialogState(dialog,item) }
         else {
             val isGranted = permission.requestPermission(permissionName)
             if(isGranted){
                 showDialog = DialogState(permissionName,item)
-
             }
             else {sendMessage("Для стабильной работы, необходимо дать разрешение")}
             
@@ -233,7 +233,7 @@ class MainViewModel(
                     }
 
                     else -> {
-                        if (!premiumState) {
+                        if (!premiumState.value) {
                             deleteAlarm(item.id)
                             updateItem(item.copy(changeAlarm = false))
                         } else {

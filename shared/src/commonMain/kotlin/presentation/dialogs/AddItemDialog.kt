@@ -236,6 +236,7 @@ fun AddOrChangeItemDialog(
     onCancel : ()-> Unit = {},
     listCategory : List<String> = emptyList(),
     calendar : Boolean = false,
+    date: Long = 0L,
     category: String = "Повседневные",
     theme: Theme = ThemeNeon(), // Используйте имя вашего БАЗОВОГО класса/интерфейса тем!
     onSave :(
@@ -244,9 +245,11 @@ fun AddOrChangeItemDialog(
         desc: String,
         uri: String,
         category: String,
+        calendar : Boolean,
         alarlm : Boolean, // Оставил старое имя, чтобы не ломать лямбду в INSERT_DIALOG_ITEM
         originalNameImage : String,
-    ) -> Unit ={_,_,_,_,_,_,_->},
+        date: Long,
+    ) -> Unit ={_,_,_,_,_,_,_,_,_->},
     getUri : (String) -> String = {""},
 ) {
     var stateTextName by remember { mutableStateOf(item?.name ?: "") }
@@ -385,7 +388,7 @@ fun AddOrChangeItemDialog(
             TextButton(
                 onClick = {
                     val text = stateTextName.trim().ifEmpty { "Без названия" }
-                    onSave(item, text, stateTextDecs.trim(), selectedFileUri, categorySelected, false, originalFileName)
+                    onSave(item,text,stateTextDecs,selectedFileUri,categorySelected,calendar,false,originalFileName,date)
                 },
                 colors = ButtonDefaults.textButtonColors(contentColor = theme.textColor)
             ) {
@@ -400,15 +403,15 @@ fun AddOrChangeItemDialog(
                 TextButton(
                     onClick = {
                         val text = stateTextName.trim().ifEmpty { "Без названия" }
-                        onSave(item, text, stateTextDecs.trim(), selectedFileUri, categorySelected, true, originalFileName)
+                        onSave(item,text,stateTextDecs,selectedFileUri,categorySelected,calendar,true,originalFileName,date)
                     },
-                    //colors = ButtonDefaults.textButtonColors(contentColor = theme.textColor)
+
                 ) {
                     Text("Установка будильника")
                 }
                 TextButton(
                     onClick = { onCancel() },
-                   // colors = ButtonDefaults.textButtonColors(contentColor = theme.cardItemBorderFalse)
+
                 ) {
                     Text("Отмена")
                 }
