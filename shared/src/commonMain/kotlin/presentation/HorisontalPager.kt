@@ -75,7 +75,7 @@ fun MainPager(paddingValues: PaddingValues = PaddingValues(),
              pagerState :PagerState ) {
 
     val titles = listOf("Блокнот","Список дел","Календарь")
-
+    val premium = viewModel.premiumState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     val todoList by viewModel.sortedItemsFlow.collectAsStateWithLifecycle()
 
@@ -302,39 +302,58 @@ fun MainPager(paddingValues: PaddingValues = PaddingValues(),
                         onAddItem = {viewModel.showDialog = DialogState(INSERT_DIALOG_ITEM)})
                 }
                 2 -> {
-                    Calendar(viewModel,
-                        onClick = {item,action->
-                            when(action){
-                                ALARM->{viewModel.permission(NOTIFICATION,item)}
-                                ALARM_LONG ->{viewModel.insertAlarmRepeat(item)}
-                                IMAGE->
-                                {openImageState = true
-                                    selectedFileUri = viewModel.getUri(item.uri) }
-                                CHANGE_ITEM->{
-                                    viewModel.showDialog = DialogState(INSERT_DIALOG_ITEM,item)}
-                                CHANGE->{
+                    if (premium.value) Calendar(
+                        viewModel,
+                        onClick = { item, action ->
+                            when (action) {
+                                ALARM -> {
+                                    viewModel.permission(NOTIFICATION, item)
+                                }
+
+                                ALARM_LONG -> {
+                                    viewModel.insertAlarmRepeat(item)
+                                }
+
+                                IMAGE -> {
+                                    openImageState = true
+                                    selectedFileUri = viewModel.getUri(item.uri)
+                                }
+
+                                CHANGE_ITEM -> {
+                                    viewModel.showDialog = DialogState(INSERT_DIALOG_ITEM, item)
+                                }
+
+                                CHANGE -> {
                                     val newItem = item.copy(
                                         change = !item.change,
-                                        changeAlarm = false)
+                                        changeAlarm = false
+                                    )
                                     viewModel.updateItem(newItem, calendar = true)
                                     if (item.changeAlarm) {
                                         viewModel.deleteAlarm(item.id)
                                         viewModel.deleteAlarm(item.id * -1)
                                     }
                                 }
-                                DELETE->{
-                                    if(item.change)viewModel.deleteItem(item)
-                                    else viewModel.showDialog = DialogState(DELETE_DIALOG_ITEM,item)
+
+                                DELETE -> {
+                                    if (item.change) viewModel.deleteItem(item)
+                                    else viewModel.showDialog =
+                                        DialogState(DELETE_DIALOG_ITEM, item)
 
                                 }
 
                             }
                         },
-                        onAddItem = {date->
+                        onAddItem = { date ->
                             viewModel.showDialog = DialogState(
-                            INSERT_DIALOG_ITEM,
-                            calendar = true,
-                            date = date)})
+                                INSERT_DIALOG_ITEM,
+                                calendar = true,
+                                date = date
+                            )
+                        }) else  LaunchedEffect(Unit) {
+                        viewModel.sendMessage("Отображение дел в календаре доступно в PREMIUM версии")
+                    }
+
                 }
 
             }
