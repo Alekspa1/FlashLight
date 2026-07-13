@@ -80,10 +80,15 @@ import presentation.theme.Theme
 import presentation.theme.ThemeNeon
 import presentation.theme.ThemeZabor
 
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+
 @Composable
 fun StartApp(viewModel: MainViewModel = koinViewModel()) {
     val theme = viewModel.themeState
     val premiumState by viewModel.premiumState.collectAsStateWithLifecycle()
+    val navController = rememberNavController()
     MaterialTheme(
         colorScheme = if(viewModel.themeState == ThemeNeon()) darkColorScheme(
             primary = theme.textColor,
@@ -126,44 +131,94 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
             }
         }
         viewModel.updateAlarm()
-        StartAppContent(
-            categories = categories,
-            toastEvents = viewModel.toast,
-            updateCategory = { category -> viewModel.updateCategory(category) },
-            openPager = { innerPadding, onOpenDrawer, pagerState ->
-                MainPager(innerPadding, viewModel, onOpenDrawer, pagerState)
-            },
-            drawerState = drawerState,
-            theme = viewModel.themeState,
-            size = viewModel.sizeState,
-            premium = premiumState,
-            update = viewModel.updateState,
-            onClick = { click ->
-                when (click) {
-                    PREMIUM_CLICK -> {viewModel.themeState = if(theme == ThemeNeon()) ThemeZabor() else ThemeNeon()}
-                    UPGRATE_CLICK -> {}
-                    SETTINGS_CLICK -> {}
-                }
+        
+        // StartAppContent(
+        //     categories = categories,
+        //     toastEvents = viewModel.toast,
+        //     updateCategory = { category -> viewModel.updateCategory(category) },
+        //     openPager = { innerPadding, onOpenDrawer, pagerState ->
+        //         MainPager(innerPadding, viewModel, onOpenDrawer, pagerState)
+        //     },
+        //     drawerState = drawerState,
+        //     theme = viewModel.themeState,
+        //     size = viewModel.sizeState,
+        //     premium = premiumState,
+        //     update = viewModel.updateState,
+        //     onClick = { click ->
+        //         when (click) {
+        //             PREMIUM_CLICK -> {viewModel.themeState = if(theme == ThemeNeon()) ThemeZabor() else ThemeNeon()}
+        //             UPGRATE_CLICK -> {}
+        //             SETTINGS_CLICK -> {}
+        //         }
 
-            },
-            onClickCategory = { listCategory, action ->
-                when (action) {
-                    INSERT_DIALOG_CATEGORY -> {
-                        if (premiumState) {
-                            viewModel.showDialog =
-                                DialogState(INSERT_DIALOG_CATEGORY, category = listCategory)
-                        } else viewModel.sendMessage("Категории доступны в PREMIUM версии")
+        //     },
+        //     onClickCategory = { listCategory, action ->
+        //         when (action) {
+        //             INSERT_DIALOG_CATEGORY -> {
+        //                 if (premiumState) {
+        //                     viewModel.showDialog =
+        //                         DialogState(INSERT_DIALOG_CATEGORY, category = listCategory)
+        //                 } else viewModel.sendMessage("Категории доступны в PREMIUM версии")
+        //             }
+
+        //             DELETE_DIALOG_CATEGORY -> {
+        //                 viewModel.showDialog =
+        //                     DialogState(DELETE_DIALOG_CATEGORY, category = listCategory)
+        //             }
+        //         }
+
+        //     }
+
+        // )
+
+        // 2. СТАВИМ ГЛОБАЛЬНЫЙ НАВИГАТОР ВМЕСТО ПРЯМОГО ВЫЗОВА КОНТЕНТА
+        NavHost(
+            navController = navController,
+            startDestination = "main_screen" // По умолчанию показываем шторку и пейджер
+        ) {
+            // ЭКРАН №1: Твоё приложение со шторкой
+            composable("main_screen") {
+                StartAppContent(
+                    categories = categories,
+                    toastEvents = viewModel.toast,
+                    updateCategory = { category -> viewModel.updateCategory(category) },
+                    openPager = { innerPadding, onOpenDrawer, pagerState ->
+                        MainPager(innerPadding, viewModel, onOpenDrawer, pagerState)
+                    },
+                    drawerState = drawerState,
+                    theme = viewModel.themeState,
+                    size = viewModel.sizeState,
+                    premium = premiumState,
+                    update = viewModel.updateState,
+                    onClick = { click ->
+                        when (click) {
+                            PREMIUM_CLICK -> { viewModel.themeState = if(theme == ThemeNeon()) ThemeZabor() else ThemeNeon() }
+                            UPGRATE_CLICK -> {}
+                            
+                            // 3. ОБРАБАТЫВАЕМ КЛИК НА НАСТРОЙКИ
+                            SETTINGS_CLICK -> {
+                                // Даем команду уйти на экран настроек (текущий экран полностью скроется)
+                                navController.navigate("settings_screen")
+                            }
+                        }
+                    },
+                    onClickCategory = { listCategory, action ->
+                        // Твоя логика кликов по категориям (INSERT/DELETE)
                     }
-
-                    DELETE_DIALOG_CATEGORY -> {
-                        viewModel.showDialog =
-                            DialogState(DELETE_DIALOG_CATEGORY, category = listCategory)
-                    }
-                }
-
+                )
             }
 
-        )
+            // ЭКРАН №2: Абсолютно новый экран настроек без Дравера!
+            composable("settings_screen") {
+                // Сюда мы подставим твой будущий Composable-экран настроек
+                // Передаем лямбду возврата назад (popBackStack)
+                SettingsScreen(onBack = { navController.popBackStack() }
+                              )
+            }
+        }
+    }
+}
+        
     }
 
 
@@ -183,6 +238,8 @@ fun StartAppContent(
     onClick: (String) -> Unit = {}, // Лямбда для клика
     onClickCategory: (category: ListCategory?,action : String) -> Unit = {_,_->}, // Лямбда для клика
 ){
+    val localNavController = rememberNavController()
+    var isCommonMode by remember { mutableStateOf(false) }
     val CardSolidColor = Color(0x6500BCD4)  // solid android:color
     val BorderNeonColor = Color(0x9900E2FF) // @color/vPagerCant
     val scope = rememberCoroutineScope()
@@ -229,7 +286,7 @@ fun StartAppContent(
                                 ) {
                                     // 1. ЗАГОЛОВОК ШТОРКИ (tvCategoryDrawer из XML)
                                     Text(
-                                        text = "Категории",
+                                        text = if(!isCommonMode) "Категории" else "Общие дела",
                                         color = theme.textColor,
                                         fontSize = size.textMenu,
                                         fontWeight = FontWeight.Bold,
@@ -307,9 +364,13 @@ fun StartAppContent(
                                                         .border(3.dp, BorderNeonColor, RoundedCornerShape(10.dp))
                                                         // 3. Добавляем клик (эффект волны подстроится под форму автоматически)
                                                         .clickable {
-                                                            scope.launch {
-                                                                drawerState.close()
-                                                            }
+                                                            // scope.launch {
+                                                            //     drawerState.close()
+                                                            // }
+                                                            isCommonMode = !isCommonMode 
+                                                           if(isCommonMode) localNavController.navigate("common_screen") 
+                                                           else localNavController.popBackStack() 
+                                                            
                                                         },
                                                     shape = RoundedCornerShape(10.dp),
                                                     // Прозрачный контейнер у Card обязателен, чтобы работал наш кастомный background
@@ -317,7 +378,7 @@ fun StartAppContent(
                                                 ) {
                                                     Text(
                                                         modifier = Modifier.padding(8.dp),
-                                                        text = "Общие дела",
+                                                        text =  if(isCommonMode) "Личные дела" else "Общие дела",
                                                         color = theme.textColor,
                                                         lineHeight = size.lineHeightItem,
                                                         fontSize = size.textItem)
@@ -543,7 +604,24 @@ fun StartAppContent(
                                 }
                             },
                             ) { innerPadding ->
-                            openPager(innerPadding, onOpenDrawer,pagerState)
+                            
+                           // openPager(innerPadding, onOpenDrawer,pagerState)
+
+                            NavHost(
+                            navController = localNavController,
+                            startDestination = "personal_pager_hub" // По умолчанию открыт твой пейджер
+                            ) {
+                                // Точка А: Твой текущий пейджер (Блокнот + Будильник)
+                                composable("personal_pager_hub") {
+                                openPager(innerPadding, onOpenDrawer, pagerState)
+                                }
+
+                                // Точка Б: Новый экран Общих Дел
+                                composable("common_screen") {
+                                    // Сюда мы подставим твой будущий экран общих дел
+                               // CommonTasksScreen(innerPadding = innerPadding, viewModel = viewModel)
+                                 }
+}
                         }
                     }
                 }
