@@ -169,7 +169,7 @@ fun CreateTimeInAlarmDialog(date: Long,viewModel: MainViewModel){
     val currentHour: Int = currentDateTime.hour
     val currentMinute: Int = currentDateTime.minute
 
-    currentTime.hours
+    
     val timePickerState = rememberTimePickerState(
         initialHour = currentHour,
         initialMinute = currentMinute,
