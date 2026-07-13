@@ -639,8 +639,8 @@ fun StartAppContent(
 
                             NavHost(
                             navController = localNavController,
-                            startDestination = "personal_pager_hub" // По умолчанию открыт твой пейджер
-                            enableOnBackPressedDispatcherOwner = false     
+                            startDestination = "personal_pager_hub",
+                                
                             ) {
                                 // Точка А: Твой текущий пейджер (Блокнот + Будильник)
                                 composable("personal_pager_hub") {
