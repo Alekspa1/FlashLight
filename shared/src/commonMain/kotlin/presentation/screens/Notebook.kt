@@ -38,6 +38,12 @@ import presentation.theme.SizeNormal
 import presentation.theme.Theme
 import presentation.theme.ThemeNeon
 
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+
+
 @Composable
 
 fun Notebook(viewModel: MainViewModel,pageIndex: Int){
