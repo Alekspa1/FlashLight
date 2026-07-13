@@ -198,10 +198,15 @@ fun CreateDateInAlarmDialog(viewModel: MainViewModel) {
             state = datePickerState,
             title = {
                 Text(
-                    text = errorMessage ?: "Выберите дату",
-                    color = if (errorMessage != null) MaterialTheme.colorScheme.error else Color.Unspecified,
-                    modifier = Modifier.padding(start = 24.dp, top = 16.dp)
-                )
+    text = errorMessage ?: "Выберите дату",
+    // ✅ ИСПРАВЛЕНО: Заменили Color на MaterialTheme, импорт которого у вас точно есть
+    color = if (errorMessage != null) {
+        MaterialTheme.colorScheme.error 
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    },
+    modifier = Modifier.padding(start = 24.dp, top = 16.dp)
+)
             }
         )
     }
