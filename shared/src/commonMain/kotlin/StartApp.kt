@@ -379,15 +379,15 @@ fun StartAppContent(
                                                         .border(3.dp, BorderNeonColor, RoundedCornerShape(10.dp))
                                                         // 3. Добавляем клик (эффект волны подстроится под форму автоматически)
                                                         .clickable {
-    onToggleCommonMode
-    val targetRoute = if (isCommonMode) "common_screen" else "personal_pager_hub"
-    val popUpRoute = if (isCommonMode) "personal_pager_hub" else "common_screen"
+     onToggleCommonMode() 
+
+    // 2. Рассчитываем роуты на основе инвертированного значения (так как стейт обновится на следующем кадре)
+    val nextMode = !isCommonMode
+    val targetRoute = if (nextMode) "common_screen" else "personal_pager_hub"
+    val popUpRoute = if (nextMode) "personal_pager_hub" else "common_screen"
 
     localNavController.navigate(targetRoute) {
-        popUpTo(popUpRoute) {
-            inclusive = true // Полностью стираем предыдущий экран
-            // saveState = true УБИРАЕМ! Оно несовместимо с полным удалением в данном сценарии
-        }
+        popUpTo(popUpRoute) { inclusive = true }
         launchSingleTop = true
     }
 },
