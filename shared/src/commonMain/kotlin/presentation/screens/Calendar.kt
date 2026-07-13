@@ -94,7 +94,8 @@ fun Calendar(
         theme = viewModel.themeState,
         size = viewModel.sizeState,
         onClick = onClick,
-        onAddItem = onAddItem,)
+        onAddItem = onAddItem,
+        message = {message-> viewModel.sendMessage(message) })
 
 }
 
@@ -105,7 +106,8 @@ fun CalendarContent(
     theme: Theme = ThemeNeon(),
     size : Size = SizeNormal(),
     onClick : (Item, Int) -> Unit = {_,_->},
-    onAddItem : (Long) -> Unit = {}) {
+    onAddItem : (Long) -> Unit = {},
+    message : (String) -> ={}) {
 
     val today = remember { Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date }
     val currentMonth = remember { YearMonth.now() }
@@ -119,7 +121,7 @@ fun CalendarContent(
     val tasksByDate = remember(listItems) {
         listItems.groupBy { item ->
             Instant.fromEpochMilliseconds(item.alarmTime)
-                .toLocalDateTime(TimeZone.UTC).date // ✅ Теперь 100% совместимо
+                .toLocalDateTime(TimeZone.currentSystemDefault()).date 
         }
     }
 
@@ -412,11 +414,20 @@ fun CalendarContent(
 
             IconButton(modifier = Modifier.size(50.dp).align(Alignment.CenterEnd),
                 onClick = {
-                    val selectedDayMillis = selectedDate
-                        // Фиксируем начало дня строго по UTC (00:00), игнорируя пояс телефона
-                        .atStartOfDayIn(TimeZone.UTC)
-                        .toEpochMilliseconds()
-                    onAddItem(selectedDayMillis) },
+    val systemTimeZone = TimeZone.currentSystemDefault()
+    // Получаем актуальное "сегодня" прямо в момент клика
+    val realToday = Clock.System.now().toLocalDateTime(systemTimeZone).date
+
+    if (selectedDate < realToday) {
+        message("Вы выбрали дату которая уже прошла")
+    } else {
+        // Конвертируем в миллисекунды только если дата валидна
+        val selectedDayMillis = selectedDate
+            .atStartOfDayIn(systemTimeZone)
+            .toEpochMilliseconds()
+        onAddItem(selectedDayMillis)
+    }
+},
             ){
                 Icon(
                     imageVector = theme.iconAdd,
