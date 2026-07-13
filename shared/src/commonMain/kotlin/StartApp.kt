@@ -161,6 +161,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                 }) {
                 StartAppContent(
                     isCommonMode = isCommonMode,
+                     onToggleCommonMode = {isCommonMode = !isCommonMode}
                     categories = categories,
                     toastEvents = viewModel.toast,
                     updateCategory = { category -> viewModel.updateCategory(category) },
@@ -237,10 +238,11 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
 @Composable
 fun StartAppContent(
     isCommonMode: Boolean,
+     onToggleCommonMode: () -> Unit
     categories: List<ListCategory> = emptyList(),
     toastEvents: Flow<String> = emptyFlow(),
     updateCategory :(String) ->Unit = {},
-    openPager: @Composable (innerPadding: PaddingValues, onOpenDrawer: () -> Unit, pagerStateUp: PagerState) -> Unit = { _, _, _,_ -> },
+    openPager: @Composable (innerPadding: PaddingValues, onOpenDrawer: () -> Unit, pagerStateUp: PagerState) -> Unit = { _, _, _, -> },
     drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Open),
     theme: Theme = ThemeNeon(),
     size : Size = SizeNormal(),
@@ -377,7 +379,7 @@ fun StartAppContent(
                                                         .border(3.dp, BorderNeonColor, RoundedCornerShape(10.dp))
                                                         // 3. Добавляем клик (эффект волны подстроится под форму автоматически)
                                                         .clickable {
-    isCommonMode = !isCommonMode
+    onToggleCommonMode
     val targetRoute = if (isCommonMode) "common_screen" else "personal_pager_hub"
     val popUpRoute = if (isCommonMode) "personal_pager_hub" else "common_screen"
 
@@ -670,8 +672,8 @@ fun StartAppContent(
 }
 
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewStartApp(){
- StartAppContent()
-}
+// @Preview(showBackground = true)
+// @Composable
+// fun PreviewStartApp(){
+//  StartAppContent()
+// }
