@@ -63,7 +63,7 @@ class AlarmReceiwer : BroadcastReceiver(), KoinComponent {
 
                 withContext(Dispatchers.Main){notificationBuilder.input(item)}
 
-                processingAlarm(item, "")
+               if(item.interval != ALARM_REPEAT) processingAlarm(item, "")
 
             } // Приход будильника
 
