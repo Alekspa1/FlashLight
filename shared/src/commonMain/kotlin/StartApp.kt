@@ -119,6 +119,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
 
         val categories by viewModel.categories.collectAsStateWithLifecycle()
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+        var isCommonMode by remember { mutableStateOf(false) }
         val category = viewModel.showDialog.category
         when(viewModel.showDialog.isWho){
             DELETE_DIALOG_CATEGORY -> {
@@ -148,45 +149,6 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
         }
         viewModel.updateAlarm()
         
-        // StartAppContent(
-        //     categories = categories,
-        //     toastEvents = viewModel.toast,
-        //     updateCategory = { category -> viewModel.updateCategory(category) },
-        //     openPager = { innerPadding, onOpenDrawer, pagerState ->
-        //         MainPager(innerPadding, viewModel, onOpenDrawer, pagerState)
-        //     },
-        //     drawerState = drawerState,
-        //     theme = viewModel.themeState,
-        //     size = viewModel.sizeState,
-        //     premium = premiumState,
-        //     update = viewModel.updateState,
-        //     onClick = { click ->
-        //         when (click) {
-        //             PREMIUM_CLICK -> {viewModel.themeState = if(theme == ThemeNeon()) ThemeZabor() else ThemeNeon()}
-        //             UPGRATE_CLICK -> {}
-        //             SETTINGS_CLICK -> {}
-        //         }
-
-        //     },
-        //     onClickCategory = { listCategory, action ->
-        //         when (action) {
-        //             INSERT_DIALOG_CATEGORY -> {
-        //                 if (premiumState) {
-        //                     viewModel.showDialog =
-        //                         DialogState(INSERT_DIALOG_CATEGORY, category = listCategory)
-        //                 } else viewModel.sendMessage("Категории доступны в PREMIUM версии")
-        //             }
-
-        //             DELETE_DIALOG_CATEGORY -> {
-        //                 viewModel.showDialog =
-        //                     DialogState(DELETE_DIALOG_CATEGORY, category = listCategory)
-        //             }
-        //         }
-
-        //     }
-
-        // )
-
         // 2. СТАВИМ ГЛОБАЛЬНЫЙ НАВИГАТОР ВМЕСТО ПРЯМОГО ВЫЗОВА КОНТЕНТА
         NavHost(
             navController = navController,
@@ -198,6 +160,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                     androidx.compose.animation.EnterTransition.None
                 }) {
                 StartAppContent(
+                    isCommonMode = isCommonMode,
                     categories = categories,
                     toastEvents = viewModel.toast,
                     updateCategory = { category -> viewModel.updateCategory(category) },
@@ -268,19 +231,16 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
         }
     }
 }
-        
-  //  }
-
-
-//}
+    
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun StartAppContent(
+    isCommonMode: Boolean,
     categories: List<ListCategory> = emptyList(),
     toastEvents: Flow<String> = emptyFlow(),
     updateCategory :(String) ->Unit = {},
-    openPager: @Composable (innerPadding: PaddingValues, onOpenDrawer: () -> Unit, pagerStateUp: PagerState) -> Unit = { _, _, _ -> },
+    openPager: @Composable (innerPadding: PaddingValues, onOpenDrawer: () -> Unit, pagerStateUp: PagerState) -> Unit = { _, _, _,_ -> },
     drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Open),
     theme: Theme = ThemeNeon(),
     size : Size = SizeNormal(),
@@ -290,7 +250,7 @@ fun StartAppContent(
     onClickCategory: (category: ListCategory?,action : String) -> Unit = {_,_->}, // Лямбда для клика
 ){
     val localNavController = rememberNavController()
-    var isCommonMode by remember { mutableStateOf(false) }
+    
     val CardSolidColor = Color(0x6500BCD4)  // solid android:color
     val BorderNeonColor = Color(0x9900E2FF) // @color/vPagerCant
     val scope = rememberCoroutineScope()
