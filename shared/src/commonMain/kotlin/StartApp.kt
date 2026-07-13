@@ -344,6 +344,7 @@ fun StartAppContent(
 
                                         ) {
                                         // Категория: Повседневные
+                                         if(isCommonMode){
                                         item {
                                             Row(
                                                 modifier = Modifier
@@ -357,10 +358,10 @@ fun StartAppContent(
                                                         .clip(RoundedCornerShape(10.dp))
                                                         .clickable {
                                                             updateCategory("Повседневные")
-                                                            scope.launch {  scope.launch {
+                                                              scope.launch {
                                                                 launch{ drawerState.close()}
                                                                 launch{ pagerState.animateScrollToPage(1) }
-                                                            } }
+                                                            } 
                                                         },
                                                     shape = RoundedCornerShape(10.dp),
                                                     colors = CardDefaults.cardColors(containerColor = CardSolidColor)
@@ -384,6 +385,7 @@ fun StartAppContent(
                                                 }
                                             }
                                         }
+                                    }
 
                                         // Категория: Общие дела
                                         item {
@@ -439,7 +441,7 @@ fun StartAppContent(
                                             }
                                         }
 
-                                        // Кастомные категории из базы данных (бывший RecyclerView)
+                                        if(isCommonMode){
                                         items(
                                             items = categories,
                                             key = { it.id!! }
@@ -491,6 +493,7 @@ fun StartAppContent(
                                                 }
                                             }
                                         }
+                                    } else Text("Временный элемент")
                                     }
 
                                     // 3. КНОПКА ДОБАВЛЕНИЯ (imBAddMenu из XML - над нижним меню)
