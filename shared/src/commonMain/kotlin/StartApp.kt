@@ -86,6 +86,11 @@ import androidx.navigation.compose.rememberNavController
 
 import presentation.screens.SettingsScreen
 
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+
 @Composable
 fun StartApp(viewModel: MainViewModel = koinViewModel()) {
     val theme = viewModel.themeState
