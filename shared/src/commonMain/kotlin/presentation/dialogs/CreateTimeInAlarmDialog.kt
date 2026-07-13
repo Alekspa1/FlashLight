@@ -53,84 +53,190 @@ import androidx.compose.runtime.collectAsState
 import kotlinx.datetime.Clock
 import kotlinx.datetime.atStartOfDayIn
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun CreateDateInAlarmDialog(viewModel: MainViewModel){
+// @OptIn(ExperimentalMaterial3Api::class)
+// @Composable
+// fun CreateDateInAlarmDialog(viewModel: MainViewModel){
 
     
-    val kotlinInstant = kotlin.time.Clock.System.now()
-    val nowInstant = kotlinx.datetime.Instant.fromEpochMilliseconds(kotlinInstant.toEpochMilliseconds())
+//    // val kotlinInstant = kotlin.time.Clock.System.now()
+//    // val nowInstant = kotlinx.datetime.Instant.fromEpochMilliseconds(kotlinInstant.toEpochMilliseconds())
+//     val nowInstant = kotlinx.datetime.Clock.System.now()
 
-    val todayDate = nowInstant
-        .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
-        .date
-    val todayMillis = kotlinx.datetime.LocalDateTime(
-        year = todayDate.year,
-        monthNumber = todayDate.monthNumber,
-        dayOfMonth = todayDate.dayOfMonth,
-        hour = 0, minute = 0, second = 0, nanosecond = 0
-    ).toInstant(kotlinx.datetime.TimeZone.currentSystemDefault()).toEpochMilliseconds()
+//     val todayDate = nowInstant
+//         .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
+//         .date
+//     val todayMillis = kotlinx.datetime.LocalDateTime(
+//         year = todayDate.year,
+//         monthNumber = todayDate.monthNumber,
+//         dayOfMonth = todayDate.dayOfMonth,
+//         hour = 0, minute = 0, second = 0, nanosecond = 0
+//     ).toInstant(kotlinx.datetime.TimeZone.currentSystemDefault()).toEpochMilliseconds()
 
- val item = viewModel.showDialog.item ?: return
- val datePickerState = rememberDatePickerState((if (item.alarmTime == 0L) todayMillis else item.alarmTime ))
-  var errorMessage by remember {mutableStateOf<String?>(null)} 
-  LaunchedEffect(datePickerState.selectedDateMillis) {
-    errorMessage = null // Сбрасываем ошибку, если пользователь выбрал другую дату
-}
-        DatePickerDialog(
-            onDismissRequest = { viewModel.showDialog = DialogState() },
-            confirmButton = {
-                TextButton(onClick = {
+//  val item = viewModel.showDialog.item ?: return
+//  val datePickerState = rememberDatePickerState((if (item.alarmTime == 0L) todayMillis else item.alarmTime ))
+//   var errorMessage by remember {mutableStateOf<String?>(null)} 
+//   LaunchedEffect(datePickerState.selectedDateMillis) {
+//     errorMessage = null // Сбрасываем ошибку, если пользователь выбрал другую дату
+// }
+//         DatePickerDialog(
+//             onDismissRequest = { viewModel.showDialog = DialogState() },
+//             confirmButton = {
+//                 TextButton(onClick = {
 
-                    val date = datePickerState.selectedDateMillis ?: 0L
+//                     val date = datePickerState.selectedDateMillis ?: 0L
 
-                    val selectedDate = kotlinx.datetime.Instant
-                    .fromEpochMilliseconds(date)
-                    // ✅ ИСПРАВЛЕНО: Расшифровываем дату по времени ТЕЛЕФОНА, а не Лондона
-                    .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
-                    .date
+//                     val selectedDate = kotlinx.datetime.Instant
+//                     .fromEpochMilliseconds(date)
+//                     // ✅ ИСПРАВЛЕНО: Расшифровываем дату по времени ТЕЛЕФОНА, а не Лондона
+//                     .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
+//                     .date
 
-                    // Получаем текущую локальную дату без зачеркнутых классов
+//                     // Получаем текущую локальную дату без зачеркнутых классов
 
 
 
-                 if(selectedDate < todayDate) {
-                  errorMessage = "Вы выбрали дату которая прошла" 
-                 }
-                 else viewModel.showDialog = DialogState(TIME,item.copy(alarmTime = date))
-                }) {
-                    Text("Далее")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { viewModel.showDialog = DialogState()}) {
-                    Text("Отмена")
-                }
-            }
-        ) {
-          DatePicker(state = datePickerState,
-              title = {
-                  if (errorMessage != null) {
-                      Text(
-                          text = errorMessage!!,
-                          color = MaterialTheme.colorScheme.error,
-                          style = MaterialTheme.typography.bodyMedium,
-                          modifier = Modifier.padding(start = 24.dp, top = 16.dp)
-                      )
-                  } else {
-                      // Стандартный заголовок, если ошибки нет
-                      Text(
-                          text = "Выберите дату",
-                          modifier = Modifier.padding(start = 24.dp, top = 16.dp)
-                      )
-                  }
+//                  if(selectedDate < todayDate) {
+//                   errorMessage = "Вы выбрали дату которая прошла" 
+//                  }
+//                  else viewModel.showDialog = DialogState(TIME,item.copy(alarmTime = date))
+//                 }) {
+//                     Text("Далее")
+//                 }
+//             },
+//             dismissButton = {
+//                 TextButton(onClick = { viewModel.showDialog = DialogState()}) {
+//                     Text("Отмена")
+//                 }
+//             }
+//         ) {
+//           DatePicker(state = datePickerState,
+//               title = {
+//                   if (errorMessage != null) {
+//                       Text(
+//                           text = errorMessage!!,
+//                           color = MaterialTheme.colorScheme.error,
+//                           style = MaterialTheme.typography.bodyMedium,
+//                           modifier = Modifier.padding(start = 24.dp, top = 16.dp)
+//                       )
+//                   } else {
+//                       // Стандартный заголовок, если ошибки нет
+//                       Text(
+//                           text = "Выберите дату",
+//                           modifier = Modifier.padding(start = 24.dp, top = 16.dp)
+//                       )
+//                   }
 
 
             
-        })
-        }
-}
+//         })
+//         }
+// }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CreateDateInAlarmDialog(viewModel: MainViewModel) {
+    val currentZone = remember { TimeZone.currentSystemDefault() }
+    
+    // 1. Текущая локальная дата телефона
+    val todayDate = remember { 
+        Clock.System.now().toLocalDateTime(currentZone).date 
+    }
+    
+    // 2. Начало сегодняшнего дня в UTC для корректного сравнения в DatePicker
+    val todayMillisInUtc = remember(todayDate) {
+        LocalDateTime(
+            year = todayDate.year, monthNumber = todayDate.monthNumber, dayOfMonth = todayDate.dayOfMonth,
+            hour = 0, minute = 0, second = 0, nanosecond = 0
+        ).toInstant(TimeZone.UTC).toEpochMilliseconds()
+    }
+
+    val item = viewModel.showDialog.item ?: return
+
+    // 3. Если в item уже есть локальное время, переводим его в UTC для отображения в календаре
+    val initialPickerMillis = remember(item.alarmTime) {
+        if (item.alarmTime == 0L) {
+            todayMillisInUtc
+        } else {
+            val localDateTime = Instant.fromEpochMilliseconds(item.alarmTime)
+                .toLocalDateTime(currentZone)
+                
+            LocalDateTime(
+                year = localDateTime.year,
+                monthNumber = localDateTime.monthNumber,
+                dayOfMonth = localDateTime.dayOfMonth,
+                hour = 0, minute = 0, second = 0, nanosecond = 0
+            ).toInstant(TimeZone.UTC).toEpochMilliseconds()
+        }
+    }
+
+    // 4. Ограничение выбора дат: блокируем все прошедшие дни на экране календаря
+    val selectableDates = remember(todayMillisInUtc) {
+        object : SelectableDates {
+            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                return utcTimeMillis >= todayMillisInUtc
+            }
+        }
+    }
+
+    // Инициализируем стейт с учетом защитных механизмов
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = initialPickerMillis,
+        selectableDates = selectableDates
+    )
+    
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(datePickerState.selectedDateMillis) { 
+        errorMessage = null 
+    }
+
+    DatePickerDialog(
+        onDismissRequest = { viewModel.showDialog = DialogState() },
+        confirmButton = {
+            TextButton(onClick = {
+                val pickerSeconds = datePickerState.selectedDateMillis ?: 0L
+                
+                // Достаем чистые год/месяц/день, которые выбрал пользователь
+                val selectedDateUtc = Instant
+                    .fromEpochMilliseconds(pickerSeconds)
+                    .toLocalDateTime(TimeZone.UTC).date
+
+                if (selectedDateUtc < todayDate) {
+                    errorMessage = "Вы выбрали дату которая прошла"
+                } else {
+                    // 5. КЛЮЧЕВОЙ ШАГ: Превращаем эту дату в полночь по ЛОКАЛЬНОМУ времени устройства
+                    val localAlarmMillis = LocalDateTime(
+                        year = selectedDateUtc.year,
+                        monthNumber = selectedDateUtc.monthNumber,
+                        dayOfMonth = selectedDateUtc.dayOfMonth,
+                        hour = 0, minute = 0, second = 0, nanosecond = 0
+                    ).toInstant(currentZone).toEpochMilliseconds()
+
+                    // Передаем локальные 00:00 в следующий диалог настройки времени
+                    viewModel.showDialog = DialogState(TIME, item.copy(alarmTime = localAlarmMillis))
+                }
+            }) {
+                Text("Далее")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = { viewModel.showDialog = DialogState() }) { 
+                Text("Отмена") 
+            }
+        }
+    ) {
+        DatePicker(
+            state = datePickerState,
+            title = {
+                Text(
+                    text = errorMessage ?: "Выберите дату",
+                    color = if (errorMessage != null) MaterialTheme.colorScheme.error else Color.Unspecified,
+                    modifier = Modifier.padding(start = 24.dp, top = 16.dp)
+                )
+            }
+        )
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
