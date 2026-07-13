@@ -50,6 +50,10 @@ import androidx.compose.foundation.layout.Arrangement
 import kotlin.time.Duration.Companion.hours
 import androidx.compose.runtime.collectAsState
 
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateDateInAlarmDialog(viewModel: MainViewModel){
