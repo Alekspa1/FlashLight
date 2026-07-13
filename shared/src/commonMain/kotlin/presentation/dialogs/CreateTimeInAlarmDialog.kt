@@ -58,10 +58,9 @@ import kotlinx.datetime.atStartOfDayIn
 fun CreateDateInAlarmDialog(viewModel: MainViewModel){
 
     
-   // val kotlinInstant = kotlin.time.Clock.System.now()
-   // val nowInstant = kotlinx.datetime.Instant.fromEpochMilliseconds(kotlinInstant.toEpochMilliseconds())
-    val nowInstant = kotlinx.datetime.Clock.System.now()
-
+    val kotlinInstant = kotlin.time.Clock.System.now()
+    val nowInstant = kotlinx.datetime.Instant.fromEpochMilliseconds(kotlinInstant.toEpochMilliseconds())
+    
     val todayDate = nowInstant
         .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
         .date
@@ -71,6 +70,7 @@ fun CreateDateInAlarmDialog(viewModel: MainViewModel){
         dayOfMonth = todayDate.dayOfMonth,
         hour = 0, minute = 0, second = 0, nanosecond = 0
     ).toInstant(kotlinx.datetime.TimeZone.currentSystemDefault()).toEpochMilliseconds()
+    
 
  val item = viewModel.showDialog.item ?: return
  val datePickerState = rememberDatePickerState((if (item.alarmTime == 0L) todayMillis else item.alarmTime ))
@@ -87,7 +87,6 @@ fun CreateDateInAlarmDialog(viewModel: MainViewModel){
 
                     val selectedDate = kotlinx.datetime.Instant
                     .fromEpochMilliseconds(date)
-                    // ✅ ИСПРАВЛЕНО: Расшифровываем дату по времени ТЕЛЕФОНА, а не Лондона
                     .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
                     .date
 
