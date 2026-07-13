@@ -96,16 +96,17 @@ val itemUtcMillis = kotlinx.datetime.LocalDateTime(
 //     hour = 0, minute = 0, second = 0, nanosecond = 0
 // ).toInstant(kotlinx.datetime.TimeZone.UTC).toEpochMilliseconds()
 
-    val todayMillisUtc = remember {
-    // 1. Узнаем реальную дату за окном у пользователя (например, 14 июля)
-    val localToday = kotlinx.datetime.Clock.System.now()
-        .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault()).date
+  val todayMillisUtc = remember {
+    // Используем твою готовую переменную nowInstant
+    val todayDateLocal = nowInstant
+        .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
+        .date
     
-    // 2. Упаковываем эти цифры (14 июля) в полночь UTC для календаря
+    // Собираем UTC-полночь для пикера на основе локальной даты
     kotlinx.datetime.LocalDateTime(
-        year = localToday.year,
-        monthNumber = localToday.monthNumber,
-        dayOfMonth = localToday.dayOfMonth,
+        year = todayDateLocal.year,
+        monthNumber = todayDateLocal.monthNumber,
+        dayOfMonth = todayDateLocal.dayOfMonth,
         hour = 0, minute = 0, second = 0, nanosecond = 0
     ).toInstant(kotlinx.datetime.TimeZone.UTC).toEpochMilliseconds()
 }
