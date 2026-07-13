@@ -441,7 +441,7 @@ fun StartAppContent(
                                             }
                                         }
 
-                                        if(isCommonMode){
+                                        if(!isCommonMode){
                                         items(
                                             items = categories,
                                             key = { it.id!! }
