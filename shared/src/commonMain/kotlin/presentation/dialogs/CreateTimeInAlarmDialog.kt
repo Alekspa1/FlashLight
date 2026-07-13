@@ -89,12 +89,26 @@ val itemUtcMillis = kotlinx.datetime.LocalDateTime(
     .toLocalDateTime(kotlinx.datetime.TimeZone.UTC)
     .date
 
-    val todayMillisUtc = kotlinx.datetime.LocalDateTime(
-    year = todayDateUtc.year,
-    monthNumber = todayDateUtc.monthNumber,
-    dayOfMonth = todayDateUtc.dayOfMonth,
-    hour = 0, minute = 0, second = 0, nanosecond = 0
-).toInstant(kotlinx.datetime.TimeZone.UTC).toEpochMilliseconds()
+//     val todayMillisUtc = kotlinx.datetime.LocalDateTime(
+//     year = todayDateUtc.year,
+//     monthNumber = todayDateUtc.monthNumber,
+//     dayOfMonth = todayDateUtc.dayOfMonth,
+//     hour = 0, minute = 0, second = 0, nanosecond = 0
+// ).toInstant(kotlinx.datetime.TimeZone.UTC).toEpochMilliseconds()
+
+    val todayMillisUtc = remember {
+    // 1. Узнаем реальную дату за окном у пользователя (например, 14 июля)
+    val localToday = kotlinx.datetime.Clock.System.now()
+        .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault()).date
+    
+    // 2. Упаковываем эти цифры (14 июля) в полночь UTC для календаря
+    kotlinx.datetime.LocalDateTime(
+        year = localToday.year,
+        monthNumber = localToday.monthNumber,
+        dayOfMonth = localToday.dayOfMonth,
+        hour = 0, minute = 0, second = 0, nanosecond = 0
+    ).toInstant(kotlinx.datetime.TimeZone.UTC).toEpochMilliseconds()
+}
     
  val datePickerState = rememberDatePickerState((if (item.alarmTime == 0L) todayMillisUtc else itemUtcMillis ))
   var errorMessage by remember {mutableStateOf<String?>(null)} 
@@ -107,10 +121,10 @@ val itemUtcMillis = kotlinx.datetime.LocalDateTime(
                 TextButton(onClick = {
                     
                     val date = datePickerState.selectedDateMillis ?: 0L
-                    val selectedDate = kotlinx.datetime.Instant
-                    .fromEpochMilliseconds(date)
-                    .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
-                    .date
+                    // val selectedDate = kotlinx.datetime.Instant
+                    // .fromEpochMilliseconds(date)
+                    // .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
+                    // .date
 
                     // Получаем текущую локальную дату без зачеркнутых классов
                 // if(selectedDate < todayDate)
