@@ -53,21 +53,33 @@ import androidx.compose.runtime.collectAsState
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateDateInAlarmDialog(viewModel: MainViewModel){
-    val kotlinInstant = kotlin.time.Clock.System.now()
-    val nowInstant = kotlinx.datetime.Instant.fromEpochMilliseconds(kotlinInstant.toEpochMilliseconds())
+    // val kotlinInstant = kotlin.time.Clock.System.now()
+    // val nowInstant = kotlinx.datetime.Instant.fromEpochMilliseconds(kotlinInstant.toEpochMilliseconds())
 
-    val todayDate = nowInstant
-        .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
-        .date
-    val todayUtcMillis = kotlinx.datetime.LocalDateTime(
-        year = todayDate.year,
-        monthNumber = todayDate.monthNumber,
-        dayOfMonth = todayDate.dayOfMonth,
-        hour = 0, minute = 0, second = 0, nanosecond = 0
-    ).toInstant(kotlinx.datetime.TimeZone.UTC).toEpochMilliseconds()
+    // val todayDate = nowInstant
+    //     .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
+    //     .date
+    // val todayUtcMillis = kotlinx.datetime.LocalDateTime(
+    //     year = todayDate.year,
+    //     monthNumber = todayDate.monthNumber,
+    //     dayOfMonth = todayDate.dayOfMonth,
+    //     hour = 0, minute = 0, second = 0, nanosecond = 0
+    // ).toInstant(kotlinx.datetime.TimeZone.UTC).toEpochMilliseconds()
+    // 1. Получаем текущий момент времени напрямую через kotlinx.datetime
+    
+val nowInstant = kotlinx.datetime.Clock.System.now()
+val systemTimeZone = kotlinx.datetime.TimeZone.currentSystemDefault()
+
+// 2. Получаем чистую локальную дату (Год, Месяц, День) телефона
+val todayDate = nowInstant.toLocalDateTime(systemTimeZone).date
+
+// 3. ✅ ИСПРАВЛЕНО: Получаем миллисекунды НАЧАЛА сегодняшнего дня строго по времени телефона
+val todayLocalMillis = todayDate
+    .atStartOfDayIn(systemTimeZone)
+    .toEpochMilliseconds()
 
  val item = viewModel.showDialog.item ?: return
- val datePickerState = rememberDatePickerState((if (item.alarmTime == 0L)todayUtcMillis else item.alarmTime ))
+ val datePickerState = rememberDatePickerState((if (item.alarmTime == 0L)todayDate else item.alarmTime ))
   var errorMessage by remember {mutableStateOf<String?>(null)} 
   LaunchedEffect(datePickerState.selectedDateMillis) {
     errorMessage = null // Сбрасываем ошибку, если пользователь выбрал другую дату
@@ -80,9 +92,10 @@ fun CreateDateInAlarmDialog(viewModel: MainViewModel){
                     val date = datePickerState.selectedDateMillis ?: 0L
 
                     val selectedDate = kotlinx.datetime.Instant
-                        .fromEpochMilliseconds(date)
-                        .toLocalDateTime(kotlinx.datetime.TimeZone.UTC)
-                        .date
+    .fromEpochMilliseconds(date)
+    // ✅ ИСПРАВЛЕНО: Расшифровываем дату по времени ТЕЛЕФОНА, а не Лондона
+    .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
+    .date
 
                     // Получаем текущую локальную дату без зачеркнутых классов
 
@@ -286,7 +299,7 @@ private fun convertTime(date: Long, hour: Int, minutes: Int): Long {
 
     // 4. Конвертируем обратно в Unix Timestamp по местному времени устройства
     return localDateTime.toInstant(systemTimeZone).toEpochMilliseconds()
-
+}
 // private fun convertTime(date: Long, hour: Int, minuts: Int): Long {
 //     // 1. Извлекаем чистую дату (год, месяц, день) из UTC-миллисекунд календаря
 //     val instantFromCalendar = Instant.fromEpochMilliseconds(date)
