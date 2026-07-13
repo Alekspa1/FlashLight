@@ -278,29 +278,29 @@ fun CalendarContent(
                     // 2. Центральная карточка (занимает всё оставшееся пространство)
 
                     Card(
-                        modifier = Modifier
-                            .padding(start = 5.dp, end = 5.dp)
-                            .weight(1f) // Заставляет карточку занять ВСЁ свободное место между кнопками
-                            .clip(RoundedCornerShape(15.dp))
-                            .border(
-                                2.dp,
-                                if(item.change) theme.cardItemBorderTrue
-                                else if (item.changeAlarm) theme.cardItemBorderAlarm
-                                else theme.cardItemBorderFalse,
-                                RoundedCornerShape(15.dp)
-
-                            ).clickable{onClick(item,CHANGE_ITEM)}
-                        ,
-
-                        shape = RoundedCornerShape(16.dp),
-
-                        colors = CardDefaults.cardColors(
-                            containerColor =
-                                if(item.change) theme.cardItemTrue
-                                else if(item.changeAlarm) theme.cardItemAlarm
-                                else theme.cardItemFalse
-                        )
-                    ) {
+    // 1. Используем встроенный клик карточки вместо .clickable в Modifier
+    onClick = { onClick(item, CHANGE_ITEM) }, 
+    
+    modifier = Modifier
+        .padding(horizontal = 5.dp)
+        .weight(1f)
+        // 2. Убрали .clip() — он больше не нужен
+        .border(
+            width = 2.dp,
+            color = if (item.change) theme.cardItemBorderTrue
+                    else if (item.changeAlarm) theme.cardItemBorderAlarm
+                    else theme.cardItemBorderFalse,
+            shape = cardShape // Используем ту же переменную формы
+        ),
+        
+    shape = cardShape, // Синхронизировали радиус (теперь ровно 15.dp)
+    
+    colors = CardDefaults.cardColors(
+        containerColor = if (item.change) theme.cardItemTrue
+                         else if (item.changeAlarm) theme.cardItemAlarm
+                         else theme.cardItemFalse
+    )
+) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
