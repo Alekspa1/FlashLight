@@ -232,7 +232,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
             composable("settings_screen") {
                 // Сюда мы подставим твой будущий Composable-экран настроек
                 // Передаем лямбду возврата назад (popBackStack)
-                SettingsScreen(onBack = { navController.popBackStack() }
+                SettingsScreen(viewModel = viewModel, onBack = { navController.popBackStack() }
                               )
             }
         }
