@@ -459,15 +459,8 @@ fun Day(
                 .size(30.dp)
                 .clip(CircleShape)
                 // 1. Задаем СПЛОШНОЙ ФОН для текущего дня (только если он НЕ выбран пользователем)
-                .background(
-                    color = if (isToday && !isSelected) theme.textDesc else Color.Transparent
-                )
-                // 2. ДОБАВЛЯЕМ ОБВОДКУ для выбранного дня
-                .then(
-                    if (isSelected) {
+                .background( if (isSelected) {
                         Modifier.border(width = 2.dp, color = theme.textColor, shape = CircleShape)
-                    } else {
-                        Modifier
                     }
                 ),
             contentAlignment = Alignment.Center
@@ -476,7 +469,7 @@ fun Day(
                 text = day.date.dayOfMonth.toString(),
                 // Если день сегодняшний, можно сделать текст белым, даже если он не выбран
                 color = when {
-                    isSelected -> theme.textColor
+                    isSelected -> Color.Red
                     isToday -> theme.textColor
                     isCurrentMonth -> theme.textColor
                     else -> theme.textDesc
