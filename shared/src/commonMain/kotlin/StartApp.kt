@@ -421,7 +421,9 @@ fun StartAppContent(
                                         HorizontalDivider(thickness = 2.dp, color = theme.iconTint)
 
                                         // Кнопка Премиум
-                                        Row(modifier = Modifier.fillMaxWidth().padding(6.dp),
+                                        Row(modifier = Modifier.fillMaxWidth()
+                                                .clickable { onClick(PREMIUM_CLICK) }
+                                                .padding(6.dp),
                                             verticalAlignment = Alignment.CenterVertically){
                                             Icon(
                                                 imageVector = theme.iconDrawerPremium,
@@ -436,7 +438,8 @@ fun StartAppContent(
                                                 fontSize = size.drawerBottomMenuText,
                                                 modifier = Modifier
                                                     .fillMaxWidth().padding(start = 4.dp)
-                                                    .clickable { onClick(PREMIUM_CLICK) },
+                                                    //.clickable { onClick(PREMIUM_CLICK) }
+                                                ,
                                                 fontWeight = FontWeight.Bold
 
                                             )
@@ -447,7 +450,9 @@ fun StartAppContent(
                                         HorizontalDivider(thickness = 2.dp, color = Color.White)
 
                                         // Кнопка Обновления
-                                        Row(modifier = Modifier.fillMaxWidth().padding(6.dp),
+                                        Row(modifier = Modifier.fillMaxWidth()
+                                                .clickable { onClick(UPGRATE_CLICK) }
+                                                .padding(6.dp),
                                             verticalAlignment = Alignment.CenterVertically){
                                             Icon(
                                                 imageVector = if(update) theme.iconDrawerUpdateOn else theme.iconDrawerUpdateOff,
@@ -461,7 +466,8 @@ fun StartAppContent(
                                                 fontSize = size.drawerBottomMenuText,
                                                 modifier = Modifier
                                                     .fillMaxWidth().padding(start = 4.dp)
-                                                    .clickable { onClick(UPGRATE_CLICK) },
+                                                   // .clickable { onClick(UPGRATE_CLICK) }
+                                                ,
                                                 fontWeight = FontWeight.Bold
 
                                             )
@@ -471,7 +477,9 @@ fun StartAppContent(
                                         HorizontalDivider(thickness = 2.dp, color = Color.White)
 
                                         // Кнопка Настройки
-                                        Row(modifier = Modifier.fillMaxWidth().padding(6.dp),
+                                        Row(modifier = Modifier.fillMaxWidth()
+                                                .clickable { onClick(SETTINGS_CLICK) }
+                                                .padding(6.dp),
                                             verticalAlignment = Alignment.CenterVertically){
                                             Icon(
                                                 imageVector = theme.iconDrawerSettigs,
@@ -485,7 +493,8 @@ fun StartAppContent(
                                                 fontSize = size.drawerBottomMenuText,
                                                 modifier = Modifier
                                                     .fillMaxWidth().padding(start = 4.dp)
-                                                    .clickable { onClick(SETTINGS_CLICK) },
+                                                    //.clickable { onClick(SETTINGS_CLICK) }
+                                                ,
                                                 fontWeight = FontWeight.Bold
 
                                             )
