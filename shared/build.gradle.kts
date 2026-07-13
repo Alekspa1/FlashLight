@@ -56,7 +56,7 @@ kotlin {
 
             implementation("io.github.vinceglb:filekit-compose:0.8.7")
             implementation("com.kizitonwose.calendar:compose-multiplatform:2.10.1")
-
+            implementation("org.jetbrains.androidx.navigationevent:navigationevent-compose:1.1.0")
             // Зависимости Coil (3.5.0)
             implementation("io.coil-kt.coil3:coil-compose:3.3.0")
             implementation("org.jetbrains.androidx.navigation:navigation-compose:2.9.2")

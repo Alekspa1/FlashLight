@@ -94,7 +94,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.navigation.compose.composable
+import androidx.compose.ui.ExperimentalComposeUiApi
+
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 
 @Composable
 fun StartApp(viewModel: MainViewModel = koinViewModel()) {
@@ -189,7 +193,10 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
             startDestination = "main_screen" // По умолчанию показываем шторку и пейджер
         ) {
             // ЭКРАН №1: Твоё приложение со шторкой
-            composable("main_screen") {
+            composable(route = "main_screen",
+                popEnterTransition = {
+                    androidx.compose.animation.EnterTransition.None
+                }) {
                 StartAppContent(
                     categories = categories,
                     toastEvents = viewModel.toast,
@@ -235,20 +242,22 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
 
             // ЭКРАН №2: Абсолютно новый экран настроек без Дравера!
             composable(
-    route = "settings_screen",
-    enterTransition = {
-        slideInHorizontally(
-            animationSpec = tween(300),
-            initialOffsetX = { -it } // Исправлено: initialOffsetX вместо initialOffset
-        )
-    },
-    exitTransition = {
-        slideOutHorizontally(
-            animationSpec = tween(300),
-            targetOffsetX = { it } // Исправлено: targetOffsetX вместо targetOffset
-        )
-    }
-) {
+                route = "settings_screen",
+                // 1. ОТКРЫТИЕ: экран выезжает из-за левого края (слева направо)
+                enterTransition = {
+                    slideInHorizontally(
+                        animationSpec = tween(300),
+                        initialOffsetX = { -it } // Появляется СЛЕВА
+                    )
+                },
+                // 2. НАЗАД: экран уезжает обратно за левый край (справа налево)
+                popExitTransition = {
+                    slideOutHorizontally(
+                        animationSpec = tween(300),
+                        targetOffsetX = { -it } // Уезжает СЛЕВА
+                    )
+                }
+            ) {
                 // Сюда мы подставим твой будущий Composable-экран настроек
                 // Передаем лямбду возврата назад (popBackStack)
                 SettingsScreen(viewModel = viewModel, onBack = { navController.popBackStack() }
@@ -263,6 +272,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
 
 //}
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun StartAppContent(
     categories: List<ListCategory> = emptyList(),
@@ -344,7 +354,7 @@ fun StartAppContent(
 
                                         ) {
                                         // Категория: Повседневные
-                                         if(isCommonMode){
+                                         if(!isCommonMode){
                                         item {
                                             Row(
                                                 modifier = Modifier
@@ -651,13 +661,22 @@ fun StartAppContent(
                                 }
                             },
                             ) { innerPadding ->
-                            
-                           // openPager(innerPadding, onOpenDrawer,pagerState)
-                            BackHandler(enabled = drawerState.isOpen) {
-    scope.launch {
-        drawerState.close()
-    }
-                            } 
+
+
+                            val navigationEventState = rememberNavigationEventState(
+                                currentInfo = NavigationEventInfo.None
+                            )
+
+
+                            NavigationBackHandler(
+                                state = navigationEventState,
+                                isBackEnabled = drawerState.isOpen, // Работает только когда drawer открыт
+                                onBackCompleted = {
+                                    scope.launch {
+                                        drawerState.close() // Закрываем drawer при успешном нажатии/жесте "Назад"
+                                    }
+                                }
+                            )
 
                             NavHost(
                             navController = localNavController,
