@@ -135,143 +135,235 @@ import kotlinx.datetime.atStartOfDayIn
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateDateInAlarmDialog(viewModel: MainViewModel) {
-    // 1. Ваши родные рабочие строки получения времени устройства
-    val kotlinInstant = kotlin.time.Clock.System.now()
-    val nowInstant = kotlinx.datetime.Instant.fromEpochMilliseconds(kotlinInstant.toEpochMilliseconds())
+    // 1. Берем системное время устройства через кроссплатформенный Clock
+    val nowInstant = kotlinx.datetime.Clock.System.now()
+    val todayDate = nowInstant.toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault()).date
 
-    val todayDate = nowInstant
-        .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
-        .date
-
-    // 2. ✅ ИСПРАВЛЕНО: Заменили TimeZone.UTC на системный часовой пояс устройства.
-    // Сборка 00:00:00 теперь идет строго по времени телефона.
-    val todayLocalMillis = kotlinx.datetime.LocalDateTime(
-        year = todayDate.year,
-        monthNumber = todayDate.monthNumber,
-        dayOfMonth = todayDate.dayOfMonth,
-        hour = 0, minute = 0, second = 0, nanosecond = 0
-    ).toInstant(kotlinx.datetime.TimeZone.currentSystemDefault()).toEpochMilliseconds()
+    // 2. Считаем начало сегодняшнего дня в UTC миллисекундах
+    val todayUtcMillis = remember(todayDate) {
+        kotlinx.datetime.LocalDateTime(
+            year = todayDate.year,
+            monthNumber = todayDate.monthNumber,
+            dayOfMonth = todayDate.dayOfMonth,
+            hour = 0, minute = 0, second = 0, nanosecond = 0
+        ).toInstant(kotlinx.datetime.TimeZone.UTC).toEpochMilliseconds()
+    }
 
     val item = viewModel.showDialog.item ?: return
-    
-    // Инициализируем календарь
+
+    // 3. Инициализируем стейт. rememberDatePickerState отлично работает в KMP
     val datePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = if (item.alarmTime == 0L) todayLocalMillis else item.alarmTime
+        initialSelectedDateMillis = if (item.alarmTime == 0L) todayUtcMillis else item.alarmTime,
+        selectableDates = remember(todayUtcMillis, todayDate.year) {
+            object : SelectableDates {
+                // Валидация дней (utcTimeMillis приходит от M3 в UTC)
+                override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                    return utcTimeMillis >= todayUtcMillis
+                }
+
+                // Валидация годов (чтобы не мотать календарь назад)
+                override fun isSelectableYear(year: Int): Boolean {
+                    return year >= todayDate.year
+                }
+            }
+        }
     )
-    
-    var errorMessage by remember { mutableStateOf<String?>(null) } 
-    
+
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
     LaunchedEffect(datePickerState.selectedDateMillis) {
-        errorMessage = null 
+        errorMessage = null
     }
-    
+
     DatePickerDialog(
         onDismissRequest = { viewModel.showDialog = DialogState() },
         confirmButton = {
-            TextButton(onClick = {
-                val date = datePickerState.selectedDateMillis ?: 0L
+            TextButton(
+                // Кнопка активна, только если дата выбрана
+                enabled = datePickerState.selectedDateMillis != null,
+                onClick = {
+                    val dateMillis = datePickerState.selectedDateMillis ?: return@TextButton
 
-                // Расшифровываем выбранную юзером дату строго по времени телефона
-                val selectedDate = kotlinx.datetime.Instant
-                    .fromEpochMilliseconds(date)
-                    .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
-                    .date
+                    // Десериализуем строго по UTC для проверки и сохранения
+                    val selectedDate = kotlinx.datetime.Instant
+                        .fromEpochMilliseconds(dateMillis)
+                        .toLocalDateTime(kotlinx.datetime.TimeZone.UTC)
+                        .date
 
-                // Проверка на прошедшую дату
-                if (selectedDate < todayDate) {
-                    errorMessage = "Вы выбрали дату которая прошла" 
-                } else {
-                    // Передаем дату дальше в диалог времени
-                    viewModel.showDialog = DialogState(TIME, item.copy(alarmTime = date))
+                    if (selectedDate < todayDate) {
+                        errorMessage = "Вы выбрали дату которая прошла"
+                    } else {
+                        // Передаем чистые UTC миллисекунды дальше в TimePicker
+                        viewModel.showDialog = DialogState(TIME, item.copy(alarmTime = dateMillis))
+                    }
                 }
-            }) {
-                Text("Далее")
-            }
+            ) { Text("Далее") }
         },
         dismissButton = {
-            TextButton(onClick = { viewModel.showDialog = DialogState() }) {
-                Text("Отмена")
-            }
+            TextButton(onClick = { viewModel.showDialog = DialogState() }) { Text("Отмена") }
         }
     ) {
         DatePicker(
             state = datePickerState,
             title = {
                 Text(
-    text = errorMessage ?: "Выберите дату",
-    // ✅ ИСПРАВЛЕНО: Заменили Color на MaterialTheme, импорт которого у вас точно есть
-    color = if (errorMessage != null) {
-        MaterialTheme.colorScheme.error 
-    } else {
-        MaterialTheme.colorScheme.onSurfaceVariant
-    },
-    modifier = Modifier.padding(start = 24.dp, top = 16.dp)
-)
+                    text = errorMessage ?: "Выберите дату",
+                    color = if (errorMessage != null) {
+                        MaterialTheme.colorScheme.error
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                    modifier = Modifier.padding(start = 24.dp, top = 16.dp)
+                )
             }
         )
     }
 }
 
+// @OptIn(ExperimentalMaterial3Api::class)
+// @Composable
+// fun CreateTimeInAlarmDialog(date: Long,viewModel: MainViewModel){
+//   val item = viewModel.showDialog.item ?: return
+//     val currentTime: Long = kotlin.time.Clock.System.now().toEpochMilliseconds()
+
+//     val instant = Instant.fromEpochMilliseconds(currentTime)
+
+// // 2. Получаем локальное время для часового пояса устройства
+//     val systemTZ = TimeZone.currentSystemDefault()
+//     val currentDateTime = instant.toLocalDateTime(systemTZ)
+
+// // 3. Достаем час и минуту в формате Int
+//     val currentHour: Int = currentDateTime.hour
+//     val currentMinute: Int = currentDateTime.minute
+
+//     currentTime.hours
+//     val timePickerState = rememberTimePickerState(
+//         initialHour = currentHour,
+//         initialMinute = currentMinute,
+//         is24Hour = true // Это принудительно включает 24-часовой формат и убирает кнопки AM/PM
+//     )
+//   var errorMessage by remember {mutableStateOf<String?>(null)} 
+//   LaunchedEffect(timePickerState.hour, timePickerState.minute) {
+//     errorMessage = null // Сбрасываем ошибку, если пользователь выбрал другую дату
+// }
+//  AlertDialog(
+//             onDismissRequest = { viewModel.showDialog = DialogState() },
+//             confirmButton = {
+//                 TextButton(onClick = {
+//                     val hour = timePickerState.hour
+//                     val minute = timePickerState.minute
+                    
+
+//                     val timeAlarm = convertTime(date,hour,minute)
+                    
+//                     if(timeAlarm < currentTime){
+//                      errorMessage = "Вы выбрали время которое прошло"   
+//                     }
+//                     else{
+//                       viewModel.showDialog = DialogState(ACTION,item.copy(alarmTime = timeAlarm)) 
+//                     }
+                    
+                    
+                   
+//                 }) {
+//                     Text("Готово")
+//                 }
+//             },
+//             dismissButton = {
+//     TextButton(onClick = {
+//             viewModel.showDialog = DialogState(CommonConst.NOTIFICATION, item)
+//     }) {
+//         Text("Назад")
+//     }
+// },
+//             text = {
+//              Column(){
+//               TimePicker(state = timePickerState )
+//               errorMessage?.let { errorText ->
+//                     Text(
+//                         text = errorText,
+//                         color = MaterialTheme.colorScheme.error,
+//                         style = MaterialTheme.typography.bodyMedium,
+//                         modifier = Modifier.padding(top = 8.dp)
+//                     )
+//                 }
+//              }
+                
+//             }
+//         )
+// }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateTimeInAlarmDialog(date: Long,viewModel: MainViewModel){
-  val item = viewModel.showDialog.item ?: return
+fun CreateTimeInAlarmDialog(date: Long, viewModel: MainViewModel) {
+    val item = viewModel.showDialog.item ?: return
     val currentTime: Long = kotlin.time.Clock.System.now().toEpochMilliseconds()
 
     val instant = Instant.fromEpochMilliseconds(currentTime)
 
-// 2. Получаем локальное время для часового пояса устройства
+    // 2. Получаем локальное время для часового пояса устройства
     val systemTZ = TimeZone.currentSystemDefault()
     val currentDateTime = instant.toLocalDateTime(systemTZ)
 
-// 3. Достаем час и минуту в формате Int
+    // 3. Достаем час и минуту в формате Int
     val currentHour: Int = currentDateTime.hour
     val currentMinute: Int = currentDateTime.minute
 
-    currentTime.hours
+    // ✅ ИСПРАВЛЕНО: Если мы редактируем существующее дело, берем часы и минуты из базы данных, 
+    // а не сбрасываем их каждый раз на текущее время устройства.
+    val initialHour = if (item.alarmTime != 0L) {
+        Instant.fromEpochMilliseconds(item.alarmTime).toLocalDateTime(systemTZ).hour
+    } else {
+        currentHour
+    }
+    
+    val initialMinute = if (item.alarmTime != 0L) {
+        Instant.fromEpochMilliseconds(item.alarmTime).toLocalDateTime(systemTZ).minute
+    } else {
+        currentMinute
+    }
+
     val timePickerState = rememberTimePickerState(
-        initialHour = currentHour,
-        initialMinute = currentMinute,
+        initialHour = initialHour,
+        initialMinute = initialMinute,
         is24Hour = true // Это принудительно включает 24-часовой формат и убирает кнопки AM/PM
     )
-  var errorMessage by remember {mutableStateOf<String?>(null)} 
-  LaunchedEffect(timePickerState.hour, timePickerState.minute) {
-    errorMessage = null // Сбрасываем ошибку, если пользователь выбрал другую дату
-}
- AlertDialog(
-            onDismissRequest = { viewModel.showDialog = DialogState() },
-            confirmButton = {
-                TextButton(onClick = {
-                    val hour = timePickerState.hour
-                    val minute = timePickerState.minute
-                    
-
-                    val timeAlarm = convertTime(date,hour,minute)
-                    
-                    if(timeAlarm < currentTime){
-                     errorMessage = "Вы выбрали время которое прошло"   
-                    }
-                    else{
-                      viewModel.showDialog = DialogState(ACTION,item.copy(alarmTime = timeAlarm)) 
-                    }
-                    
-                    
-                   
-                }) {
-                    Text("Готово")
-                }
-            },
-            dismissButton = {
-    TextButton(onClick = {
-            viewModel.showDialog = DialogState(CommonConst.NOTIFICATION, item)
-    }) {
-        Text("Назад")
+    
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    
+    LaunchedEffect(timePickerState.hour, timePickerState.minute) {
+        errorMessage = null // Сбрасываем ошибку, если пользователь выбрал другую дату
     }
-},
-            text = {
-             Column(){
-              TimePicker(state = timePickerState )
-              errorMessage?.let { errorText ->
+    
+    AlertDialog(
+        onDismissRequest = { viewModel.showDialog = DialogState() },
+        confirmButton = {
+            TextButton(onClick = {
+                val hour = timePickerState.hour
+                val minute = timePickerState.minute
+
+                val timeAlarm = convertTime(date, hour, minute)
+
+                if (timeAlarm < currentTime) {
+                    errorMessage = "Вы выбрали время которое прошло"
+                } else {
+                    viewModel.showDialog = DialogState(ACTION, item.copy(alarmTime = timeAlarm))
+                }
+            }) {
+                Text("Готово")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = {
+                viewModel.showDialog = DialogState(CommonConst.NOTIFICATION, item)
+            }) {
+                Text("Назад")
+            }
+        },
+        text = {
+            Column() {
+                TimePicker(state = timePickerState)
+                errorMessage?.let { errorText ->
                     Text(
                         text = errorText,
                         color = MaterialTheme.colorScheme.error,
@@ -279,11 +371,9 @@ fun CreateTimeInAlarmDialog(date: Long,viewModel: MainViewModel){
                         modifier = Modifier.padding(top = 8.dp)
                     )
                 }
-             }
-                
             }
-        )
-}
+        }
+    )
 
 @Composable
 fun CreateActionInAlarmDialog(viewModel: MainViewModel){
@@ -356,13 +446,31 @@ fun CreateActionInAlarmDialog(viewModel: MainViewModel){
     }
 )
 }
+// private fun convertTime(date: Long, hour: Int, minutes: Int): Long {
+//     // Получаем текущий часовой пояс устройства пользователя
+//     val systemTimeZone = TimeZone.currentSystemDefault()
+
+//     // 1. ✅ ИСПРАВЛЕНО: Извлекаем чистую дату с учетом часового пояса ТЕЛЕФОНА
+//     val instantFromCalendar = Instant.fromEpochMilliseconds(date)
+//     val localDate = instantFromCalendar.toLocalDateTime(systemTimeZone).date
+
+//     // 2. Создаем время на основе выбранных пользователем часов и минут
+//     val localTime = LocalTime(hour, minutes, 0, 0)
+
+//     // 3. Объединяем их в единый LocalDateTime
+//     val localDateTime = LocalDateTime(localDate, localTime)
+
+//     // 4. Конвертируем обратно в Unix Timestamp по местному времени устройства
+//     return localDateTime.toInstant(systemTimeZone).toEpochMilliseconds()
+// }
 private fun convertTime(date: Long, hour: Int, minutes: Int): Long {
-    // Получаем текущий часовой пояс устройства пользователя
     val systemTimeZone = TimeZone.currentSystemDefault()
 
-    // 1. ✅ ИСПРАВЛЕНО: Извлекаем чистую дату с учетом часового пояса ТЕЛЕФОНА
+    // Так как твой DatePicker на предыдущем шаге возвращает миллисекунды в UTC,
+    // извлекать чистые год-месяц-день мы обязаны тоже СТРОГО по TimeZone.UTC.
+    // Если же дата пришла из локального календаря, замени тут TimeZone.UTC на systemTimeZone.
     val instantFromCalendar = Instant.fromEpochMilliseconds(date)
-    val localDate = instantFromCalendar.toLocalDateTime(systemTimeZone).date
+    val localDate = instantFromCalendar.toLocalDateTime(TimeZone.UTC).date
 
     // 2. Создаем время на основе выбранных пользователем часов и минут
     val localTime = LocalTime(hour, minutes, 0, 0)
@@ -370,24 +478,9 @@ private fun convertTime(date: Long, hour: Int, minutes: Int): Long {
     // 3. Объединяем их в единый LocalDateTime
     val localDateTime = LocalDateTime(localDate, localTime)
 
-    // 4. Конвертируем обратно в Unix Timestamp по местному времени устройства
+    // 4. Конвертируем обратно в Unix Timestamp по МЕСТНОМУ времени устройства для сохранения в БД
     return localDateTime.toInstant(systemTimeZone).toEpochMilliseconds()
 }
-// private fun convertTime(date: Long, hour: Int, minuts: Int): Long {
-//     // 1. Извлекаем чистую дату (год, месяц, день) из UTC-миллисекунд календаря
-//     val instantFromCalendar = Instant.fromEpochMilliseconds(date)
-//     val localDate = instantFromCalendar.toLocalDateTime(TimeZone.UTC).date
-
-//     // 2. Создаем время на основе выбранных часов и минут
-//     val localTime = LocalTime(hour, minuts, 0, 0)
-
-//     // 3. Объединяем их в единый LocalDateTime
-//     val localDateTime = LocalDateTime(localDate, localTime)
-
-//     // 4. Конвертируем обратно в Unix Timestamp с учетом часового пояса устройства
-//     val systemTimeZone = TimeZone.currentSystemDefault()
-//     return localDateTime.toInstant(systemTimeZone).toEpochMilliseconds()
-// }
 
 
   
