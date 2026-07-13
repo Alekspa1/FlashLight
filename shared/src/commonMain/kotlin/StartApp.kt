@@ -384,22 +384,16 @@ fun StartAppContent(
                                                         .border(3.dp, BorderNeonColor, RoundedCornerShape(10.dp))
                                                         // 3. Добавляем клик (эффект волны подстроится под форму автоматически)
                                                         .clickable {
-    // 1. Переключаем режим шторки (обязательно rememberSaveable!)
-    isCommonMode = !isCommonMode 
-    
-    // 2. Четко переключаем экраны "тумблером" без засорения бэкстека
-    if (isCommonMode) {
-        localNavController.navigate("common_screen") {
-            popUpTo("personal_pager_hub") { saveState = true }
-            launchSingleTop = true
-            restoreState = true
+    isCommonMode = !isCommonMode
+    val targetRoute = if (isCommonMode) "common_screen" else "personal_pager_hub"
+    val popUpRoute = if (isCommonMode) "personal_pager_hub" else "common_screen"
+
+    localNavController.navigate(targetRoute) {
+        popUpTo(popUpRoute) {
+            inclusive = true // Полностью стираем предыдущий экран
+            // saveState = true УБИРАЕМ! Оно несовместимо с полным удалением в данном сценарии
         }
-    } else {
-        localNavController.navigate("personal_pager_hub") {
-            popUpTo("common_screen") { saveState = true }
-            launchSingleTop = true
-            restoreState = true
-        }
+        launchSingleTop = true
     }
 },
                                                     shape = RoundedCornerShape(10.dp),
