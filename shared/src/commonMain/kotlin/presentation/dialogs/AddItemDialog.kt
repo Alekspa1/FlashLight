@@ -187,7 +187,9 @@ fun AddOrChangeItemDialog(
                                 Text(text = "Изменить фото")
                             }
                             TextButton(
-                                onClick = { selectedFileUri = "" },
+                                onClick = { 
+                                    selectedFileUri = ""
+                                    originalFileName = ""},
                                 colors = ButtonDefaults.textButtonColors(contentColor = theme.cardItemBorderFalse)
                             ) {
                                 Text(text = "Удалить фото")
