@@ -4,8 +4,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-@Compasable
-fun SettingsScreen(onBack : () -> Untit = {} ){
+@Composable
+fun SettingsScreen(onBack : () -> Unit = {} ){
 
 
   Text(text = "Экран настроек", color = Color.White)
