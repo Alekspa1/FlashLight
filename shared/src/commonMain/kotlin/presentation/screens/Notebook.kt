@@ -63,7 +63,7 @@ fun Notebook(viewModel: MainViewModel,pageIndex: Int){
     NoteBookContent(
         text = viewModel.stateTextNotebook,
         showDialog = viewModel.showDialog,
-        onResultDialog = {dialog-> viewModel.showDialog = dialog},
+       // onResultDialog = {dialog-> viewModel.showDialog = dialog},
         onTextChange = {newtext->
             viewModel.stateTextNotebook = newtext},
         theme = viewModel.themeState,
@@ -77,18 +77,25 @@ fun Notebook(viewModel: MainViewModel,pageIndex: Int){
     fun NoteBookContent(
         text: String,
         showDialog : DialogState = DialogState(),
-        onResultDialog : (DialogState) -> Unit = {},
+       // onResultDialog : (DialogState) -> Unit = {},
         onTextChange : (String) -> Unit = {},
         theme: Theme = ThemeNeon(),
         size: Size = SizeNormal()
         )
     {
+            var openDialog by remember { mutableStateOf(false) }
+            // if(showDialog.isWho == CommonConst.DELETE_DIALOG_ITEM){
+            // DeleteDialog(theme = theme) {result->
+            // if(result) onTextChange("")
+            //  onResultDialog(DialogState())
+            // }
+            // }
 
-            if(showDialog.isWho == CommonConst.DELETE_DIALOG_ITEM){
+            if(openDialog) {
             DeleteDialog(theme = theme) {result->
-            if(result) onTextChange("")
-             onResultDialog(DialogState())
-            }
+             if(result) onTextChange("")
+              openDialog = false
+             }    
             }
 
         Column(modifier = Modifier.fillMaxWidth()) {
@@ -137,7 +144,7 @@ fun Notebook(viewModel: MainViewModel,pageIndex: Int){
                             )
                     }
                     IconButton(modifier = Modifier.size(50.dp).align(Alignment.CenterEnd),
-                        onClick = {onResultDialog(DialogState(CommonConst.DELETE_DIALOG_ITEM))  },
+                        onClick = {openDialog = true},
                     ){
                         Image(
                             painter = painterResource(Res.drawable.ic_del_notebook_neon),
