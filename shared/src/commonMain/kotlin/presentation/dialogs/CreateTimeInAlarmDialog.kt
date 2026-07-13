@@ -79,7 +79,7 @@ val todayLocalMillis = todayDate
     .toEpochMilliseconds()
 
  val item = viewModel.showDialog.item ?: return
- val datePickerState = rememberDatePickerState((if (item.alarmTime == 0L)todayDate else item.alarmTime ))
+ val datePickerState = rememberDatePickerState((if (item.alarmTime == 0L)todayLocalMillis else item.alarmTime ))
   var errorMessage by remember {mutableStateOf<String?>(null)} 
   LaunchedEffect(datePickerState.selectedDateMillis) {
     errorMessage = null // Сбрасываем ошибку, если пользователь выбрал другую дату
@@ -217,7 +217,7 @@ fun CreateActionInAlarmDialog(viewModel: MainViewModel){
    val item = viewModel.showDialog.item ?: return
    val listAction = listOf("Один раз", "Каждый день", "Каждую неделю","Каждый месяц", "Каждый год")
    var selected by remember { mutableStateOf(listAction[0]) }
-   val isPremium = viewModel.premiumState
+   val isPremium = viewModel.premiumState.collectAsState()
   AlertDialog(
     onDismissRequest = { viewModel.showDialog = DialogState() },
     confirmButton = {
@@ -250,7 +250,7 @@ fun CreateActionInAlarmDialog(viewModel: MainViewModel){
                 Column(Modifier.selectableGroup(),
                     verticalArrangement = Arrangement.spacedBy(10.dp) ) {
                     listAction.forEachIndexed {index, text ->
-                      val isOptionEnabled = index == 0 || isPremium.collectAsState().value
+                      val isOptionEnabled = index == 0 || isPremium.value
                         Row( Modifier.fillMaxWidth()
                             .selectable(
                                 selected = (text == selected),
@@ -267,7 +267,7 @@ fun CreateActionInAlarmDialog(viewModel: MainViewModel){
                         }
                     }
 
-                    if (!isPremium.collectAsState().value) {
+                    if (!isPremium.value) {
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         text = "* Повторяющиеся будильники доступны в PREMIUM версии",
