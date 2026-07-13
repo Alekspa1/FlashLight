@@ -26,7 +26,7 @@ import MainViewModel
 import presentation.theme.Size
 import presentation.theme.Theme
 import presentation.theme.ThemeNeon
-
+import androidx.compose.material3.Icon
 @Composable
 fun SettingsScreen(
     viewModel: MainViewModel,
