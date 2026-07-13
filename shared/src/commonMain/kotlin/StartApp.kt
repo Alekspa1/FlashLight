@@ -161,7 +161,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                 }) {
                 StartAppContent(
                     isCommonMode = isCommonMode,
-                     onToggleCommonMode = {isCommonMode = !isCommonMode}
+                     onToggleCommonMode = {isCommonMode = !isCommonMode},
                     categories = categories,
                     toastEvents = viewModel.toast,
                     updateCategory = { category -> viewModel.updateCategory(category) },
@@ -226,7 +226,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                 drawerState.close() 
                     }
 
-                SettingsScreen(viewModel = viewModel, onBack = { navController.popBackStack() }
+                SettingsScreen(viewModel = viewModel, onBack = {navController.popBackStack() }
                               )
             }
         }
@@ -238,7 +238,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
 @Composable
 fun StartAppContent(
     isCommonMode: Boolean,
-     onToggleCommonMode: () -> Unit
+     onToggleCommonMode: () -> Unit = {},
     categories: List<ListCategory> = emptyList(),
     toastEvents: Flow<String> = emptyFlow(),
     updateCategory :(String) ->Unit = {},

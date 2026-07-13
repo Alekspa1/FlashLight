@@ -61,14 +61,7 @@ fun SettingsScreen(
                     .padding(top = 10.dp, bottom = 10.dp)
             ) {
                 IconButton(
-                    onClick = onBack,
-                    modifier = Modifier
-                        .size(40.dp) // layout_width/height="40dp"
-                        .align(Alignment.CenterStart)
-                        .padding(start = 8.dp)
-                ) {
-                    IconButton(
-                                                    onClick = { /* Логика меню */ },
+                                                    onClick = { onBack() },
                                                     modifier = Modifier.size(35.dp)
                                                 ) {
                                                     Icon(
@@ -77,7 +70,7 @@ fun SettingsScreen(
                                                         tint = ThemeNeon().iconDelTint
                                                     )
                                                 }
-                }
+
                 
                 Text(
                     text = "Общие настройки", // tv_settings
