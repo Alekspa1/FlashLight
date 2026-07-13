@@ -57,23 +57,46 @@ import kotlinx.datetime.atStartOfDayIn
 @Composable
 fun CreateDateInAlarmDialog(viewModel: MainViewModel){
 
-    
+    val item = viewModel.showDialog.item ?: return
     val kotlinInstant = kotlin.time.Clock.System.now()
     val nowInstant = kotlinx.datetime.Instant.fromEpochMilliseconds(kotlinInstant.toEpochMilliseconds())
     
-    val todayDate = nowInstant
-        .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
-        .date
-    val todayMillis = kotlinx.datetime.LocalDateTime(
-        year = todayDate.year,
-        monthNumber = todayDate.monthNumber,
-        dayOfMonth = todayDate.dayOfMonth,
-        hour = 0, minute = 0, second = 0, nanosecond = 0
-    ).toInstant(kotlinx.datetime.TimeZone.currentSystemDefault()).toEpochMilliseconds()
+    // val todayDate = nowInstant
+    //     .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
+    //     .date
     
+    // val todayMillis = kotlinx.datetime.LocalDateTime(
+    //     year = todayDate.year,
+    //     monthNumber = todayDate.monthNumber,
+    //     dayOfMonth = todayDate.dayOfMonth,
+    //     hour = 0, minute = 0, second = 0, nanosecond = 0
+    // ).toInstant(kotlinx.datetime.TimeZone.currentSystemDefault()).toEpochMilliseconds()
 
- val item = viewModel.showDialog.item ?: return
- val datePickerState = rememberDatePickerState((if (item.alarmTime == 0L) todayMillis else item.alarmTime ))
+    val localDateTime = kotlinx.datetime.Instant
+    .fromEpochMilliseconds(item.alarmTime)
+    .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
+
+// 2. Берем только год, месяц и день, сбрасываем время в 00:00:00
+// и принудительно переводим эту комбинацию в UTC миллисекунды
+val itemUtcMillis = kotlinx.datetime.LocalDateTime(
+    year = localDateTime.year,
+    monthNumber = localDateTime.monthNumber,
+    dayOfMonth = localDateTime.dayOfMonth,
+    hour = 0, minute = 0, second = 0, nanosecond = 0
+).toInstant(kotlinx.datetime.TimeZone.UTC).toEpochMilliseconds()
+    
+    val todayDateUtc = nowInstant
+    .toLocalDateTime(kotlinx.datetime.TimeZone.UTC)
+    .date
+
+    val todayMillisUtc = kotlinx.datetime.LocalDateTime(
+    year = todayDateUtc.year,
+    monthNumber = todayDateUtc.monthNumber,
+    dayOfMonth = todayDateUtc.dayOfMonth,
+    hour = 0, minute = 0, second = 0, nanosecond = 0
+).toInstant(kotlinx.datetime.TimeZone.UTC).toEpochMilliseconds()
+    
+ val datePickerState = rememberDatePickerState((if (item.alarmTime == 0L) todayMillisUtc else itemUtcMillis ))
   var errorMessage by remember {mutableStateOf<String?>(null)} 
   LaunchedEffect(datePickerState.selectedDateMillis) {
     errorMessage = null // Сбрасываем ошибку, если пользователь выбрал другую дату
@@ -82,19 +105,17 @@ fun CreateDateInAlarmDialog(viewModel: MainViewModel){
             onDismissRequest = { viewModel.showDialog = DialogState() },
             confirmButton = {
                 TextButton(onClick = {
-
+                    
                     val date = datePickerState.selectedDateMillis ?: 0L
-
                     val selectedDate = kotlinx.datetime.Instant
                     .fromEpochMilliseconds(date)
                     .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
                     .date
 
                     // Получаем текущую локальную дату без зачеркнутых классов
-
-
-
-                 if(selectedDate < todayDate) {
+                // if(selectedDate < todayDate)
+                 if(date < todayMillisUtc)
+                    {
                   errorMessage = "Вы выбрали дату которая прошла" 
                  }
                  else viewModel.showDialog = DialogState(TIME,item.copy(alarmTime = date))
@@ -136,8 +157,8 @@ fun CreateDateInAlarmDialog(viewModel: MainViewModel){
 @Composable
 fun CreateTimeInAlarmDialog(date: Long,viewModel: MainViewModel){
   val item = viewModel.showDialog.item ?: return
+    
     val currentTime: Long = kotlin.time.Clock.System.now().toEpochMilliseconds()
-
     val instant = Instant.fromEpochMilliseconds(currentTime)
 
 // 2. Получаем локальное время для часового пояса устройства
@@ -277,13 +298,31 @@ fun CreateActionInAlarmDialog(viewModel: MainViewModel){
     }
 )
 }
+// private fun convertTime(date: Long, hour: Int, minutes: Int): Long {
+//     // Получаем текущий часовой пояс устройства пользователя
+//     val systemTimeZone = TimeZone.currentSystemDefault()
+
+//     // 1. ✅ ИСПРАВЛЕНО: Извлекаем чистую дату с учетом часового пояса ТЕЛЕФОНА
+//     val instantFromCalendar = Instant.fromEpochMilliseconds(date)
+//     val localDate = instantFromCalendar.toLocalDateTime(systemTimeZone).date
+
+//     // 2. Создаем время на основе выбранных пользователем часов и минут
+//     val localTime = LocalTime(hour, minutes, 0, 0)
+
+//     // 3. Объединяем их в единый LocalDateTime
+//     val localDateTime = LocalDateTime(localDate, localTime)
+
+//     // 4. Конвертируем обратно в Unix Timestamp по местному времени устройства
+//     return localDateTime.toInstant(systemTimeZone).toEpochMilliseconds()
+// }
+
 private fun convertTime(date: Long, hour: Int, minutes: Int): Long {
     // Получаем текущий часовой пояс устройства пользователя
     val systemTimeZone = TimeZone.currentSystemDefault()
 
     // 1. ✅ ИСПРАВЛЕНО: Извлекаем чистую дату с учетом часового пояса ТЕЛЕФОНА
     val instantFromCalendar = Instant.fromEpochMilliseconds(date)
-    val localDate = instantFromCalendar.toLocalDateTime(systemTimeZone).date
+    val localDate = instantFromCalendar.toLocalDateTime(TimeZone.UTC).date
 
     // 2. Создаем время на основе выбранных пользователем часов и минут
     val localTime = LocalTime(hour, minutes, 0, 0)
