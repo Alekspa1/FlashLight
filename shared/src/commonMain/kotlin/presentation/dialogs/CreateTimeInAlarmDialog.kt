@@ -51,7 +51,6 @@ import kotlin.time.Duration.Companion.hours
 import androidx.compose.runtime.collectAsState
 
 import kotlinx.datetime.Clock
-import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -72,7 +71,7 @@ fun CreateDateInAlarmDialog(viewModel: MainViewModel){
     // 1. Получаем текущий момент времени напрямую через kotlinx.datetime
     
 val nowInstant = kotlinx.datetime.Clock.System.now()
-val systemTimeZone = kotlinx.datetime.TimeZone.currentSystemDefault()
+val currentTime: Long = nowInstant.toEpochMilliseconds()
 
 // 2. Получаем чистую локальную дату (Год, Месяц, День) телефона
 val todayDate = nowInstant.toLocalDateTime(systemTimeZone).date
