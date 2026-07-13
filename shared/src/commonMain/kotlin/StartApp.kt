@@ -494,7 +494,7 @@ fun StartAppContent(
                                             }
                                         }
                                     } else Text("Временный элемент")
-                                    }
+                                    
 
                                     // 3. КНОПКА ДОБАВЛЕНИЯ (imBAddMenu из XML - над нижним меню)
                                     Box(
