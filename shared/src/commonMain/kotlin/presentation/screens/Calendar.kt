@@ -455,16 +455,20 @@ fun Day(
         verticalArrangement = Arrangement.Center
     ) {
         Box(
-            modifier = Modifier
-                .size(30.dp)
-                .clip(CircleShape)
-                // 1. Задаем СПЛОШНОЙ ФОН для текущего дня (только если он НЕ выбран пользователем)
-                .background( if (isSelected) {
-                        Modifier.border(width = 2.dp, color = theme.textColor, shape = CircleShape)
-                    }
-                ),
-            contentAlignment = Alignment.Center
-        ) {
+    modifier = Modifier
+        .size(30.dp)
+        // 1. Сначала применяем обводку по условию
+        .then(
+            if (isSelected) {
+                Modifier.border(width = 2.dp, color = theme.textColor, shape = CircleShape)
+            } else {
+                Modifier
+            }
+        )
+        // 2. Только потом обрезаем контент изнутри (если необходимо)
+        .clip(CircleShape),
+    contentAlignment = Alignment.Center
+) {
             Text(
                 text = day.date.dayOfMonth.toString(),
                 // Если день сегодняшний, можно сделать текст белым, даже если он не выбран
