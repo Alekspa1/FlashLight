@@ -107,7 +107,7 @@ fun CalendarContent(
     size : Size = SizeNormal(),
     onClick : (Item, Int) -> Unit = {_,_->},
     onAddItem : (Long) -> Unit = {},
-    message : (String) -> ={}) {
+    message : (String) -> Unit = {} ) {
 
     val today = remember { Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date }
     val currentMonth = remember { YearMonth.now() }
@@ -292,10 +292,10 @@ fun CalendarContent(
             color = if (item.change) theme.cardItemBorderTrue
                     else if (item.changeAlarm) theme.cardItemBorderAlarm
                     else theme.cardItemBorderFalse,
-            shape = cardShape // Используем ту же переменную формы
+            shape = RoundedCornerShape(15.dp) // Используем ту же переменную формы
         ),
         
-    shape = cardShape, // Синхронизировали радиус (теперь ровно 15.dp)
+    shape = RoundedCornerShape(15.dp), // Синхронизировали радиус (теперь ровно 15.dp)
     
     colors = CardDefaults.cardColors(
         containerColor = if (item.change) theme.cardItemTrue
