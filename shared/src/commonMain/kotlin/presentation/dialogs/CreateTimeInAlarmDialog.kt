@@ -270,22 +270,38 @@ fun CreateActionInAlarmDialog(viewModel: MainViewModel){
     }
 )
 }
+private fun convertTime(date: Long, hour: Int, minutes: Int): Long {
+    // Получаем текущий часовой пояс устройства пользователя
+    val systemTimeZone = TimeZone.currentSystemDefault()
 
-private fun convertTime(date: Long, hour: Int, minuts: Int): Long {
-    // 1. Извлекаем чистую дату (год, месяц, день) из UTC-миллисекунд календаря
+    // 1. ✅ ИСПРАВЛЕНО: Извлекаем чистую дату с учетом часового пояса ТЕЛЕФОНА
     val instantFromCalendar = Instant.fromEpochMilliseconds(date)
-    val localDate = instantFromCalendar.toLocalDateTime(TimeZone.UTC).date
+    val localDate = instantFromCalendar.toLocalDateTime(systemTimeZone).date
 
-    // 2. Создаем время на основе выбранных часов и минут
-    val localTime = LocalTime(hour, minuts, 0, 0)
+    // 2. Создаем время на основе выбранных пользователем часов и минут
+    val localTime = LocalTime(hour, minutes, 0, 0)
 
     // 3. Объединяем их в единый LocalDateTime
     val localDateTime = LocalDateTime(localDate, localTime)
 
-    // 4. Конвертируем обратно в Unix Timestamp с учетом часового пояса устройства
-    val systemTimeZone = TimeZone.currentSystemDefault()
+    // 4. Конвертируем обратно в Unix Timestamp по местному времени устройства
     return localDateTime.toInstant(systemTimeZone).toEpochMilliseconds()
-}
+
+// private fun convertTime(date: Long, hour: Int, minuts: Int): Long {
+//     // 1. Извлекаем чистую дату (год, месяц, день) из UTC-миллисекунд календаря
+//     val instantFromCalendar = Instant.fromEpochMilliseconds(date)
+//     val localDate = instantFromCalendar.toLocalDateTime(TimeZone.UTC).date
+
+//     // 2. Создаем время на основе выбранных часов и минут
+//     val localTime = LocalTime(hour, minuts, 0, 0)
+
+//     // 3. Объединяем их в единый LocalDateTime
+//     val localDateTime = LocalDateTime(localDate, localTime)
+
+//     // 4. Конвертируем обратно в Unix Timestamp с учетом часового пояса устройства
+//     val systemTimeZone = TimeZone.currentSystemDefault()
+//     return localDateTime.toInstant(systemTimeZone).toEpochMilliseconds()
+// }
 
 
   
