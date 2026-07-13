@@ -1,3 +1,5 @@
+package presentation.screens
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -23,6 +25,7 @@ import org.jetbrains.compose.resources.painterResource
 import MainViewModel
 import presentation.theme.Size
 import presentation.theme.Theme
+import presentation.theme.ThemeNeon
 
 @Composable
 fun SettingsScreen(
