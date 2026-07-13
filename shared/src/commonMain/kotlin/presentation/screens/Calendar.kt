@@ -469,8 +469,8 @@ fun Day(
                 text = day.date.dayOfMonth.toString(),
                 // Если день сегодняшний, можно сделать текст белым, даже если он не выбран
                 color = when {
-                    isSelected -> Color.Red
-                    isToday -> theme.textColor
+                    isSelected -> theme.textColor
+                    isToday -> Color.Red
                     isCurrentMonth -> theme.textColor
                     else -> theme.textDesc
                 },
@@ -505,7 +505,7 @@ fun MonthHeader(daysOfWeek: List<DayOfWeek>, theme: Theme) {
                 modifier = Modifier.weight(1f), // Занимает ровно 1/7 ширины экрана
                 textAlign = TextAlign.Center,    // Текст строго по центру своей колонки
                 text = dayOfWeek.displayText(),
-                color = theme.textDesc, // Сделаем чуть блеклыми, чтобы не сливались с числами
+                color = theme.textColor, // Сделаем чуть блеклыми, чтобы не сливались с числами
                 fontSize = 14.sp
             )
         }
