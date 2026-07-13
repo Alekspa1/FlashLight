@@ -423,7 +423,7 @@ fun CalendarContent(
     } else {
         // Конвертируем в миллисекунды только если дата валидна
         val selectedDayMillis = selectedDate
-            .atStartOfDayIn(systemTimeZone)
+            .atStartOfDayIn(TimeZone.UTC)
             .toEpochMilliseconds()
         onAddItem(selectedDayMillis)
     }
