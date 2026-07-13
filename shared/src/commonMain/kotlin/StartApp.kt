@@ -84,6 +84,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 
+import presentation.screens.SettingsScreen
+
 @Composable
 fun StartApp(viewModel: MainViewModel = koinViewModel()) {
     val theme = viewModel.themeState
@@ -202,9 +204,22 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                             }
                         }
                     },
-                    onClickCategory = { listCategory, action ->
-                        // Твоя логика кликов по категориям (INSERT/DELETE)
+                        onClickCategory = { listCategory, action ->
+                when (action) {
+                    INSERT_DIALOG_CATEGORY -> {
+                        if (premiumState) {
+                            viewModel.showDialog =
+                                DialogState(INSERT_DIALOG_CATEGORY, category = listCategory)
+                        } else viewModel.sendMessage("Категории доступны в PREMIUM версии")
                     }
+
+                    DELETE_DIALOG_CATEGORY -> {
+                        viewModel.showDialog =
+                            DialogState(DELETE_DIALOG_CATEGORY, category = listCategory)
+                    }
+                }
+
+            }
                 )
             }
 
