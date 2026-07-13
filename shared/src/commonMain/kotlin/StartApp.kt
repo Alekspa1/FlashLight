@@ -235,22 +235,20 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
 
             // ЭКРАН №2: Абсолютно новый экран настроек без Дравера!
             composable(
-                      route = "settings_screen",
-        // Когда ОТКРЫВАЕТСЯ common_screen (он идет слева направо)
-        enterTransition = {
-            slideInHorizontally(
-                animationSpec = tween(300),
-                initialOffset = { -it } // Начало за левой границей экрана (-fullWidth)
-            )
-        },
-        // Когда common_screen ЗАКРЫВАЕТСЯ и уходит со сцены
-        exitTransition = {
-            slideOutHorizontally(
-                animationSpec = tween(300),
-                targetOffset = { it } // Уходит направо за границу экрана (+fullWidth)
-            )
-        }
-                      ) {
+    route = "settings_screen",
+    enterTransition = {
+        slideInHorizontally(
+            animationSpec = tween(300),
+            initialOffsetX = { -it } // Исправлено: initialOffsetX вместо initialOffset
+        )
+    },
+    exitTransition = {
+        slideOutHorizontally(
+            animationSpec = tween(300),
+            targetOffsetX = { it } // Исправлено: targetOffsetX вместо targetOffset
+        )
+    }
+) {
                 // Сюда мы подставим твой будущий Composable-экран настроек
                 // Передаем лямбду возврата назад (popBackStack)
                 SettingsScreen(viewModel = viewModel, onBack = { navController.popBackStack() }
