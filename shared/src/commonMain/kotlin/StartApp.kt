@@ -659,6 +659,11 @@ fun StartAppContent(
                             startDestination = "personal_pager_hub",
                                 
                             ) {
+                                BackHandler(enabled = drawerState.isOpen) {
+        scope.launch {
+            drawerState.close()
+        }
+    }
                                 // Точка А: Твой текущий пейджер (Блокнот + Будильник)
                                 composable("personal_pager_hub") {
                                 openPager(innerPadding, onOpenDrawer, pagerState)
