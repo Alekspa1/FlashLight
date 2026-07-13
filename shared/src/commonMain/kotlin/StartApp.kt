@@ -384,14 +384,25 @@ fun StartAppContent(
                                                         .border(3.dp, BorderNeonColor, RoundedCornerShape(10.dp))
                                                         // 3. Добавляем клик (эффект волны подстроится под форму автоматически)
                                                         .clickable {
-                                                            // scope.launch {
-                                                            //     drawerState.close()
-                                                            // }
+                                                            // 1. Меняем режим шторки (обязательно используем rememberSaveable!)
                                                             isCommonMode = !isCommonMode 
-                                                           if(isCommonMode) localNavController.navigate("common_screen") 
-                                                           else localNavController.popBackStack() 
-                                                            
-                                                        },
+    
+                                                            // 2. Жестко переключаем экраны без накопления стека
+                                                                if (isCommonMode) {
+                                                                localNavController.navigate("common_screen") {
+                                                                // Очищаем историю до домашнего экрана и не копируем экраны
+                                                                popUpTo("personal_pager_hub") { saveState = true }
+                                                                    launchSingleTop = true
+                                                                restoreState = true
+                                                                        }
+                                                                } else {
+                                                                localNavController.navigate("personal_pager_hub") {
+                                                                popUpTo("common_screen") { saveState = true }
+                                                                launchSingleTop = true
+                                                                            restoreState = true
+                                                                        }
+                                                                                    }
+                                                            },
                                                     shape = RoundedCornerShape(10.dp),
                                                     // Прозрачный контейнер у Card обязателен, чтобы работал наш кастомный background
                                                     colors = CardDefaults.cardColors(containerColor = Color.Transparent)
