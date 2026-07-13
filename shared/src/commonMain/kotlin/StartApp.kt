@@ -257,9 +257,11 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                         targetOffsetX = { -it } // Уезжает СЛЕВА
                     )
                 }
-            ) {
-                // Сюда мы подставим твой будущий Composable-экран настроек
-                // Передаем лямбду возврата назад (popBackStack)
+            ) {  
+                LaunchedEffect(Unit) {
+                drawerState.close() 
+                    }
+
                 SettingsScreen(viewModel = viewModel, onBack = { navController.popBackStack() }
                               )
             }
