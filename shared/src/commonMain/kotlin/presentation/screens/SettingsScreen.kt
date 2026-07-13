@@ -20,7 +20,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
-import presentation.viewmodels.MainViewModel
+import MainViewModel
+import presentation.theme.Size
+import presentation.theme.Theme
 
 @Composable
 fun SettingsScreen(
@@ -62,11 +64,16 @@ fun SettingsScreen(
                         .align(Alignment.CenterStart)
                         .padding(start = 8.dp)
                 ) {
-                    Image(
-                        painter = painterResource(theme.iconDrawerEveryday), // Поменяй на свою иконку ic_back, когда добавишь в тему
-                        contentDescription = "Назад",
-                        modifier = Modifier.fillMaxSize()
-                    )
+                    IconButton(
+                                                    onClick = { /* Логика меню */ },
+                                                    modifier = Modifier.size(35.dp)
+                                                ) {
+                                                    Icon(
+                                                        imageVector = theme.iconDrawerEveryday, // Или ваша иконка ic_menu
+                                                        contentDescription = "Меню",
+                                                        tint = ThemeNeon().iconDelTint
+                                                    )
+                                                }
                 }
                 
                 Text(
