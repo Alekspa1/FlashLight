@@ -234,10 +234,10 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
     }
 }
         
-    }
+  //  }
 
 
-}
+//}
 
 @Composable
 fun StartAppContent(
