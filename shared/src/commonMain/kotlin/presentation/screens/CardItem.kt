@@ -155,7 +155,7 @@ fun CardItem(item: Item,
                                 fontSize = size.textDesc) }
                         if (item.changeAlarm) {
                             Text(
-                                modifier = Modifier.padding(start = 5.dp,top = 4.dp, end = 5.dp),
+                                modifier = Modifier.padding(start = 5.dp,top = 8.dp, end = 5.dp),
                                 text = alarmText(item),
                                 color = theme.textAlarm,
                                 fontSize = size.textAlarm,
