@@ -142,10 +142,9 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                     category = category,
                     theme = theme,
                     onSave = {listCategory,name->
-                        if(listCategory == null) {
-                            viewModel.insertCategory(name)
-                            viewModel.showDialog = DialogState()
-                        } else viewModel.upgrateListCategory(listCategory,name)
+                        if(listCategory == null)  viewModel.insertCategory(name)
+                        else  viewModel.upgrateListCategory(listCategory,name) 
+                        viewModel.showDialog = DialogState()
                     },
                     onCancel = {viewModel.showDialog = DialogState()})
             }
