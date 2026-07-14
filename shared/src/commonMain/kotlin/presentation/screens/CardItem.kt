@@ -229,7 +229,7 @@ private fun formatDate(date: LocalDate): String {
     return "$d.$m.${date.year}"
 }
 
-fun alarmText(item: Item): String {
+private fun alarmText(item: Item): String {
     val tz = TimeZone.currentSystemDefault()
 
     // Явно указываем фабричный метод kotlinx.datetime, чтобы получить правильный тип
