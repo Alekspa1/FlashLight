@@ -53,6 +53,7 @@ import presentation.theme.ThemeNeon
 import kotlinx.datetime.Instant
 import presentation.theme.Size
 import presentation.theme.SizeNormal
+import presentation.screens.CardItem
 
 @Composable
 fun ListToDo(list: List<Item>,
@@ -87,7 +88,7 @@ fun ListToDo(list: List<Item>,
                 key = { it.id}
             ){item->
                 Box(modifier = Modifier.animateItem()) {
-                    Item(item = item,
+                    CardItem(item = item,
                         theme = theme,
                         size = size) { item, action -> onClick(item, action)
                     }
@@ -301,76 +302,76 @@ fun Item(item: Item,
 
 }
 
-// Вспомогательная функция для форматирования времени в строку HH:mm вручную (чтобы не тащить тяжелые форматировщики в commonMain)
-private fun formatTime(hour: Int, minute: Int): String {
-    val h = if (hour < 10) "0$hour" else "$hour"
-    val m = if (minute < 10) "0$minute" else "$minute"
-    return "$h:$m"
-}
+// // Вспомогательная функция для форматирования времени в строку HH:mm вручную (чтобы не тащить тяжелые форматировщики в commonMain)
+// private fun formatTime(hour: Int, minute: Int): String {
+//     val h = if (hour < 10) "0$hour" else "$hour"
+//     val m = if (minute < 10) "0$minute" else "$minute"
+//     return "$h:$m"
+// }
 
-// Вспомогательная функция для ручного форматирования даты dd.MM.yyyy
-private fun formatDate(date: LocalDate): String {
-    val d = if (date.dayOfMonth < 10) "0${date.dayOfMonth}" else "${date.dayOfMonth}"
-    val m = if (date.month.number < 10) "0${date.month.number}" else "${date.month.number}"
-    return "$d.$m.${date.year}"
-}
+// // Вспомогательная функция для ручного форматирования даты dd.MM.yyyy
+// private fun formatDate(date: LocalDate): String {
+//     val d = if (date.dayOfMonth < 10) "0${date.dayOfMonth}" else "${date.dayOfMonth}"
+//     val m = if (date.month.number < 10) "0${date.month.number}" else "${date.month.number}"
+//     return "$d.$m.${date.year}"
+// }
 
-fun alarmText(item: Item): String {
-    val tz = TimeZone.currentSystemDefault()
+// fun alarmText(item: Item): String {
+//     val tz = TimeZone.currentSystemDefault()
 
-    // Явно указываем фабричный метод kotlinx.datetime, чтобы получить правильный тип
-    val instant = kotlinx.datetime.Instant.fromEpochMilliseconds(item.alarmTime)
-    val localDateTime = instant.toLocalDateTime(tz)
+//     // Явно указываем фабричный метод kotlinx.datetime, чтобы получить правильный тип
+//     val instant = kotlinx.datetime.Instant.fromEpochMilliseconds(item.alarmTime)
+//     val localDateTime = instant.toLocalDateTime(tz)
 
-    val resultTime = formatTime(localDateTime.hour, localDateTime.minute)
-    val resultDate = getFormattedDate(item.alarmTime)
-    val alarmText = "Напомнит $resultDate в $resultTime"
+//     val resultTime = formatTime(localDateTime.hour, localDateTime.minute)
+//     val resultDate = getFormattedDate(item.alarmTime)
+//     val alarmText = "Напомнит $resultDate в $resultTime"
 
-    return when (item.interval) {
-        ALARM_ONE -> alarmText
-        ALARM_DAY -> "$alarmText и через день"
-        ALARM_WEEK -> "$alarmText и через неделю"
-        ALARM_MONTH -> "$alarmText и через месяц"
-        ALARM_YEAR -> "$alarmText и через год"
-        else -> alarmText
-    }
-}
+//     return when (item.interval) {
+//         ALARM_ONE -> alarmText
+//         ALARM_DAY -> "$alarmText и через день"
+//         ALARM_WEEK -> "$alarmText и через неделю"
+//         ALARM_MONTH -> "$alarmText и через месяц"
+//         ALARM_YEAR -> "$alarmText и через год"
+//         else -> alarmText
+//     }
+// }
 
-private fun getFormattedDate(millis: Long): String {
-    val tz = TimeZone.currentSystemDefault()
+// private fun getFormattedDate(millis: Long): String {
+//     val tz = TimeZone.currentSystemDefault()
 
-    // Вместо Clock.System используем обертку ClockSystem из kotlinx-datetime,
-    // которая возвращает совместимый тип даты
-    val currentMillis = kotlin.time.Clock.System.now().toEpochMilliseconds()
+//     // Вместо Clock.System используем обертку ClockSystem из kotlinx-datetime,
+//     // которая возвращает совместимый тип даты
+//     val currentMillis = kotlin.time.Clock.System.now().toEpochMilliseconds()
 
-// 2. Переводим их в дату через проверенный kotlinx.datetime.Instant
-    val today: LocalDate = kotlinx.datetime.Instant.fromEpochMilliseconds(currentMillis).toLocalDateTime(tz).date
+// // 2. Переводим их в дату через проверенный kotlinx.datetime.Instant
+//     val today: LocalDate = kotlinx.datetime.Instant.fromEpochMilliseconds(currentMillis).toLocalDateTime(tz).date
 
-    // Явно создаем целевую дату через правильный пакет
-    val targetDate = kotlinx.datetime.Instant.fromEpochMilliseconds(millis).toLocalDateTime(tz).date
+//     // Явно создаем целевую дату через правильный пакет
+//     val targetDate = kotlinx.datetime.Instant.fromEpochMilliseconds(millis).toLocalDateTime(tz).date
 
-    val daysDiff = today.daysUntil(targetDate)
+//     val daysDiff = today.daysUntil(targetDate)
 
-    return when (daysDiff) {
-        0 -> "сегодня"
-        1 -> "завтра"
-        2 -> "послезавтра"
-        in 3..6 -> getDayOfWeekWithPreposition(targetDate.dayOfWeek)
-        else -> formatDate(targetDate)
-    }
-}
+//     return when (daysDiff) {
+//         0 -> "сегодня"
+//         1 -> "завтра"
+//         2 -> "послезавтра"
+//         in 3..6 -> getDayOfWeekWithPreposition(targetDate.dayOfWeek)
+//         else -> formatDate(targetDate)
+//     }
+// }
 
-private fun getDayOfWeekWithPreposition(dayOfWeek: DayOfWeek): String {
-    return when (dayOfWeek) {
-        DayOfWeek.MONDAY -> "в понедельник"
-        DayOfWeek.TUESDAY -> "во вторник"
-        DayOfWeek.WEDNESDAY -> "в среду"
-        DayOfWeek.THURSDAY -> "в четверг"
-        DayOfWeek.FRIDAY -> "в пятницу"
-        DayOfWeek.SATURDAY -> "в субботу"
-        DayOfWeek.SUNDAY -> "в воскресенье"
-    }
-}
+// private fun getDayOfWeekWithPreposition(dayOfWeek: DayOfWeek): String {
+//     return when (dayOfWeek) {
+//         DayOfWeek.MONDAY -> "в понедельник"
+//         DayOfWeek.TUESDAY -> "во вторник"
+//         DayOfWeek.WEDNESDAY -> "в среду"
+//         DayOfWeek.THURSDAY -> "в четверг"
+//         DayOfWeek.FRIDAY -> "в пятницу"
+//         DayOfWeek.SATURDAY -> "в субботу"
+//         DayOfWeek.SUNDAY -> "в воскресенье"
+//     }
+// }
 
 @Preview(showBackground = true)
 @Composable
