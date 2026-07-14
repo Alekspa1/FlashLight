@@ -222,9 +222,9 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                     )
                 }
             ) {  
-                LaunchedEffect(Unit) {
-                drawerState.close() 
-                    }
+                // LaunchedEffect(Unit) {
+                // drawerState.close() 
+                //     }
 
                 SettingsScreen(viewModel = viewModel, onBack = {navController.popBackStack() }
                               )
