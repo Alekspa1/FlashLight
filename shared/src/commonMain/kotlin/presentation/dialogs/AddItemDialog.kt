@@ -295,7 +295,8 @@ fun KmpSpinnerInput(
 
             ExposedDropdownMenu(
                 expanded = expanded,
-                onDismissRequest = { expanded = false }
+                onDismissRequest = { expanded = false },
+                matchAnchorWidth = false
             ) {
                 list.forEachIndexed { index, item -> // <--- Используем forEachIndexed вместо обычного forEach
                     DropdownMenuItem(
