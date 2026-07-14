@@ -47,10 +47,11 @@ import presentation.theme.Theme
 import presentation.theme.ThemeNeon
 import presentation.theme.Size
 import presentation.theme.SizeNormal
+import kotlinx.datetime.number
 
 @Composable
 
-fun Item(item: Item,
+fun CardItem(item: Item,
          theme: Theme = ThemeNeon(),
          size: Size = SizeNormal(),
          onClick : (Item, Int) -> Unit = { _, _->}) {
