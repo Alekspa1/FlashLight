@@ -100,6 +100,9 @@ import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.ui.input.pointer.pointerInput
+
 @Composable
 fun StartApp(viewModel: MainViewModel = koinViewModel()) {
     val theme = viewModel.themeState
@@ -590,7 +593,11 @@ fun StartAppContent(
                         }
                     }
                 ) {
-                    Box(modifier = Modifier.fillMaxSize()) {
+                    Box(modifier = Modifier.fillMaxSize().pointerInput(Unit) {
+    detectHorizontalDragGestures { change, _ ->
+        change.consume()
+    }
+}) {
                         Image(
                             painter = painterResource(theme.backgroundStart),
                             contentDescription = null,
