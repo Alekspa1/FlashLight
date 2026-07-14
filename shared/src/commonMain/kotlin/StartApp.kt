@@ -593,17 +593,23 @@ fun StartAppContent(
                         }
                     }
                 ) {
-                    Box(modifier = Modifier.fillMaxSize().pointerInput(Unit) {
-    detectHorizontalDragGestures { change, _ ->
-        change.consume()
-    }
-}) {
+                    Box(modifier = Modifier.fillMaxSize()) {
                         Image(
                             painter = painterResource(theme.backgroundStart),
                             contentDescription = null,
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.FillBounds
                         )
+                        Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(start = 24.dp) // Оставляем щель 24dp слева для дравера
+            .pointerInput(Unit) {
+                detectHorizontalDragGestures { change, _ ->
+                    change.consume() // Гасим свайпы из центра
+                }
+            }
+    )
 
                         Scaffold(
                             modifier = Modifier.fillMaxSize(),
