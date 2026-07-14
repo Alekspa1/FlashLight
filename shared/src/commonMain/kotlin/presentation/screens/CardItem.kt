@@ -273,3 +273,15 @@ private fun getFormattedDate(millis: Long): String {
         else -> formatDate(targetDate)
     }
 }
+
+private fun getDayOfWeekWithPreposition(dayOfWeek: DayOfWeek): String {
+    return when (dayOfWeek) {
+        DayOfWeek.MONDAY -> "в понедельник"
+        DayOfWeek.TUESDAY -> "во вторник"
+        DayOfWeek.WEDNESDAY -> "в среду"
+        DayOfWeek.THURSDAY -> "в четверг"
+        DayOfWeek.FRIDAY -> "в пятницу"
+        DayOfWeek.SATURDAY -> "в субботу"
+        DayOfWeek.SUNDAY -> "в воскресенье"
+    }
+}
