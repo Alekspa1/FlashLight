@@ -249,158 +249,163 @@ fun CalendarContent(
                     }
                 }
             } else items(selectedDateTasks) { item ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically // Все три элемента будут идеально ровно по центру высоты
-                ) {
-                    // 1. Левая кнопка/текст
-
-                    Box(
-                        modifier = Modifier
-                            .padding(start = 8.dp)
-                            .size(35.dp).combinedClickable(
-                                onClick = {onClick(item,ALARM)},
-                                onLongClick = {onClick(item,ALARM_LONG)}
-                            )
 
 
+                    CardItem(item = item,theme = theme, size = size, onClick = onClick)
 
-                    ) {
+                
+//                 Row(
+//                     modifier = Modifier.fillMaxWidth(),
+//                     verticalAlignment = Alignment.CenterVertically // Все три элемента будут идеально ровно по центру высоты
+//                 ) {
+//                     // 1. Левая кнопка/текст
 
-                        Icon(
-                            imageVector = Icons.Default.Alarm, // Нужен импорт androidx.compose.material.icons.Icons
-                            contentDescription = "Будильник",
-                            tint =  if(item.changeAlarm) theme.tintAlarmOn else theme.tintAlarmOff,
-                            modifier = Modifier.fillMaxSize(),
-                        )
+//                     Box(
+//                         modifier = Modifier
+//                             .padding(start = 8.dp)
+//                             .size(35.dp).combinedClickable(
+//                                 onClick = {onClick(item,ALARM)},
+//                                 onLongClick = {onClick(item,ALARM_LONG)}
+//                             )
 
-                    }
 
 
-                    // 2. Центральная карточка (занимает всё оставшееся пространство)
+//                     ) {
 
-                    Card(
-    // 1. Используем встроенный клик карточки вместо .clickable в Modifier
-    onClick = { onClick(item, CHANGE_ITEM) }, 
+//                         Icon(
+//                             imageVector = Icons.Default.Alarm, // Нужен импорт androidx.compose.material.icons.Icons
+//                             contentDescription = "Будильник",
+//                             tint =  if(item.changeAlarm) theme.tintAlarmOn else theme.tintAlarmOff,
+//                             modifier = Modifier.fillMaxSize(),
+//                         )
+
+//                     }
+
+
+//                     // 2. Центральная карточка (занимает всё оставшееся пространство)
+
+//                     Card(
+//     // 1. Используем встроенный клик карточки вместо .clickable в Modifier
+//     onClick = { onClick(item, CHANGE_ITEM) }, 
     
-    modifier = Modifier
-        .padding(horizontal = 5.dp)
-        .weight(1f)
-        // 2. Убрали .clip() — он больше не нужен
-        .border(
-            width = 2.dp,
-            color = if (item.change) theme.cardItemBorderTrue
-                    else if (item.changeAlarm) theme.cardItemBorderAlarm
-                    else theme.cardItemBorderFalse,
-            shape = RoundedCornerShape(15.dp) // Используем ту же переменную формы
-        ),
+//     modifier = Modifier
+//         .padding(horizontal = 5.dp)
+//         .weight(1f)
+//         // 2. Убрали .clip() — он больше не нужен
+//         .border(
+//             width = 2.dp,
+//             color = if (item.change) theme.cardItemBorderTrue
+//                     else if (item.changeAlarm) theme.cardItemBorderAlarm
+//                     else theme.cardItemBorderFalse,
+//             shape = RoundedCornerShape(15.dp) // Используем ту же переменную формы
+//         ),
         
-    shape = RoundedCornerShape(15.dp), // Синхронизировали радиус (теперь ровно 15.dp)
+//     shape = RoundedCornerShape(15.dp), // Синхронизировали радиус (теперь ровно 15.dp)
     
-    colors = CardDefaults.cardColors(
-        containerColor = if (item.change) theme.cardItemTrue
-                         else if (item.changeAlarm) theme.cardItemAlarm
-                         else theme.cardItemFalse
-    )
-) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 6.dp, top = 8.dp, bottom = 8.dp,end = 6.dp)
-                            ,
-                            verticalAlignment = Alignment.CenterVertically,
+//     colors = CardDefaults.cardColors(
+//         containerColor = if (item.change) theme.cardItemTrue
+//                          else if (item.changeAlarm) theme.cardItemAlarm
+//                          else theme.cardItemFalse
+//     )
+// ) {
+//                         Row(
+//                             modifier = Modifier
+//                                 .fillMaxWidth()
+//                                 .padding(start = 6.dp, top = 8.dp, bottom = 8.dp,end = 6.dp)
+//                             ,
+//                             verticalAlignment = Alignment.CenterVertically,
 
 
-                            ) {
-                            if (item.uri != "") IconButton(
-                                onClick = { onClick(item,IMAGE) },
-                                modifier = Modifier.padding(start = 8.dp).size(24.dp)
+//                             ) {
+//                             if (item.uri != "") IconButton(
+//                                 onClick = { onClick(item,IMAGE) },
+//                                 modifier = Modifier.padding(start = 8.dp).size(24.dp)
 
-                            ) {
+//                             ) {
 
-                                Icon(
-                                    modifier = Modifier.fillMaxSize(),
-                                    imageVector = theme.iconImage, // Нужен импорт androidx.compose.material.icons.Icons
-                                    contentDescription = "Картинка",
-                                    tint = theme.iconTint
-                                )
+//                                 Icon(
+//                                     modifier = Modifier.fillMaxSize(),
+//                                     imageVector = theme.iconImage, // Нужен импорт androidx.compose.material.icons.Icons
+//                                     contentDescription = "Картинка",
+//                                     tint = theme.iconTint
+//                                 )
 
-                            }
+//                             }
 
-                            Column(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .padding(start = 6.dp, end = 6.dp),
-                            ) {
-                                Text(
-                                    modifier = Modifier.padding(start = 5.dp,end = 5.dp),
-                                    text = item.name,
-                                    color = theme.textColor,
-                                    lineHeight = size.lineHeightItem,
-                                    fontSize = size.textItem)
-                                if (item.desc.isNotEmpty())  {
-                                    Text(
-                                        modifier = Modifier.padding(start = 5.dp,top = 2.dp, end = 5.dp),
-                                        text = item.desc,
-                                        color = theme.textDesc,
-                                        lineHeight = size.lineHeightDescAndAlarm,
-                                        fontSize = size.textDesc) }
-                                if (item.changeAlarm) {
-                                    Text(
-                                        modifier = Modifier.padding(start = 5.dp,top = 4.dp, end = 5.dp),
-                                        text = alarmText(item),
-                                        color = theme.textAlarm,
-                                        fontSize = size.textAlarm,
-                                        lineHeight = size.lineHeightDescAndAlarm
-                                    )
-                                }
-                            }
-                            IconButton(
-                                onClick = { onClick(item,CHANGE) },
-                                modifier = Modifier.padding(end = 8.dp).size(24.dp)
-                            ) {
+//                             Column(
+//                                 modifier = Modifier
+//                                     .weight(1f)
+//                                     .padding(start = 6.dp, end = 6.dp),
+//                             ) {
+//                                 Text(
+//                                     modifier = Modifier.padding(start = 5.dp,end = 5.dp),
+//                                     text = item.name,
+//                                     color = theme.textColor,
+//                                     lineHeight = size.lineHeightItem,
+//                                     fontSize = size.textItem)
+//                                 if (item.desc.isNotEmpty())  {
+//                                     Text(
+//                                         modifier = Modifier.padding(start = 5.dp,top = 2.dp, end = 5.dp),
+//                                         text = item.desc,
+//                                         color = theme.textDesc,
+//                                         lineHeight = size.lineHeightDescAndAlarm,
+//                                         fontSize = size.textDesc) }
+//                                 if (item.changeAlarm) {
+//                                     Text(
+//                                         modifier = Modifier.padding(start = 5.dp,top = 4.dp, end = 5.dp),
+//                                         text = alarmText(item),
+//                                         color = theme.textAlarm,
+//                                         fontSize = size.textAlarm,
+//                                         lineHeight = size.lineHeightDescAndAlarm
+//                                     )
+//                                 }
+//                             }
+//                             IconButton(
+//                                 onClick = { onClick(item,CHANGE) },
+//                                 modifier = Modifier.padding(end = 8.dp).size(24.dp)
+//                             ) {
 
-                                Icon(
-                                    modifier = Modifier.fillMaxSize(),
+//                                 Icon(
+//                                     modifier = Modifier.fillMaxSize(),
 
-                                    imageVector =
-                                        if(item.change)  theme.chekBoxOn
-                                        else theme.chekBoxOff,
-                                    contentDescription = "Chek",
-                                    tint = theme.chekBoxTint
-                                )
+//                                     imageVector =
+//                                         if(item.change)  theme.chekBoxOn
+//                                         else theme.chekBoxOff,
+//                                     contentDescription = "Chek",
+//                                     tint = theme.chekBoxTint
+//                                 )
 
-                            }
-                        }
-                    }
-
-
-
-                    // 3. Правая кнопка/текст
+//                             }
+//                         }
+//                     }
 
 
 
-                    IconButton(
-
-                        onClick = {onClick(item,DELETE)  },
-                        modifier = Modifier.padding(end = 8.dp).size(35.dp)
-
-
-                    ) {
-
-                        Icon(
-                            modifier = Modifier.fillMaxSize(),
-                            imageVector = theme.iconDelItem, // Нужен импорт androidx.compose.material.icons.Icons
-                            contentDescription = "Меню",
-                            tint = theme.iconDelTint,
-
-                            )
-
-                    }
+//                     // 3. Правая кнопка/текст
 
 
 
-                } // Конец Row
+//                     IconButton(
+
+//                         onClick = {onClick(item,DELETE)  },
+//                         modifier = Modifier.padding(end = 8.dp).size(35.dp)
+
+
+//                     ) {
+
+//                         Icon(
+//                             modifier = Modifier.fillMaxSize(),
+//                             imageVector = theme.iconDelItem, // Нужен импорт androidx.compose.material.icons.Icons
+//                             contentDescription = "Меню",
+//                             tint = theme.iconDelTint,
+
+//                             )
+
+//                     }
+
+
+
+//                 } // Конец Row
             }
 
 
