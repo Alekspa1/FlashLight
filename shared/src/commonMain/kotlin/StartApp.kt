@@ -600,12 +600,9 @@ fun StartAppContent(
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.FillBounds
                         )
-                        Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(start = 24.dp) // Оставляем щель 24dp слева для дравера
-            
-    ) {Scaffold(
+                        
+
+                        Scaffold(
                             modifier = Modifier.fillMaxSize(),
                             containerColor = Color.Transparent,
                             bottomBar = {
@@ -666,70 +663,7 @@ fun StartAppContent(
                                // CommonTasksScreen(innerPadding = innerPadding, viewModel = viewModel)
                                  }
 }
-                        }}
-
-//                         Scaffold(
-//                             modifier = Modifier.fillMaxSize(),
-//                             containerColor = Color.Transparent,
-//                             bottomBar = {
-//                                 Box(
-//                                     modifier = Modifier.fillMaxWidth().navigationBarsPadding(),
-//                                     contentAlignment = Alignment.Center
-//                                 ) {
-//                                     // Если код запущен внутри Android Studio Preview
-//                                     if (LocalInspectionMode.current) {
-//                                         // Показываем красивую фейковую заглушку для верстки
-//                                         Box(
-//                                             modifier = Modifier
-//                                                 .fillMaxWidth()
-//                                                 .height(50.dp) // Стандартная высота баннера
-//                                                 .background(Color.DarkGray),
-//                                             contentAlignment = Alignment.Center
-//                                         ) {
-//                                             Text("Здесь будет реклама Яндекса", color = Color.White)
-//                                         }
-//                                     } else {
-//                                         // В реальном приложении запускаем настоящий баннер
-//                                         YandexBannerAd(CommonConst.BANER, Modifier.fillMaxWidth())
-//                                     }
-//                                 }
-//                             },
-//                             ) { innerPadding ->
-
-
-//                             val navigationEventState = rememberNavigationEventState(
-//                                 currentInfo = NavigationEventInfo.None
-//                             )
-
-
-//                             NavigationBackHandler(
-//                                 state = navigationEventState,
-//                                 isBackEnabled = drawerState.isOpen, // Работает только когда drawer открыт
-//                                 onBackCompleted = {
-//                                     scope.launch {
-//                                         drawerState.close() // Закрываем drawer при успешном нажатии/жесте "Назад"
-//                                     }
-//                                 }
-//                             )
-
-//                             NavHost(
-//                             navController = localNavController,
-//                             startDestination = "personal_pager_hub",
-                                
-//                             ) {
-                                
-//                                 // Точка А: Твой текущий пейджер (Блокнот + Будильник)
-//                                 composable("personal_pager_hub") {
-//                                 openPager(innerPadding, onOpenDrawer, pagerState)
-//                                 }
-
-//                                 // Точка Б: Новый экран Общих Дел
-//                                 composable("common_screen") {
-//                                     // Сюда мы подставим твой будущий экран общих дел
-//                                // CommonTasksScreen(innerPadding = innerPadding, viewModel = viewModel)
-//                                  }
-// }
-//                         }
+                        }
                     }
                 }
                 SnackbarHost(
