@@ -18,6 +18,7 @@ import data.repostitory.AndroidPermissionImpl
 import data.repostitory.AndroidSaveDeleteImpl
 import domain.repostirory.AlarmRepository
 import domain.repostirory.DeleteImageInItemReository
+import domain.repostirory.SaveDeleteImageRepositpry
 import domain.repostirory.PathProviderRepostitory
 import domain.repostirory.PermissionRepository
 import domain.repostirory.SaveDeleteImageRepositpry
@@ -51,8 +52,9 @@ actual val moduleAnotherPlatform = module {
         context.getSystemService(Context.ALARM_SERVICE) as AlarmManager }
 
     single<AlarmRepository> { AndroidAlarmImpl( get(),get()) }
+    factory<SaveDeleteImageRepositpry> { SaveDeleteImageImpl(get()) }
 
-    factory<NotificationBuilder> { NotificationBuilder(get()) }
+    factory<NotificationBuilder> { NotificationBuilder(get(),get()) }
     factory<NotificationBuilderPassed> { NotificationBuilderPassed(get()) }
     factory<PathProviderRepostitory> { AndroidPathProviderImp(get()) }
     factory<SaveDeleteImageRepositpry> { AndroidSaveDeleteImpl(get()) }
