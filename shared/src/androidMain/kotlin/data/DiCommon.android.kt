@@ -21,7 +21,6 @@ import domain.repostirory.DeleteImageInItemReository
 import domain.repostirory.SaveDeleteImageRepositpry
 import domain.repostirory.PathProviderRepostitory
 import domain.repostirory.PermissionRepository
-import domain.repostirory.SaveDeleteImageRepositpry
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
