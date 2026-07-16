@@ -23,7 +23,7 @@ import domain.repostirory.PathProviderRepostitory
 import domain.repostirory.PermissionRepository
 import org.koin.dsl.bind
 import org.koin.dsl.module
-
+import data.perository.SaveDeleteImageImpl
 
 actual val moduleAnotherPlatform = module {
 
