@@ -20,12 +20,13 @@ import androidx.core.net.toUri
 import com.dragon.shared.R
 import data.room.Item
 import presentation.MainActivity
-
+import domain.repostirory.SaveDeleteImageRepositpry
 
 
 
 class NotificationBuilder(
     private val context: Context,
+    private val image: SaveDeleteImageRepositpry,
     //val settings: SettingsSharedPreference
 ) {
     //val newRingtoneUri: Uri? = settings.getUriAlarm()?.toUri() ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
@@ -111,8 +112,9 @@ class NotificationBuilder(
                 context, item.id, intentPush,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
+            
         val bitmap:Bitmap? = try {
-            MediaStore.Images.Media.getBitmap(context.contentResolver, item.uri.toUri())
+            MediaStore.Images.Media.getBitmap(context.contentResolver, image.getUri(item.uri).toUri())
         } catch (_: Exception){
             null
         }
