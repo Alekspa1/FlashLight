@@ -21,6 +21,9 @@ import com.dragon.shared.R
 import data.room.Item
 import presentation.MainActivity
 import domain.repostirory.SaveDeleteImageRepositpry
+import android.graphics.BitmapFactory
+
+
 
 
 
@@ -112,12 +115,24 @@ class NotificationBuilder(
                 context, item.id, intentPush,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
+
+            val fullPath = image.getUri(item.uri).removePrefix("file://")
+
+            val bitmap: Bitmap? = try {
+                if (fullPath.isNotEmpty()) {
+                BitmapFactory.decodeFile(fullPath)
+                } else {
+                null
+                }
+                } catch (_: Exception) {
+                null
+                }
             
-        val bitmap:Bitmap? = try {
-            MediaStore.Images.Media.getBitmap(context.contentResolver, image.getUri(item.uri).toUri())
-        } catch (_: Exception){
-            null
-        }
+        // val bitmap:Bitmap? = try {
+        //     MediaStore.Images.Media.getBitmap(context.contentResolver, image.getUri(item.uri).toUri())
+        // } catch (_: Exception){
+        //     null
+        // }
         val bigIcon = NotificationCompat.BigPictureStyle()
             .bigPicture(bitmap)
 
