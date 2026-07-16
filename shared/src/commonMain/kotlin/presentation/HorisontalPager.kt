@@ -65,6 +65,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.LaunchedEffect
 import presentation.screens.Calendar
+import presentation.theme.ThemeNeon
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 
@@ -101,6 +102,7 @@ fun MainPager(paddingValues: PaddingValues = PaddingValues(),
             INSERT_DIALOG_ITEM -> {
                 AddOrChangeItemDialog(
                     item = item,
+                    theme = ThemeNeon(),
                     listCategory = listCategory,
                     category = category,
                     calendar = viewModel.showDialog.calendar,
@@ -166,7 +168,7 @@ fun MainPager(paddingValues: PaddingValues = PaddingValues(),
         modifier = Modifier
             .padding(paddingValues)
             .fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+       // verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Row(
             modifier = Modifier

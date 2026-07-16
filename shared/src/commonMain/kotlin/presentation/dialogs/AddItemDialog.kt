@@ -109,7 +109,7 @@ fun AddOrChangeItemDialog(
     AlertDialog(
         onDismissRequest = { onCancel() },
 
-        title = { Text("Сфокусироваться", color = theme.textColor) },
+        title = { Text("Сфокусироваться") },
 
         text = {
             Column(
@@ -182,7 +182,7 @@ fun AddOrChangeItemDialog(
                         ) {
                             TextButton(
                                 onClick = { fileLauncher.launch() },
-                                colors = ButtonDefaults.textButtonColors(contentColor = theme.textColor)
+                               // colors = ButtonDefaults.textButtonColors(contentColor = theme.textColor)
                             ) {
                                 Text(text = "Изменить фото")
                             }
@@ -200,13 +200,9 @@ fun AddOrChangeItemDialog(
                         Spacer(modifier = Modifier.weight(1f)) 
                         
                         TextButton(
-                            onClick = { fileLauncher.launch() },
-                            colors = ButtonDefaults.textButtonColors(
-                                
-                                contentColor = theme.textDesc
-                            ),
-                                                   ) {
-                            Text(text = "Добавить фото", color = theme.textColor)
+                            onClick = { fileLauncher.launch() })
+                        {
+                            Text(text = "Добавить фото")
                         }
                     }
                 }
@@ -220,7 +216,7 @@ fun AddOrChangeItemDialog(
                     val text = stateTextName.trim().ifEmpty { "Без названия" }
                     onSave(item,text,stateTextDecs,selectedFileUri,categorySelected,calendar,false,originalFileName,date)
                 },
-                colors = ButtonDefaults.textButtonColors(contentColor = theme.textColor)
+               // colors = ButtonDefaults.textButtonColors(contentColor = theme.textColor)
             ) {
                 Text("Ок", fontWeight = FontWeight.Bold)
             }
@@ -283,7 +279,7 @@ fun KmpSpinnerInput(
                 ) {
                     Text(
                         text = selectedCategory,
-                        color = theme.textColor,
+
                         fontSize = 15.sp,
                         modifier = Modifier.padding(end = 8.dp)
                     )
@@ -304,7 +300,6 @@ fun KmpSpinnerInput(
                             // Возвращаем сюда чистый текст без лишних колонок внутри
                             Text(
                                 text = item,
-                                color = theme.textColor,
                                 style = MaterialTheme.typography.bodyLarge,
                             )
                         },
@@ -313,7 +308,6 @@ fun KmpSpinnerInput(
                             expanded = false
                         },
                         colors = MenuDefaults.itemColors(
-                            textColor = theme.textColor,
                             leadingIconColor = theme.iconAddTint,
                             trailingIconColor = theme.iconAddTint
                         )

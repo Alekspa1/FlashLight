@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -42,6 +44,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import org.jetbrains.compose.resources.imageResource
+import presentation.theme.ThemeZabor
 
 
 @Composable
@@ -110,7 +115,12 @@ fun Notebook(viewModel: MainViewModel,pageIndex: Int){
                     .padding(8.dp)
                     .fillMaxWidth()
                     .weight(1f)
-                    .border(width = 3.dp, color = Color(0x9900E2FF), shape = RoundedCornerShape(10.dp)),
+                    then(
+                        if (theme == ThemeNeon()) Modifier
+                            .border(width = 3.dp,
+                                color = theme.noteBookBorder,
+                                shape = RoundedCornerShape(10.dp))
+                    else Modifier),
                 value = text,
 
                 onValueChange = { newText ->
@@ -124,15 +134,15 @@ fun Notebook(viewModel: MainViewModel,pageIndex: Int){
                     unfocusedTextColor = theme.textColor,
 
                     // 1. ТВОЙ БИРЮЗОВЫЙ НЕОН НА ФОНЕ (Solid):
-                    focusedContainerColor = Color(0x9900BCD4),
-                    unfocusedContainerColor = Color(0x9900BCD4),
+                    focusedContainerColor = theme.noteBookBackground,
+                    unfocusedContainerColor = theme.noteBookBackground,
 
                     // 2. ТВОЙ СИНЕ-ГОЛУБОЙ НЕОН НА ОБВОДКЕ (Stroke):
-                    focusedBorderColor = Color(0x9900E2FF),
-                    unfocusedBorderColor = Color(0x9900E2FF),
+                   // focusedBorderColor = Color(0x9900E2FF),
+                   // unfocusedBorderColor = Color(0x9900E2FF),
 
                     // Курсор делаем сочным сине-голубым:
-                    cursorColor = Color(0xFF00E2FF)
+                    cursorColor = theme.textColor
                 )
             )
 
@@ -142,7 +152,7 @@ fun Notebook(viewModel: MainViewModel,pageIndex: Int){
                         onClick = { },
                     ) {
                         Image(
-                            painter = painterResource(Res.drawable.ic_micro_neon),
+                            painter = theme.iconMicro(),
                             contentDescription = null,
                             modifier = Modifier.fillMaxSize()
 
@@ -153,7 +163,7 @@ fun Notebook(viewModel: MainViewModel,pageIndex: Int){
                         onClick = {openDialog = true},
                     ){
                         Image(
-                            painter = painterResource(Res.drawable.ic_del_notebook_neon),
+                            painter = theme.iconDel(),
                             contentDescription = null,
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop
@@ -169,6 +179,6 @@ fun Notebook(viewModel: MainViewModel,pageIndex: Int){
 @Preview(showBackground = true)
 @Composable
 fun Test(){
-    NoteBookContent("NoteBookContent")
+    NoteBookContent("NoteBookContent", theme = ThemeNeon())
 
 }

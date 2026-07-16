@@ -42,6 +42,7 @@ import CommonConst.CHANGE
 import CommonConst.CHANGE_ITEM
 import CommonConst.DELETE
 import CommonConst.IMAGE
+import androidx.compose.ui.tooling.preview.Preview
 import data.room.Item
 import presentation.theme.Theme
 import presentation.theme.ThemeNeon
@@ -49,6 +50,7 @@ import presentation.theme.Size
 import presentation.theme.SizeNormal
 import kotlinx.datetime.number
 import kotlinx.datetime.DayOfWeek
+import presentation.theme.ThemeZabor
 
 @Composable
 
@@ -285,4 +287,11 @@ private fun getDayOfWeekWithPreposition(dayOfWeek: DayOfWeek): String {
         DayOfWeek.SATURDAY -> "в субботу"
         DayOfWeek.SUNDAY -> "в воскресенье"
     }
+}
+
+@Preview
+@Composable
+fun PrevItem(){
+    CardItem(Item(id = 2, name = "Проверить Koin модули", category = "Фокус", alarmTime = 0L, change = false, sort = 2, changeAlarm = true),
+        theme = ThemeZabor())
 }

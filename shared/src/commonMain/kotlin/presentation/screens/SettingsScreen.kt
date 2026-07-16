@@ -1,48 +1,61 @@
 package presentation.screens
 
+import MainViewModel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.BackHand
+import androidx.compose.material.icons.filled.Backpack
+import androidx.compose.material.icons.filled.Backup
+import androidx.compose.material.icons.filled.BackupTable
+import androidx.compose.material.icons.filled.DoorBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
-import MainViewModel
 import presentation.theme.Size
+import presentation.theme.SizeNormal
 import presentation.theme.Theme
 import presentation.theme.ThemeNeon
-import androidx.compose.material3.Icon
+
 @Composable
 fun SettingsScreen(
-    viewModel: MainViewModel,
-    onBack: () -> Unit
+    theme: Theme = ThemeNeon(),
+    size : Size = SizeNormal(),
+    onBack: () -> Unit = {}
 ) {
-    val theme = viewModel.themeState
-    val size = viewModel.sizeState
-    
-    // Подтягиваем твои неоновые цвета (как в шторке)
-    val cardSolidColor = Color(0x6500BCD4)
-    val borderNeonColor = Color(0x9900E2FF)
+
 
     Box(modifier = Modifier.fillMaxSize()) {
         // 1. ФОН: android:background="@drawable/img"
         Image(
-            painter = painterResource(theme.backgroundStart), 
+            painter = painterResource(theme.backgroundStart),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.FillBounds
@@ -52,7 +65,7 @@ fun SettingsScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(rememberScrollState()),
         ) {
             // ШАПКА: im_back (ImageView) + tv_settings ("Общие настройки")
             Box(
@@ -61,17 +74,17 @@ fun SettingsScreen(
                     .padding(top = 10.dp, bottom = 10.dp)
             ) {
                 IconButton(
-                                                    onClick = { onBack() },
-                                                    modifier = Modifier.size(35.dp)
-                                                ) {
-                                                    Icon(
-                                                        imageVector = theme.iconDrawerEveryday, // Или ваша иконка ic_menu
-                                                        contentDescription = "Меню",
-                                                        tint = ThemeNeon().iconDelTint
-                                                    )
-                                                }
+                    onClick = { onBack() },
+                    modifier = Modifier.size(35.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack, // Или ваша иконка ic_menu
+                        contentDescription = "Меню",
+                        tint = theme.iconDelTint
+                    )
+                }
 
-                
+
                 Text(
                     text = "Общие настройки", // tv_settings
                     color = theme.textColor,
@@ -82,24 +95,56 @@ fun SettingsScreen(
                 )
             }
 
-            // Твой основной LinearLayout (paddingStart/End="10dp")
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 10.dp),
-                verticalArrangement = Arrangement.spacedBy(3.dp) // layout_marginBottom="3dp"
+                verticalArrangement = Arrangement.spacedBy(5.dp) // layout_marginBottom="3dp"
             ) {
                 // --- СЕКЦИЯ 1: СТИЛИ И ИНСТРУКЦИИ ---
-                SettingItem("Тема", theme, size, cardSolidColor, borderNeonColor) {
-                    // Твоя рабочая логика переключения неона
-                    viewModel.themeState = if (theme == theme) theme else theme 
-                }
-                SettingItem("Размер шрифта", theme, size, cardSolidColor, borderNeonColor) { /* ... */ }
-                SettingItem("Сортировка", theme, size, cardSolidColor, borderNeonColor) { /* ... */ }
-                SettingItem("Звук будильника", theme, size, cardSolidColor, borderNeonColor) { /* ... */ }
-                SettingItem("Инструкция", theme, size, cardSolidColor, borderNeonColor) { /* ... */ }
-                SettingItem("Обратная связь", theme, size, cardSolidColor, borderNeonColor) { /* ... */ }
-                SettingItem("Поддержать разработчика", theme, size, cardSolidColor, borderNeonColor) { /* ... */ }
+                SettingItem("Тема", theme, size, theme.cardMenuItem, theme.borderCardMenuItem){}
+                SettingItem(
+                    "Размер шрифта",
+                    theme,
+                    size,
+                    theme.cardMenuItem,
+                    theme.borderCardMenuItem
+                ) { /* ... */ }
+                SettingItem(
+                    "Сортировка",
+                    theme,
+                    size,
+                    theme.cardMenuItem,
+                    theme.borderCardMenuItem
+                ) { /* ... */ }
+                SettingItem(
+                    "Звук будильника",
+                    theme,
+                    size,
+                    theme.cardMenuItem,
+                    theme.borderCardMenuItem
+                ) { /* ... */ }
+                SettingItem(
+                    "Инструкция",
+                    theme,
+                    size,
+                    theme.cardMenuItem,
+                    theme.borderCardMenuItem
+                ) { /* ... */ }
+                SettingItem(
+                    "Обратная связь",
+                    theme,
+                    size,
+                    theme.cardMenuItem,
+                    theme.borderCardMenuItem
+                ) { /* ... */ }
+                SettingItem(
+                    "Поддержать разработчика",
+                    theme,
+                    size,
+                    theme.cardMenuItem,
+                    theme.borderCardMenuItem
+                ) { /* ... */ }
 
                 // --- СЕКЦИЯ 2: РАЗРЕШЕНИЯ (tv_settings_permissions) ---
                 Text(
@@ -107,11 +152,23 @@ fun SettingsScreen(
                     color = theme.textColor,
                     fontSize = size.textMenu,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp),
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp),
                     textAlign = TextAlign.Center
                 )
-                SettingItem("Работа в фоне", theme, size, cardSolidColor, borderNeonColor) { /* Настройки батареи */ }
-                SettingItem("Настройки приложения", theme, size, cardSolidColor, borderNeonColor) { /* Системные настройки аппа */ }
+                SettingItem(
+                    "Работа в фоне",
+                    theme,
+                    size,
+                    theme.cardMenuItem,
+                    theme.borderCardMenuItem
+                ) { /* Настройки батареи */ }
+                SettingItem(
+                    "Настройки приложения",
+                    theme,
+                    size,
+                    theme.cardMenuItem,
+                    theme.borderCardMenuItem
+                ) { /* Системные настройки аппа */ }
 
                 // --- СЕКЦИЯ 3: РЕЗЕРВНОЕ КОПИРОВАНИЕ (tv_settings_backup) ---
                 Text(
@@ -119,16 +176,16 @@ fun SettingsScreen(
                     color = theme.textColor,
                     fontSize = size.textMenu,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp),
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp),
                     textAlign = TextAlign.Center
                 )
-                SettingItem("Сохранить базу данных", theme, size, cardSolidColor, borderNeonColor) { 
+                SettingItem("Сохранить базу данных", theme, size, theme.cardMenuItem, theme.borderCardMenuItem) {
                     //viewModel.saveDatabase() // Пример вызова во ViewModel
                 }
-                SettingItem("Загрузить базу данных", theme, size, cardSolidColor, borderNeonColor) { 
-                   // viewModel.loadDatabase() 
+                SettingItem("Загрузить базу данных", theme, size, theme.cardMenuItem, theme.borderCardMenuItem) {
+                    // viewModel.loadDatabase()
                 }
-                
+
                 Spacer(modifier = Modifier.height(24.dp))
             }
         }
@@ -174,4 +231,10 @@ fun SettingItem(
             modifier = Modifier.padding(8.dp) // padding="8dp"
         )
     }
+}
+
+@Preview
+@Composable
+fun Prev(){
+    SettingsScreen()
 }

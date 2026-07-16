@@ -37,6 +37,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -54,6 +55,7 @@ import kotlinx.datetime.Instant
 import presentation.theme.Size
 import presentation.theme.SizeNormal
 import presentation.screens.CardItem
+import presentation.theme.ThemeZabor
 
 @Composable
 fun ListToDo(list: List<Item>,
@@ -108,7 +110,7 @@ fun ListToDo(list: List<Item>,
                     onClick = {  },
                 ){
                     Image(
-                        painter = painterResource(theme.iconMicro),
+                        painter = theme.iconMicro(),
                         contentDescription = null,
                         modifier = Modifier.fillMaxSize()
 
@@ -391,7 +393,7 @@ fun ToDoListPreview() {
     )
 
     // Вызываем твой экран списков и скармливаем ему этот муляж
-    ListToDo(list = mockList)
+    ListToDo(list = mockList, theme = ThemeZabor())
 }
 
 

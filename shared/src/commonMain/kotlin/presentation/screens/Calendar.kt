@@ -31,6 +31,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Alarm
+import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Notifications
@@ -476,11 +477,9 @@ fun Day(
         .size(30.dp)
         // 1. Сначала применяем обводку по условию
         .then(
-            if (isSelected) {
-                Modifier.border(width = 2.dp, color = theme.textColor, shape = CircleShape)
-            } else {
-                Modifier
-            }
+             if (isSelected) Modifier.background(color = theme.textColor, shape = CircleShape)
+             else if (isToday)  Modifier.border(width = 2.dp, color = theme.textColor, shape = CircleShape)
+             else Modifier
         )
         // 2. Только потом обрезаем контент изнутри (если необходимо)
         .clip(CircleShape),
@@ -490,8 +489,8 @@ fun Day(
                 text = day.date.dayOfMonth.toString(),
                 // Если день сегодняшний, можно сделать текст белым, даже если он не выбран
                 color = when {
-                    isSelected -> theme.textColor
-                    isToday -> Color.Red
+                    isSelected -> theme.colorCalendarDaySelect
+                    isToday -> theme.textColor
                     isCurrentMonth -> theme.textColor
                     else -> theme.textDesc
                 },
@@ -504,12 +503,12 @@ fun Day(
         // Ваша иконка дела под кружком
         if (hasTasks && isCurrentMonth) {
             Icon(
-                imageVector =  Icons.Default.Notifications,
+                imageVector =  Icons.Default.Circle,
                 contentDescription = null,
                 modifier = Modifier
                     .padding(top = 2.dp)
                     .size(8.dp),
-                tint = if (isSelected) Color.White else Color.Yellow
+                tint = Color.Red
             )
         } else {
             Spacer(modifier = Modifier.size(8.dp).padding(top = 2.dp))
