@@ -49,6 +49,20 @@ import CommonConst.THEME_ZABOR
 import presentation.dialogs.ThemeDialog
 import CommonConst.THEME_FUTURE
 import CommonConst.THEME_ZABOR
+
+import CommonConst.SIZE_SETTINGS
+import CommonConst.SORT_SETTINGS
+import CommonConst.ALARM_SETTINGS
+
+import CommonConst.SIZE_SMALL
+import CommonConst.SIZE_STANDART
+import CommonConst.SIZE_LARGE
+
+import CommonConst.SORT_STANDART
+import CommonConst.SORT_USER
+
+
+
 import presentation.dialogs.DialogState
 
 
@@ -60,14 +74,38 @@ fun SettingsScreen(
     viewModel : MainViewModel,
 ) {
 
-    
+    val listTheme = listOf(THEME_FUTURE, THEME_ZABOR)
+    val listSize = listOf(SIZE_SMALL, SIZE_STANDART, SIZE_LARGE)
+    val listSort = listOf(SORT_STANDART, SORT_USER)
+    val listSound = listOf(THEME_FUTURE, SORT_USER)
     when(viewModel.showDialog.isWho){
-        THEME_SETTINGS-> {ThemeDialog(theme = THEME_ZABOR,
+        THEME_SETTINGS-> {
+            ThemeDialog(select = THEME_ZABOR,
+                                      listAction = listTheme,  
                                       onClick ={selectedTheme->
                                       if(selectedTheme == THEME_FUTURE) viewModel.themeState = ThemeNeon() else viewModel.themeState = ThemeZabor()
                                       viewModel.showDialog = DialogState()
                                       },
-                                      onCancel = { viewModel.showDialog = DialogState()})}
+                                      onCancel = { viewModel.showDialog = DialogState()})
+        }
+        SIZE_SETTINGS -> {
+            ThemeDialog(select = SIZE_STANDART,
+                                      listAction = listSize,  
+                                      onClick ={viewModel.showDialog = DialogState()},
+                                      onCancel = { viewModel.showDialog = DialogState()})
+        }
+        SORT_SETTINGS -> {
+           ThemeDialog(select = SORT_STANDART,
+                                      listAction = listSize,  
+                                      onClick ={viewModel.showDialog = DialogState()},
+                                      onCancel = { viewModel.showDialog = DialogState()})
+        }
+        ALARM_SETTINGS -> {
+             ThemeDialog(select = THEME_FUTURE,
+                                      listAction = listSize,  
+                                      onClick ={viewModel.showDialog = DialogState()},
+                                      onCancel = { viewModel.showDialog = DialogState()})
+        }
     }
 
 
@@ -128,21 +166,21 @@ fun SettingsScreen(
                     size,
                     theme.cardMenuItem,
                     theme.borderCardMenuItem
-                ) { /* ... */ }
+                ) { viewModel.showDialog = DialogState("SIZE_SETTINGS") }
                 SettingItem(
                     "Сортировка",
                     theme,
                     size,
                     theme.cardMenuItem,
                     theme.borderCardMenuItem
-                ) { /* ... */ }
+                ) { viewModel.showDialog = DialogState("SORT_SETTINGS") }
                 SettingItem(
                     "Звук будильника",
                     theme,
                     size,
                     theme.cardMenuItem,
                     theme.borderCardMenuItem
-                ) { /* ... */ }
+                ) { viewModel.showDialog = DialogState("ALARM_SETTINGS") }
                 SettingItem(
                     "Инструкция",
                     theme,
