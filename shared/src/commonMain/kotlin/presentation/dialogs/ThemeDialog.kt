@@ -24,11 +24,13 @@ import androidx.compose.ui.unit.sp
 
 
 @Composable
-fun ThemeDialog(theme: String = THEME_FUTURE, onClick : (String)-> Unit = {},onCancel : () -> Unit = {}){
-
+fun ThemeDialog(
+ select: String = THEME_FUTURE,
+ listAction: List<String>,
+ onClick : (String)-> Unit = {},
+ onCancel : () -> Unit = {}){
  
-   val listAction = listOf(THEME_FUTURE, THEME_ZABOR)
-   var selected by remember { mutableStateOf(theme) }
+   var selected by remember { mutableStateOf(select) }
    
   AlertDialog(
     onDismissRequest = { onCancel() },
