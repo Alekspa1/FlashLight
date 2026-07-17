@@ -59,15 +59,15 @@ fun SettingsScreen(
     onBack: () -> Unit = {},
     viewModel : MainViewModel,
 ) {
-val dialogState = viewModel.showDialog 
+
     
-    when(dialogState){
+    when(viewModel.showDialog.isWho){
         THEME_SETTINGS-> {ThemeDialog(theme = THEME_ZABOR,
                                       onClick ={selectedTheme->
                                       if(selectedTheme == THEME_FUTURE) viewModel.themeState = ThemeNeon() else viewModel.themeState = ThemeZabor()
-                                      dialogState = DialogState()
+                                      viewModel.showDialog = DialogState()
                                       },
-                                      onCancel = {dialogState = DialogState()})}
+                                      onCancel = { viewModel.showDialog = DialogState()})}
     }
 
 
@@ -121,7 +121,7 @@ val dialogState = viewModel.showDialog
                 verticalArrangement = Arrangement.spacedBy(5.dp) // layout_marginBottom="3dp"
             ) {
                 // --- СЕКЦИЯ 1: СТИЛИ И ИНСТРУКЦИИ ---
-                SettingItem("Тема", theme, size, theme.cardMenuItem, theme.borderCardMenuItem){dialogState = DialogState("THEME_SETTINGS")}
+                SettingItem("Тема", theme, size, theme.cardMenuItem, theme.borderCardMenuItem){ viewModel.showDialog = DialogState("THEME_SETTINGS")}
                 SettingItem(
                     "Размер шрифта",
                     theme,
