@@ -223,7 +223,8 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                 SettingsScreen(
                     theme = theme,
                     size = size,
-                    onBack = { navController.popBackStack() }
+                    onBack = { navController.popBackStack() },
+                    viewModel = viewModel
                 )
             }
         }
