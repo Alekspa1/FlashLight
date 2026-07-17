@@ -54,13 +54,13 @@ fun ThemeDialog(theme: String = THEME_FUTURE, onClick : (String)-> Unit = {},onC
                         Row( Modifier.fillMaxWidth()
                             .selectable(
                                 selected = (text == selected),
-                                enabled = isOptionEnabled,
+                            
                                 onClick = { selected = text }),
                             verticalAlignment = Alignment.CenterVertically)
                         {
                             RadioButton(
                                 selected = (text == selected),
-                                enabled = isOptionEnabled,
+                               
                                 onClick = null 
                             )
                             Text( text = text, fontSize = 24.sp )
