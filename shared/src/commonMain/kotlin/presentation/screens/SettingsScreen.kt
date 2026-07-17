@@ -43,6 +43,13 @@ import presentation.theme.Size
 import presentation.theme.SizeNormal
 import presentation.theme.Theme
 import presentation.theme.ThemeNeon
+import presentation.theme.ThemeZabor
+import CommonConst.THEME_SETTINGS
+import CommonConst.THEME_ZABOR
+import presentation.dialogs.ThemeDialog
+import CommonConst.THEME_FUTURE
+import CommonConst.THEME_ZABOR
+import presentation.dialogs.DialogState
 
 
 @Composable
@@ -55,7 +62,7 @@ fun SettingsScreen(
 val dialogState = viewModel.showDialog 
     
     when(dialogState){
-        THEME_SETTINGS-> {ThemeDialog(theme = themeB,
+        THEME_SETTINGS-> {ThemeDialog(theme = THEME_ZABOR,
                                       onClick ={selectedTheme->
                                       if(selectedTheme == THEME_FUTURE) viewModel.themeState = ThemeNeon() else viewModel.themeState = ThemeZabor()
                                       dialogState = DialogState()
@@ -245,8 +252,3 @@ fun SettingItem(
     }
 }
 
-@Preview
-@Composable
-fun Prev(){
-    SettingsScreen()
-}
