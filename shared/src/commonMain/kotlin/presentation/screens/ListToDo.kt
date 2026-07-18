@@ -120,23 +120,6 @@ fun ListToDo(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .draggableHandle(
-                                enabled = isDragDropEnabled,
-                                onDragStarted = {},
-                                onDragStopped = {
-                                    val currentIds = currentSnapshotList.map { it.id }
-                                    val originalIds = list.map { it.id }
-                                    
-                                    if (currentIds != originalIds) {
-                                        // Пересчитываем sort только если карточки реально сдвинулись!
-                                        val listWithUpdatedSort = currentSnapshotList.mapIndexed { idx, listItem ->
-                                            listItem.copy(sort = idx)
-                                        }
-                                        currentSnapshotList = listWithUpdatedSort 
-                                        onDragDropped(listWithUpdatedSort) 
-                                    }
-                                }
-                            )
                             .animateItem() 
                             .graphicsLayer {
                                 alpha = if (isDragging) 0.5f else 1f
@@ -146,6 +129,7 @@ fun ListToDo(
                         CardItem(
                             item = item,
                             theme = theme,
+                             dragModifier = draggableHandle,
                             size = size,
                             onClick = { returnedItem, action -> onClick(returnedItem, action) }
                         )
