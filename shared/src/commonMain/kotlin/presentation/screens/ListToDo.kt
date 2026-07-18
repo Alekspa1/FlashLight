@@ -73,8 +73,9 @@ fun ListToDo(
     category: String = "Тест"
 ) {
     val listState = rememberLazyListState()
-
-    val reorderableState = rememberReorderableLazyListState(
+    var currentSnapshotList by remember(list) { mutableStateOf(list) }
+    
+   val reorderableState = rememberReorderableLazyListState(
         lazyListState = listState,
         onMove = { from, to ->
             if (from.index == 0 || to.index == 0) return@rememberReorderableLazyListState
@@ -82,11 +83,12 @@ fun ListToDo(
             val fromIdx = from.index - 1
             val toIdx = to.index - 1
 
-            if (fromIdx in list.indices && toIdx in list.indices) {
-                val updatedList = list.toMutableList().apply {
+            if (fromIdx in currentSnapshotList.indices && toIdx in currentSnapshotList.indices) {
+                val updatedList = currentSnapshotList.toMutableList().apply {
                     add(toIdx, removeAt(fromIdx))
                 }
-                onListReordered(updatedList) 
+                currentSnapshotList = updatedList // Обновляем локальный снимок
+                onListReordered(updatedList) // Отдаем во ViewModel для UI
             }
         }
     )
@@ -126,7 +128,7 @@ fun ListToDo(
             .draggableHandle(
                 onDragStarted = {},
                 onDragStopped = {
-                    onDragDone(list)
+                    onDragDone(currentSnapshotList)
                 }
             )
             .animateItem() 
