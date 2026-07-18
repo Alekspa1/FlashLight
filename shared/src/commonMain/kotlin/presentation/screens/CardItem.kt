@@ -117,7 +117,7 @@ fun CardItem(item: Item,
                         onDragStarted = {},
                         onDragStopped = {
                             // Наш победный пересчет sort строго при отпускании пальца
-                            val listWithUpdatedSort = currentListSnapshot.mapIndexed { idx, listItem ->
+                            val listWithUpdatedSort = currentListSnapshot().mapIndexed { idx, listItem ->
                                 listItem.copy(sort = idx)
                             }
                             onDragDone(listWithUpdatedSort) // Отправляем в ListToDo, а оттуда во ViewModel
