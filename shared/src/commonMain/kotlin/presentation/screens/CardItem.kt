@@ -51,12 +51,16 @@ import presentation.theme.SizeNormal
 import kotlinx.datetime.number
 import kotlinx.datetime.DayOfWeek
 import presentation.theme.ThemeZabor
+import sh.calvin.reorderable.ReorderableCollectionItemScope
 
 @Composable
 
 fun CardItem(item: Item,
          theme: Theme = ThemeNeon(),
          size: Size = SizeNormal(),
+         reorderableScope: sh.calvin.reorderable.ReorderableCollectionItemScope? = null,
+         currentListSnapshot: List<Item> = emptyList(), // 👈 Принимаем живой список экрана
+         onDragDone: (List<Item>) -> Unit = {},  
          onClick : (Item, Int) -> Unit = { _, _->}) {
 
         Row(
@@ -90,29 +94,47 @@ fun CardItem(item: Item,
             // 2. Центральная карточка (занимает всё оставшееся пространство)
 
             Card(
-                modifier = Modifier
-                    .padding(start = 5.dp, end = 5.dp)
-                    .weight(1f) // Заставляет карточку занять ВСЁ свободное место между кнопками
-                    .clip(RoundedCornerShape(15.dp))
-                    .border(
-                        2.dp,
-                        if(item.change) theme.cardItemBorderTrue
-                        else if (item.changeAlarm) theme.cardItemBorderAlarm
-                        else theme.cardItemBorderFalse,
-                        RoundedCornerShape(15.dp)
+    modifier = Modifier
+        .padding(start = 5.dp, end = 5.dp)
+        .weight(1f) // Заставляет карточку занять ВСЁ свободное место между кнопками
+        .clip(RoundedCornerShape(15.dp))
+        .border(
+            2.dp,
+            if(item.change) theme.cardItemBorderTrue
+            else if (item.changeAlarm) theme.cardItemBorderAlarm
+            else theme.cardItemBorderFalse,
+            RoundedCornerShape(15.dp)
+        )
+        // 1. Сначала вешаем обычный клик (для открытия диалога)
+        .clickable { onClick(item, CHANGE_ITEM) }
+        // 2. И только в самом конце через .then подключаем драг-хэндл, чтобы они не конфликтовали
+        .then(
+            if (reorderableScope != null) {
+                with(reorderableScope) {
+                    Modifier.draggableHandle(
+                        enabled = isDragDropEnabled, 
+                        onDragStarted = {},
+                        onDragStopped = {
+                            // Наш победный пересчет sort строго при отпускании пальца
+                            val listWithUpdatedSort = currentListSnapshot.mapIndexed { idx, listItem ->
+                                listItem.copy(sort = idx)
+                            }
+                            onDragDone(listWithUpdatedSort) // Отправляем в ListToDo, а оттуда во ViewModel
+                        }
+                    )
+                }
+            } else Modifier
+        ),
 
-                    ).clickable{onClick(item,CHANGE_ITEM)}
-                    ,
+    shape = RoundedCornerShape(16.dp),
 
-                shape = RoundedCornerShape(16.dp),
-
-                colors = CardDefaults.cardColors(
-                    containerColor =
-                        if(item.change) theme.cardItemTrue
-                        else if(item.changeAlarm) theme.cardItemAlarm
-                        else theme.cardItemFalse
-                )
-            ) {
+    colors = CardDefaults.cardColors(
+        containerColor =
+            if(item.change) theme.cardItemTrue
+            else if(item.changeAlarm) theme.cardItemAlarm
+            else theme.cardItemFalse
+    )
+) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
