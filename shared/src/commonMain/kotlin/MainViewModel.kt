@@ -2,6 +2,7 @@
 import CommonConst.ALARM_ONE
 import CommonConst.NOTIFICATION
 import CommonConst.SORT_STANDART
+import CommonConst.SORT_USER
 import CommonConst.TIME
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -64,7 +65,7 @@ class MainViewModel(
 
 
     //private val _sortType = MutableStateFlow(settingsPref.getSort())
-    private val _sortType = MutableStateFlow(SORT_STANDART)
+    private val _sortType = MutableStateFlow(SORT_USER)
     val sortType = _sortType.asStateFlow()
 
     private val _categoryItemFlow = MutableStateFlow("Повседневные")
