@@ -271,19 +271,15 @@ fun MainPager(paddingValues: PaddingValues = PaddingValues(),
                     Notebook(viewModel,pagerState.currentPage)
                 }
                 1 -> {
-                    ListToDo(list = todoList,
-                        category = category,
-                        theme = viewModel.themeState,
-                        size = viewModel.sizeState,
-    
-    // Мгновенно меняем порядок в памяти, чтобы карточки вставали на места
-    onListReordered = { updatedList ->
-        viewModel.updateListInUi(updatedList)
-    },
-    
-    // Сохраняем в БД, когда палец отпущен
-    onDragDone = { finalList ->
-        viewModel.updateItemsOrderInDb(finalList)
+                   ListToDo(
+    list = todoList,
+    category = category,
+    theme = viewModel.themeState,
+    size = viewModel.sizeState,
+    isDragDropEnabled = (viewModel.getSort() == SORT_USER),
+    onDragDropped = { updatedList ->
+        // Вызываем твой готовый нативный метод. Он получит список, где sort уже изменен на UI!
+        viewModel.updateItemsOrder(updatedList) 
     },
                         onClick = {item,action->
                             when(action){
