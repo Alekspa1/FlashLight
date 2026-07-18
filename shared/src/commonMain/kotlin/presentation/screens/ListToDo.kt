@@ -46,7 +46,7 @@ fun ListToDo(
 ) {
     val listState = rememberLazyListState()
     
-    // 🌟 KMP-совместимый SnapshotStateList для ультрабыстрой работы в Android и iOS
+    // KMP-совместимый SnapshotStateList для ультрабыстрой работы в Android и iOS
     val currentSnapshotList = remember { mutableStateListOf<Item>() }
 
     // Чистый KMP LaunchedEffect синхронизации данных
@@ -60,17 +60,17 @@ fun ListToDo(
     val reorderableState = rememberReorderableLazyListState(
         lazyListState = listState,
         onMove = { from, to ->
-    // ЗАЩИТА: Игнорируем рокировки с заголовком
-    if (from.index == 0 || to.index == 0) return@rememberReorderableLazyListState
-    
-    val fromIdx = from.index - 1
-    // 🌟 Ограничиваем целевой индекс рамками нашего SnapshotStateList
-    val toIdx = (to.index - 1).coerceIn(currentSnapshotList.indices)
+            // ЗАЩИТА: Игнорируем рокировки с заголовком
+            if (from.index == 0 || to.index == 0) return@rememberReorderableLazyListState
+            
+            val fromIdx = from.index - 1
+            // Ограничиваем целевой индекс рамками нашего SnapshotStateList
+            val toIdx = (to.index - 1).coerceIn(currentSnapshotList.indices)
 
-    if (fromIdx != toIdx && fromIdx in currentSnapshotList.indices) {
-        currentSnapshotList.add(toIdx, currentSnapshotList.removeAt(fromIdx))
-    }
-},
+            if (fromIdx != toIdx && fromIdx in currentSnapshotList.indices) {
+                currentSnapshotList.add(toIdx, currentSnapshotList.removeAt(fromIdx))
+            }
+        },
         onDragEnd = { _, _ -> 
             var isOrderChanged = currentSnapshotList.size != list.size
             if (!isOrderChanged) {
@@ -103,7 +103,13 @@ fun ListToDo(
         ) {
             item(key = category) {
                 Box(modifier = Modifier.fillMaxWidth()) {
-                    Text(text = category, color = theme.textColor, fontSize = size.textMenu, fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.Center))
+                    Text(
+                        text = category, 
+                        color = theme.textColor, 
+                        fontSize = size.textMenu, 
+                        fontWeight = FontWeight.Bold, 
+                        modifier = Modifier.align(Alignment.Center)
+                    )
                 }
             }
 
@@ -111,10 +117,29 @@ fun ListToDo(
                 items = currentSnapshotList, 
                 key = { _, item -> item.id }
             ) { index, item ->
-                ReorderableItem(state = reorderableState, key = item.id) { isDragging -> 
+                
+                // Вычисляем фактический индекс ячейки в LazyColumn (index списка + 1 заголовок)
+                val actualLazyIndex = index + 1
+
+                ReorderableItem(
+                    state = reorderableState, 
+                    key = item.id,
+                    index = actualLazyIndex // 🌟 Передаем индекс для корректной работы Calvin
+                ) { isDragging -> 
                     val pureDragHandle = Modifier.draggableHandle(enabled = isDragDropEnabled)
-                    Box(modifier = Modifier.fillMaxWidth().animateItem().graphicsLayer { alpha = if (isDragging) 0.5f else 1f }) {
-                        CardItem(item = item, theme = theme, size = size, dragModifier = pureDragHandle, onClick = { returnedItem, action -> onClick(returnedItem, action) })
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .animateItem()
+                            .graphicsLayer { alpha = if (isDragging) 0.5f else 1f }
+                    ) {
+                        CardItem(
+                            item = item, 
+                            theme = theme, 
+                            size = size, 
+                            dragModifier = pureDragHandle, 
+                            onClick = { returnedItem, action -> onClick(returnedItem, action) }
+                        )
                     }
                 }
             }
@@ -126,7 +151,7 @@ fun ListToDo(
                 IconButton(modifier = Modifier.size(50.dp).align(Alignment.Center), onClick = { }) {
                     Image(painter = theme.iconMicro(), contentDescription = null, modifier = Modifier.fillMaxSize())
                 }
-                IconButton(modifier = Modifier.size(50.dp).align(Alignment.CenterEnd), onClick = { onAddItem() }) {
+                IconButton(modifier = Modifier.size(50.dp).align(Alignment.CenterEnd), onClick = onAddItem) {
                     Icon(imageVector = theme.iconAdd, contentDescription = null, modifier = Modifier.fillMaxSize(), tint = theme.iconAddTint)
                 }
             }
