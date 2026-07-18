@@ -31,6 +31,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.graphicsLayer 
 
 
+
+
 @Composable
 fun ListToDo(
     list: List<Item>, 
@@ -43,7 +45,7 @@ fun ListToDo(
     category: String = "Тест"
 ) {
     val listState = rememberLazyListState()
-
+    
     // Наш локальный "адаптер" в памяти Compose
     var currentSnapshotList by remember { mutableStateOf<List<Item>>(list) }
 
@@ -54,19 +56,40 @@ fun ListToDo(
         }
     }
 
+    // Инициализируем стейт реордера. Вся логика сохранения теперь живет на самом верху списка!
     val reorderableState = rememberReorderableLazyListState(
         lazyListState = listState,
         onMove = { from, to ->
             if (from.index == 0 || to.index == 0) return@rememberReorderableLazyListState
-
             val fromIdx = from.index - 1
             val toIdx = to.index - 1
 
             if (fromIdx in currentSnapshotList.indices && toIdx in currentSnapshotList.indices) {
-                val updatedList = currentSnapshotList.toMutableList().apply {
+                currentSnapshotList = currentSnapshotList.toMutableList().apply {
                     add(toIdx, removeAt(fromIdx))
                 }
-                currentSnapshotList = updatedList 
+            }
+        },
+        // Срабатывает ТОЛЬКО когда палец реально оторвался от экрана после перемещения!
+        onDragEnd = { _, _ -> 
+            // Высокоскоростная продакшен-проверка по ID через цикл без выделения лишней памяти
+            var isOrderChanged = currentSnapshotList.size != list.size
+            if (!isOrderChanged) {
+                for (i in currentSnapshotList.indices) {
+                    if (currentSnapshotList[i].id != list[i].id) {
+                        isOrderChanged = true
+                        break
+                    }
+                }
+            }
+
+            // Отправляем данные в БД только если карточки РЕАЛЬНО поменялись местами
+            if (isOrderChanged) {
+                val listWithUpdatedSort = currentSnapshotList.mapIndexed { idx, listItem ->
+                    listItem.copy(sort = idx)
+                }
+                currentSnapshotList = listWithUpdatedSort
+                onDragDropped(listWithUpdatedSort)
             }
         }
     )
@@ -77,14 +100,13 @@ fun ListToDo(
             modifier = Modifier.fillMaxWidth().weight(1f),
             verticalArrangement = Arrangement.spacedBy(5.dp), 
         ) {
-            val categoryName = category
-            item(key = categoryName) {
+            item(key = category) {
                 Box(modifier = Modifier.fillMaxWidth()) {
                     Text(
-                        text = categoryName,
-                        color = theme.textColor,
-                        fontSize = size.textMenu,
-                        fontWeight = FontWeight.Bold,
+                        text = category, 
+                        color = theme.textColor, 
+                        fontSize = size.textMenu, 
+                        fontWeight = FontWeight.Bold, 
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
@@ -94,43 +116,28 @@ fun ListToDo(
                 items = currentSnapshotList, 
                 key = { _, item -> item.id }
             ) { index, item ->
-
                 ReorderableItem(
                     state = reorderableState,
                     key = item.id
                 ) { isDragging -> 
-                    val draggableHandle = Modifier.draggableHandle(
-                                enabled = isDragDropEnabled,
-                                onDragStarted = {},
-                                onDragStopped = {
-                                    val currentIds = currentSnapshotList.map { it.id }
-                                    val originalIds = list.map { it.id }
-                                    
-                                    if (currentIds != originalIds) {
-                                        // Пересчитываем sort только если карточки реально сдвинулись!
-                                        val listWithUpdatedSort = currentSnapshotList.mapIndexed { idx, listItem ->
-                                            listItem.copy(sort = idx)
-                                        }
-                                        currentSnapshotList = listWithUpdatedSort 
-                                        onDragDropped(listWithUpdatedSort) 
-                                    }
-                                }
-                            )
                     
+                    // Абсолютно "чистый" модификатор ручки драга. Без тяжелых вычислений, 0 лагов!
+                    val pureDragHandle = Modifier.draggableHandle(
+                        enabled = isDragDropEnabled
+                    )
+
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .animateItem() 
-                            .graphicsLayer {
-                                alpha = if (isDragging) 0.5f else 1f
-                            }
+                            .graphicsLayer { alpha = if (isDragging) 0.5f else 1f }
                     ) {
-                        // Твоя чистая карточка без проброса лишних контекстов и лямбд
+                        // Передаем готовый pureDragHandle внутрь твоей карточки
                         CardItem(
                             item = item,
                             theme = theme,
-                             dragModifier = draggableHandle,
                             size = size,
+                            dragModifier = pureDragHandle, 
                             onClick = { returnedItem, action -> onClick(returnedItem, action) }
                         )
                     }
@@ -138,6 +145,7 @@ fun ListToDo(
             }
         }
 
+        // --- Нижний блок кнопок остается без изменений ---
         Row(modifier = Modifier.fillMaxWidth()) {
             Box(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
                 IconButton(
@@ -166,6 +174,143 @@ fun ListToDo(
         }
     }
 }
+
+
+// @Composable
+// fun ListToDo(
+//     list: List<Item>, 
+//     theme: Theme = ThemeNeon(),
+//     size: Size = SizeNormal(),
+//     isDragDropEnabled: Boolean = true, 
+//     onClick: (Item, Int) -> Unit = { _, _ -> },
+//     onAddItem: () -> Unit = {},
+//     onDragDropped: (List<Item>) -> Unit = {}, 
+//     category: String = "Тест"
+// ) {
+//     val listState = rememberLazyListState()
+
+//     // Наш локальный "адаптер" в памяти Compose
+//     var currentSnapshotList by remember { mutableStateOf<List<Item>>(list) }
+
+//     // Рубеж защиты: обновляем экран только если из БД прилетел реально измененный чекбокс
+//     androidx.compose.runtime.LaunchedEffect(list) {
+//         if (currentSnapshotList != list) {
+//             currentSnapshotList = list
+//         }
+//     }
+
+//     val reorderableState = rememberReorderableLazyListState(
+//         lazyListState = listState,
+//         onMove = { from, to ->
+//             if (from.index == 0 || to.index == 0) return@rememberReorderableLazyListState
+
+//             val fromIdx = from.index - 1
+//             val toIdx = to.index - 1
+
+//             if (fromIdx in currentSnapshotList.indices && toIdx in currentSnapshotList.indices) {
+//                 val updatedList = currentSnapshotList.toMutableList().apply {
+//                     add(toIdx, removeAt(fromIdx))
+//                 }
+//                 currentSnapshotList = updatedList 
+//             }
+//         }
+//     )
+
+//     Column(modifier = Modifier.fillMaxSize()) {
+//         LazyColumn(
+//             state = listState,
+//             modifier = Modifier.fillMaxWidth().weight(1f),
+//             verticalArrangement = Arrangement.spacedBy(5.dp), 
+//         ) {
+//             val categoryName = category
+//             item(key = categoryName) {
+//                 Box(modifier = Modifier.fillMaxWidth()) {
+//                     Text(
+//                         text = categoryName,
+//                         color = theme.textColor,
+//                         fontSize = size.textMenu,
+//                         fontWeight = FontWeight.Bold,
+//                         modifier = Modifier.align(Alignment.Center)
+//                     )
+//                 }
+//             }
+
+//             itemsIndexed(
+//                 items = currentSnapshotList, 
+//                 key = { _, item -> item.id }
+//             ) { index, item ->
+
+//                 ReorderableItem(
+//                     state = reorderableState,
+//                     key = item.id
+//                 ) { isDragging -> 
+//                     val draggableHandle = Modifier.draggableHandle(
+//                                 enabled = isDragDropEnabled,
+//                                 onDragStarted = {},
+//                                 onDragStopped = {
+//                                     val currentIds = currentSnapshotList.map { it.id }
+//                                     val originalIds = list.map { it.id }
+                                    
+//                                     if (currentIds != originalIds) {
+//                                         // Пересчитываем sort только если карточки реально сдвинулись!
+//                                         val listWithUpdatedSort = currentSnapshotList.mapIndexed { idx, listItem ->
+//                                             listItem.copy(sort = idx)
+//                                         }
+//                                         currentSnapshotList = listWithUpdatedSort 
+//                                         onDragDropped(listWithUpdatedSort) 
+//                                     }
+//                                 }
+//                             )
+                    
+//                     Box(
+//                         modifier = Modifier
+//                             .fillMaxWidth()
+//                             .animateItem() 
+//                             .graphicsLayer {
+//                                 alpha = if (isDragging) 0.5f else 1f
+//                             }
+//                     ) {
+//                         // Твоя чистая карточка без проброса лишних контекстов и лямбд
+//                         CardItem(
+//                             item = item,
+//                             theme = theme,
+//                              dragModifier = draggableHandle,
+//                             size = size,
+//                             onClick = { returnedItem, action -> onClick(returnedItem, action) }
+//                         )
+//                     }
+//                 }
+//             }
+//         }
+
+//         Row(modifier = Modifier.fillMaxWidth()) {
+//             Box(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+//                 IconButton(
+//                     modifier = Modifier.size(50.dp).align(Alignment.Center),
+//                     onClick = { },
+//                 ) {
+//                     Image(
+//                         painter = theme.iconMicro(),
+//                         contentDescription = null,
+//                         modifier = Modifier.fillMaxSize()
+//                     )
+//                 }
+
+//                 IconButton(
+//                     modifier = Modifier.size(50.dp).align(Alignment.CenterEnd),
+//                     onClick = { onAddItem() },
+//                 ) {
+//                     Icon(
+//                         imageVector = theme.iconAdd,
+//                         contentDescription = null,
+//                         modifier = Modifier.fillMaxSize(),
+//                         tint = theme.iconAddTint
+//                     )
+//                 }
+//             }
+//         }
+//     }
+// }
 
 
 
