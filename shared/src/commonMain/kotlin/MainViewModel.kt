@@ -156,7 +156,7 @@ fun updateItemsOrderInDb(finalList: List<Item>) {
                 item.copy(sort = index) 
             }
             // Записываем в Room одной транзакцией
-            db.CourseDao().updateItemsOrder(listWithUpdatedSort)  
+            db.updateItemsOrder(listWithUpdatedSort)  
         } catch (e: Exception) {
             e.printStackTrace()
         }
