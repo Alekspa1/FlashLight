@@ -107,7 +107,7 @@ fun CardItem(item: Item,
             RoundedCornerShape(15.dp)
         )
         // 1. Сначала вешаем обычный клик (для открытия диалога)
-        .clickable { onClick(item, CHANGE_ITEM) }
+        .clickable { onClick(item, CHANGE_ITEM) },
         // 2. И только в самом конце через .then подключаем драг-хэндл, чтобы они не конфликтовали
         // .then(
         //     if (reorderableScope != null) {
