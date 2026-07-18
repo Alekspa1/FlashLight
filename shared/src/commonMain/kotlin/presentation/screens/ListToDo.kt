@@ -1,101 +1,66 @@
 package presentation.screens
 
-import CommonConst.ALARM
-import CommonConst.ALARM_DAY
-import CommonConst.ALARM_LONG
-import CommonConst.ALARM_MONTH
-import CommonConst.ALARM_ONE
-import CommonConst.ALARM_WEEK
-import CommonConst.ALARM_YEAR
-import CommonConst.CHANGE
-import CommonConst.CHANGE_ITEM
-import CommonConst.DELETE
-import CommonConst.IMAGE
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed 
 import androidx.compose.foundation.lazy.rememberLazyListState 
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue 
-import androidx.compose.runtime.setValue // 👈 НОВОЕ: Для работы мутабельного стейта через 'by'
-import androidx.compose.runtime.remember // 👈 НОВОЕ: Исправляет ошибку Unresolved reference 'remember'
-import androidx.compose.runtime.mutableStateOf // 👈 НОВОЕ: Исправляет ошибку Unresolved reference 'mutableStateOf'
+import androidx.compose.runtime.setValue 
+import androidx.compose.runtime.remember 
+import androidx.compose.runtime.mutableStateOf 
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import data.room.Item
-import kotlinx.datetime.DayOfWeek
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.daysUntil
-import kotlinx.datetime.number
-import kotlinx.datetime.toLocalDateTime
-import org.jetbrains.compose.resources.painterResource
 import presentation.theme.Theme
 import presentation.theme.ThemeNeon
-import kotlinx.datetime.Instant
 import presentation.theme.Size
 import presentation.theme.SizeNormal
-import presentation.screens.CardItem
-import presentation.theme.ThemeZabor
 
-// ИМПОРТЫ CALVIN REORDERABLE
+// ИМПОРТЫ СТАБИЛЬНОЙ БИБЛИОТЕКИ CALVIN REORDERABLE
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @Composable
 fun ListToDo(
-    list: List<Item>,
+    list: List<Item>, // Сюда заходит todoList by viewModel.sortedItemsFlow.collectAsStateWithLifecycle()
     theme: Theme = ThemeNeon(),
     size: Size = SizeNormal(),
-    isDragDropEnabled: Boolean = true,
+    isDragDropEnabled: Boolean = true, // Включаем/выключаем драг динамически (viewModel.getSort() == SORT_USER)
     onClick: (Item, Int) -> Unit = { _, _ -> },
     onAddItem: () -> Unit = {},
-    onListReordered: (List<Item>) -> Unit = {}, 
-    onDragDone: (List<Item>) -> Unit = {}, // Сюда улетит правильный список для БД
+    onDragDropped: (List<Item>) -> Unit = {}, // 👈 1. Переименовали колбэк, чтобы соответствовать твоей логике itemTouchDropped
     category: String = "Тест"
 ) {
     val listState = rememberLazyListState()
 
-    // Наш "Аналог RecyclerView Адаптера" в памяти Compose. 
-    var currentSnapshotList by remember(list) { mutableStateOf(list) }
+    // 🌟 2. ЭТО ТВОЙ ItemAdapter! Локальный снимок списка в оперативной памяти экрана.
+    // Когда из БД (через аргумент list) прилетает измененный чекбокс, remember(list) автоматически обновляет снимок.
+    var currentSnapshotList by remember(list) { mutableStateOf<List<Item>>(list) }
 
+    // Инициализируем стейт реордера
     val reorderableState = rememberReorderableLazyListState(
         lazyListState = listState,
         onMove = { from, to ->
+            // ЗАЩИТА: Заголовок стоит на индексе 0. Игнорируем рокировки с ним.
             if (from.index == 0 || to.index == 0) return@rememberReorderableLazyListState
 
             val fromIdx = from.index - 1
             val toIdx = to.index - 1
 
             if (fromIdx in currentSnapshotList.indices && toIdx in currentSnapshotList.indices) {
+                // 🌟 3. АНАЛОГ DragDropUtil.onMove: Меняем элементы местами ТОЛЬКО внутри нашего локального "адаптера"
                 val updatedList = currentSnapshotList.toMutableList().apply {
                     add(toIdx, removeAt(fromIdx))
                 }
-                currentSnapshotList = updatedList // Меняем порядок в нашем "адаптере"
-                onListReordered(updatedList) // Передаем наверх во ViewModel для живой анимации
+                currentSnapshotList = updatedList // Обновляем экран, карточки плавно летят. ViewModel и БД в этот момент молчат!
             }
         }
     )
@@ -119,7 +84,7 @@ fun ListToDo(
                 }
             }
 
-            // Читаем элементы из currentSnapshotList (нашего живого адаптера)
+            // Читаем элементы из живого currentSnapshotList, чтобы UI не зависел от диска Room во время движения
             itemsIndexed(
                 items = currentSnapshotList, 
                 key = { _, item -> item.id }
@@ -136,8 +101,13 @@ fun ListToDo(
                                 enabled = isDragDropEnabled,
                                 onDragStarted = {},
                                 onDragStopped = {
-                                    // Отдаем наверх ТОТ СПИСОК, КОТОРЫЙ ПОЛУЧИЛСЯ ПОСЛЕ ПЕРЕСТАНОВКИ
-                                    onDragDone(currentSnapshotList) 
+                                    // 🌟 4. АНАЛОГ itemTouchDropped: Палец отпустили!
+                                    // Прямо здесь пробегаемся по итоговому списку и перезаписываем поле sort его новым индексом
+                                    val listWithUpdatedSort = currentSnapshotList.mapIndexed { idx, listItem ->
+                                        listItem.copy(sort = idx)
+                                    }
+                                    // Отдаем готовый список с новыми sort в твой нативный метод во ViewModel
+                                    onDragDropped(listWithUpdatedSort) 
                                 }
                             )
                             .animateItem() 
@@ -154,8 +124,9 @@ fun ListToDo(
                     }
                 }
             }
-        } // Конец LazyColumn
+        }
 
+        // --- Нижний блок кнопок остается без изменений ---
         Row(modifier = Modifier.fillMaxWidth()) {
             Box(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
                 IconButton(
@@ -182,7 +153,7 @@ fun ListToDo(
                 }
             }
         }
-    } // Конец главного Column
+    }
 }
 
 
