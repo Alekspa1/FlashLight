@@ -60,7 +60,7 @@ kotlin {
             // Зависимости Coil (3.5.0)
             implementation("io.coil-kt.coil3:coil-compose:3.3.0")
             implementation("org.jetbrains.androidx.navigation:navigation-compose:2.9.2")
-            implementation("io.github.aclassen:compose-reorderable:1.5.0")
+            implementation("sh.calvin.reorderable:reorderable:2.4.3")
         }
 
         commonTest.dependencies {
