@@ -109,23 +109,23 @@ fun CardItem(item: Item,
         // 1. Сначала вешаем обычный клик (для открытия диалога)
         .clickable { onClick(item, CHANGE_ITEM) }
         // 2. И только в самом конце через .then подключаем драг-хэндл, чтобы они не конфликтовали
-        .then(
-            if (reorderableScope != null) {
-                with(reorderableScope) {
-                    Modifier.draggableHandle(
-                        enabled = isDragDropEnabled, 
-                        onDragStarted = {},
-                        onDragStopped = {
-                            // Наш победный пересчет sort строго при отпускании пальца
-                            val listWithUpdatedSort = currentListSnapshot().mapIndexed { idx, listItem ->
-                                listItem.copy(sort = idx)
-                            }
-                            onDragDone(listWithUpdatedSort) // Отправляем в ListToDo, а оттуда во ViewModel
-                        }
-                    )
-                }
-            } else Modifier
-        ),
+        // .then(
+        //     if (reorderableScope != null) {
+        //         with(reorderableScope) {
+        //             Modifier.draggableHandle(
+        //                 enabled = isDragDropEnabled, 
+        //                 onDragStarted = {},
+        //                 onDragStopped = {
+        //                     // Наш победный пересчет sort строго при отпускании пальца
+        //                     val listWithUpdatedSort = currentListSnapshot().mapIndexed { idx, listItem ->
+        //                         listItem.copy(sort = idx)
+        //                     }
+        //                     onDragDone(listWithUpdatedSort) // Отправляем в ListToDo, а оттуда во ViewModel
+        //                 }
+        //             )
+        //         }
+        //     } else Modifier
+        // ),
 
     shape = RoundedCornerShape(16.dp),
 
