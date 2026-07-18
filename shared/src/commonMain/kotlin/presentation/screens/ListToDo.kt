@@ -46,33 +46,32 @@ fun ListToDo(
 ) {
     val listState = rememberLazyListState()
     
-    // Наш локальный "адаптер" в памяти Compose
-    var currentSnapshotList by remember { mutableStateOf<List<Item>>(list) }
+    // 🌟 KMP-совместимый SnapshotStateList для ультрабыстрой работы в Android и iOS
+    val currentSnapshotList = remember { mutableStateListOf<Item>() }
 
-    // Рубеж защиты: обновляем экран только если из БД прилетел реально измененный чекбокс
-    androidx.compose.runtime.LaunchedEffect(list) {
+    // Чистый KMP LaunchedEffect синхронизации данных
+    LaunchedEffect(list) {
         if (currentSnapshotList != list) {
-            currentSnapshotList = list
+            currentSnapshotList.clear()
+            currentSnapshotList.addAll(list)
         }
     }
 
-    // Инициализируем стейт реордера. Вся логика сохранения теперь живет на самом верху списка!
     val reorderableState = rememberReorderableLazyListState(
         lazyListState = listState,
         onMove = { from, to ->
-            if (from.index == 0 || to.index == 0) return@rememberReorderableLazyListState
-            val fromIdx = from.index - 1
-            val toIdx = to.index - 1
+    // ЗАЩИТА: Игнорируем рокировки с заголовком
+    if (from.index == 0 || to.index == 0) return@rememberReorderableLazyListState
+    
+    val fromIdx = from.index - 1
+    // 🌟 Ограничиваем целевой индекс рамками нашего SnapshotStateList
+    val toIdx = (to.index - 1).coerceIn(currentSnapshotList.indices)
 
-            if (fromIdx in currentSnapshotList.indices && toIdx in currentSnapshotList.indices) {
-                currentSnapshotList = currentSnapshotList.toMutableList().apply {
-                    add(toIdx, removeAt(fromIdx))
-                }
-            }
-        },
-        // Срабатывает ТОЛЬКО когда палец реально оторвался от экрана после перемещения!
+    if (fromIdx != toIdx && fromIdx in currentSnapshotList.indices) {
+        currentSnapshotList.add(toIdx, currentSnapshotList.removeAt(fromIdx))
+    }
+},
         onDragEnd = { _, _ -> 
-            // Высокоскоростная продакшен-проверка по ID через цикл без выделения лишней памяти
             var isOrderChanged = currentSnapshotList.size != list.size
             if (!isOrderChanged) {
                 for (i in currentSnapshotList.indices) {
@@ -83,12 +82,14 @@ fun ListToDo(
                 }
             }
 
-            // Отправляем данные в БД только если карточки РЕАЛЬНО поменялись местами
             if (isOrderChanged) {
                 val listWithUpdatedSort = currentSnapshotList.mapIndexed { idx, listItem ->
                     listItem.copy(sort = idx)
                 }
-                currentSnapshotList = listWithUpdatedSort
+                
+                currentSnapshotList.clear()
+                currentSnapshotList.addAll(listWithUpdatedSort)
+                
                 onDragDropped(listWithUpdatedSort)
             }
         }
@@ -102,13 +103,7 @@ fun ListToDo(
         ) {
             item(key = category) {
                 Box(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = category, 
-                        color = theme.textColor, 
-                        fontSize = size.textMenu, 
-                        fontWeight = FontWeight.Bold, 
-                        modifier = Modifier.align(Alignment.Center)
-                    )
+                    Text(text = category, color = theme.textColor, fontSize = size.textMenu, fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.Center))
                 }
             }
 
@@ -116,65 +111,28 @@ fun ListToDo(
                 items = currentSnapshotList, 
                 key = { _, item -> item.id }
             ) { index, item ->
-                ReorderableItem(
-                    state = reorderableState,
-                    key = item.id
-                ) { isDragging -> 
-                    
-                    // Абсолютно "чистый" модификатор ручки драга. Без тяжелых вычислений, 0 лагов!
-                    val pureDragHandle = Modifier.draggableHandle(
-                        enabled = isDragDropEnabled
-                    )
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .animateItem() 
-                            .graphicsLayer { alpha = if (isDragging) 0.5f else 1f }
-                    ) {
-                        // Передаем готовый pureDragHandle внутрь твоей карточки
-                        CardItem(
-                            item = item,
-                            theme = theme,
-                            size = size,
-                            dragModifier = pureDragHandle, 
-                            onClick = { returnedItem, action -> onClick(returnedItem, action) }
-                        )
+                ReorderableItem(state = reorderableState, key = item.id) { isDragging -> 
+                    val pureDragHandle = Modifier.draggableHandle(enabled = isDragDropEnabled)
+                    Box(modifier = Modifier.fillMaxWidth().animateItem().graphicsLayer { alpha = if (isDragging) 0.5f else 1f }) {
+                        CardItem(item = item, theme = theme, size = size, dragModifier = pureDragHandle, onClick = { returnedItem, action -> onClick(returnedItem, action) })
                     }
                 }
             }
         }
 
-        // --- Нижний блок кнопок остается без изменений ---
+        // --- Блок кнопок ---
         Row(modifier = Modifier.fillMaxWidth()) {
             Box(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-                IconButton(
-                    modifier = Modifier.size(50.dp).align(Alignment.Center),
-                    onClick = { },
-                ) {
-                    Image(
-                        painter = theme.iconMicro(),
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxSize()
-                    )
+                IconButton(modifier = Modifier.size(50.dp).align(Alignment.Center), onClick = { }) {
+                    Image(painter = theme.iconMicro(), contentDescription = null, modifier = Modifier.fillMaxSize())
                 }
-
-                IconButton(
-                    modifier = Modifier.size(50.dp).align(Alignment.CenterEnd),
-                    onClick = { onAddItem() },
-                ) {
-                    Icon(
-                        imageVector = theme.iconAdd,
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxSize(),
-                        tint = theme.iconAddTint
-                    )
+                IconButton(modifier = Modifier.size(50.dp).align(Alignment.CenterEnd), onClick = { onAddItem() }) {
+                    Icon(imageVector = theme.iconAdd, contentDescription = null, modifier = Modifier.fillMaxSize(), tint = theme.iconAddTint)
                 }
             }
         }
     }
 }
-
 
 // @Composable
 // fun ListToDo(
