@@ -74,13 +74,12 @@ fun ListToDo(
     onClick: (Item, Int) -> Unit = { _, _ -> },
     onAddItem: () -> Unit = {},
     onListReordered: (List<Item>) -> Unit = {}, 
-    onDragDone: (List<Item>) -> Unit = {}, // 👈 Сюда улетит правильный список для БД
+    onDragDone: (List<Item>) -> Unit = {}, // Сюда улетит правильный список для БД
     category: String = "Тест"
 ) {
     val listState = rememberLazyListState()
 
-    // 🌟 Наш "Аналог RecyclerView Адаптера" в памяти Compose. 
-    // Каждый раз, когда list обновляется из БД (например, прилетел чекбокс), snapshot тоже обновится.
+    // Наш "Аналог RecyclerView Адаптера" в памяти Compose. 
     var currentSnapshotList by remember(list) { mutableStateOf(list) }
 
     val reorderableState = rememberReorderableLazyListState(
@@ -92,7 +91,6 @@ fun ListToDo(
             val toIdx = to.index - 1
 
             if (fromIdx in currentSnapshotList.indices && toIdx in currentSnapshotList.indices) {
-                // Точно так же, как DragDropUtil.onMove(itemAdapter) двигал элементы в нативной версии:
                 val updatedList = currentSnapshotList.toMutableList().apply {
                     add(toIdx, removeAt(fromIdx))
                 }
@@ -121,7 +119,7 @@ fun ListToDo(
                 }
             }
 
-            // Читаем элементы из currentSnapshotList (нашего живого адаптера), чтобы UI не дергался
+            // Читаем элементы из currentSnapshotList (нашего живого адаптера)
             itemsIndexed(
                 items = currentSnapshotList, 
                 key = { _, item -> item.id }
@@ -138,7 +136,6 @@ fun ListToDo(
                                 enabled = isDragDropEnabled,
                                 onDragStarted = {},
                                 onDragStopped = {
-                                    // 🌟 ФИНАЛ (Аналог itemTouchDropped):
                                     // Отдаем наверх ТОТ СПИСОК, КОТОРЫЙ ПОЛУЧИЛСЯ ПОСЛЕ ПЕРЕСТАНОВКИ
                                     onDragDone(currentSnapshotList) 
                                 }
@@ -157,10 +154,7 @@ fun ListToDo(
                     }
                 }
             }
-        }
-    }
-}
-       
+        } // Конец LazyColumn
 
         Row(modifier = Modifier.fillMaxWidth()) {
             Box(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
@@ -188,7 +182,7 @@ fun ListToDo(
                 }
             }
         }
-    }
+    } // Конец главного Column
 }
 
 
