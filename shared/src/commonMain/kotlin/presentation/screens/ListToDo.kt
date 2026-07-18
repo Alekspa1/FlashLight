@@ -122,15 +122,16 @@ fun ListToDo(
                     ) {
                       
                             CardItem(
-    item = item,
-    theme = theme,
-    size = size,
-    reorderableScope = this, 
-    isDragDropEnabled = isDragDropEnabled,
-    currentListSnapshot = currentSnapshotList, 
+                            item = item,
+                                theme = theme,
+                            size = size,
+                            reorderableScope = this, 
+                            isDragDropEnabled = isDragDropEnabled,
+                            currentListSnapshot = currentSnapshotList, 
     
     // ИСПРАВЛЕНО: Теперь строчка на месте, логика полностью синхронизирована
     onDragDone = { finalList -> 
+        if (finalList == list) return@CardItem
         currentSnapshotList = finalList // 🌟 Фиксируем новые sort локально на экране
         onDragDropped(finalList)        // Отправляем готовый список во ViewModel для Room
     },
