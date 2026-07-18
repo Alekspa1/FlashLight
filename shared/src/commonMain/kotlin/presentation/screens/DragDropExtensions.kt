@@ -29,15 +29,18 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 
 @Composable
-fun rememberDragDropState(lazyListState: LazyListState, onMove: (Int, Int) -> Unit): DragDropState {
+fun rememberDragDropState(
+    lazyListState: LazyListState, 
+    onMove: (Int, Int) -> Unit,
+    onDragEnd: () -> Unit // 👈 1. Передаем событие окончания драга наружу
+): DragDropState {
     val scope = rememberCoroutineScope()
     val state = remember(lazyListState) {
-        DragDropState(state = lazyListState, onMove = onMove, scope = scope)
+        DragDropState(state = lazyListState, onMove = onMove, onDragEnd = onDragEnd, scope = scope)
     }
     LaunchedEffect(state) {
         while (true) {
             val diff = state.scrollChannel.receive()
-            // Используем правильный метод прокрутки, совместимый с KMP CommonMain
             lazyListState.scroll {
                 scrollBy(diff)
             }
@@ -64,23 +67,26 @@ class DragDropState internal constructor(
     private val state: LazyListState,
     private val scope: CoroutineScope,
     private val onMove: (Int, Int) -> Unit,
+    private val onDragEnd: () -> Unit, // 👈 Сохраняем колбэк окончания
 ) {
-    var draggingItemIndex by mutableStateOf<Int?>(null)
+    // 👈 2. ТРЕКАЕМ ПО КЛЮЧУ (Any), А НЕ ПО ИНДЕКСУ (Int)
+    var draggingItemKey by mutableStateOf<Any?>(null)
         private set
 
     internal val scrollChannel = Channel<Float>()
     private var draggingItemDraggedDelta by mutableFloatStateOf(0f)
     private var draggingItemInitialOffset by mutableIntStateOf(0)
 
+    // Теперь индекс зажатого элемента динамически находится в списке по его ключу
     internal val draggingItemOffset: Float
         get() = draggingItemLayoutInfo?.let { item ->
             draggingItemInitialOffset + draggingItemDraggedDelta - item.offset
         } ?: 0f
 
     private val draggingItemLayoutInfo: LazyListItemInfo?
-        get() = state.layoutInfo.visibleItemsInfo.firstOrNull { it.index == draggingItemIndex }
+        get() = state.layoutInfo.visibleItemsInfo.firstOrNull { it.key == draggingItemKey }
 
-    internal var previousIndexOfDraggedItem by mutableStateOf<Int?>(null)
+    internal var previousTrackedKey by mutableStateOf<Any?>(null)
         private set
 
     internal var previousItemOffset = Animatable(0f)
@@ -90,16 +96,16 @@ class DragDropState internal constructor(
         state.layoutInfo.visibleItemsInfo
             .firstOrNull { item -> offset.y.toInt() in item.offset..(item.offset + item.size) }
             ?.also {
-                if (it.index > 0) { // Игнорируем заголовок категории
-                    draggingItemIndex = it.index
+                if (it.index > 0) { // Игнорируем заголовок категории (у него индекс 0)
+                    draggingItemKey = it.key // Запоминаем уникальный ID
                     draggingItemInitialOffset = it.offset
                 }
             }
     }
 
     internal fun onDragInterrupted() {
-        if (draggingItemIndex != null) {
-            previousIndexOfDraggedItem = draggingItemIndex
+        if (draggingItemKey != null) {
+            previousTrackedKey = draggingItemKey
             val startOffset = draggingItemOffset
             scope.launch {
                 previousItemOffset.snapTo(startOffset)
@@ -107,12 +113,14 @@ class DragDropState internal constructor(
                     0f,
                     spring(stiffness = Spring.StiffnessMediumLow, visibilityThreshold = 1f),
                 )
-                previousIndexOfDraggedItem = null
+                previousTrackedKey = null
             }
         }
         draggingItemDraggedDelta = 0f
-        draggingItemIndex = null
+        draggingItemKey = null
         draggingItemInitialOffset = 0
+        
+        onDragEnd() // 👈 3. ВЫЗЫВАЕМ СОБЫТИЕ ЗАПИСИ В БД (Палец отпущен!)
     }
 
     internal fun onDrag(offset: Offset) {
@@ -125,15 +133,17 @@ class DragDropState internal constructor(
 
         val targetItem = state.layoutInfo.visibleItemsInfo.find { item ->
             middleOffset.toInt() in item.offset..(item.offset + item.size) &&
-                    draggingItem.index != item.index && item.index > 0 // Игнорируем заголовок категории
+                    draggingItem.index != item.index && item.index > 0
         }
 
         if (targetItem != null) {
             val isMovingDown = targetItem.index > draggingItem.index
+            
+            // 👈 4. Смягчаем порог пересечения для элементов разной высоты (40% и 60%)
             val isValidMove = if (isMovingDown) {
-                middleOffset > targetItem.offset + (targetItem.size * 0.3f)
+                middleOffset > targetItem.offset + (targetItem.size * 0.4f)
             } else {
-                middleOffset < targetItem.offset + (targetItem.size * 0.7f)
+                middleOffset < targetItem.offset + (targetItem.size * 0.6f)
             }
 
             if (isValidMove) {
@@ -146,7 +156,8 @@ class DragDropState internal constructor(
                     )
                 }
                 onMove.invoke(draggingItem.index, targetItem.index)
-                draggingItemIndex = targetItem.index
+                // Ключ зажатого элемента остался прежним. В следующем кадре рекомпозиции 
+                // draggingItemLayoutInfo сам найдет карточку по её новому индексу.
             }
         } else {
             val overscroll = when {
@@ -164,15 +175,15 @@ class DragDropState internal constructor(
 @Composable
 fun LazyItemScope.DraggableItem(
     dragDropState: DragDropState,
-    index: Int,
+    key: Any, // 👈 Принимаем key (item.id) вместо индекса
     modifier: Modifier = Modifier,
     content: @Composable ColumnScope.(isDragging: Boolean) -> Unit,
 ) {
-    val dragging = index == dragDropState.draggingItemIndex
+    val dragging = key == dragDropState.draggingItemKey
     val draggingModifier =
         if (dragging) {
             Modifier.zIndex(1f).graphicsLayer { translationY = dragDropState.draggingItemOffset }
-        } else if (index == dragDropState.previousIndexOfDraggedItem) {
+        } else if (key == dragDropState.previousTrackedKey) {
             Modifier.zIndex(1f).graphicsLayer {
                 translationY = dragDropState.previousItemOffset.value
             }
