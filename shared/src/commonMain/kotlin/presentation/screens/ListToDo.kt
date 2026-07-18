@@ -132,7 +132,7 @@ fun ListToDo(
     
     // ИСПРАВЛЕНО: Теперь строчка на месте, логика полностью синхронизирована
     onDragDone = { finalList -> 
-           if (finalList.map { it.id } == list.map { it.id }) return@onDragDone
+           if (finalList.map { it.id } == list.map { it.id }) return@itemsIndexed
         currentSnapshotList = finalList // 🌟 Фиксируем новые sort локально на экране
         onDragDropped(finalList)        // Отправляем готовый список во ViewModel для Room
     },
