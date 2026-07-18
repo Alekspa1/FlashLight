@@ -112,25 +112,9 @@ fun ListToDo(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .draggableHandle(
-                                enabled = isDragDropEnabled,
-                                onDragStarted = {},
-                                 onDragStopped = {
-    val listWithUpdatedSort = currentSnapshotList.mapIndexed { idx, listItem ->
-        listItem.copy(sort = idx)
-    }
-    currentSnapshotList = listWithUpdatedSort // Фиксируем новые sort локально на экране
-    onDragDropped(listWithUpdatedSort) // Отправляем чистый список во ViewModel для Room
-}
-                            )
                             .animateItem()
                         .graphicsLayer {
-                    // Если карточку зажали (isDragging == true), сжимаем до 0.93f, как в нативном коде. 
-                    // Когда отпустили — возвращаем честный 1f
-                    val scale = if (isDragging) 0.93f else 1f
-                    scaleX = scale
-                    scaleY = scale
-                    
+             
                     // Если зажали — делаем прозрачность 0.5f, как в твоем touchHelper. 
                     // Отпустили — возвращаем 100% яркость (1f)
                     alpha = if (isDragging) 0.5f else 1f
@@ -138,12 +122,21 @@ fun ListToDo(
                     ) {
                       
                             CardItem(
-                                item = item,
-                                theme = theme,
-                                size = size
-                            ) { returnedItem, action ->
-                                onClick(returnedItem, action)
-                            }
+    item = item,
+    theme = theme,
+    size = size,
+    reorderableScope = this, 
+    isDragDropEnabled = isDragDropEnabled,
+    currentListSnapshot = currentSnapshotList, 
+    
+    // ИСПРАВЛЕНО: Теперь строчка на месте, логика полностью синхронизирована
+    onDragDone = { finalList -> 
+        currentSnapshotList = finalList // 🌟 Фиксируем новые sort локально на экране
+        onDragDropped(finalList)        // Отправляем готовый список во ViewModel для Room
+    },
+    
+    onClick = { returnedItem, action -> onClick(returnedItem, action) }
+)
                         
                     }
                 }
