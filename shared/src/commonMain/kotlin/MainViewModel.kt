@@ -130,18 +130,22 @@ class MainViewModel(
     // )
 
 
-        private var isUserDragging = false
-// Локальный буфер, чтобы помнить последний удачный порядок элементов
+      private val dragTrigger = MutableStateFlow(0)
+
+// Флаг защиты от прыжков: true, пока пользователь тащит карточку или БД сохраняет данные
+private var isUserDragging = false
+// Локальный буфер порядка элементов
 private var lastValidList: List<Item> = emptyList()
 
 val sortedItemsFlow = combine(
     db.getAll(),
     sortType,
-    categoryItemFlow
-) { list, sort, currentCategory ->
+    categoryItemFlow,
+    dragTrigger // Подмешиваем триггер в общую кучу
+) { list, sort, currentCategory, _ ->
 
-    // 🌟 КРИТИЧЕСКАЯ ЗАЩИТА: Если идет драг или сохранение, 
-    // возвращаем прошлый стабильный список, не давая карточкам прыгать!
+    // КРИТИЧЕСКАЯ ЗАЩИТА: Если идет драг или сохранение, 
+    // возвращаем прошлый стабильный список, не давая карточкам прыгать назад!
     if (isUserDragging) {
         return@combine lastValidList
     }
@@ -159,22 +163,19 @@ val sortedItemsFlow = combine(
         filteredList.sortedBy { it.sort }
     }
     
-    // Запоминаем актуальный порядок
     lastValidList = result
     result
 }.flowOn(Dispatchers.Default)
  .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-// 1. Метод для анимации в памяти (теперь мы можем напрямую менять lastValidList, чтобы обмануть combine)
+// Мгновенная анимация карточек на экране (без лагов БД)
 fun updateListInUi(newList: List<Item>) {
     isUserDragging = true
     lastValidList = newList
-    // Нам нужно заставить combine пересчитаться с новым списком в памяти. 
-    // Самый простой способ — «пнуть» любой из потоков, например sortType
-    sortType.value = sortType.value 
+    dragTrigger.value += 1 // Принудительно заставляем combine выдать актуальный lastValidList
 }
 
-// 2. Метод сохранения в БД
+// Финальное сохранение порядка в БД с перезаписью поля sort
 fun updateItemsOrderInDb(finalList: List<Item>) {
     isUserDragging = true
     lastValidList = finalList
@@ -188,7 +189,7 @@ fun updateItemsOrderInDb(finalList: List<Item>) {
         } catch (e: Exception) {
             e.printStackTrace()
         } finally {
-            // Запись на диск завершена. Отключаем защиту.
+            // Запись завершена. Снимаем защиту.
             isUserDragging = false
         }
     }
