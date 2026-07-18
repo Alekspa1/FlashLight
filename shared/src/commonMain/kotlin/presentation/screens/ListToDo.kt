@@ -39,14 +39,22 @@ fun ListToDo(
     onDragDropped: (List<Item>) -> Unit = {}, // 👈 1. Переименовали колбэк, чтобы соответствовать твоей логике itemTouchDropped
     category: String = "Тест"
 ) {
-     var currentSnapshotList by remember(list) { mutableStateOf<List<Item>>(list) }
-    LaunchedEffect(list) {
-    currentSnapshotList = list
-        }
-    val listState = rememberLazyListState()
+         val listState = rememberLazyListState()
 
-    // 🌟 2. ЭТО ТВОЙ ItemAdapter! Локальный снимок списка в оперативной памяти экрана.
-    // Когда из БД (через аргумент list) прилетает измененный чекбокс, remember(list) автоматически обновляет снимок.
+    // 1. Создаем локальный "адаптер". Теперь remember пустой — он НЕ будет слепо затирать память при каждом шорохе!
+    var currentSnapshotList by remember { mutableStateOf<List<Item>>(list) }
+
+    // 🌟 2. АНАЛОГ ТВОЕГО НА ТИВНОГО COLLECT С РУБЕЖОМ ЗАЩИТЫ:
+    // Как только из БД (через аргумент list) прилетают данные, мы явно проверяем их, как в твоем фрагменте!
+    LaunchedEffect(list) {
+        // Проверяем: если порядок элементов и их контент на экране УЖЕ СОВПАДАЮТ с БД — игнорируем (return)
+        // Точно так же, как твоя нативная строка: if (currentItems == rawDataList) return@collect
+        if (currentSnapshotList == list) return@LaunchedEffect
+
+        // Если данные реально отличаются (например, прилетел измененный чекбокс), 
+        // принудительно обновляем наш локальный "адаптер", как это делал твой FastAdapterDiffUtil.set()
+        currentSnapshotList = list
+    }
    
 
     // Инициализируем стейт реордера
@@ -104,16 +112,13 @@ fun ListToDo(
                             .draggableHandle(
                                 enabled = isDragDropEnabled,
                                 onDragStarted = {},
-                                onDragStopped = {
-                                    // 🌟 4. АНАЛОГ itemTouchDropped: Палец отпустили!
-                                    // Прямо здесь пробегаемся по итоговому списку и перезаписываем поле sort его новым индексом
-                                    val listWithUpdatedSort = currentSnapshotList.mapIndexed { idx, listItem ->
-                                        listItem.copy(sort = idx)
-                                    }
-                                    // Отдаем готовый список с новыми sort в твой нативный метод во ViewModel
-                                    onDragDropped(listWithUpdatedSort) 
-                                    currentSnapshotList = listWithUpdatedSort
-                                }
+                                onDragStopped = onDragStopped = {
+    val listWithUpdatedSort = currentSnapshotList.mapIndexed { idx, listItem ->
+        listItem.copy(sort = idx)
+    }
+    currentSnapshotList = listWithUpdatedSort // Фиксируем новые sort локально на экране
+    onDragDropped(listWithUpdatedSort) // Отправляем чистый список во ViewModel для Room
+}
                             )
                             .animateItem() 
                     ) {
