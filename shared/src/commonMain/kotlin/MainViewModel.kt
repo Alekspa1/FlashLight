@@ -129,6 +129,40 @@ class MainViewModel(
         initialValue = emptyList() // Пока база данных считывается с диска, отдаем пустой список
     )
 
+
+        private val _uiItemsState = MutableStateFlow<List<Item>>(emptyList())
+val uiItemsState = _uiItemsState.asStateFlow()
+
+init {
+    // 2. Связываем поток из БД с нашим UI-стейтом
+    viewModelScope.launch {
+        sortedItemsFlow.collect { itemsFromDb ->
+            _uiItemsState.value = itemsFromDb
+        }
+    }
+}
+
+// 3. Метод для плавной анимации карточек в памяти во время перетаскивания
+fun updateListInUi(newList: List<Item>) {
+    _uiItemsState.value = newList
+}
+
+// 4. Твой нативный метод, доработанный для перезаписи поля sort
+fun updateItemsOrderInDb(finalList: List<Item>) {
+    viewModelScope.launch(Dispatchers.IO) {
+        try {
+            // Перезаписываем поле sort на основе нового положения элементов
+            val listWithUpdatedSort = finalList.mapIndexed { index, item ->
+                item.copy(sort = index) 
+            }
+            // Записываем в Room одной транзакцией
+            db.CourseDao().updateItemsOrder(listWithUpdatedSort)  
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+}
+
     fun saveText() = pref.saveTextNoteBook(stateTextNotebook)
 
     fun updateCategory(value: String) {
