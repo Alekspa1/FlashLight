@@ -276,7 +276,7 @@ fun MainPager(paddingValues: PaddingValues = PaddingValues(),
     category = category,
     theme = viewModel.themeState,
     size = viewModel.sizeState,
-    isDragDropEnabled = (viewModel.getSort() == SORT_USER),
+    //isDragDropEnabled = (viewModel.getSort() == SORT_USER),
     onDragDropped = { updatedList ->
         // Вызываем твой готовый нативный метод. Он получит список, где sort уже изменен на UI!
         viewModel.updateItemsOrder(updatedList) 
