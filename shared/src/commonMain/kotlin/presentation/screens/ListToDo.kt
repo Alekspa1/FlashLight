@@ -109,6 +109,7 @@ fun ListToDo(
                     state = reorderableState,
                     key = item.id
                 ) { isDragging -> 
+                    val reorder = this
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -125,7 +126,7 @@ fun ListToDo(
                             item = item,
                                 theme = theme,
                             size = size,
-                            reorderableScope = this, 
+                            reorderableScope = reorder, 
                             isDragDropEnabled = isDragDropEnabled,
                             currentListSnapshot = currentSnapshotList, 
     
