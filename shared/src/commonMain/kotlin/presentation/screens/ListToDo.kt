@@ -112,6 +112,7 @@ fun ListToDo(
                                     }
                                     // Отдаем готовый список с новыми sort в твой нативный метод во ViewModel
                                     onDragDropped(listWithUpdatedSort) 
+                                    currentSnapshotList = listWithUpdatedSort
                                 }
                             )
                             .animateItem() 
