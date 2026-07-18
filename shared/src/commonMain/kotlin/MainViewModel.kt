@@ -102,63 +102,94 @@ class MainViewModel(
 
     fun deleteImage(fileName: String) = image.delete(fileName)
 
-     val sortedItemsFlow = combine(
-        db.getAll(), // Поток всех дел
-        sortType,                         // Поток типа сортировки
-        categoryItemFlow                  // Поток выбранной категории
-    ) { list, sort, currentCategory ->
+    //  val sortedItemsFlow = combine(
+    //     db.getAll(), // Поток всех дел
+    //     sortType,                         // Поток типа сортировки
+    //     categoryItemFlow                  // Поток выбранной категории
+    // ) { list, sort, currentCategory ->
 
-        // 1. СНАЧАЛА ФИЛЬТРУЕМ СПИСОК: оставляем только дела из выбранной категории
-        val filteredList = list.filter { it.category == currentCategory }
+    //     // 1. СНАЧАЛА ФИЛЬТРУЕМ СПИСОК: оставляем только дела из выбранной категории
+    //     val filteredList = list.filter { it.category == currentCategory }
 
-        // 2. ЗАТЕМ СОРТИРУЕМ ОТФИЛЬТРОВАННЫЙ СПИСОК
-         if (sort == SORT_STANDART) {
-             filteredList.sortedWith(
-                 compareBy<Item> { if (it.changeAlarm) 0 else 1 } // 1. Сначала ВСЕ с активным будильником (желтые)
-                     .thenBy { if (it.change) 1 else 0 }          // 2. ОПУСКАЕМ ЗЕЛЕНЫЕ: сначала незавершенные (0), выполненные (1) вниз!
-                     .thenBy { it.alarmTime }                     // 3. Сортируем будильники по времени
-                     .thenBy { it.sort }                          // 4. Стандартная сортировка для остальных
-             )
-         } else {
-            filteredList.sortedBy { it.sort }
-        }
-    }.flowOn(Dispatchers.Default)
-        .stateIn(
-        scope = viewModelScope, // Корутина привязана к жизни ViewModel
-        started = SharingStarted.WhileSubscribed(5000), // Бережёт оперативку и батарейку
-        initialValue = emptyList() // Пока база данных считывается с диска, отдаем пустой список
-    )
+    //     // 2. ЗАТЕМ СОРТИРУЕМ ОТФИЛЬТРОВАННЫЙ СПИСОК
+    //      if (sort == SORT_STANDART) {
+    //          filteredList.sortedWith(
+    //              compareBy<Item> { if (it.changeAlarm) 0 else 1 } // 1. Сначала ВСЕ с активным будильником (желтые)
+    //                  .thenBy { if (it.change) 1 else 0 }          // 2. ОПУСКАЕМ ЗЕЛЕНЫЕ: сначала незавершенные (0), выполненные (1) вниз!
+    //                  .thenBy { it.alarmTime }                     // 3. Сортируем будильники по времени
+    //                  .thenBy { it.sort }                          // 4. Стандартная сортировка для остальных
+    //          )
+    //      } else {
+    //         filteredList.sortedBy { it.sort }
+    //     }
+    // }.flowOn(Dispatchers.Default)
+    //     .stateIn(
+    //     scope = viewModelScope, // Корутина привязана к жизни ViewModel
+    //     started = SharingStarted.WhileSubscribed(5000), // Бережёт оперативку и батарейку
+    //     initialValue = emptyList() // Пока база данных считывается с диска, отдаем пустой список
+    // )
 
 
-        private val _uiItemsState = MutableStateFlow<List<Item>>(emptyList())
-val uiItemsState = _uiItemsState.asStateFlow()
+        private var isUserDragging = false
+// Локальный буфер, чтобы помнить последний удачный порядок элементов
+private var lastValidList: List<Item> = emptyList()
 
-init {
-    // 2. Связываем поток из БД с нашим UI-стейтом
-    viewModelScope.launch {
-        sortedItemsFlow.collect { itemsFromDb ->
-            _uiItemsState.value = itemsFromDb
-        }
+val sortedItemsFlow = combine(
+    db.getAll(),
+    sortType,
+    categoryItemFlow
+) { list, sort, currentCategory ->
+
+    // 🌟 КРИТИЧЕСКАЯ ЗАЩИТА: Если идет драг или сохранение, 
+    // возвращаем прошлый стабильный список, не давая карточкам прыгать!
+    if (isUserDragging) {
+        return@combine lastValidList
     }
-}
 
-// 3. Метод для плавной анимации карточек в памяти во время перетаскивания
+    val filteredList = list.filter { it.category == currentCategory }
+
+    val result = if (sort == SORT_STANDART) {
+        filteredList.sortedWith(
+            compareBy<Item> { if (it.changeAlarm) 0 else 1 }
+                .thenBy { if (it.change) 1 else 0 }
+                .thenBy { it.alarmTime }
+                .thenBy { it.sort }
+        )
+    } else {
+        filteredList.sortedBy { it.sort }
+    }
+    
+    // Запоминаем актуальный порядок
+    lastValidList = result
+    result
+}.flowOn(Dispatchers.Default)
+ .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+// 1. Метод для анимации в памяти (теперь мы можем напрямую менять lastValidList, чтобы обмануть combine)
 fun updateListInUi(newList: List<Item>) {
-    _uiItemsState.value = newList
+    isUserDragging = true
+    lastValidList = newList
+    // Нам нужно заставить combine пересчитаться с новым списком в памяти. 
+    // Самый простой способ — «пнуть» любой из потоков, например sortType
+    sortType.value = sortType.value 
 }
 
-// 4. Твой нативный метод, доработанный для перезаписи поля sort
+// 2. Метод сохранения в БД
 fun updateItemsOrderInDb(finalList: List<Item>) {
+    isUserDragging = true
+    lastValidList = finalList
+    
     viewModelScope.launch(Dispatchers.IO) {
         try {
-            // Перезаписываем поле sort на основе нового положения элементов
             val listWithUpdatedSort = finalList.mapIndexed { index, item ->
                 item.copy(sort = index) 
             }
-            // Записываем в Room одной транзакцией
             db.updateItemsOrder(listWithUpdatedSort)  
         } catch (e: Exception) {
             e.printStackTrace()
+        } finally {
+            // Запись на диск завершена. Отключаем защиту.
+            isUserDragging = false
         }
     }
 }
