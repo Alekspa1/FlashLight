@@ -78,7 +78,8 @@ fun MainPager(paddingValues: PaddingValues = PaddingValues(),
     val titles = listOf("Блокнот","Список дел","Календарь")
     val premium = viewModel.premiumState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
-    val todoList by viewModel.sortedItemsFlow.collectAsStateWithLifecycle()
+   // val todoList by viewModel.sortedItemsFlow.collectAsStateWithLifecycle()
+   val todoList by viewModel.uiItemsState.collectAsStateWithLifecycle()
 
     val listCategory by viewModel.spinnerCategories.collectAsStateWithLifecycle()
 
@@ -274,6 +275,16 @@ fun MainPager(paddingValues: PaddingValues = PaddingValues(),
                         category = category,
                         theme = viewModel.themeState,
                         size = viewModel.sizeState,
+    
+    // Мгновенно меняем порядок в памяти, чтобы карточки вставали на места
+    onListReordered = { updatedList ->
+        viewModel.updateListInUi(updatedList)
+    },
+    
+    // Сохраняем в БД, когда палец отпущен
+    onDragDone = { finalList ->
+        viewModel.updateItemsOrderInDb(finalList)
+    },
                         onClick = {item,action->
                             when(action){
                                 ALARM->{viewModel.permission(NOTIFICATION,item)}
