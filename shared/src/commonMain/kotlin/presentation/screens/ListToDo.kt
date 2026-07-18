@@ -99,6 +99,24 @@ fun ListToDo(
                     state = reorderableState,
                     key = item.id
                 ) { isDragging -> 
+                    val draggableHandle = Modifier.draggableHandle(
+                                enabled = isDragDropEnabled,
+                                onDragStarted = {},
+                                onDragStopped = {
+                                    val currentIds = currentSnapshotList.map { it.id }
+                                    val originalIds = list.map { it.id }
+                                    
+                                    if (currentIds != originalIds) {
+                                        // Пересчитываем sort только если карточки реально сдвинулись!
+                                        val listWithUpdatedSort = currentSnapshotList.mapIndexed { idx, listItem ->
+                                            listItem.copy(sort = idx)
+                                        }
+                                        currentSnapshotList = listWithUpdatedSort 
+                                        onDragDropped(listWithUpdatedSort) 
+                                    }
+                                }
+                            )
+                    
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
