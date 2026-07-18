@@ -28,6 +28,9 @@ import presentation.theme.SizeNormal
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.graphics.graphicsLayer 
+
+
 @Composable
 fun ListToDo(
     list: List<Item>, // Сюда заходит todoList by viewModel.sortedItemsFlow.collectAsStateWithLifecycle()
