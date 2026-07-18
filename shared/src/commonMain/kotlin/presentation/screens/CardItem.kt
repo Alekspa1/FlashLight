@@ -60,7 +60,7 @@ fun CardItem(item: Item,
          size: Size = SizeNormal(),
          isDragDropEnabled: Boolean = true,    
          reorderableScope: sh.calvin.reorderable.ReorderableCollectionItemScope? = null,
-         currentListSnapshot: List<Item> = emptyList(), // 👈 Принимаем живой список экрана
+         currentListSnapshot: () -> List<Item> = { emptyList() }, // 👈 Принимаем живой список экрана
          onDragDone: (List<Item>) -> Unit = {},  
          onClick : (Item, Int) -> Unit = { _, _->}) {
 
