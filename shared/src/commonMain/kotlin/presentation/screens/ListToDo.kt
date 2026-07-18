@@ -34,6 +34,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue 
+import androidx.compose.runtime.setValue // 👈 НОВОЕ: Для работы мутабельного стейта через 'by'
+import androidx.compose.runtime.remember // 👈 НОВОЕ: Исправляет ошибку Unresolved reference 'remember'
+import androidx.compose.runtime.mutableStateOf // 👈 НОВОЕ: Исправляет ошибку Unresolved reference 'mutableStateOf'
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -57,7 +61,7 @@ import presentation.theme.SizeNormal
 import presentation.screens.CardItem
 import presentation.theme.ThemeZabor
 
-// ИМПОРТИРУЕМ ТОЛЬКО CALVIN REORDERABLE
+// ИМПОРТЫ CALVIN REORDERABLE
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
