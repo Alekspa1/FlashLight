@@ -120,9 +120,20 @@ fun ListToDo(
     onDragDropped(listWithUpdatedSort) // Отправляем чистый список во ViewModel для Room
 }
                             )
-                            .animateItem() 
+                            .animateItem()
+                        .graphicsLayer {
+                    // Если карточку зажали (isDragging == true), сжимаем до 0.93f, как в нативном коде. 
+                    // Когда отпустили — возвращаем честный 1f
+                    val scale = if (isDragging) 0.93f else 1f
+                    scaleX = scale
+                    scaleY = scale
+                    
+                    // Если зажали — делаем прозрачность 0.5f, как в твоем touchHelper. 
+                    // Отпустили — возвращаем 100% яркость (1f)
+                    alpha = if (isDragging) 0.5f else 1f
+                }
                     ) {
-                        Card(modifier = Modifier.fillMaxWidth()) {
+                      
                             CardItem(
                                 item = item,
                                 theme = theme,
@@ -130,7 +141,7 @@ fun ListToDo(
                             ) { returnedItem, action ->
                                 onClick(returnedItem, action)
                             }
-                        }
+                        
                     }
                 }
             }
