@@ -24,8 +24,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed // Нужно вместо обычного items
-import androidx.compose.foundation.lazy.rememberLazyListState // Нужно для контроля скролла
+import androidx.compose.foundation.lazy.itemsIndexed 
+import androidx.compose.foundation.lazy.rememberLazyListState 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Alarm
@@ -57,16 +57,9 @@ import presentation.theme.SizeNormal
 import presentation.screens.CardItem
 import presentation.theme.ThemeZabor
 
-// Импортируем функции drag-and-drop
-import presentation.screens.rememberDragDropState
-import presentation.screens.dragContainer
-import presentation.screens.DraggableItem
-
-// ИМПОРТЫ БИБЛИОТЕКИ REORDERABLE
-import org.burnoutcrew.reorderable.ReorderableItem
-import org.burnoutcrew.reorderable.detectReorderAfterLongPress
-import org.burnoutcrew.reorderable.rememberReorderableLazyListState
-import org.burnoutcrew.reorderable.reorderable
+// ИМПОРТИРУЕМ ТОЛЬКО CALVIN REORDERABLE
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @Composable
 fun ListToDo(
@@ -75,48 +68,38 @@ fun ListToDo(
     size: Size = SizeNormal(),
     onClick: (Item, Int) -> Unit = { _, _ -> },
     onAddItem: () -> Unit = {},
-    onListReordered: (List<Item>) -> Unit = {}, // Для живого движения в памяти
-    onDragDone: (List<Item>) -> Unit = {},       // Для финальной записи sort в БД
+    onListReordered: (List<Item>) -> Unit = {}, 
+    onDragDone: (List<Item>) -> Unit = {},       
     category: String = "Тест"
 ) {
-    // 1. Инициализируем стейт библиотеки. Она сама знает, как двигать элементы разной высоты
-    val state = rememberReorderableLazyListState(
+    val listState = rememberLazyListState()
+
+    val reorderableState = rememberReorderableLazyListState(
+        lazyListState = listState,
         onMove = { from, to ->
-            // ЗАЩИТА: Заголовок стоит на индексе 0. Если пытаются двигать заголовок, игнорируем!
             if (from.index == 0 || to.index == 0) return@rememberReorderableLazyListState
-            
-            // Смещаем индексы для нашего чистого списка элементов (без заголовка)
+
             val fromIdx = from.index - 1
             val toIdx = to.index - 1
-            
+
             if (fromIdx in list.indices && toIdx in list.indices) {
                 val updatedList = list.toMutableList().apply {
                     add(toIdx, removeAt(fromIdx))
                 }
-                onListReordered(updatedList) // Моментально обновляем UI в памяти
+                onListReordered(updatedList) 
             }
-        },
-        canDragOver = { draggedOver, dragging ->
-            // ЗАЩИТА: Запрещаем карточкам перелетать выше заголовка (индекс 0)
-            draggedOver.index > 0
-        },
-        onDragEnd = { _, _ ->
-            // Сработает ровно ОДИН раз, когда пользователь отпустил палец
-            onDragDone(list) 
         }
     )
 
     Column(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
-            state = state.listState, // Передаем стейт прокрутки библиотеки
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .reorderable(state) // Навешиваем обработчик реордера
+            state = listState,
+            modifier = Modifier.fillMaxWidth().weight(1f),
+            verticalArrangement = Arrangement.spacedBy(5.dp), 
         ) {
             val categoryName = category
             item(key = categoryName) {
-                Box(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
+                Box(modifier = Modifier.fillMaxWidth()) {
                     Text(
                         text = categoryName,
                         color = theme.textColor,
@@ -127,25 +110,34 @@ fun ListToDo(
                 }
             }
 
-            // Обрати внимание: используем обычный items, библиотека сама трекает индексы
-            items(list, key = { it.id }) { item ->
-                
-                // Обертка библиотеки для контроля зажатого элемента
-                ReorderableItem(state, key = item.id) { isDragging ->
+            itemsIndexed(
+                items = list,
+                key = { _, item -> item.id }
+            ) { index, item ->
+                val actualLazyColumnIndex = index + 1
+
+                ReorderableItem(
+                    state = reorderableState,
+                    key = item.id,
+                    index = actualLazyColumnIndex
+                ) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 5.dp)
-                            // detectReorderAfterLongPress запускает драг по лонгпрессу
-                            .detectReorderAfterLongPress(state) 
-                            .animateItem() // Родная плавная анимация Compose для соседей
+                            .draggableHandle(
+                                onDragStarted = {},
+                                onDragStopped = {
+                                    onDragDone(list)
+                                }
+                            )
+                            .animateItem() 
                     ) {
                         Card(modifier = Modifier.fillMaxWidth()) {
                             CardItem(
                                 item = item,
                                 theme = theme,
                                 size = size
-                            ) { returnedItem, action -> 
+                            ) { returnedItem, action ->
                                 onClick(returnedItem, action)
                             }
                         }
@@ -154,7 +146,6 @@ fun ListToDo(
             }
         }
 
-        // --- Твой нижний блок Row с кнопками остается без изменений ---
         Row(modifier = Modifier.fillMaxWidth()) {
             Box(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
                 IconButton(
@@ -183,7 +174,6 @@ fun ListToDo(
         }
     }
 }
-
 
 
 
