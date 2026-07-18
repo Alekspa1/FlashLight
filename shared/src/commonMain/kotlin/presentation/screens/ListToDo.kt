@@ -116,33 +116,32 @@ fun ListToDo(
             ) { index, item ->
                 val actualLazyColumnIndex = index + 1
 
-                ReorderableItem(
-                    state = reorderableState,
-                    key = item.id,
-                    index = actualLazyColumnIndex
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .draggableHandle(
-                                onDragStarted = {},
-                                onDragStopped = {
-                                    onDragDone(list)
-                                }
-                            )
-                            .animateItem() 
-                    ) {
-                        Card(modifier = Modifier.fillMaxWidth()) {
-                            CardItem(
-                                item = item,
-                                theme = theme,
-                                size = size
-                            ) { returnedItem, action ->
-                                onClick(returnedItem, action)
-                            }
-                        }
-                    }
+               ReorderableItem(
+    state = reorderableState,
+    key = item.id
+) { isDragging -> // 👈 Не забудь добавить 'isDragging ->'
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .draggableHandle(
+                onDragStarted = {},
+                onDragStopped = {
+                    onDragDone(list)
                 }
+            )
+            .animateItem() 
+    ) {
+        Card(modifier = Modifier.fillMaxWidth()) {
+            CardItem(
+                item = item,
+                theme = theme,
+                size = size
+            ) { returnedItem, action ->
+                onClick(returnedItem, action)
+            }
+        }
+    }
+}
             }
         }
 
