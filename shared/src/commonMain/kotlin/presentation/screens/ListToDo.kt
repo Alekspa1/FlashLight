@@ -62,6 +62,12 @@ import presentation.screens.rememberDragDropState
 import presentation.screens.dragContainer
 import presentation.screens.DraggableItem
 
+// ИМПОРТЫ БИБЛИОТЕКИ REORDERABLE
+import org.burnoutcrew.reorderable.ReorderableItem
+import org.burnoutcrew.reorderable.detectReorderAfterLongPress
+import org.burnoutcrew.reorderable.rememberReorderableLazyListState
+import org.burnoutcrew.reorderable.reorderable
+
 @Composable
 fun ListToDo(
     list: List<Item>,
@@ -69,38 +75,44 @@ fun ListToDo(
     size: Size = SizeNormal(),
     onClick: (Item, Int) -> Unit = { _, _ -> },
     onAddItem: () -> Unit = {},
-    onListReordered: (List<Item>) -> Unit = {}, // Срабатывает НА КАЖДЫЙ СДВИГ пальца (для анимации в памяти)
-    onDragDone: (List<Item>) -> Unit = {},       // СРАБОТАЕТ ОДИН РАЗ, КОГДА ОТПУСТИШЬ ПАЛЕЦ (для записи sort в БД)
+    onListReordered: (List<Item>) -> Unit = {}, // Для живого движения в памяти
+    onDragDone: (List<Item>) -> Unit = {},       // Для финальной записи sort в БД
     category: String = "Тест"
 ) {
-    val listState = rememberLazyListState()
-    
-    // Инициализируем состояние драга. Передаем логику сдвига и логику окончания жеста.
-    val dragDropState = rememberDragDropState(
-        lazyListState = listState, 
-        onMove = { fromIndex, toIndex ->
-            // Корректируем индексы, так как заголовок занимает индекс 0 в LazyColumn
-            val from = fromIndex - 1
-            val to = toIndex - 1
-            if (from in list.indices && to in list.indices) {
+    // 1. Инициализируем стейт библиотеки. Она сама знает, как двигать элементы разной высоты
+    val state = rememberReorderableLazyListState(
+        onMove = { from, to ->
+            // ЗАЩИТА: Заголовок стоит на индексе 0. Если пытаются двигать заголовок, игнорируем!
+            if (from.index == 0 || to.index == 0) return@rememberReorderableLazyListState
+            
+            // Смещаем индексы для нашего чистого списка элементов (без заголовка)
+            val fromIdx = from.index - 1
+            val toIdx = to.index - 1
+            
+            if (fromIdx in list.indices && toIdx in list.indices) {
                 val updatedList = list.toMutableList().apply {
-                    add(to, removeAt(from))
+                    add(toIdx, removeAt(fromIdx))
                 }
-                onListReordered(updatedList) // Моментально обновляем UI-стейт в памяти
+                onListReordered(updatedList) // Моментально обновляем UI в памяти
             }
         },
-        onDragEnd = {
-            onDragDone(list) // Передаем финальный список наверх, когда палец отпустили
+        canDragOver = { draggedOver, dragging ->
+            // ЗАЩИТА: Запрещаем карточкам перелетать выше заголовка (индекс 0)
+            draggedOver.index > 0
+        },
+        onDragEnd = { _, _ ->
+            // Сработает ровно ОДИН раз, когда пользователь отпустил палец
+            onDragDone(list) 
         }
     )
 
     Column(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
+            state = state.listState, // Передаем стейт прокрутки библиотеки
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
-                .dragContainer(dragDropState),
-            state = listState,
+                .reorderable(state) // Навешиваем обработчик реордера
         ) {
             val categoryName = category
             item(key = categoryName) {
@@ -115,18 +127,18 @@ fun ListToDo(
                 }
             }
 
-            itemsIndexed(
-                items = list,
-                key = { _, item -> item.id } // LazyColumn следит за элементами по ID
-            ) { index, item ->
+            // Обрати внимание: используем обычный items, библиотека сама трекает индексы
+            items(list, key = { it.id }) { item ->
                 
-                // КРИТИЧЕСКАЯ ПРАВКА: Передаем СТАБИЛЬНЫЙ key = item.id вместо изменяющегося индекса.
-                // Теперь алгоритм "намертво" привяжется к карточке, и драг не сорвется.
-                DraggableItem(dragDropState, key = item.id) { isDragging ->
+                // Обертка библиотеки для контроля зажатого элемента
+                ReorderableItem(state, key = item.id) { isDragging ->
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 5.dp) // Безопасная замена spacedBy
+                            .padding(bottom = 5.dp)
+                            // detectReorderAfterLongPress запускает драг по лонгпрессу
+                            .detectReorderAfterLongPress(state) 
+                            .animateItem() // Родная плавная анимация Compose для соседей
                     ) {
                         Card(modifier = Modifier.fillMaxWidth()) {
                             CardItem(
@@ -142,7 +154,7 @@ fun ListToDo(
             }
         }
 
-        // --- Нижний блок кнопок остается без изменений ---
+        // --- Твой нижний блок Row с кнопками остается без изменений ---
         Row(modifier = Modifier.fillMaxWidth()) {
             Box(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
                 IconButton(
