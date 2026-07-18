@@ -102,98 +102,45 @@ class MainViewModel(
 
     fun deleteImage(fileName: String) = image.delete(fileName)
 
-    //  val sortedItemsFlow = combine(
-    //     db.getAll(), // Поток всех дел
-    //     sortType,                         // Поток типа сортировки
-    //     categoryItemFlow                  // Поток выбранной категории
-    // ) { list, sort, currentCategory ->
+     val sortedItemsFlow = combine(
+        db.getAll(), // Поток всех дел
+        sortType,                         // Поток типа сортировки
+        categoryItemFlow                  // Поток выбранной категории
+    ) { list, sort, currentCategory ->
 
-    //     // 1. СНАЧАЛА ФИЛЬТРУЕМ СПИСОК: оставляем только дела из выбранной категории
-    //     val filteredList = list.filter { it.category == currentCategory }
+        // 1. СНАЧАЛА ФИЛЬТРУЕМ СПИСОК: оставляем только дела из выбранной категории
+        val filteredList = list.filter { it.category == currentCategory }
 
-    //     // 2. ЗАТЕМ СОРТИРУЕМ ОТФИЛЬТРОВАННЫЙ СПИСОК
-    //      if (sort == SORT_STANDART) {
-    //          filteredList.sortedWith(
-    //              compareBy<Item> { if (it.changeAlarm) 0 else 1 } // 1. Сначала ВСЕ с активным будильником (желтые)
-    //                  .thenBy { if (it.change) 1 else 0 }          // 2. ОПУСКАЕМ ЗЕЛЕНЫЕ: сначала незавершенные (0), выполненные (1) вниз!
-    //                  .thenBy { it.alarmTime }                     // 3. Сортируем будильники по времени
-    //                  .thenBy { it.sort }                          // 4. Стандартная сортировка для остальных
-    //          )
-    //      } else {
-    //         filteredList.sortedBy { it.sort }
-    //     }
-    // }.flowOn(Dispatchers.Default)
-    //     .stateIn(
-    //     scope = viewModelScope, // Корутина привязана к жизни ViewModel
-    //     started = SharingStarted.WhileSubscribed(5000), // Бережёт оперативку и батарейку
-    //     initialValue = emptyList() // Пока база данных считывается с диска, отдаем пустой список
-    // )
+        // 2. ЗАТЕМ СОРТИРУЕМ ОТФИЛЬТРОВАННЫЙ СПИСОК
+         if (sort == SORT_STANDART) {
+             filteredList.sortedWith(
+                 compareBy<Item> { if (it.changeAlarm) 0 else 1 } // 1. Сначала ВСЕ с активным будильником (желтые)
+                     .thenBy { if (it.change) 1 else 0 }          // 2. ОПУСКАЕМ ЗЕЛЕНЫЕ: сначала незавершенные (0), выполненные (1) вниз!
+                     .thenBy { it.alarmTime }                     // 3. Сортируем будильники по времени
+                     .thenBy { it.sort }                          // 4. Стандартная сортировка для остальных
+             )
+         } else {
+            filteredList.sortedBy { it.sort }
+        }
+    }.flowOn(Dispatchers.Default)
+        .stateIn(
+        scope = viewModelScope, // Корутина привязана к жизни ViewModel
+        started = SharingStarted.WhileSubscribed(5000), // Бережёт оперативку и батарейку
+        initialValue = emptyList() // Пока база данных считывается с диска, отдаем пустой список
+    )
 
-
-      private val dragTrigger = MutableStateFlow(0)
-
-// Флаг защиты от прыжков: true, пока пользователь тащит карточку или БД сохраняет данные
-private var isUserDragging = false
-// Локальный буфер порядка элементов
-private var lastValidList: List<Item> = emptyList()
-
-val sortedItemsFlow = combine(
-    db.getAll(),
-    sortType,
-    categoryItemFlow,
-    dragTrigger // Подмешиваем триггер в общую кучу
-) { list, sort, currentCategory, _ ->
-
-    // КРИТИЧЕСКАЯ ЗАЩИТА: Если идет драг или сохранение, 
-    // возвращаем прошлый стабильный список, не давая карточкам прыгать назад!
-    if (isUserDragging) {
-        return@combine lastValidList
-    }
-
-    val filteredList = list.filter { it.category == currentCategory }
-
-    val result = if (sort == SORT_STANDART) {
-        filteredList.sortedWith(
-            compareBy<Item> { if (it.changeAlarm) 0 else 1 }
-                .thenBy { if (it.change) 1 else 0 }
-                .thenBy { it.alarmTime }
-                .thenBy { it.sort }
-        )
-    } else {
-        filteredList.sortedBy { it.sort }
-    }
-    
-    lastValidList = result
-    result
-}.flowOn(Dispatchers.Default)
- .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-
-// Мгновенная анимация карточек на экране (без лагов БД)
-fun updateListInUi(newList: List<Item>) {
-    isUserDragging = true
-    lastValidList = newList
-    dragTrigger.value += 1 // Принудительно заставляем combine выдать актуальный lastValidList
-}
-
-// Финальное сохранение порядка в БД с перезаписью поля sort
-fun updateItemsOrderInDb(finalList: List<Item>) {
-    isUserDragging = true
-    lastValidList = finalList
-    
-    viewModelScope.launch(Dispatchers.IO) {
-        try {
-            val listWithUpdatedSort = finalList.mapIndexed { index, item ->
-                item.copy(sort = index) 
+            fun updateItemsOrder(newList: List<Item>) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                db.updateItemsOrder(newList)  // Один запрос, одна транзакция
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
-            db.updateItemsOrder(listWithUpdatedSort)  
-        } catch (e: Exception) {
-            e.printStackTrace()
-        } finally {
-            // Запись завершена. Снимаем защиту.
-            isUserDragging = false
         }
     }
-}
+
+
+     
 
     fun saveText() = pref.saveTextNoteBook(stateTextNotebook)
 
