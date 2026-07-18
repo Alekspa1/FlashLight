@@ -37,7 +37,10 @@ fun rememberDragDropState(lazyListState: LazyListState, onMove: (Int, Int) -> Un
     LaunchedEffect(state) {
         while (true) {
             val diff = state.scrollChannel.receive()
-            lazyListState.scrollBy(diff)
+            // Используем правильный метод прокрутки, совместимый с KMP CommonMain
+            lazyListState.scroll {
+                scrollBy(diff)
+            }
         }
     }
     return state
