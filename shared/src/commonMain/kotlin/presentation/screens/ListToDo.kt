@@ -70,16 +70,20 @@ fun ListToDo(
     list: List<Item>,
     theme: Theme = ThemeNeon(),
     size: Size = SizeNormal(),
+    isDragDropEnabled: Boolean = true,
     onClick: (Item, Int) -> Unit = { _, _ -> },
     onAddItem: () -> Unit = {},
     onListReordered: (List<Item>) -> Unit = {}, 
-    onDragDone: (List<Item>) -> Unit = {},       
+    onDragDone: (List<Item>) -> Unit = {}, // 👈 Сюда улетит правильный список для БД
     category: String = "Тест"
 ) {
     val listState = rememberLazyListState()
+
+    // 🌟 Наш "Аналог RecyclerView Адаптера" в памяти Compose. 
+    // Каждый раз, когда list обновляется из БД (например, прилетел чекбокс), snapshot тоже обновится.
     var currentSnapshotList by remember(list) { mutableStateOf(list) }
-    
-   val reorderableState = rememberReorderableLazyListState(
+
+    val reorderableState = rememberReorderableLazyListState(
         lazyListState = listState,
         onMove = { from, to ->
             if (from.index == 0 || to.index == 0) return@rememberReorderableLazyListState
@@ -88,11 +92,12 @@ fun ListToDo(
             val toIdx = to.index - 1
 
             if (fromIdx in currentSnapshotList.indices && toIdx in currentSnapshotList.indices) {
+                // Точно так же, как DragDropUtil.onMove(itemAdapter) двигал элементы в нативной версии:
                 val updatedList = currentSnapshotList.toMutableList().apply {
                     add(toIdx, removeAt(fromIdx))
                 }
-                currentSnapshotList = updatedList // Обновляем локальный снимок
-                onListReordered(updatedList) // Отдаем во ViewModel для UI
+                currentSnapshotList = updatedList // Меняем порядок в нашем "адаптере"
+                onListReordered(updatedList) // Передаем наверх во ViewModel для живой анимации
             }
         }
     )
@@ -116,40 +121,46 @@ fun ListToDo(
                 }
             }
 
+            // Читаем элементы из currentSnapshotList (нашего живого адаптера), чтобы UI не дергался
             itemsIndexed(
-                items = list,
+                items = currentSnapshotList, 
                 key = { _, item -> item.id }
             ) { index, item ->
-                val actualLazyColumnIndex = index + 1
 
-               ReorderableItem(
-    state = reorderableState,
-    key = item.id
-) { isDragging -> // 👈 Не забудь добавить 'isDragging ->'
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .draggableHandle(
-                onDragStarted = {},
-                onDragStopped = {
-                    onDragDone(currentSnapshotList)
+                ReorderableItem(
+                    state = reorderableState,
+                    key = item.id
+                ) { isDragging -> 
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .draggableHandle(
+                                enabled = isDragDropEnabled,
+                                onDragStarted = {},
+                                onDragStopped = {
+                                    // 🌟 ФИНАЛ (Аналог itemTouchDropped):
+                                    // Отдаем наверх ТОТ СПИСОК, КОТОРЫЙ ПОЛУЧИЛСЯ ПОСЛЕ ПЕРЕСТАНОВКИ
+                                    onDragDone(currentSnapshotList) 
+                                }
+                            )
+                            .animateItem() 
+                    ) {
+                        Card(modifier = Modifier.fillMaxWidth()) {
+                            CardItem(
+                                item = item,
+                                theme = theme,
+                                size = size
+                            ) { returnedItem, action ->
+                                onClick(returnedItem, action)
+                            }
+                        }
+                    }
                 }
-            )
-            .animateItem() 
-    ) {
-        Card(modifier = Modifier.fillMaxWidth()) {
-            CardItem(
-                item = item,
-                theme = theme,
-                size = size
-            ) { returnedItem, action ->
-                onClick(returnedItem, action)
             }
         }
     }
 }
-            }
-        }
+       
 
         Row(modifier = Modifier.fillMaxWidth()) {
             Box(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
