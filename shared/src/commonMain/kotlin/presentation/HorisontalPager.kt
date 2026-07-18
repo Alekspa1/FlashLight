@@ -78,8 +78,8 @@ fun MainPager(paddingValues: PaddingValues = PaddingValues(),
     val titles = listOf("Блокнот","Список дел","Календарь")
     val premium = viewModel.premiumState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
-   // val todoList by viewModel.sortedItemsFlow.collectAsStateWithLifecycle()
-   val todoList by viewModel.uiItemsState.collectAsStateWithLifecycle()
+    val todoList by viewModel.sortedItemsFlow.collectAsStateWithLifecycle()
+
 
     val listCategory by viewModel.spinnerCategories.collectAsStateWithLifecycle()
 
