@@ -57,11 +57,8 @@ import sh.calvin.reorderable.ReorderableCollectionItemScope
 
 fun CardItem(item: Item,
          theme: Theme = ThemeNeon(),
-         size: Size = SizeNormal(),
-         isDragDropEnabled: Boolean = true,    
-         reorderableScope: sh.calvin.reorderable.ReorderableCollectionItemScope? = null,
-         currentListSnapshot: () -> List<Item> = { emptyList() }, // 👈 Принимаем живой список экрана
-         onDragDone: (List<Item>) -> Unit = {},  
+         size: Size = SizeNormal(),  
+         dragModifier: Modifier = Modifier,
          onClick : (Item, Int) -> Unit = { _, _->}) {
 
         Row(
@@ -107,27 +104,9 @@ fun CardItem(item: Item,
             RoundedCornerShape(15.dp)
         )
         // 1. Сначала вешаем обычный клик (для открытия диалога)
-        .clickable { onClick(item, CHANGE_ITEM) },
-        // 2. И только в самом конце через .then подключаем драг-хэндл, чтобы они не конфликтовали
-        // .then(
-        //     if (reorderableScope != null) {
-        //         with(reorderableScope) {
-        //             Modifier.draggableHandle(
-        //                 enabled = isDragDropEnabled, 
-        //                 onDragStarted = {},
-        //                 onDragStopped = {
-        //                     // Наш победный пересчет sort строго при отпускании пальца
-        //                     val listWithUpdatedSort = currentListSnapshot().mapIndexed { idx, listItem ->
-        //                         listItem.copy(sort = idx)
-        //                     }
-        //                     onDragDone(listWithUpdatedSort) // Отправляем в ListToDo, а оттуда во ViewModel
-        //                 }
-        //             )
-        //         }
-        //     } else Modifier
-        // ),
-
-    shape = RoundedCornerShape(16.dp),
+        .clickable { onClick(item, CHANGE_ITEM) }
+         .then(dragModifier),
+             shape = RoundedCornerShape(16.dp),
 
     colors = CardDefaults.cardColors(
         containerColor =
