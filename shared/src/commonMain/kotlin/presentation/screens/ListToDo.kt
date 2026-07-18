@@ -69,23 +69,30 @@ fun ListToDo(
     size: Size = SizeNormal(),
     onClick: (Item, Int) -> Unit = { _, _ -> },
     onAddItem: () -> Unit = {},
-    onListReordered: (List<Item>) -> Unit = {}, // Колбэк для сохранения нового порядка
+    onListReordered: (List<Item>) -> Unit = {}, // Срабатывает НА КАЖДЫЙ СДВИГ пальца (для анимации в памяти)
+    onDragDone: (List<Item>) -> Unit = {},       // СРАБОТАЕТ ОДИН РАЗ, КОГДА ОТПУСТИШЬ ПАЛЕЦ (для записи sort в БД)
     category: String = "Тест"
 ) {
     val listState = rememberLazyListState()
     
-    // Инициализируем состояние драга
-    val dragDropState = rememberDragDropState(listState) { fromIndex, toIndex ->
-        // Корректируем индексы, так как заголовок занимает индекс 0 в LazyColumn
-        val from = fromIndex - 1
-        val to = toIndex - 1
-        if (from in list.indices && to in list.indices) {
-            val updatedList = list.toMutableList().apply {
-                add(to, removeAt(from))
+    // Инициализируем состояние драга. Передаем логику сдвига и логику окончания жеста.
+    val dragDropState = rememberDragDropState(
+        lazyListState = listState, 
+        onMove = { fromIndex, toIndex ->
+            // Корректируем индексы, так как заголовок занимает индекс 0 в LazyColumn
+            val from = fromIndex - 1
+            val to = toIndex - 1
+            if (from in list.indices && to in list.indices) {
+                val updatedList = list.toMutableList().apply {
+                    add(to, removeAt(from))
+                }
+                onListReordered(updatedList) // Моментально обновляем UI-стейт в памяти
             }
-            onListReordered(updatedList) // Передаем наверх обновленный список
+        },
+        onDragEnd = {
+            onDragDone(list) // Передаем финальный список наверх, когда палец отпустили
         }
-    }
+    )
 
     Column(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
@@ -110,12 +117,12 @@ fun ListToDo(
 
             itemsIndexed(
                 items = list,
-                key = { _, item -> item.id }
+                key = { _, item -> item.id } // LazyColumn следит за элементами по ID
             ) { index, item ->
-                // Индекс в LazyColumn равен index + 1 из-за заголовка
-                val actualLazyColumnIndex = index + 1
                 
-                DraggableItem(dragDropState, actualLazyColumnIndex) { isDragging ->
+                // КРИТИЧЕСКАЯ ПРАВКА: Передаем СТАБИЛЬНЫЙ key = item.id вместо изменяющегося индекса.
+                // Теперь алгоритм "намертво" привяжется к карточке, и драг не сорвется.
+                DraggableItem(dragDropState, key = item.id) { isDragging ->
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -135,7 +142,7 @@ fun ListToDo(
             }
         }
 
-        // --- Нижний блок кнопок ---
+        // --- Нижний блок кнопок остается без изменений ---
         Row(modifier = Modifier.fillMaxWidth()) {
             Box(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
                 IconButton(
