@@ -112,7 +112,7 @@ fun ListToDo(
                             .draggableHandle(
                                 enabled = isDragDropEnabled,
                                 onDragStarted = {},
-                                onDragStopped = onDragStopped = {
+                                 onDragStopped = {
     val listWithUpdatedSort = currentSnapshotList.mapIndexed { idx, listItem ->
         listItem.copy(sort = idx)
     }
