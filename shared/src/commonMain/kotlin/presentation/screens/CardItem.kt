@@ -58,6 +58,7 @@ import sh.calvin.reorderable.ReorderableCollectionItemScope
 fun CardItem(item: Item,
          theme: Theme = ThemeNeon(),
          size: Size = SizeNormal(),
+         isDragDropEnabled: Boolean = true,    
          reorderableScope: sh.calvin.reorderable.ReorderableCollectionItemScope? = null,
          currentListSnapshot: List<Item> = emptyList(), // 👈 Принимаем живой список экрана
          onDragDone: (List<Item>) -> Unit = {},  
