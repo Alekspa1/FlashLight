@@ -39,11 +39,15 @@ fun ListToDo(
     onDragDropped: (List<Item>) -> Unit = {}, // 👈 1. Переименовали колбэк, чтобы соответствовать твоей логике itemTouchDropped
     category: String = "Тест"
 ) {
+     var currentSnapshotList by remember(list) { mutableStateOf<List<Item>>(list) }
+    LaunchedEffect(list) {
+    currentSnapshotList = list
+        }
     val listState = rememberLazyListState()
 
     // 🌟 2. ЭТО ТВОЙ ItemAdapter! Локальный снимок списка в оперативной памяти экрана.
     // Когда из БД (через аргумент list) прилетает измененный чекбокс, remember(list) автоматически обновляет снимок.
-    var currentSnapshotList by remember(list) { mutableStateOf<List<Item>>(list) }
+   
 
     // Инициализируем стейт реордера
     val reorderableState = rememberReorderableLazyListState(
