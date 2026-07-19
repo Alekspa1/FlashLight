@@ -12,6 +12,9 @@ import CommonConst.URI_OLD
 import com.russhwolf.settings.Settings
 import domain.repostirory.SettingsAppRepository
 
+import CommonConst.THEME_FUTURE
+import CommonConst.THEME_SETTINGS
+
 
 class MultiplatrormAppSettings(private val settings: Settings) : SettingsAppRepository {
 
@@ -31,13 +34,13 @@ class MultiplatrormAppSettings(private val settings: Settings) : SettingsAppRepo
  }
 
   override  fun getUriAlarm() = settings.getString(ALARM_SETTINGS, URI_STANDART)
-  override  fun saveUriAlarm(uri: Uri){
+  override  fun saveUriAlarm(uri: String){
     settings.putString(ALARM_SETTINGS, uri.toString())
   }
 
  override  fun getOldUriAlarm() = settings.getString(URI_OLD, URI_STANDART)
- override   fun saveOldUriAlarm(uri: Uri){
-    settings.putString(URI_OLD, uri.toString())
+ override   fun saveOldUriAlarm(uri: String){
+    settings.putString(URI_OLD, uri)
  }
 
 }
