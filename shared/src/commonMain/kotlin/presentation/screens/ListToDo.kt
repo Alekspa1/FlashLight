@@ -57,9 +57,10 @@ fun ListToDo(
     
     // Рубеж защиты: обновляем экран только если из БД прилетел реально измененный чекбокс
     androidx.compose.runtime.LaunchedEffect(list) {
-        if (currentSnapshotList != list) {
-            currentSnapshotList = list
-        }
+        // if (currentSnapshotList != list) {
+            
+        // }
+        currentSnapshotList = list
     }
 
     val reorderableState = rememberReorderableLazyListState(
