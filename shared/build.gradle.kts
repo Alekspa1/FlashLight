@@ -61,6 +61,7 @@ kotlin {
             implementation("io.coil-kt.coil3:coil-compose:3.3.0")
             implementation("org.jetbrains.androidx.navigation:navigation-compose:2.9.2")
             implementation("sh.calvin.reorderable:reorderable:2.4.3")
+            implementation("com.russhwolf:multiplatform-settings:1.3.0")
         }
 
         commonTest.dependencies {
