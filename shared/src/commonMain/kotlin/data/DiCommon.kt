@@ -40,6 +40,7 @@ val appModule = module {
     single { get<myDataBase>().CourseDao() }
     
     single<SharedPrefRepository> { MultiplatrormSettings(settings = get(named("noteBook"))) }
+    single<SettingsAppRepository > { MultiplatrormAppSettings(settings = get(named("settings"))) }
     
     single<AlarmRepeadRepository> { AlarmRepeadImp(get(),get()) }
     factory<SaveDeleteImageRepositpry> { SaveDeleteImageImpl(get()) }
