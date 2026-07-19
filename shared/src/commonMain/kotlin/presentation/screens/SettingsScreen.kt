@@ -97,7 +97,7 @@ fun SettingsScreen(
         SORT_SETTINGS -> {
            ThemeDialog(select = SORT_STANDART,
                                       listAction = listSort,  
-                                      onClick ={action-> viewModel.sortType.value = action
+                                      onClick ={action-> viewModel._sortType.value = action
                                           
                                           viewModel.showDialog = DialogState()},
                                       onCancel = { viewModel.showDialog = DialogState()})
