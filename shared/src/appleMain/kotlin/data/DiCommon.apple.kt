@@ -21,6 +21,7 @@ import platform.Foundation.stringByAppendingPathComponent
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.NSUserDefaultsSettings
 import org.koin.core.qualifier.named
+import platform.Foundation.NSUserDefaults
 
 @OptIn(ExperimentalForeignApi::class)
 actual val moduleAnotherPlatform: Module = module {
