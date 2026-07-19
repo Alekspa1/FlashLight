@@ -39,10 +39,12 @@ import kotlinx.coroutines.flow.map
 import presentation.theme.SizeNormal
 import presentation.theme.Theme
 import presentation.theme.ThemeNeon
+import domain.repostirory.SettingsAppRepository
 
 class MainViewModel(
     private val pref: SharedPrefRepository,
     private val db: CourseDao,
+    private val settingsPref : SettingsAppRepository,
     val deleteImageInitem: DeleteImageInItemReository,
     private val permission: PermissionRepository,
     private val alarm: AlarmRepository,
@@ -54,20 +56,39 @@ class MainViewModel(
 
     var stateTextNotebook by mutableStateOf(pref.loadTextNoteBook())
     var showDialog by  mutableStateOf(DialogState())
-    var _toast = MutableSharedFlow<String>()
+    private var _toast = MutableSharedFlow<String>()
     var toast = _toast.asSharedFlow()
 
     var premiumState = MutableStateFlow(true)
     var updateState by mutableStateOf(false)
     var themeState by mutableStateOf<Theme>(ThemeNeon())
+    
+    init{
+        when(settingsPref.getTheme()){
+            THEME_FUTURE ->{themeState = ThemeNeon()}
+            THEME_ZABOR -> {themeState = ThemeZabor()}
+        } 
+    }
+    fun saveTheme(value: String){
+    settingsPref.saveTheme(value)
+    
+    when(value){
+    THEME_FUTURE ->{themeState = ThemeNeon()}
+    THEME_ZABOR -> {themeState = ThemeZabor()}   
+    }
+    }
     var sizeState by mutableStateOf(SizeNormal())
 
 
 
-    //private val _sortType = MutableStateFlow(settingsPref.getSort())
-    val _sortType = MutableStateFlow(SORT_USER)
+    
+    private val _sortType = MutableStateFlow(settingsPref.getSort())
     val sortType = _sortType.asStateFlow()
 
+    fun saveSort(sort: String) {
+     _sortType.value = sort    
+    }
+    
     private val _categoryItemFlow = MutableStateFlow("Повседневные")
     val categoryItemFlow = _categoryItemFlow.asStateFlow()
 
