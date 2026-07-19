@@ -41,6 +41,10 @@ import presentation.theme.Theme
 import presentation.theme.ThemeNeon
 import domain.repostirory.SettingsAppRepository
 
+import CommonConst.THEME_FUTURE
+import CommonConst.THEME_ZABOR
+
+
 class MainViewModel(
     private val pref: SharedPrefRepository,
     private val db: CourseDao,
