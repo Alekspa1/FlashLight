@@ -5,7 +5,7 @@ import CommonConst.KEY_NOTE_BOOK
 import com.russhwolf.settings.Settings
 import domain.repostirory.SharedPrefRepository
 
-class MultiplatrormSettings(settings: Settings) : SharedPrefRepository{
+class MultiplatrormSettings(private val settings: Settings) : SharedPrefRepository{
   
   private val greetings =
 
