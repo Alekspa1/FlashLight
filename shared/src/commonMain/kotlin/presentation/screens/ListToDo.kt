@@ -29,6 +29,9 @@ import androidx.compose.ui.graphics.graphicsLayer
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+
 @Composable
 fun ListToDo(
     list: List<Item>, 
@@ -44,7 +47,7 @@ fun ListToDo(
 
     // Наш локальный "адаптер" в памяти Compose
     var currentSnapshotList by remember { mutableStateOf<List<Item>>(list) }
-
+    val haptic = LocalHapticFeedback.current
     // Рубеж защиты: обновляем экран только если из БД прилетел реально измененный чекбокс
     androidx.compose.runtime.LaunchedEffect(list) {
         if (currentSnapshotList != list) {
@@ -100,7 +103,7 @@ fun ListToDo(
                     // Формируем чистый dragModifier для проброса внутрь карточки
                     val draggableHandle = Modifier.longPressDraggableHandle(
                         enabled = isDragDropEnabled,
-                        onDragStarted = {},
+                        onDragStarted = {haptic.performHapticFeedback(HapticFeedbackType.LongPress)},
                         onDragStopped = {
                             // Пересчитываем sort строго в момент отпускания пальца
                             val listWithUpdatedSort = currentSnapshotList.mapIndexed { idx, listItem ->
@@ -115,7 +118,6 @@ fun ListToDo(
                         modifier = Modifier
                             .fillMaxWidth()
                             .animateItem()
-                            .then(draggableHandle)
                             .graphicsLayer {
                                 alpha = if (isDragging) 0.5f else 1f
                             }
@@ -125,7 +127,10 @@ fun ListToDo(
                             theme = theme,
                             dragModifier = draggableHandle, // Наш готовый модификатор
                             size = size,
-                            onClick = { returnedItem, action -> onClick(returnedItem, action) }
+                            onClick = { 
+                                returnedItem, action ->
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                onClick(returnedItem, action) }
                         )
                     }
                 }
