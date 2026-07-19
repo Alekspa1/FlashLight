@@ -92,6 +92,7 @@ fun CardItem(item: Item,
             // 2. Центральная карточка (занимает всё оставшееся пространство)
 
             Card(
+
     modifier = Modifier
         .padding(start = 5.dp, end = 5.dp)
         .weight(1f) // Заставляет карточку занять ВСЁ свободное место между кнопками
@@ -106,7 +107,7 @@ fun CardItem(item: Item,
         // 1. Сначала вешаем обычный клик (для открытия диалога)
         .clickable { onClick(item, CHANGE_ITEM) }
          .then(dragModifier),
-             shape = RoundedCornerShape(16.dp),
+             shape = RoundedCornerShape(15.dp),
 
     colors = CardDefaults.cardColors(
         containerColor =

@@ -103,7 +103,7 @@ fun ListToDo(
                     state = reorderableState,
                     key = item.id
                 ) { isDragging -> 
-                    val draggableHandle = Modifier.draggableHandle(
+                    val draggableHandle = Modifier.longPressDraggableHandle(
                                 enabled = isDragDropEnabled,
                                 onDragStarted = {},
                                 onDragStopped = {
