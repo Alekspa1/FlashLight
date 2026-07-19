@@ -71,6 +71,7 @@ class MainViewModel(
         when(settingsPref.getTheme()){
             THEME_FUTURE ->{themeState = ThemeNeon()}
             THEME_ZABOR -> {themeState = ThemeZabor()}
+            else -> themeState = ThemeNeon()
         } 
     }
     fun saveTheme(value: String){
