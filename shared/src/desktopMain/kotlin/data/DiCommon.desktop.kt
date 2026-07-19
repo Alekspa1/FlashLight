@@ -25,9 +25,10 @@ import com.russhwolf.settings.PreferencesSettings
 import java.util.prefs.Preferences
 import org.koin.core.qualifier.named
 actual val moduleAnotherPlatform: Module = module {
-  //  single<SharedPrefRepository> { DesktopSharedPrefImpl() }
+
 
     single<Settings>(named("noteBook")) { PreferencesSettings(Preferences.userRoot().node("NotebookSettings")) }
+    single<Settings>(named("settings")) { PreferencesSettings(Preferences.userRoot().node("AppSettings")) }
 
     single<RoomDatabase.Builder<myDataBase>> {
         // Указываем путь к файлу на жестком диске ПК
