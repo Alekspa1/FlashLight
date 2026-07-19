@@ -20,8 +20,14 @@ import domain.repostirory.DeleteImageInItemReository
 import domain.repostirory.PathProviderRepostitory
 import domain.repostirory.PermissionRepository
 
+import com.russhwolf.settings.Settings
+import com.russhwolf.settings.PreferencesSettings
+import java.util.prefs.Preferences
+import org.koin.core.qualifier.named
 actual val moduleAnotherPlatform: Module = module {
-    single<SharedPrefRepository> { DesktopSharedPrefImpl() }
+  //  single<SharedPrefRepository> { DesktopSharedPrefImpl() }
+
+    single<Settings>(named("noteBook")) { PreferencesSettings(Preferences.userRoot().node("NotebookSettings")) }
 
     single<RoomDatabase.Builder<myDataBase>> {
         // Указываем путь к файлу на жестком диске ПК
