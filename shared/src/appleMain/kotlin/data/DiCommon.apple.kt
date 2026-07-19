@@ -18,10 +18,15 @@ import platform.Foundation.NSFileManager
 import platform.Foundation.NSUserDomainMask
 import platform.Foundation.stringByAppendingPathComponent
 
+import com.russhwolf.settings.Settings
+import com.russhwolf.settings.NSUserDefaultsSettings
+import org.koin.core.qualifier.named
 
 @OptIn(ExperimentalForeignApi::class)
 actual val moduleAnotherPlatform: Module = module {
-    single <SharedPrefRepository> { IosSharedPrefImpl() }
+    //single <SharedPrefRepository> { IosSharedPrefImpl() }
+    
+    single<Settings>(named("noteBook")) { NSUserDefaultsSettings(NSUserDefaults.standardUserDefaults) }
 
     single<RoomDatabase.Builder<myDataBase>> {
         // 1. Находим путь к безопасной папке Документов внутри песочницы iOS
