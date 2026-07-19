@@ -13,9 +13,9 @@ interface SettingsAppRepository {
     fun saveSize(value: String)
 
     fun getUriAlarm()
-    fun saveUriAlarm(uri: Uri)
+    fun saveUriAlarm(uri: String)
 
     fun getOldUriAlarm() 
-    fun saveOldUriAlarm(uri: Uri)
+    fun saveOldUriAlarm(uri: String)
   
 }
