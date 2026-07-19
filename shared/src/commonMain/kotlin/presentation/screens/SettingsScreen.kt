@@ -83,7 +83,8 @@ fun SettingsScreen(
             ThemeDialog(select = THEME_ZABOR,
                                       listAction = listTheme,  
                                       onClick ={selectedTheme->
-                                      if(selectedTheme == THEME_FUTURE) viewModel.themeState = ThemeNeon() else viewModel.themeState = ThemeZabor()
+                                     // if(selectedTheme == THEME_FUTURE) viewModel.themeState = ThemeNeon() else viewModel.themeState = ThemeZabor()
+                                      viewModel.saveTheme(selectedTheme)    
                                       viewModel.showDialog = DialogState()
                                       },
                                       onCancel = { viewModel.showDialog = DialogState()})
@@ -97,7 +98,7 @@ fun SettingsScreen(
         SORT_SETTINGS -> {
            ThemeDialog(select = SORT_STANDART,
                                       listAction = listSort,  
-                                      onClick ={action-> viewModel._sortType.value = action
+                                      onClick ={action-> viewModel.saveSort(action)  
                                           
                                           viewModel.showDialog = DialogState()},
                                       onCancel = { viewModel.showDialog = DialogState()})
