@@ -11,10 +11,12 @@ import data.alarmReceiwer.NotificationBuilderPassed
 import data.repostitory.AndroidAlarmImpl
 import data.repostitory.AndroidPathProviderImp
 import data.repostitory.AndroidPermissionImpl
+import data.repostitory.AndroidSaveDeleteImpl
 import data.room.myDataBase
 import domain.repostirory.AlarmRepository
 import domain.repostirory.PathProviderRepostitory
 import domain.repostirory.PermissionRepository
+import domain.repostirory.SaveDeleteImageRepositpry
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.qualifier.named
 import org.koin.dsl.bind
@@ -66,6 +68,6 @@ actual val moduleAnotherPlatform = module {
     factory<NotificationBuilder> { NotificationBuilder(get(),get()) }
     factory<NotificationBuilderPassed> { NotificationBuilderPassed(get()) }
     factory<PathProviderRepostitory> { AndroidPathProviderImp(get()) }
-
+    factory<SaveDeleteImageRepositpry> { AndroidSaveDeleteImpl(get()) }
 
 }
