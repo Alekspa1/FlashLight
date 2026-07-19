@@ -9,6 +9,8 @@ import CommonConst.ALARM_SETTINGS
 import CommonConst.URI_STANDART
 import CommonConst.URI_OLD
 
+import com.russhwolf.settings.Settings
+import domain.repostirory.SettingsAppRepository
 
 
 class MultiplatrormAppSettings(private val settings: Settings) : SettingsAppRepository {
