@@ -29,6 +29,8 @@ import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.graphicsLayer 
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 
 
 
@@ -50,7 +52,9 @@ fun ListToDo(
 
     // Наш локальный "адаптер" в памяти Compose
     var currentSnapshotList by remember { mutableStateOf<List<Item>>(list) }
-
+    
+    val haptic = LocalHapticFeedback.current
+    
     // Рубеж защиты: обновляем экран только если из БД прилетел реально измененный чекбокс
     androidx.compose.runtime.LaunchedEffect(list) {
         if (currentSnapshotList != list) {
@@ -105,7 +109,7 @@ fun ListToDo(
                 ) { isDragging -> 
                     val draggableHandle = Modifier.longPressDraggableHandle(
                                 enabled = isDragDropEnabled,
-                                onDragStarted = {},
+                                onDragStarted = { haptic.performHapticFeedback(HapticFeedbackType.LongPress)},
                                 onDragStopped = {
                                     val currentIds = currentSnapshotList.map { it.id }
                                     val originalIds = list.map { it.id }
@@ -135,7 +139,9 @@ fun ListToDo(
                             theme = theme,
                              dragModifier = draggableHandle,
                             size = size,
-                            onClick = { returnedItem, action -> onClick(returnedItem, action) }
+                            onClick = { returnedItem, action -> 
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                onClick(returnedItem, action) }
                         )
                     }
                 }
