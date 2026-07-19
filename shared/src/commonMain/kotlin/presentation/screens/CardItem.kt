@@ -106,7 +106,8 @@ fun CardItem(item: Item,
         )
         // 1. Сначала вешаем обычный клик (для открытия диалога)
         .clickable { onClick(item, CHANGE_ITEM) }
-         .then(dragModifier),
+         //.then(dragModifier)
+                     ,
              shape = RoundedCornerShape(15.dp),
 
     colors = CardDefaults.cardColors(
