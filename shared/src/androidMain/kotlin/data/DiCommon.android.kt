@@ -28,17 +28,24 @@ import com.russhwolf.settings.Settings
 import org.koin.core.qualifier.named
 
 actual val moduleAnotherPlatform = module {
-
-   // single<SharedPrefRepository> { AndroidSharedPrefIml(get()) }
+      val context: Context = get()
+  
       single<Settings>(named("noteBook")){
-          val context: Context = get()
+          
           val prefs = context.getSharedPreferences("TABLE", Context.MODE_PRIVATE)
           SharedPreferencesSettings(prefs)
           
       }
+
+       single<Settings>(named("settings")){
+         
+          val prefsSettings = context.getSharedPreferences("SETTINGS", Context.MODE_PRIVATE)
+          SharedPreferencesSettings(prefsSettings)
+          
+      }
    
     single<myDataBase> {
-        val context: Context = get()
+        
 
         val dbFile = context.getDatabasePath("db")
 
@@ -56,7 +63,7 @@ actual val moduleAnotherPlatform = module {
     single { AndroidPermissionImpl(get()) } bind PermissionRepository::class
 
     single<AlarmManager> {
-        val context: Context = get()
+       
         context.getSystemService(Context.ALARM_SERVICE) as AlarmManager }
 
     single<AlarmRepository> { AndroidAlarmImpl( get(),get()) }
