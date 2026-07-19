@@ -23,19 +23,11 @@ import presentation.theme.Theme
 import presentation.theme.ThemeNeon
 import presentation.theme.Size
 import presentation.theme.SizeNormal
+import androidx.compose.ui.graphics.graphicsLayer
 
 // ИМПОРТЫ СТАБИЛЬНОЙ БИБЛИОТЕКИ CALVIN REORDERABLE
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.graphics.graphicsLayer 
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
-
-
-
-
-
 
 @Composable
 fun ListToDo(
@@ -52,15 +44,12 @@ fun ListToDo(
 
     // Наш локальный "адаптер" в памяти Compose
     var currentSnapshotList by remember { mutableStateOf<List<Item>>(list) }
-    
-    val haptic = LocalHapticFeedback.current
-    
+
     // Рубеж защиты: обновляем экран только если из БД прилетел реально измененный чекбокс
     androidx.compose.runtime.LaunchedEffect(list) {
-        // if (currentSnapshotList != list) {
-            
-        // }
-        currentSnapshotList = list
+        if (currentSnapshotList != list) {
+            currentSnapshotList = list
+        }
     }
 
     val reorderableState = rememberReorderableLazyListState(
@@ -108,43 +97,34 @@ fun ListToDo(
                     state = reorderableState,
                     key = item.id
                 ) { isDragging -> 
-                    val draggableHandle = Modifier.longPressDraggableHandle(
-                                enabled = isDragDropEnabled,
-                                onDragStarted = { haptic.performHapticFeedback(HapticFeedbackType.LongPress)},
-                                onDragStopped = {
-                                    val currentIds = currentSnapshotList.map { it.id }
-                                    val originalIds = list.map { it.id }
-                                    
-                                    if (currentIds != originalIds) {
-                                        // Пересчитываем sort только если карточки реально сдвинулись!
-                                        val listWithUpdatedSort = currentSnapshotList.mapIndexed { idx, listItem ->
-                                            listItem.copy(sort = idx)
-                                        }
-                                        currentSnapshotList = listWithUpdatedSort 
-                                        onDragDropped(listWithUpdatedSort) 
-                                    }
-                                }
-                            )
-                    
+                    // Формируем чистый dragModifier для проброса внутрь карточки
+                    val draggableHandle = Modifier.draggableHandle(
+                        enabled = isDragDropEnabled,
+                        onDragStarted = {},
+                        onDragStopped = {
+                            // Пересчитываем sort строго в момент отпускания пальца
+                            val listWithUpdatedSort = currentSnapshotList.mapIndexed { idx, listItem ->
+                                listItem.copy(sort = idx)
+                            }
+                            currentSnapshotList = listWithUpdatedSort // Фиксируем новые sort локально на экране
+                            onDragDropped(listWithUpdatedSort) // Отправляем готовый список во ViewModel для Room
+                        }
+                    )
+
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .then(draggableHandle)
                             .animateItem() 
                             .graphicsLayer {
                                 alpha = if (isDragging) 0.5f else 1f
                             }
                     ) {
-                        val actualItem = currentSnapshotList[index]
-                        // Твоя чистая карточка без проброса лишних контекстов и лямбд
                         CardItem(
-                            item = actualItem,
+                            item = item,
                             theme = theme,
-                             dragModifier = draggableHandle,
+                            dragModifier = draggableHandle, // Наш готовый модификатор
                             size = size,
-                            onClick = { returnedItem, action -> 
-                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                onClick(returnedItem, action) }
+                            onClick = { returnedItem, action -> onClick(returnedItem, action) }
                         )
                     }
                 }
