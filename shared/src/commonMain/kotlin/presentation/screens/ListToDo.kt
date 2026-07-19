@@ -129,6 +129,7 @@ fun ListToDo(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .then(dragModifier)
                             .animateItem() 
                             .graphicsLayer {
                                 alpha = if (isDragging) 0.5f else 1f
