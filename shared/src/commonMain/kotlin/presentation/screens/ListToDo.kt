@@ -104,13 +104,29 @@ fun ListToDo(
                     val draggableHandle = Modifier.longPressDraggableHandle(
                         enabled = isDragDropEnabled,
                         onDragStarted = {haptic.performHapticFeedback(HapticFeedbackType.LongPress)},
+                        // onDragStopped = {
+                        //     // Пересчитываем sort строго в момент отпускания пальца
+                        //     val listWithUpdatedSort = currentSnapshotList.mapIndexed { idx, listItem ->
+                        //         listItem.copy(sort = idx)
+                        //     }
+                        //     currentSnapshotList = listWithUpdatedSort // Фиксируем новые sort локально на экране
+                        //     onDragDropped(listWithUpdatedSort) // Отправляем готовый список во ViewModel для Room
+                        // }
                         onDragStopped = {
-                            // Пересчитываем sort строго в момент отпускания пальца
-                            val listWithUpdatedSort = currentSnapshotList.mapIndexed { idx, listItem ->
-                                listItem.copy(sort = idx)
+                val currentIds = currentSnapshotList.map { it.id }
+                val originalIds = list.map { it.id }
+    
+                // 1. Формируем список с новыми sort и обновляем память экрана В ЛЮБОМ СЛУЧАЕ (при каждом отпускании пальца/клике)
+                // Это гарантирует, что ссылки на объекты в памяти обновятся, и чекбоксы больше никогда не багуют!
+                    val listWithUpdatedSort = currentSnapshotList.mapIndexed { idx, listItem ->
+                        listItem.copy(sort = idx)
+                        }
+                        currentSnapshotList = listWithUpdatedSort 
+    
+                        // 2. А во ViewModel и базу данных Room отправляем данные СТРОГО если порядок ID реально изменился!
+                        if (currentIds != originalIds) {
+                            onDragDropped(listWithUpdatedSort) 
                             }
-                            currentSnapshotList = listWithUpdatedSort // Фиксируем новые sort локально на экране
-                            onDragDropped(listWithUpdatedSort) // Отправляем готовый список во ViewModel для Room
                         }
                     )
 
