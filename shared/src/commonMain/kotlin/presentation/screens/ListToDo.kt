@@ -98,7 +98,7 @@ fun ListToDo(
                     key = item.id
                 ) { isDragging -> 
                     // Формируем чистый dragModifier для проброса внутрь карточки
-                    val draggableHandle = Modifier.draggableHandle(
+                    val draggableHandle = Modifier.longPressDraggableHandle(
                         enabled = isDragDropEnabled,
                         onDragStarted = {},
                         onDragStopped = {
@@ -114,7 +114,8 @@ fun ListToDo(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .animateItem() 
+                            .animateItem()
+                            .then(draggableHandle)
                             .graphicsLayer {
                                 alpha = if (isDragging) 0.5f else 1f
                             }
