@@ -16,7 +16,7 @@ import data.room.Item
 import data.room.ListCategory
 import domain.repostirory.AlarmRepeadRepository
 import domain.repostirory.AlarmRepository
-import domain.repostirory.DeleteImageInItemReository
+
 import domain.repostirory.PermissionRepository
 import domain.repostirory.SaveDeleteImageRepositpry
 import domain.repostirory.SharedPrefRepository
@@ -43,13 +43,14 @@ import domain.repostirory.SettingsAppRepository
 
 import CommonConst.THEME_FUTURE
 import CommonConst.THEME_ZABOR
+import presentation.theme.ThemeZabor
 
 
 class MainViewModel(
     private val pref: SharedPrefRepository,
     private val db: CourseDao,
     private val settingsPref : SettingsAppRepository,
-    val deleteImageInitem: DeleteImageInItemReository,
+
     private val permission: PermissionRepository,
     private val alarm: AlarmRepository,
     private val alarmRepeat: AlarmRepeadRepository,
@@ -70,7 +71,8 @@ class MainViewModel(
     init{
         when(settingsPref.getTheme()){
             THEME_FUTURE ->{themeState = ThemeNeon()}
-            THEME_ZABOR -> {themeState = ThemeZabor()}
+            THEME_ZABOR -> {themeState = ThemeZabor()
+            }
             else -> themeState = ThemeNeon()
         } 
     }
@@ -82,6 +84,8 @@ class MainViewModel(
     THEME_ZABOR -> {themeState = ThemeZabor()}   
     }
     }
+    fun getTheme() = settingsPref.getTheme()
+
     var sizeState by mutableStateOf(SizeNormal())
 
 
@@ -91,7 +95,8 @@ class MainViewModel(
     val sortType = _sortType.asStateFlow()
 
     fun saveSort(sort: String) {
-     _sortType.value = sort    
+        settingsPref.saveSort(sort)
+        _sortType.value = sort
     }
     
     private val _categoryItemFlow = MutableStateFlow("Повседневные")

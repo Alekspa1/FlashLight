@@ -62,52 +62,59 @@ import CommonConst.SORT_STANDART
 import CommonConst.SORT_USER
 
 
-
 import presentation.dialogs.DialogState
 
 
 @Composable
 fun SettingsScreen(
     theme: Theme = ThemeNeon(),
-    size : Size = SizeNormal(),
+    size: Size = SizeNormal(),
     onBack: () -> Unit = {},
-    viewModel : MainViewModel,
+    viewModel: MainViewModel,
 ) {
 
     val listTheme = listOf(THEME_FUTURE, THEME_ZABOR)
     val listSize = listOf(SIZE_SMALL, SIZE_STANDART, SIZE_LARGE)
     val listSort = listOf(SORT_STANDART, SORT_USER)
     val listSound = listOf(THEME_FUTURE, SORT_USER)
-    when(viewModel.showDialog.isWho){
-        THEME_SETTINGS-> {
-            ThemeDialog(select = THEME_ZABOR,
-                                      listAction = listTheme,  
-                                      onClick ={selectedTheme->
-                                     // if(selectedTheme == THEME_FUTURE) viewModel.themeState = ThemeNeon() else viewModel.themeState = ThemeZabor()
-                                      viewModel.saveTheme(selectedTheme)    
-                                      viewModel.showDialog = DialogState()
-                                      },
-                                      onCancel = { viewModel.showDialog = DialogState()})
+
+    when (viewModel.showDialog.isWho) {
+        THEME_SETTINGS -> {
+            ThemeDialog(
+                select = viewModel.getTheme(),
+                listAction = listTheme,
+                onClick = { selectedTheme ->
+                    viewModel.saveTheme(selectedTheme)
+                    viewModel.showDialog = DialogState()
+                },
+                onCancel = { viewModel.showDialog = DialogState() })
         }
+
         SIZE_SETTINGS -> {
-            ThemeDialog(select = SIZE_STANDART,
-                                      listAction = listSize,  
-                                      onClick ={viewModel.showDialog = DialogState()},
-                                      onCancel = { viewModel.showDialog = DialogState()})
+            ThemeDialog(
+                select = SIZE_STANDART,
+                listAction = listSize,
+                onClick = { viewModel.showDialog = DialogState() },
+                onCancel = { viewModel.showDialog = DialogState() })
         }
+
         SORT_SETTINGS -> {
-           ThemeDialog(select = SORT_STANDART,
-                                      listAction = listSort,  
-                                      onClick ={action-> viewModel.saveSort(action)  
-                                          
-                                          viewModel.showDialog = DialogState()},
-                                      onCancel = { viewModel.showDialog = DialogState()})
+            ThemeDialog(
+                select = viewModel.sortType.value,
+                listAction = listSort,
+                onClick = { action ->
+                    viewModel.saveSort(action)
+                    viewModel.showDialog = DialogState()
+                },
+                onCancel = { viewModel.showDialog = DialogState() })
         }
+
         ALARM_SETTINGS -> {
-             ThemeDialog(select = THEME_FUTURE,
-                                      listAction = listSize,  
-                                      onClick ={viewModel.showDialog = DialogState()},
-                                      onCancel = { viewModel.showDialog = DialogState()})
+            ThemeDialog(
+                select = THEME_FUTURE,
+                listAction = listSound,
+                onClick = { viewModel.showDialog = DialogState() },
+                onCancel = { viewModel.showDialog = DialogState() })
         }
     }
 
@@ -162,7 +169,13 @@ fun SettingsScreen(
                 verticalArrangement = Arrangement.spacedBy(5.dp) // layout_marginBottom="3dp"
             ) {
                 // --- СЕКЦИЯ 1: СТИЛИ И ИНСТРУКЦИИ ---
-                SettingItem("Тема", theme, size, theme.cardMenuItem, theme.borderCardMenuItem){ viewModel.showDialog = DialogState("THEME_SETTINGS")}
+                SettingItem(
+                    "Тема",
+                    theme,
+                    size,
+                    theme.cardMenuItem,
+                    theme.borderCardMenuItem
+                ) { viewModel.showDialog = DialogState("THEME_SETTINGS") }
                 SettingItem(
                     "Размер шрифта",
                     theme,
@@ -239,10 +252,22 @@ fun SettingsScreen(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp),
                     textAlign = TextAlign.Center
                 )
-                SettingItem("Сохранить базу данных", theme, size, theme.cardMenuItem, theme.borderCardMenuItem) {
+                SettingItem(
+                    "Сохранить базу данных",
+                    theme,
+                    size,
+                    theme.cardMenuItem,
+                    theme.borderCardMenuItem
+                ) {
                     //viewModel.saveDatabase() // Пример вызова во ViewModel
                 }
-                SettingItem("Загрузить базу данных", theme, size, theme.cardMenuItem, theme.borderCardMenuItem) {
+                SettingItem(
+                    "Загрузить базу данных",
+                    theme,
+                    size,
+                    theme.cardMenuItem,
+                    theme.borderCardMenuItem
+                ) {
                     // viewModel.loadDatabase()
                 }
 
@@ -263,7 +288,6 @@ fun SettingsScreen(
     }
 }
 
-// Карточка элемента настроек (Полностью повторяет button_background_item_category)
 @Composable
 fun SettingItem(
     text: String,

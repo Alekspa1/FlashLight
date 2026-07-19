@@ -3,19 +3,19 @@ package domain.repostirory
 
 interface SettingsAppRepository {
 
-    fun getSort()
+    fun getSort() : String
     fun saveSort(value: String)
 
-    fun getTheme()
+    fun getTheme() : String
     fun saveTheme(value: String)
 
-    fun getSize()
+    fun getSize() : String
     fun saveSize(value: String)
 
-    fun getUriAlarm()
+    fun getUriAlarm() : String
     fun saveUriAlarm(uri: String)
 
-    fun getOldUriAlarm() 
+    fun getOldUriAlarm()  : String
     fun saveOldUriAlarm(uri: String) 
   
 }

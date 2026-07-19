@@ -35,7 +35,7 @@ class MultiplatrormAppSettings(private val settings: Settings) : SettingsAppRepo
 
   override  fun getUriAlarm() = settings.getString(ALARM_SETTINGS, URI_STANDART)
   override  fun saveUriAlarm(uri: String){
-    settings.putString(ALARM_SETTINGS, uri.toString())
+    settings.putString(ALARM_SETTINGS, uri)
   }
 
  override  fun getOldUriAlarm() = settings.getString(URI_OLD, URI_STANDART)

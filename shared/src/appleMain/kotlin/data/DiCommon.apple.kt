@@ -1,31 +1,25 @@
 package data
 
-import androidx.room.RoomDatabase
-import data.repository.IosSharedPrefImpl
-import data.room.myDataBase
-import domain.repostirory.SharedPrefRepository
-import org.koin.core.module.Module
-import org.koin.dsl.module
-
 import androidx.room.Room
-import data.repository.IosDeleteImageInItemImpl
+import androidx.room.RoomDatabase
+import com.russhwolf.settings.NSUserDefaultsSettings
+import com.russhwolf.settings.Settings
 import data.repository.IosPermissionImpl
-import domain.repostirory.DeleteImageInItemReository
+import data.room.myDataBase
 import domain.repostirory.PermissionRepository
 import kotlinx.cinterop.ExperimentalForeignApi
+import org.koin.core.module.Module
+import org.koin.core.qualifier.named
+import org.koin.dsl.module
 import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSFileManager
+import platform.Foundation.NSUserDefaults
 import platform.Foundation.NSUserDomainMask
 import platform.Foundation.stringByAppendingPathComponent
 
-import com.russhwolf.settings.Settings
-import com.russhwolf.settings.NSUserDefaultsSettings
-import org.koin.core.qualifier.named
-import platform.Foundation.NSUserDefaults
-
 @OptIn(ExperimentalForeignApi::class)
 actual val moduleAnotherPlatform: Module = module {
-    //single <SharedPrefRepository> { IosSharedPrefImpl() }
+
     
     single<Settings>(named("noteBook")) { NSUserDefaultsSettings(NSUserDefaults.standardUserDefaults) }
     single<Settings>(named("settings")) { NSUserDefaultsSettings(NSUserDefaults.standardUserDefaults) }
@@ -51,8 +45,6 @@ actual val moduleAnotherPlatform: Module = module {
             name = dbFilePath
         )
     }
-
-    single <DeleteImageInItemReository> { IosDeleteImageInItemImpl() }
     single <PermissionRepository> { IosPermissionImpl() }
 
 }
