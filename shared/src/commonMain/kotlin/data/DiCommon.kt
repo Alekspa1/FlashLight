@@ -18,6 +18,10 @@ import org.koin.dsl.module
 import kotlin.math.sin
 
 
+import domain.repostirory.SharedPrefRepository
+import data.perository.MultiplatrormSettings
+import org.koin.core.qualifier.named
+
 expect val moduleAnotherPlatform: Module
 
 val appModule = module {
@@ -34,7 +38,9 @@ val appModule = module {
     }
 
     single { get<myDataBase>().CourseDao() }
-
+    
+    single<SharedPrefRepository> { MultiplatrormSettings(settings = get(named("noteBook"))) }
+    
     single<AlarmRepeadRepository> { AlarmRepeadImp(get(),get()) }
     factory<SaveDeleteImageRepositpry> { SaveDeleteImageImpl(get()) }
 
