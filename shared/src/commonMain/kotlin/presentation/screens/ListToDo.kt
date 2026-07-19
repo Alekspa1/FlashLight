@@ -135,9 +135,10 @@ fun ListToDo(
                                 alpha = if (isDragging) 0.5f else 1f
                             }
                     ) {
+                        val actualItem = currentSnapshotList[index]
                         // Твоя чистая карточка без проброса лишних контекстов и лямбд
                         CardItem(
-                            item = item,
+                            item = actualItem,
                             theme = theme,
                              dragModifier = draggableHandle,
                             size = size,
