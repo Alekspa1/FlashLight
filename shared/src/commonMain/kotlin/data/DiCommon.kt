@@ -19,7 +19,9 @@ import kotlin.math.sin
 
 
 import domain.repostirory.SharedPrefRepository
+import domain.repostirory.SettingsAppRepository
 import data.perository.MultiplatrormSettings
+import data.perository.MultiplatrormAppSettings
 import org.koin.core.qualifier.named
 
 expect val moduleAnotherPlatform: Module
