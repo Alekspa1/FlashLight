@@ -28,6 +28,7 @@ actual val moduleAnotherPlatform: Module = module {
     //single <SharedPrefRepository> { IosSharedPrefImpl() }
     
     single<Settings>(named("noteBook")) { NSUserDefaultsSettings(NSUserDefaults.standardUserDefaults) }
+    single<Settings>(named("settings")) { NSUserDefaultsSettings(NSUserDefaults.standardUserDefaults) }
 
     single<RoomDatabase.Builder<myDataBase>> {
         // 1. Находим путь к безопасной папке Документов внутри песочницы iOS
