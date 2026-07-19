@@ -4,7 +4,6 @@ import android.app.AlarmManager
 import android.app.Application
 import android.content.Context
 import androidx.core.content.ContextCompat.getSystemService
-import data.repostitory.AndroidSharedPrefIml
 import data.room.myDataBase
 import domain.repostirory.SharedPrefRepository
 import androidx.room.Room
@@ -24,10 +23,20 @@ import domain.repostirory.PermissionRepository
 import org.koin.dsl.bind
 import org.koin.dsl.module
 import data.perository.SaveDeleteImageImpl
+import com.russhwolf.settings.SharedPreferencesSettings
+import com.russhwolf.settings.Settings
+import org.koin.core.qualifier.named
 
 actual val moduleAnotherPlatform = module {
 
-    single<SharedPrefRepository> { AndroidSharedPrefIml(get()) }
+   // single<SharedPrefRepository> { AndroidSharedPrefIml(get()) }
+      single<Settings>(named("noteBook")){
+          val context: Context = get()
+          val prefs = context.getSharedPreferences("TABLE", Context.MODE_PRIVATE)
+          SharedPreferencesSettings(prefs)
+          
+      }
+   
     single<myDataBase> {
         val context: Context = get()
 
