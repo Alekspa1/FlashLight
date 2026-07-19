@@ -65,7 +65,7 @@ class MainViewModel(
 
 
     //private val _sortType = MutableStateFlow(settingsPref.getSort())
-    private val _sortType = MutableStateFlow(SORT_USER)
+    val _sortType = MutableStateFlow(SORT_USER)
     val sortType = _sortType.asStateFlow()
 
     private val _categoryItemFlow = MutableStateFlow("Повседневные")
