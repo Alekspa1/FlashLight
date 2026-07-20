@@ -74,22 +74,24 @@ class MainViewModel(
     var premiumState = MutableStateFlow(true)
     
     var updateState by mutableStateOf(false)
-    var themeState by mutableStateOf<Theme>(ThemeNeon())
-    var sizeState by mutableStateOf<Size>(SizeNormal())
-    init{
-        when(settingsPref.getTheme()){
-            THEME_FUTURE ->{themeState = ThemeNeon()}
-            THEME_ZABOR -> {themeState = ThemeZabor() }
-            else -> themeState = ThemeNeon()
-        } 
-        when(settingsPref.getSize()){
-         SIZE_SMALL -> {sizeState = SizeSmall()} 
-         SIZE_STANDART -> {sizeState = SizeNormal()} 
-         SIZE_LARGE -> {sizeState = SizeLarge()} 
-         else -> sizeState = SizeNormal()
+    
+ var themeState by mutableStateOf<Theme>(
+        when (settingsPref.getTheme()) {
+            THEME_FUTURE -> ThemeNeon()
+            THEME_ZABOR -> ThemeZabor()
+            else -> ThemeNeon()
         }
-        
-    }
+    )
+    
+    var sizeState by mutableStateOf<Size>(
+        when (settingsPref.getSize()) {
+            SIZE_SMALL -> SizeSmall()
+            SIZE_STANDART -> SizeNormal()
+            SIZE_LARGE -> SizeLarge()
+            else -> SizeNormal()
+        }
+    )
+   
     fun saveTheme(value: String){
     settingsPref.saveTheme(value)
     
@@ -99,6 +101,7 @@ class MainViewModel(
     }
     }
     fun getTheme() = settingsPref.getTheme()
+    fun getSize() = settingsPref.getSize()
 
     
 
