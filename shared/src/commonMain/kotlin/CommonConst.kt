@@ -74,7 +74,7 @@ object CommonConst {
     const val THEME_ZABOR = "Деревянная"
     const val SIZE_SETTINGS = "SIZE_SETTINGS"
     const val SIZE_SMALL = "Малый"
-    const val SIZE_STANDART = "СтандартныйT"
+    const val SIZE_STANDART = "Стандартный"
     const val SIZE_LARGE = "Крупный"
     const val ALARM_SETTINGS = "ALARM_SETTINGS"
     const val URI_STANDART = "content://settings/system/alarm_alert"
