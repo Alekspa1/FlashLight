@@ -92,7 +92,7 @@ fun SettingsScreen(
 
         SIZE_SETTINGS -> {
             ThemeDialog(
-                select = SIZE_STANDART,
+                select = viewModel.getSize(),
                 listAction = listSize,
                 onClick = { size->
                     viewModel.saveSize(size)
