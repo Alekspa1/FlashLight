@@ -43,8 +43,15 @@ import domain.repostirory.SettingsAppRepository
 
 import CommonConst.THEME_FUTURE
 import CommonConst.THEME_ZABOR
-import presentation.theme.ThemeZabor
 
+import CommonConst.SIZE_SMALL
+import CommonConst.SIZE_STANDART
+import CommonConst.SIZE_LARGE
+
+import presentation.theme.ThemeZabor
+import presentation.theme.SizeSmall
+import presentation.theme.SizeLarge
+import presentation.theme.Size
 
 class MainViewModel(
     private val pref: SharedPrefRepository,
@@ -65,16 +72,23 @@ class MainViewModel(
     var toast = _toast.asSharedFlow()
 
     var premiumState = MutableStateFlow(true)
+    
     var updateState by mutableStateOf(false)
     var themeState by mutableStateOf<Theme>(ThemeNeon())
-    
+    var sizeState by mutableStateOf<Size>(SizeNormal())
     init{
         when(settingsPref.getTheme()){
             THEME_FUTURE ->{themeState = ThemeNeon()}
-            THEME_ZABOR -> {themeState = ThemeZabor()
-            }
+            THEME_ZABOR -> {themeState = ThemeZabor() }
             else -> themeState = ThemeNeon()
         } 
+        when(settingsPref.getSize()){
+         SIZE_SMALL -> {sizeState = SizeSmall()} 
+         SIZE_STANDART -> {sizeState = SizeNormal()} 
+         SIZE_LARGE -> {sizeState = SizeLarge()} 
+         else -> sizeState = SizeNormal()
+        }
+        
     }
     fun saveTheme(value: String){
     settingsPref.saveTheme(value)
@@ -86,7 +100,7 @@ class MainViewModel(
     }
     fun getTheme() = settingsPref.getTheme()
 
-    var sizeState by mutableStateOf(SizeNormal())
+    
 
 
 
@@ -97,6 +111,16 @@ class MainViewModel(
     fun saveSort(sort: String) {
         settingsPref.saveSort(sort)
         _sortType.value = sort
+    }
+
+     fun saveSize(size: String) {
+        settingsPref.saveSize(size)
+        when(size){
+         SIZE_SMALL -> {sizeState = SizeSmall()} 
+         SIZE_STANDART -> {sizeState = SizeNormal()} 
+         SIZE_LARGE -> {sizeState = SizeLarge()} 
+         else -> sizeState = SizeNormal()   
+    }
     }
     
     private val _categoryItemFlow = MutableStateFlow("Повседневные")
