@@ -94,7 +94,9 @@ fun SettingsScreen(
             ThemeDialog(
                 select = SIZE_STANDART,
                 listAction = listSize,
-                onClick = { viewModel.showDialog = DialogState() },
+                onClick = { size->
+                    viewModel.saveSize(size)
+                    viewModel.showDialog = DialogState() },
                 onCancel = { viewModel.showDialog = DialogState() })
         }
 
