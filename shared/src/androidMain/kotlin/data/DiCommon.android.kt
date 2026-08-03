@@ -9,11 +9,13 @@ import com.russhwolf.settings.SharedPreferencesSettings
 import data.alarmReceiwer.NotificationBuilder
 import data.alarmReceiwer.NotificationBuilderPassed
 import data.repostitory.AndroidAlarmImpl
+import data.repostitory.AndroidGetPlatrormImp
 import data.repostitory.AndroidPathProviderImp
 import data.repostitory.AndroidPermissionImpl
 import data.repostitory.AndroidSaveDeleteImpl
 import data.room.myDataBase
 import domain.repostirory.AlarmRepository
+import domain.repostirory.GetPlatrormRepository
 import domain.repostirory.PathProviderRepostitory
 import domain.repostirory.PermissionRepository
 import domain.repostirory.SaveDeleteImageRepositpry
@@ -69,5 +71,6 @@ actual val moduleAnotherPlatform = module {
     factory<NotificationBuilderPassed> { NotificationBuilderPassed(get()) }
     factory<PathProviderRepostitory> { AndroidPathProviderImp(get()) }
     factory<SaveDeleteImageRepositpry> { AndroidSaveDeleteImpl(get()) }
+    factory<GetPlatrormRepository> { AndroidGetPlatrormImp() }
 
 }

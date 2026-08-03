@@ -1,6 +1,5 @@
 package data
 
-import com.dragon.shared.data.repostitory.DesktopSharedPrefImpl
 import domain.repostirory.SharedPrefRepository
 import org.koin.core.module.Module
 import org.koin.dsl.module
@@ -8,6 +7,7 @@ import org.koin.dsl.module
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.dragon.shared.data.repostitory.DesktopAlarmImpl
+import com.dragon.shared.data.repostitory.DesktopGetPlatformImpl
 import com.dragon.shared.data.repostitory.DesktopPathProviderImpl
 import com.dragon.shared.data.repostitory.DesktopPermissonImp
 import data.perository.AlarmRepeadImp
@@ -20,6 +20,7 @@ import domain.repostirory.PermissionRepository
 
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.PreferencesSettings
+import domain.repostirory.GetPlatrormRepository
 import java.util.prefs.Preferences
 import org.koin.core.qualifier.named
 actual val moduleAnotherPlatform: Module = module {
@@ -41,4 +42,5 @@ actual val moduleAnotherPlatform: Module = module {
     single<PermissionRepository> { DesktopPermissonImp() }
     single<AlarmRepository> { DesktopAlarmImpl(db = get()) }
     factory<PathProviderRepostitory> { DesktopPathProviderImpl() }
+    factory<GetPlatrormRepository> { DesktopGetPlatformImpl() }
 }

@@ -47,6 +47,7 @@ import CommonConst.THEME_ZABOR
 import CommonConst.SIZE_SMALL
 import CommonConst.SIZE_STANDART
 import CommonConst.SIZE_LARGE
+import domain.repostirory.GetPlatrormRepository
 
 import presentation.theme.ThemeZabor
 import presentation.theme.SizeSmall
@@ -61,7 +62,8 @@ class MainViewModel(
     private val permission: PermissionRepository,
     private val alarm: AlarmRepository,
     private val alarmRepeat: AlarmRepeadRepository,
-    private val image: SaveDeleteImageRepositpry
+    private val image: SaveDeleteImageRepositpry,
+    private val platform : GetPlatrormRepository,
 ) : ViewModel() {
 
 
@@ -71,7 +73,7 @@ class MainViewModel(
     private var _toast = MutableSharedFlow<String>()
     var toast = _toast.asSharedFlow()
 
-    var premiumState = MutableStateFlow(true)
+    var premiumState = MutableStateFlow(pref.getPremium())
     
     var updateState by mutableStateOf(false)
     
@@ -82,6 +84,8 @@ class MainViewModel(
             else -> ThemeNeon()
         }
     )
+
+    val getPlatform = platform.getPlatform()
     
     var sizeState by mutableStateOf<Size>(
         when (settingsPref.getSize()) {

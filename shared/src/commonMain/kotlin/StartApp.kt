@@ -81,6 +81,7 @@ import presentation.YandexBannerAd
 import presentation.dialogs.AddOrChangeCategoryDialog
 import presentation.dialogs.DeleteDialog
 import presentation.dialogs.DialogState
+import presentation.screens.Faq
 import presentation.screens.SettingsScreen
 import presentation.theme.Size
 import presentation.theme.SizeNormal
@@ -201,6 +202,9 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
             // ЭКРАН №2: Абсолютно новый экран настроек без Дравера!
             composable(
                 route = "settings_screen",
+                popEnterTransition = {
+                    androidx.compose.animation.EnterTransition.None
+                },
                 // 1. ОТКРЫТИЕ: экран выезжает из-за левого края (слева направо)
                 enterTransition = {
                     slideInHorizontally(
@@ -216,16 +220,40 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                     )
                 }
             ) {
-                // LaunchedEffect(Unit) {
-                // drawerState.close() 
-                //     }
-
                 SettingsScreen(
                     theme = theme,
                     size = size,
                     onBack = { navController.popBackStack() },
+                    onClick = {click->
+                        when(click){
+                            "FAQ"-> navController.navigate("faq_screen")
+                        }
+                    },
                     viewModel = viewModel
                 )
+            }
+
+            composable(
+                route = "faq_screen",
+                // 1. ОТКРЫТИЕ: экран выезжает из-за левого края (слева направо)
+                enterTransition = {
+                    slideInHorizontally(
+                        animationSpec = tween(300),
+                        initialOffsetX = { -it } // Появляется СЛЕВА
+                    )
+                },
+                // 2. НАЗАД: экран уезжает обратно за левый край (справа налево)
+                popExitTransition = {
+                    slideOutHorizontally(
+                        animationSpec = tween(300),
+                        targetOffsetX = { -it } // Уезжает СЛЕВА
+                    )
+                }
+            ) {
+                Faq(
+                    size = size,
+                    onBack = { navController.popBackStack() },
+                    )
             }
         }
     }
@@ -241,7 +269,7 @@ fun StartAppContent(
     toastEvents: Flow<String> = emptyFlow(),
     updateCategory: (String) -> Unit = {},
     openPager: @Composable (innerPadding: PaddingValues, onOpenDrawer: () -> Unit, pagerStateUp: PagerState) -> Unit = { _, _, _ -> },
-    drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Open),
+    drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed),
     theme: Theme = ThemeNeon(),
     size: Size = SizeNormal(),
     premium: Boolean = false,

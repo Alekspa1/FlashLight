@@ -1,13 +1,17 @@
 package data.perository
 
 import CommonConst.KEY_NOTE_BOOK
+import CommonConst.PREMIUM_KEY
 
 import com.russhwolf.settings.Settings
+import domain.repostirory.GetPlatrormRepository
 import domain.repostirory.SharedPrefRepository
 
-class MultiplatrormSettings(private val settings: Settings) : SharedPrefRepository{
+class MultiplatrormSettings(private val settings: Settings, private val platform : GetPlatrormRepository) : SharedPrefRepository{
+
   
-  private val greetings =
+  private val greetings = if(platform.getPlatform() == "Desktop") "Приветсвую дорогой друг"
+    else
 
         "Дорогие пользователи! ❤️\n\nИз-за агрессивных систем энергосбережения на " +
 
@@ -26,7 +30,7 @@ class MultiplatrormSettings(private val settings: Settings) : SharedPrefReposito
                 "Если вам понравится мое приложение, буду очень рад вашему хорошему отзыву! "
   
 
-   override fun saveTextNoteBook(value: String) {
+    override fun saveTextNoteBook(value: String) {
 
         settings.putString(KEY_NOTE_BOOK, value)
 
@@ -34,7 +38,15 @@ class MultiplatrormSettings(private val settings: Settings) : SharedPrefReposito
 
     }
 
-
     override fun loadTextNoteBook(): String = settings.getString(KEY_NOTE_BOOK, greetings)
+
+    override fun savePremium(flag: Boolean) {
+        settings.putBoolean(PREMIUM_KEY, flag)
+
+    }
+
+    override fun getPremium(): Boolean = settings.getBoolean(PREMIUM_KEY, false)
+
+
 }
   

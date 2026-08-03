@@ -53,6 +53,7 @@ import CommonConst.THEME_ZABOR
 import CommonConst.SIZE_SETTINGS
 import CommonConst.SORT_SETTINGS
 import CommonConst.ALARM_SETTINGS
+import CommonConst.DONATE
 
 import CommonConst.SIZE_SMALL
 import CommonConst.SIZE_STANDART
@@ -60,6 +61,7 @@ import CommonConst.SIZE_LARGE
 
 import CommonConst.SORT_STANDART
 import CommonConst.SORT_USER
+import androidx.compose.ui.platform.LocalUriHandler
 
 
 import presentation.dialogs.DialogState
@@ -70,6 +72,7 @@ fun SettingsScreen(
     theme: Theme = ThemeNeon(),
     size: Size = SizeNormal(),
     onBack: () -> Unit = {},
+    onClick : (String) -> Unit = {},
     viewModel: MainViewModel,
 ) {
 
@@ -77,6 +80,8 @@ fun SettingsScreen(
     val listSize = listOf(SIZE_SMALL, SIZE_STANDART, SIZE_LARGE)
     val listSort = listOf(SORT_STANDART, SORT_USER)
     val listSound = listOf(THEME_FUTURE, SORT_USER)
+
+    val uriHandler = LocalUriHandler.current
 
     when (viewModel.showDialog.isWho) {
         THEME_SETTINGS -> {
@@ -119,6 +124,7 @@ fun SettingsScreen(
                 onCancel = { viewModel.showDialog = DialogState() })
         }
     }
+
 
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -192,58 +198,64 @@ fun SettingsScreen(
                     theme.cardMenuItem,
                     theme.borderCardMenuItem
                 ) { viewModel.showDialog = DialogState("SORT_SETTINGS") }
-                SettingItem(
-                    "Звук будильника",
-                    theme,
-                    size,
-                    theme.cardMenuItem,
-                    theme.borderCardMenuItem
-                ) { viewModel.showDialog = DialogState("ALARM_SETTINGS") }
+                if(viewModel.getPlatform == "Android") {
+                    SettingItem(
+                        "Звук будильника",
+                        theme,
+                        size,
+                        theme.cardMenuItem,
+                        theme.borderCardMenuItem
+                    ) { viewModel.showDialog = DialogState("ALARM_SETTINGS") }
+                }
+
+
                 SettingItem(
                     "Инструкция",
                     theme,
                     size,
                     theme.cardMenuItem,
                     theme.borderCardMenuItem
-                ) { /* ... */ }
+                ) { onClick("FAQ") }
                 SettingItem(
                     "Обратная связь",
                     theme,
                     size,
                     theme.cardMenuItem,
                     theme.borderCardMenuItem
-                ) { /* ... */ }
+                ) {  uriHandler.openUri("mailto:apereverzev47@gmail.com?subject=FOCUS")}
                 SettingItem(
                     "Поддержать разработчика",
                     theme,
                     size,
                     theme.cardMenuItem,
                     theme.borderCardMenuItem
-                ) { /* ... */ }
+                ) { uriHandler.openUri(DONATE)}
 
-                // --- СЕКЦИЯ 2: РАЗРЕШЕНИЯ (tv_settings_permissions) ---
-                Text(
-                    text = "Разрешения",
-                    color = theme.textColor,
-                    fontSize = size.textMenu,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp),
-                    textAlign = TextAlign.Center
-                )
-                SettingItem(
-                    "Работа в фоне",
-                    theme,
-                    size,
-                    theme.cardMenuItem,
-                    theme.borderCardMenuItem
-                ) { /* Настройки батареи */ }
-                SettingItem(
-                    "Настройки приложения",
-                    theme,
-                    size,
-                    theme.cardMenuItem,
-                    theme.borderCardMenuItem
-                ) { /* Системные настройки аппа */ }
+                if(viewModel.getPlatform != "Desktop") {
+                    // --- СЕКЦИЯ 2: РАЗРЕШЕНИЯ (tv_settings_permissions) ---
+                    Text(
+                        text = "Разрешения",
+                        color = theme.textColor,
+                        fontSize = size.textMenu,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp),
+                        textAlign = TextAlign.Center
+                    )
+                    SettingItem(
+                        "Работа в фоне",
+                        theme,
+                        size,
+                        theme.cardMenuItem,
+                        theme.borderCardMenuItem
+                    ) { /* Настройки батареи */ }
+                    SettingItem(
+                        "Настройки приложения",
+                        theme,
+                        size,
+                        theme.cardMenuItem,
+                        theme.borderCardMenuItem
+                    ) { /* Системные настройки аппа */ }
+                }
 
                 // --- СЕКЦИЯ 3: РЕЗЕРВНОЕ КОПИРОВАНИЕ (tv_settings_backup) ---
                 Text(

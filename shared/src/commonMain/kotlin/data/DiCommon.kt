@@ -22,6 +22,7 @@ import domain.repostirory.SharedPrefRepository
 import domain.repostirory.SettingsAppRepository
 import data.perository.MultiplatrormSettings
 import data.perository.MultiplatrormAppSettings
+import domain.repostirory.GetPlatrormRepository
 import org.koin.core.qualifier.named
 
 expect val moduleAnotherPlatform: Module
@@ -41,11 +42,12 @@ val appModule = module {
 
     single { get<myDataBase>().CourseDao() }
     
-    single<SharedPrefRepository> { MultiplatrormSettings(settings = get(named("noteBook"))) }
+    single<SharedPrefRepository> { MultiplatrormSettings(settings = get(named("noteBook")), platform = get()) }
     single<SettingsAppRepository > { MultiplatrormAppSettings(settings = get(named("settings"))) }
     
     single<AlarmRepeadRepository> { AlarmRepeadImp(get(),get()) }
     factory<SaveDeleteImageRepositpry> { SaveDeleteImageImpl(get()) }
+
 
 }
 

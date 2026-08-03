@@ -36,6 +36,7 @@ class AndroidAlarmImpl( private val context: Context,
     }
 
     override fun deleteAlarm(id: Int) {
+
         val alarmtIntent = Intent(context, AlarmReceiwer::class.java).let { intent ->
             intent.putExtra(KEY_INTENT, id)
             intent.setAction(KEY_INTENT_ALARM)
@@ -46,6 +47,18 @@ class AndroidAlarmImpl( private val context: Context,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
         }
+
+        val alarmtIntentRepeat = Intent(context, AlarmReceiwer::class.java).let { intent ->
+            intent.putExtra(KEY_INTENT, id*-1)
+            intent.setAction(KEY_INTENT_ALARM)
+            PendingIntent.getBroadcast(
+                context,
+                id*-1,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+        }
         alarmManager.cancel(alarmtIntent)
+        alarmManager.cancel(alarmtIntentRepeat)
     }
 }
