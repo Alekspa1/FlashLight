@@ -13,6 +13,7 @@ object CommonConst {
     const val PREMIUM_CLICK = "PREMIUM_CLICK"
     const val UPGRATE_CLICK = "UPPGATE_CLICK"
     const val SETTINGS_CLICK = "SETTINGS_CLICK"
+    const val SHARED_ClICK = "SHARED_ClICK"
     const val ADD_CATEGORY = "ADD_CATEGORY"
 
 
@@ -64,8 +65,8 @@ object CommonConst {
 //        ONE_YEAR,
 //    )
     const val NOT_AUTHORIZED = "RuStore User Not Authorized"
-    const val DONATE = "https://www.tinkoff.ru/rm/r_yDLrspQXuU.pghPicassj/iZZa112656"
-
+   // const val DONATE = "https://www.tinkoff.ru/rm/r_yDLrspQXuU.pghPicassj/iZZa112656"
+    const val DONATE = "https://finance.ozon.ru/apps/sbp/ozonbankpay/019fc89f-c6be-7de0-87cd-7942f34670ad"
     const val SORT_SETTINGS = "SORT_SETTINGS"
     const val SORT_STANDART = "Стандартная"
     const val SORT_USER = "Пользовательская"

@@ -4,6 +4,7 @@ import CommonConst.DELETE_DIALOG_CATEGORY
 import CommonConst.INSERT_DIALOG_CATEGORY
 import CommonConst.PREMIUM_CLICK
 import CommonConst.SETTINGS_CLICK
+import CommonConst.SHARED_ClICK
 import CommonConst.UPGRATE_CLICK
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
@@ -64,6 +65,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -95,6 +97,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
     val size = viewModel.sizeState
     val premiumState by viewModel.premiumState.collectAsStateWithLifecycle()
     val navController = rememberNavController()
+    val localNavController = rememberNavController()
     MaterialTheme(
         colorScheme = if (viewModel.themeState == ThemeNeon()) darkColorScheme(
             primary = theme.textColor,
@@ -109,6 +112,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
     ) {
 
         val categories by viewModel.categories.collectAsStateWithLifecycle()
+        val updateState by viewModel.updateState.collectAsStateWithLifecycle()
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
         var isCommonMode by remember { mutableStateOf(false) }
         val category = viewModel.showDialog.category
@@ -138,7 +142,6 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
             }
         }
         viewModel.updateAlarm()
-
         // 2. СТАВИМ ГЛОБАЛЬНЫЙ НАВИГАТОР ВМЕСТО ПРЯМОГО ВЫЗОВА КОНТЕНТА
         NavHost(
             navController = navController,
@@ -163,12 +166,12 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                     theme = viewModel.themeState,
                     size = viewModel.sizeState,
                     premium = premiumState,
-                    update = viewModel.updateState,
+                    update = updateState,
                     onClick = { click ->
                         when (click) {
                             PREMIUM_CLICK -> {
-                                viewModel.themeState =
-                                    if (theme == ThemeNeon()) ThemeZabor() else ThemeNeon()
+                                val premium = viewModel.getPremium()
+                                viewModel.savePremium(!premium)
                             }
 
                             UPGRATE_CLICK -> {}
@@ -177,6 +180,10 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                             SETTINGS_CLICK -> {
                                 // Даем команду уйти на экран настроек (текущий экран полностью скроется)
                                 navController.navigate("settings_screen")
+                            }
+
+                            SHARED_ClICK -> {
+                                viewModel.sendMessage("Общие дела появяться в следующих обновлениях")
                             }
                         }
                     },
@@ -430,19 +437,21 @@ fun StartAppContent(
                                                 )
                                                 // 3. Добавляем клик (эффект волны подстроится под форму автоматически)
                                                 .clickable {
-                                                    onToggleCommonMode()
+                                                        onClick(SHARED_ClICK)
+//                                                    onToggleCommonMode()
+//
+//                                                    // 2. Рассчитываем роуты на основе инвертированного значения (так как стейт обновится на следующем кадре)
+//                                                    val nextMode = !isCommonMode
+//                                                    val targetRoute =
+//                                                        if (nextMode) "common_screen" else "personal_pager_hub"
+//                                                    val popUpRoute =
+//                                                        if (nextMode) "personal_pager_hub" else "common_screen"
+//
+//                                                    localNavController.navigate(targetRoute) {
+//                                                        popUpTo(popUpRoute) { inclusive = true }
+//                                                        launchSingleTop = true
+//                                                    }
 
-                                                    // 2. Рассчитываем роуты на основе инвертированного значения (так как стейт обновится на следующем кадре)
-                                                    val nextMode = !isCommonMode
-                                                    val targetRoute =
-                                                        if (nextMode) "common_screen" else "personal_pager_hub"
-                                                    val popUpRoute =
-                                                        if (nextMode) "personal_pager_hub" else "common_screen"
-
-                                                    localNavController.navigate(targetRoute) {
-                                                        popUpTo(popUpRoute) { inclusive = true }
-                                                        launchSingleTop = true
-                                                    }
                                                 },
                                             shape = RoundedCornerShape(10.dp),
                                             // Прозрачный контейнер у Card обязателен, чтобы работал наш кастомный background
@@ -596,7 +605,6 @@ fun StartAppContent(
                                         fontSize = size.drawerBottomMenuText,
                                         modifier = Modifier
                                             .fillMaxWidth().padding(start = 4.dp)
-                                        //.clickable { onClick(PREMIUM_CLICK) }
                                         ,
                                         fontWeight = FontWeight.Bold
 

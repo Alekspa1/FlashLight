@@ -73,11 +73,17 @@ class MainViewModel(
     private var _toast = MutableSharedFlow<String>()
     var toast = _toast.asSharedFlow()
 
-    var premiumState = MutableStateFlow(pref.getPremium())
+  // private val _premiumState = MutableStateFlow(pref.getPremium())
+   private val _premiumState = MutableStateFlow(true)
+   var premiumState = _premiumState.asStateFlow()
+
+    private val _updateState = MutableStateFlow(false)
+    var updateState = _updateState.asStateFlow()
+
+    private val _sortType = MutableStateFlow(settingsPref.getSort())
+    val sortType = _sortType.asStateFlow()
     
-    var updateState by mutableStateOf(false)
-    
- var themeState by mutableStateOf<Theme>(
+    var themeState by mutableStateOf(
         when (settingsPref.getTheme()) {
             THEME_FUTURE -> ThemeNeon()
             THEME_ZABOR -> ThemeZabor()
@@ -87,7 +93,7 @@ class MainViewModel(
 
     val getPlatform = platform.getPlatform()
     
-    var sizeState by mutableStateOf<Size>(
+    var sizeState by mutableStateOf(
         when (settingsPref.getSize()) {
             SIZE_SMALL -> SizeSmall()
             SIZE_STANDART -> SizeNormal()
@@ -107,14 +113,6 @@ class MainViewModel(
     fun getTheme() = settingsPref.getTheme()
     fun getSize() = settingsPref.getSize()
 
-    
-
-
-
-    
-    private val _sortType = MutableStateFlow(settingsPref.getSort())
-    val sortType = _sortType.asStateFlow()
-
     fun saveSort(sort: String) {
         settingsPref.saveSort(sort)
         _sortType.value = sort
@@ -129,6 +127,12 @@ class MainViewModel(
          else -> sizeState = SizeNormal()   
     }
     }
+
+    fun savePremium(value: Boolean){
+        pref.savePremium(value)
+        _premiumState.value = value
+        }
+    fun getPremium() = pref.getPremium()
     
     private val _categoryItemFlow = MutableStateFlow("Повседневные")
     val categoryItemFlow = _categoryItemFlow.asStateFlow()
