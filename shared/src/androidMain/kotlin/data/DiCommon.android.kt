@@ -8,6 +8,7 @@ import com.russhwolf.settings.Settings
 import com.russhwolf.settings.SharedPreferencesSettings
 import data.alarmReceiwer.NotificationBuilder
 import data.alarmReceiwer.NotificationBuilderPassed
+import data.perository.MultiplatrormAppSettings
 import data.repostitory.AndroidAlarmImpl
 import data.repostitory.AndroidGetPlatrormImp
 import data.repostitory.AndroidPathProviderImp
@@ -20,6 +21,7 @@ import domain.repostirory.GetPlatrormRepository
 import domain.repostirory.PathProviderRepostitory
 import domain.repostirory.PermissionRepository
 import domain.repostirory.SaveDeleteImageRepositpry
+import domain.repostirory.SettingsAppRepository
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.qualifier.named
 import org.koin.dsl.bind
@@ -67,8 +69,15 @@ actual val moduleAnotherPlatform = module {
 
     single<AlarmRepository> { AndroidAlarmImpl( get(),get()) }
     single { androidContext().contentResolver }
+    single { MultiplatrormAppSettings(get(named("settings"))) }
 
-    factory<NotificationBuilder> { NotificationBuilder(get(),get(),get()) }
+    factory<NotificationBuilder> {
+        NotificationBuilder(
+            context = get(),
+            image = get(),
+            settings = get() // Угловые скобки не нужны, Koin сам подставит класс
+        )
+    }
     factory<NotificationBuilderPassed> { NotificationBuilderPassed(get()) }
     factory<PathProviderRepostitory> { AndroidPathProviderImp(get()) }
     factory<SaveDeleteImageRepositpry> { AndroidSaveDeleteImpl(get()) }
