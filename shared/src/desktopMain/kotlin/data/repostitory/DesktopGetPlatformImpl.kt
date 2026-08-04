@@ -4,7 +4,7 @@ import domain.repostirory.GetPlatrormRepository
 
 class DesktopGetPlatformImpl : GetPlatrormRepository {
     override fun getPlatform(): String = "Desktop"
-    override fun getAllSound(): Map<String, String> {
+    override suspend fun getAllSound(): Map<String, String> {
         return mapOf("" to "")
     }
 }
