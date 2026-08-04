@@ -2,6 +2,7 @@ package presentation.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -43,10 +44,11 @@ fun Faq(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+               // .verticalScroll(rememberScrollState())
                 .background(Color.Black),
         ) {
-            // ШАПКА: im_back (ImageView) + tv_settings ("Общие настройки")
+
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -74,27 +76,33 @@ fun Faq(
                 )
 
             }
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+            ) {
+                Image(
+                    painter = painterResource(Res.drawable.ic_alarm_faq),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.FillWidth
+                )
+                HorizontalDivider(thickness = 2.dp, color = Color.White)
+                Image(
+                    painter = painterResource(Res.drawable.ic_sort_faq),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.FillWidth
+                )
+                HorizontalDivider(thickness = 2.dp, color = Color.White)
+                Image(
+                    painter = painterResource(Res.drawable.ic_category_faq),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.FillWidth
+                )
 
-            Image(
-                painter = painterResource(Res.drawable.ic_alarm_faq),
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.FillWidth
-            )
-            HorizontalDivider(thickness = 2.dp, color = Color.White)
-            Image(
-                painter = painterResource(Res.drawable.ic_sort_faq),
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.FillWidth
-            )
-            HorizontalDivider(thickness = 2.dp, color = Color.White)
-            Image(
-                painter = painterResource(Res.drawable.ic_category_faq),
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.FillWidth
-            )
+            }
 
 
         }

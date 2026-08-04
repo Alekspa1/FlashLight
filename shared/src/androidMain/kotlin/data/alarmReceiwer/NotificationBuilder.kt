@@ -3,7 +3,6 @@ package data.alarmReceiwer
 import CommonConst.CHANNEL_ID
 import CommonConst.KEY_INTENT_CALL_BACKREADY
 import CommonConst.KEY_INTENT_CALL_POSTPONE
-import android.app.Application
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -11,31 +10,26 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.media.AudioAttributes
-import android.media.RingtoneManager
 import android.net.Uri
-import android.provider.MediaStore
 import androidx.core.app.NotificationCompat
 import androidx.core.net.toUri
 import com.dragon.shared.R
+import data.perository.MultiplatrormAppSettings
 import data.room.Item
-import presentation.MainActivity
 import domain.repostirory.SaveDeleteImageRepositpry
-import android.graphics.BitmapFactory
-
-
-
+import presentation.MainActivity
 
 
 class NotificationBuilder(
     private val context: Context,
     private val image: SaveDeleteImageRepositpry,
-    //val settings: SettingsSharedPreference
+    val settings: MultiplatrormAppSettings
 ) {
-    //val newRingtoneUri: Uri? = settings.getUriAlarm()?.toUri() ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
-    val newRingtoneUri: Uri =  RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
-    val oldRingtoneUri: Uri =  RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
-   // val oldRingtoneUri: Uri? = settings.getOldUriAlarm()?.toUri() ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+    val newRingtoneUri: Uri = settings.getUriAlarm().toUri()
+
+    val oldRingtoneUri: Uri = settings.getOldUriAlarm().toUri()
 
     val notificationManager =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -64,7 +58,7 @@ class NotificationBuilder(
             notificationManager.createNotificationChannel(createChanel(atrubute))
         }
 
-        //settings.saveOldUriAlarm(newRingtoneUri)
+        settings.saveOldUriAlarm(newRingtoneUri.toString())
 
         return notificationManager
     }

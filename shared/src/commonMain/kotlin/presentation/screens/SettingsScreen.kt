@@ -61,7 +61,13 @@ import CommonConst.SIZE_LARGE
 
 import CommonConst.SORT_STANDART
 import CommonConst.SORT_USER
+import CommonConst.SOUND
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import presentation.DialogSoundAndroid
 
 
 import presentation.dialogs.DialogState
@@ -72,14 +78,17 @@ fun SettingsScreen(
     theme: Theme = ThemeNeon(),
     size: Size = SizeNormal(),
     onBack: () -> Unit = {},
-    onClick : (String) -> Unit = {},
+    onClick: (String) -> Unit = {},
     viewModel: MainViewModel,
 ) {
-
+    LaunchedEffect(Unit) {
+        viewModel.loadSounds()
+    }
     val listTheme = listOf(THEME_FUTURE, THEME_ZABOR)
     val listSize = listOf(SIZE_SMALL, SIZE_STANDART, SIZE_LARGE)
     val listSort = listOf(SORT_STANDART, SORT_USER)
-    val listSound = listOf(THEME_FUTURE, SORT_USER)
+    val listSound by viewModel.soundState.collectAsState()
+
 
     val uriHandler = LocalUriHandler.current
 
@@ -99,9 +108,10 @@ fun SettingsScreen(
             ThemeDialog(
                 select = viewModel.getSize(),
                 listAction = listSize,
-                onClick = { size->
+                onClick = { size ->
                     viewModel.saveSize(size)
-                    viewModel.showDialog = DialogState() },
+                    viewModel.showDialog = DialogState()
+                },
                 onCancel = { viewModel.showDialog = DialogState() })
         }
 
@@ -117,11 +127,16 @@ fun SettingsScreen(
         }
 
         ALARM_SETTINGS -> {
-            ThemeDialog(
-                select = THEME_FUTURE,
-                listAction = listSound,
-                onClick = { viewModel.showDialog = DialogState() },
-                onCancel = { viewModel.showDialog = DialogState() })
+            val uri = viewModel.getUri()
+            DialogSoundAndroid(
+                selectUri = uri,
+                listSound = listSound,
+                onClick = { newUri ->
+                    viewModel.saveUri(newUri)
+                    viewModel.showDialog = DialogState()
+                },
+                onCancel = { viewModel.showDialog = DialogState() }
+            )
         }
     }
 
@@ -136,11 +151,10 @@ fun SettingsScreen(
             contentScale = ContentScale.FillBounds
         )
 
-        // 2. КОНТЕНТ: ScrollView + fillViewport
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
         ) {
             // ШАПКА: im_back (ImageView) + tv_settings ("Общие настройки")
             Box(
@@ -173,6 +187,7 @@ fun SettingsScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
                     .padding(horizontal = 10.dp),
                 verticalArrangement = Arrangement.spacedBy(5.dp) // layout_marginBottom="3dp"
             ) {
@@ -198,14 +213,17 @@ fun SettingsScreen(
                     theme.cardMenuItem,
                     theme.borderCardMenuItem
                 ) { viewModel.showDialog = DialogState("SORT_SETTINGS") }
-                if(viewModel.getPlatform == "Android") {
+                if (viewModel.getPlatform == "Android") {
                     SettingItem(
                         "Звук будильника",
                         theme,
                         size,
                         theme.cardMenuItem,
                         theme.borderCardMenuItem
-                    ) { viewModel.showDialog = DialogState("ALARM_SETTINGS") }
+                    ) {
+                        viewModel.permission(ALARM_SETTINGS)
+                        // viewModel.showDialog = DialogState("ALARM_SETTINGS")
+                    }
                 }
 
 
@@ -222,16 +240,16 @@ fun SettingsScreen(
                     size,
                     theme.cardMenuItem,
                     theme.borderCardMenuItem
-                ) {  uriHandler.openUri("mailto:apereverzev47@gmail.com?subject=FOCUS")}
+                ) { uriHandler.openUri("mailto:apereverzev47@gmail.com?subject=FOCUS") }
                 SettingItem(
                     "Поддержать разработчика",
                     theme,
                     size,
                     theme.cardMenuItem,
                     theme.borderCardMenuItem
-                ) { uriHandler.openUri(DONATE)}
+                ) { uriHandler.openUri(DONATE) }
 
-                if(viewModel.getPlatform != "Desktop") {
+                if (viewModel.getPlatform != "Desktop") {
                     // --- СЕКЦИЯ 2: РАЗРЕШЕНИЯ (tv_settings_permissions) ---
                     Text(
                         text = "Разрешения",

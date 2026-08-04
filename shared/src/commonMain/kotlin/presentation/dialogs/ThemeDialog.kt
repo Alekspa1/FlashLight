@@ -6,8 +6,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog // или material если используете M2
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
@@ -48,9 +50,12 @@ fun ThemeDialog(
             },
 
     text = {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)){
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+
+    ){
       Text("Выберите тему")
-                Column(Modifier.selectableGroup(),
+                Column(Modifier.selectableGroup() .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(10.dp) ) {
                     listAction.forEach {text ->
                         Row( Modifier.fillMaxWidth()

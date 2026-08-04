@@ -8,6 +8,7 @@ data class DialogState(
     val item: Item? = null,
     val category : ListCategory? = null,
     val calendar: Boolean = false,
-    val date: Long = 0L
+    val date: Long = 0L,
+
 )
 

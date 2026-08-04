@@ -1,4 +1,5 @@
 package data.repostitory
+import CommonConst.ALARM_SETTINGS
 import CommonConst.NOTIFICATION
 import CommonConst.SOUND
 import android.Manifest
@@ -21,12 +22,18 @@ class AndroidPermissionImpl(private val context: Context):PermissionRepository{
     override fun isChekedPermission(permissionName: String) : Boolean{
    return when(permissionName){
     NOTIFICATION->  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        println("isChekedPermission")
         isPermissionGranted(context, Manifest.permission.POST_NOTIFICATIONS)
     } else {
         true
     }
-        SOUND ->  true
+       ALARM_SETTINGS -> {
+            val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                Manifest.permission.READ_MEDIA_AUDIO
+            } else {
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            }
+            isPermissionGranted(context, permission)
+        }
        else -> true
     }
   }
@@ -38,8 +45,19 @@ class AndroidPermissionImpl(private val context: Context):PermissionRepository{
     when(permissionName){
         NOTIFICATION ->{
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                println("requestPermission")
                 pLauncher?.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+        ALARM_SETTINGS -> {
+            val permissionsToRequest =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    arrayOf(Manifest.permission.READ_MEDIA_AUDIO)
+                } else {
+                    arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+                }
+
+            permissionsToRequest.forEach {
+                pLauncher?.launch(it)
             }
         }
         else -> {}

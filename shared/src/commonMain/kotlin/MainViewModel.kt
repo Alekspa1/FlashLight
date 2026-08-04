@@ -1,16 +1,14 @@
 
 import CommonConst.ALARM_ONE
+import CommonConst.DEFAULT_DIALOG
 import CommonConst.NOTIFICATION
 import CommonConst.SORT_STANDART
-import CommonConst.SORT_USER
 import CommonConst.TIME
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.room.Transaction
 import data.room.CourseDao
 import data.room.Item
 import data.room.ListCategory
@@ -47,12 +45,14 @@ import CommonConst.THEME_ZABOR
 import CommonConst.SIZE_SMALL
 import CommonConst.SIZE_STANDART
 import CommonConst.SIZE_LARGE
+
+import CommonConst.ALARM_SETTINGS
 import domain.repostirory.GetPlatrormRepository
 
 import presentation.theme.ThemeZabor
 import presentation.theme.SizeSmall
 import presentation.theme.SizeLarge
-import presentation.theme.Size
+
 
 class MainViewModel(
     private val pref: SharedPrefRepository,
@@ -66,7 +66,15 @@ class MainViewModel(
     private val platform : GetPlatrormRepository,
 ) : ViewModel() {
 
+    private val _soundState = MutableStateFlow<Map<String, String>>(emptyMap())
+    val soundState = _soundState.asStateFlow()
 
+     fun loadSounds() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val result = platform.getAllSound()
+            _soundState.value = result // Обновляем состояние (это безопасно)
+        }
+    }
 
     var stateTextNotebook by mutableStateOf(pref.loadTextNoteBook())
     var showDialog by  mutableStateOf(DialogState())
@@ -149,6 +157,7 @@ class MainViewModel(
         else emptyList()
     }
     fun getUri(fileName :  String) = image.getUri(fileName)
+
     fun saveImage(temporaryPathString: String, fileName: String) {
         // Убираем блокировку главного потока, переключаясь на дисковый Dispatchers.IO
         viewModelScope.launch(Dispatchers.IO) {
@@ -210,6 +219,9 @@ class MainViewModel(
 
     fun saveText() = pref.saveTextNoteBook(stateTextNotebook)
 
+    fun getUri() = settingsPref.getUriAlarm()
+    fun saveUri(uri: String) = settingsPref.saveUriAlarm(uri)
+
     fun updateCategory(value: String) {
         _categoryItemFlow.value = value
     }
@@ -252,24 +264,47 @@ class MainViewModel(
         }
     }
 
-    fun permission(permissionName: String, item: Item,calendar: Boolean = false) {
+//    fun permission(permissionName: String, item: Item,calendar: Boolean = false) {
+//        viewModelScope.launch{
+//         val isChekedPermission = permission.isChekedPermission(permissionName)
+//
+//        if(isChekedPermission) {
+//            val dialog = if(calendar) TIME else NOTIFICATION
+//            sendMessage(dialog)
+//            showDialog = DialogState(dialog,item) }
+//        else {
+//            val isGranted = permission.requestPermission(permissionName)
+//            if(isGranted){
+//                showDialog = DialogState(permissionName,item)
+//            }
+//            else {sendMessage("Для стабильной работы, необходимо дать разрешение")}
+//
+//        }
+//        }
+//
+//    }
+
+    fun permission(permissionName: String, item: Item? = null,calendar: Boolean = false) {
         viewModelScope.launch{
-         val isChekedPermission = permission.isChekedPermission(permissionName)
-    
-        if(isChekedPermission) {
-            val dialog = if(calendar) TIME else NOTIFICATION
-            sendMessage(dialog)
-            showDialog = DialogState(dialog,item) }
-        else {
-            val isGranted = permission.requestPermission(permissionName)
-            if(isGranted){
-                showDialog = DialogState(permissionName,item)
+            val isChekedPermission = permission.isChekedPermission(permissionName)
+
+            if(isChekedPermission) {
+                val dialog = when(permissionName){
+                    NOTIFICATION -> if(calendar) TIME else NOTIFICATION
+                    ALARM_SETTINGS -> ALARM_SETTINGS
+                    else -> DEFAULT_DIALOG
+                }
+                showDialog = DialogState(dialog,item) }
+            else {
+                val isGranted = permission.requestPermission(permissionName)
+                if(isGranted){
+                    showDialog = DialogState(permissionName,item)
+                }
+                else {sendMessage("Для стабильной работы, необходимо дать разрешение")}
+
             }
-            else {sendMessage("Для стабильной работы, необходимо дать разрешение")}
-            
-        }   
         }
-        
+
     }
 
     fun insertAlarm(item: Item){
