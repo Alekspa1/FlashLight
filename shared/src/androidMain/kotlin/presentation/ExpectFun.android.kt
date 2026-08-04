@@ -7,6 +7,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
@@ -36,11 +39,22 @@ actual fun DialogSoundAndroid(
     onClick: (String) -> Unit,
     onCancel: () -> Unit
 ) {
-    // В состоянии храним именно URI, чтобы не было путаницы с одинаковыми названиями
     var selectedUri by remember { mutableStateOf(selectUri) }
     val soundPlayer = koinInject<AndroidSoundPlayer>()
 
-    // Автоматически выключит звук, если диалог закроют кнопкой "Назад" или смахнут
+    // Превращаем мапу в список пар, чтобы работать с индексами
+    val soundList = remember(listSound) { listSound.toList() }
+
+    // Находим индекс текущей выбранной мелодии в списке
+    val initialIndex = remember(soundList, selectUri) {
+        val index = soundList.indexOfFirst { it.second == selectUri }
+        if (index != -1) index else 0
+    }
+
+    // Состояние скролла для LazyColumn. Передаем initialIndex,
+    // чтобы список ИЗНАЧАЛЬНО отрисовался прокрученным на нужную позицию
+    val listState = rememberLazyListState(initialFirstVisibleItemIndex = initialIndex)
+
     DisposableEffect(Unit) {
         onDispose { soundPlayer.stop() }
     }
@@ -54,29 +68,25 @@ actual fun DialogSoundAndroid(
         confirmButton = {
             TextButton(onClick = {
                 soundPlayer.stop()
-                onClick(selectedUri) // Отдаем выбранный URI для сохранения локально
-            }) {
-                Text("Ок")
-            }
+                onClick(selectedUri)
+            }) { Text("Ок") }
         },
         dismissButton = {
             TextButton(onClick = {
                 soundPlayer.stop()
                 onCancel()
-            }) {
-                Text("Отмена")
-            }
+            }) { Text("Отмена") }
         },
         text = {
-            Column(
-                Modifier
+            // Используем LazyColumn вместо Column для поддержки авто-скролла и оптимизации памяти
+            LazyColumn(
+                state = listState,
+                modifier = Modifier
                     .fillMaxWidth()
-                    .selectableGroup()
-                    .verticalScroll(rememberScrollState()),
+                    .selectableGroup(),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Итерируемся по мапе: name — это ключ (название), uriStr — значение (путь)
-                listSound.forEach { (name, uriStr) ->
+                itemsIndexed(soundList) { _, (name, uriStr) ->
                     val isSelected = (uriStr == selectedUri)
 
                     Row(
@@ -85,20 +95,18 @@ actual fun DialogSoundAndroid(
                             .selectable(
                                 selected = isSelected,
                                 onClick = {
-                                    selectedUri = uriStr // Сохраняем URI кликнутого трека
-                                    soundPlayer.playSound(uriStr.toUri()) // Играем его по URI
+                                    selectedUri = uriStr
+                                    soundPlayer.playSound(uriStr.toUri())
                                 }
                             )
                             .padding(vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+                        verticalAlignment = Alignment.CenterVertically)
+                    {
                         RadioButton(
                             selected = isSelected,
-                            onClick = null // null переносит клик на весь Row
+                            onClick = null
                         )
                         Spacer(modifier = Modifier.width(12.dp))
-
-                        // Пользователь видит НАЗВАНИЕ песни
                         Text(text = name, fontSize = 18.sp)
                     }
                 }

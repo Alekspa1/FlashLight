@@ -210,8 +210,10 @@ fun SettingsScreen(
                         theme.cardMenuItem,
                         theme.borderCardMenuItem
                     ) {
-                        viewModel.permission(ALARM_SETTINGS)
-                        // viewModel.showDialog = DialogState("ALARM_SETTINGS")
+                        if(viewModel.getPremium()) viewModel.permission(ALARM_SETTINGS)
+                        else viewModel.sendMessage("Доступно в PREMIUM версии")
+
+
                     }
                 }
 
