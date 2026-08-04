@@ -69,6 +69,10 @@ class MainViewModel(
     private val _soundState = MutableStateFlow<Map<String, String>>(emptyMap())
     val soundState = _soundState.asStateFlow()
 
+    init {
+        loadSounds()
+    }
+
      fun loadSounds() {
         viewModelScope.launch(Dispatchers.IO) {
             val result = platform.getAllSound()
