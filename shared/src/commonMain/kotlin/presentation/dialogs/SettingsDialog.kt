@@ -1,6 +1,5 @@
 package presentation.dialogs
 import CommonConst.THEME_FUTURE
-import CommonConst.THEME_ZABOR
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -26,7 +25,8 @@ import androidx.compose.ui.unit.sp
 
 
 @Composable
-fun ThemeDialog(
+fun SettingsDialog(
+ title: String = "По умолчанию",
  select: String = THEME_FUTURE,
  listAction: List<String>,
  onClick : (String)-> Unit = {},
@@ -54,7 +54,7 @@ fun ThemeDialog(
         verticalArrangement = Arrangement.spacedBy(8.dp)
 
     ){
-      Text("Выберите тему")
+      Text(title)
                 Column(Modifier.selectableGroup() .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(10.dp) ) {
                     listAction.forEach {text ->

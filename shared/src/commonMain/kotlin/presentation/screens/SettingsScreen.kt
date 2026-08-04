@@ -18,12 +18,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.BackHand
-import androidx.compose.material.icons.filled.Backpack
-import androidx.compose.material.icons.filled.Backup
-import androidx.compose.material.icons.filled.BackupTable
-import androidx.compose.material.icons.filled.DoorBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -36,19 +30,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
 import presentation.theme.Size
 import presentation.theme.SizeNormal
 import presentation.theme.Theme
 import presentation.theme.ThemeNeon
-import presentation.theme.ThemeZabor
 import CommonConst.THEME_SETTINGS
 import CommonConst.THEME_ZABOR
-import presentation.dialogs.ThemeDialog
+import presentation.dialogs.SettingsDialog
 import CommonConst.THEME_FUTURE
-import CommonConst.THEME_ZABOR
 
 import CommonConst.SIZE_SETTINGS
 import CommonConst.SORT_SETTINGS
@@ -61,12 +52,9 @@ import CommonConst.SIZE_LARGE
 
 import CommonConst.SORT_STANDART
 import CommonConst.SORT_USER
-import CommonConst.SOUND
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import presentation.DialogSoundAndroid
 
 
@@ -81,9 +69,7 @@ fun SettingsScreen(
     onClick: (String) -> Unit = {},
     viewModel: MainViewModel,
 ) {
-    LaunchedEffect(Unit) {
-        viewModel.loadSounds()
-    }
+
     val listTheme = listOf(THEME_FUTURE, THEME_ZABOR)
     val listSize = listOf(SIZE_SMALL, SIZE_STANDART, SIZE_LARGE)
     val listSort = listOf(SORT_STANDART, SORT_USER)
@@ -94,7 +80,8 @@ fun SettingsScreen(
 
     when (viewModel.showDialog.isWho) {
         THEME_SETTINGS -> {
-            ThemeDialog(
+            SettingsDialog(
+                title = "Выберите тему",
                 select = viewModel.getTheme(),
                 listAction = listTheme,
                 onClick = { selectedTheme ->
@@ -105,7 +92,8 @@ fun SettingsScreen(
         }
 
         SIZE_SETTINGS -> {
-            ThemeDialog(
+            SettingsDialog(
+                title = "Выберите размер шрифа",
                 select = viewModel.getSize(),
                 listAction = listSize,
                 onClick = { size ->
@@ -116,7 +104,8 @@ fun SettingsScreen(
         }
 
         SORT_SETTINGS -> {
-            ThemeDialog(
+            SettingsDialog(
+                title = "Выберите тип сортировки",
                 select = viewModel.sortType.value,
                 listAction = listSort,
                 onClick = { action ->
