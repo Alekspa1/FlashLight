@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -16,6 +17,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -38,14 +40,16 @@ import presentation.theme.ThemeNeon
 @Composable
 fun Faq(
     size: Size = SizeNormal(),
-    onBack: () -> Unit = {},)
+    theme: Theme = ThemeNeon(),
+    onBack: () -> Unit = {},
+    innerPadding : PaddingValues = PaddingValues())
 {
+
 
         Column(
             modifier = Modifier
+                .padding(innerPadding)
                 .fillMaxSize()
-               // .verticalScroll(rememberScrollState())
-                .background(Color.Black),
         ) {
 
 
@@ -61,14 +65,14 @@ fun Faq(
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack, // Или ваша иконка ic_menu
                         contentDescription = "Меню",
-                        tint = Color.White
+                        tint = theme.iconTint
                     )
                 }
 
 
                 Text(
                     text = "Инструкция", // tv_settings
-                    color = Color.White,
+                    color = theme.textColor,
                     fontSize = size.textMenu,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.fillMaxWidth(),
@@ -106,6 +110,8 @@ fun Faq(
 
 
         }
+
+
 
 }
 

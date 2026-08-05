@@ -67,6 +67,8 @@ import androidx.compose.runtime.LaunchedEffect
 import presentation.screens.Calendar
 import presentation.theme.ThemeNeon
 import CommonConst.SORT_USER
+import androidx.compose.foundation.layout.width
+
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 
 @Composable
@@ -263,7 +265,8 @@ fun MainPager(paddingValues: PaddingValues = PaddingValues(),
         HorizontalPager(
             state = pagerState,
             modifier = Modifier
-                .fillMaxSize()
+               // .fillMaxSize()
+                .weight(1f)
 
         ) { pageIndex ->
             when (pageIndex) {
@@ -278,7 +281,6 @@ fun MainPager(paddingValues: PaddingValues = PaddingValues(),
     size = viewModel.sizeState,
     isDragDropEnabled = (viewModel.sortType.value == SORT_USER),
     onDragDropped = { updatedList ->
-        // Вызываем твой готовый нативный метод. Он получит список, где sort уже изменен на UI!
         viewModel.updateItemsOrder(updatedList) 
     },
                         onClick = {item,action->
@@ -311,56 +313,65 @@ fun MainPager(paddingValues: PaddingValues = PaddingValues(),
                         onAddItem = {viewModel.showDialog = DialogState(INSERT_DIALOG_ITEM)})
                 }
                 2 -> {
-                    if (premium.value) Calendar(
-                        viewModel,
-                        onClick = { item, action ->
-                            when (action) {
-                                ALARM -> {
-                                    viewModel.permission(NOTIFICATION, item)
-                                }
-
-                                ALARM_LONG -> {
-                                    viewModel.insertAlarmRepeat(item)
-                                }
-
-                                IMAGE -> {
-                                    openImageState = true
-                                    selectedFileUri = viewModel.getUri(item.uri)
-                                }
-
-                                CHANGE_ITEM -> {
-                                    viewModel.showDialog = DialogState(INSERT_DIALOG_ITEM, item)
-                                }
-
-                                CHANGE -> {
-                                    val newItem = item.copy(
-                                        change = !item.change,
-                                        changeAlarm = false
-                                    )
-                                    viewModel.updateItem(newItem, calendar = true)
-                                    if (item.changeAlarm) {
-                                        viewModel.deleteAlarm(item.id)
-                                        viewModel.deleteAlarm(item.id * -1)
+                    if (premium.value) {
+                        Calendar(
+                            viewModel,
+                            onClick = { item, action ->
+                                when (action) {
+                                    ALARM -> {
+                                        viewModel.permission(NOTIFICATION, item)
                                     }
+
+                                    ALARM_LONG -> {
+                                        viewModel.insertAlarmRepeat(item)
+                                    }
+
+                                    IMAGE -> {
+                                        openImageState = true
+                                        selectedFileUri = viewModel.getUri(item.uri)
+                                    }
+
+                                    CHANGE_ITEM -> {
+                                        viewModel.showDialog = DialogState(INSERT_DIALOG_ITEM, item)
+                                    }
+
+                                    CHANGE -> {
+                                        val newItem = item.copy(
+                                            change = !item.change,
+                                            changeAlarm = false
+                                        )
+                                        viewModel.updateItem(newItem, calendar = true)
+                                        if (item.changeAlarm) {
+                                            viewModel.deleteAlarm(item.id)
+                                            viewModel.deleteAlarm(item.id * -1)
+                                        }
+                                    }
+
+                                    DELETE -> {
+                                        if (item.change) viewModel.deleteItem(item)
+                                        else viewModel.showDialog =
+                                            DialogState(DELETE_DIALOG_ITEM, item)
+
+                                    }
+
                                 }
+                            },
+                            onAddItem = { date ->
+                                viewModel.showDialog = DialogState(
+                                    INSERT_DIALOG_ITEM,
+                                    calendar = true,
+                                    date = date
+                                )
+                            })
+                    }  else {
+                        // Проверяем, что pagerState совпадает с текущим индексом страницы
+                        val isVisible = pagerState.currentPage == pageIndex
 
-                                DELETE -> {
-                                    if (item.change) viewModel.deleteItem(item)
-                                    else viewModel.showDialog =
-                                        DialogState(DELETE_DIALOG_ITEM, item)
-
-                                }
-
+                        LaunchedEffect(isVisible) {
+                            if (isVisible) {
+                                viewModel.sendMessage("Отображение дел в календаре доступно в PREMIUM версии")
                             }
-                        },
-                        onAddItem = { date ->
-                            viewModel.showDialog = DialogState(
-                                INSERT_DIALOG_ITEM,
-                                calendar = true,
-                                date = date
-                            )
-                        }) else  LaunchedEffect(Unit) {
-                        viewModel.sendMessage("Отображение дел в календаре доступно в PREMIUM версии")
+                        }
                     }
 
                 }
@@ -368,6 +379,8 @@ fun MainPager(paddingValues: PaddingValues = PaddingValues(),
             }
 
         }
+
+        YandexBannerAd(CommonConst.BANER, Modifier.fillMaxWidth())
 
     }
 

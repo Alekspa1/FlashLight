@@ -1,5 +1,3 @@
-
-
 import CommonConst.DELETE_DIALOG_CATEGORY
 import CommonConst.INSERT_DIALOG_CATEGORY
 import CommonConst.PREMIUM_CLICK
@@ -84,6 +82,7 @@ import presentation.dialogs.AddOrChangeCategoryDialog
 import presentation.dialogs.DeleteDialog
 import presentation.dialogs.DialogState
 import presentation.screens.Faq
+import presentation.screens.PremiumScreen
 import presentation.screens.SettingsScreen
 import presentation.theme.Size
 import presentation.theme.SizeNormal
@@ -97,7 +96,8 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
     val size = viewModel.sizeState
     val premiumState by viewModel.premiumState.collectAsStateWithLifecycle()
     val navController = rememberNavController()
-    val localNavController = rememberNavController()
+
+
     MaterialTheme(
         colorScheme = if (viewModel.themeState == ThemeNeon()) darkColorScheme(
             primary = theme.textColor,
@@ -108,7 +108,8 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
             onSurfaceVariant = theme.textColor
 
         ) else lightColorScheme(
-            primary = theme.textColor)
+            primary = theme.textColor
+        )
     ) {
 
         val categories by viewModel.categories.collectAsStateWithLifecycle()
@@ -116,6 +117,13 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
         var isCommonMode by remember { mutableStateOf(false) }
         val category = viewModel.showDialog.category
+        val snackbarHostState = remember { SnackbarHostState() }
+
+        LaunchedEffect(Unit) {
+            viewModel.toast.collect { message ->
+                snackbarHostState.showSnackbar(message)
+            }
+        }
         when (viewModel.showDialog.isWho) {
             DELETE_DIALOG_CATEGORY -> {
                 DeleteDialog(theme = theme) { result ->
@@ -142,127 +150,192 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
             }
         }
         viewModel.updateAlarm()
-        // 2. СТАВИМ ГЛОБАЛЬНЫЙ НАВИГАТОР ВМЕСТО ПРЯМОГО ВЫЗОВА КОНТЕНТА
-        NavHost(
-            navController = navController,
-            startDestination = "main_screen" // По умолчанию показываем шторку и пейджер
-        ) {
-            // ЭКРАН №1: Твоё приложение со шторкой
-            composable(
-                route = "main_screen",
-                popEnterTransition = {
-                    androidx.compose.animation.EnterTransition.None
-                }) {
-                StartAppContent(
-                    isCommonMode = isCommonMode,
-                    onToggleCommonMode = { isCommonMode = !isCommonMode },
-                    categories = categories,
-                    toastEvents = viewModel.toast,
-                    updateCategory = { category -> viewModel.updateCategory(category) },
-                    openPager = { innerPadding, onOpenDrawer, pagerState ->
-                        MainPager(innerPadding, viewModel, onOpenDrawer, pagerState)
-                    },
-                    drawerState = drawerState,
-                    theme = viewModel.themeState,
-                    size = viewModel.sizeState,
-                    premium = premiumState,
-                    update = updateState,
-                    onClick = { click ->
-                        when (click) {
-                            PREMIUM_CLICK -> {
-                                val premium = viewModel.getPremium()
-                                viewModel.savePremium(!premium)
-                            }
 
-                            UPGRATE_CLICK -> {}
 
-                            // 3. ОБРАБАТЫВАЕМ КЛИК НА НАСТРОЙКИ
-                            SETTINGS_CLICK -> {
-                                // Даем команду уйти на экран настроек (текущий экран полностью скроется)
-                                navController.navigate("settings_screen")
-                            }
 
-                            SHARED_ClICK -> {
-                                viewModel.sendMessage("Общие дела появяться в следующих обновлениях")
-                            }
-                        }
-                    },
-                    onClickCategory = { listCategory, action ->
-                        when (action) {
-                            INSERT_DIALOG_CATEGORY -> {
-                                if (premiumState) {
-                                    viewModel.showDialog =
-                                        DialogState(INSERT_DIALOG_CATEGORY, category = listCategory)
-                                } else viewModel.sendMessage("Категории доступны в PREMIUM версии")
-                            }
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            containerColor = Color.Transparent,
+            bottomBar = {
+                Box(
+                    modifier = Modifier.fillMaxWidth().navigationBarsPadding(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    SnackbarHost(
+                        hostState = snackbarHostState,
+                        modifier = Modifier.align(Alignment.BottomCenter)
+                    )
 
-                            DELETE_DIALOG_CATEGORY -> {
-                                viewModel.showDialog =
-                                    DialogState(DELETE_DIALOG_CATEGORY, category = listCategory)
-                            }
-                        }
 
+                }
+            }
+        ) { innerPadding ->
+            Box(modifier = Modifier.fillMaxSize()) {
+
+                Image(
+                    painter = painterResource(theme.backgroundStart),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.FillBounds
+                )
+                NavHost(
+                    navController = navController,
+                    startDestination = "main_screen" // По умолчанию показываем шторку и пейджер
+                ) {
+                    // ЭКРАН №1: Твоё приложение со шторкой
+                    composable(
+                        route = "main_screen",
+                        popEnterTransition = {
+                            androidx.compose.animation.EnterTransition.None
+                        }) {
+                        StartAppContent(
+                            isCommonMode = isCommonMode,
+                            onToggleCommonMode = { isCommonMode = !isCommonMode },
+                            categories = categories,
+                            toastEvents = viewModel.toast,
+                            updateCategory = { category -> viewModel.updateCategory(category) },
+                            openPager = { onOpenDrawer, pagerState ->
+                                MainPager(innerPadding, viewModel, onOpenDrawer, pagerState)
+                            },
+                            drawerState = drawerState,
+                            theme = viewModel.themeState,
+                            size = viewModel.sizeState,
+                            premium = premiumState,
+                            update = updateState,
+                            onClick = { click ->
+                                when (click) {
+                                    PREMIUM_CLICK -> {
+                                        navController.navigate("premium_screen")
+                                    }
+
+                                    UPGRATE_CLICK -> {}
+
+                                    // 3. ОБРАБАТЫВАЕМ КЛИК НА НАСТРОЙКИ
+                                    SETTINGS_CLICK -> {
+                                        // Даем команду уйти на экран настроек (текущий экран полностью скроется)
+                                        navController.navigate("settings_screen")
+                                    }
+
+                                    SHARED_ClICK -> {
+                                        viewModel.sendMessage("Общие дела появяться в следующих обновлениях")
+                                    }
+                                }
+                            },
+                            onClickCategory = { listCategory, action ->
+                                when (action) {
+                                    INSERT_DIALOG_CATEGORY -> {
+                                        if (premiumState) {
+                                            viewModel.showDialog =
+                                                DialogState(
+                                                    INSERT_DIALOG_CATEGORY,
+                                                    category = listCategory
+                                                )
+                                        } else viewModel.sendMessage("Категории доступны в PREMIUM версии")
+                                    }
+
+                                    DELETE_DIALOG_CATEGORY -> {
+                                        viewModel.showDialog =
+                                            DialogState(
+                                                DELETE_DIALOG_CATEGORY,
+                                                category = listCategory
+                                            )
+                                    }
+                                }
+
+                            }
+                        )
                     }
-                )
-            }
 
-            // ЭКРАН №2: Абсолютно новый экран настроек без Дравера!
-            composable(
-                route = "settings_screen",
-                popEnterTransition = {
-                    androidx.compose.animation.EnterTransition.None
-                },
-                // 1. ОТКРЫТИЕ: экран выезжает из-за левого края (слева направо)
-                enterTransition = {
-                    slideInHorizontally(
-                        animationSpec = tween(300),
-                        initialOffsetX = { -it } // Появляется СЛЕВА
-                    )
-                },
-                // 2. НАЗАД: экран уезжает обратно за левый край (справа налево)
-                popExitTransition = {
-                    slideOutHorizontally(
-                        animationSpec = tween(300),
-                        targetOffsetX = { -it } // Уезжает СЛЕВА
-                    )
-                }
-            ) {
-                SettingsScreen(
-                    theme = theme,
-                    size = size,
-                    onBack = { navController.popBackStack() },
-                    onClick = {click->
-                        when(click){
-                            "FAQ"-> navController.navigate("faq_screen")
+                    // ЭКРАН №2: Абсолютно новый экран настроек без Дравера!
+                    composable(
+                        route = "settings_screen",
+                        popEnterTransition = {
+                            androidx.compose.animation.EnterTransition.None
+                        },
+                        // 1. ОТКРЫТИЕ: экран выезжает из-за левого края (слева направо)
+                        enterTransition = {
+                            slideInHorizontally(
+                                animationSpec = tween(300),
+                                initialOffsetX = { -it } // Появляется СЛЕВА
+                            )
+                        },
+                        // 2. НАЗАД: экран уезжает обратно за левый край (справа налево)
+                        popExitTransition = {
+                            slideOutHorizontally(
+                                animationSpec = tween(300),
+                                targetOffsetX = { -it } // Уезжает СЛЕВА
+                            )
                         }
-                    },
-                    viewModel = viewModel
-                )
-            }
+                    ) {
+                        SettingsScreen(
+                            theme = theme,
+                            size = size,
+                            onBack = { navController.popBackStack() },
+                            onClick = { click ->
+                                when (click) {
+                                    "FAQ" -> navController.navigate("faq_screen")
+                                }
+                            },
+                            viewModel = viewModel,
+                            innerPadding = innerPadding
+                        )
+                    }
 
-            composable(
-                route = "faq_screen",
-                // 1. ОТКРЫТИЕ: экран выезжает из-за левого края (слева направо)
-                enterTransition = {
-                    slideInHorizontally(
-                        animationSpec = tween(300),
-                        initialOffsetX = { -it } // Появляется СЛЕВА
-                    )
-                },
-                // 2. НАЗАД: экран уезжает обратно за левый край (справа налево)
-                popExitTransition = {
-                    slideOutHorizontally(
-                        animationSpec = tween(300),
-                        targetOffsetX = { -it } // Уезжает СЛЕВА
-                    )
+                    composable(
+                        route = "faq_screen",
+                        // 1. ОТКРЫТИЕ: экран выезжает из-за левого края (слева направо)
+                        enterTransition = {
+                            slideInHorizontally(
+                                animationSpec = tween(300),
+                                initialOffsetX = { -it } // Появляется СЛЕВА
+                            )
+                        },
+                        // 2. НАЗАД: экран уезжает обратно за левый край (справа налево)
+                        popExitTransition = {
+                            slideOutHorizontally(
+                                animationSpec = tween(300),
+                                targetOffsetX = { -it } // Уезжает СЛЕВА
+                            )
+                        }
+                    ) {
+                        Faq(
+                            theme = theme,
+                            size = size,
+                            onBack = { navController.popBackStack() },
+                            innerPadding = innerPadding
+                        )
+                    }
+
+                    composable(
+                        route = "premium_screen",
+                        popEnterTransition = {
+                            androidx.compose.animation.EnterTransition.None
+                        },
+                        // 1. ОТКРЫТИЕ: экран выезжает из-за левого края (слева направо)
+                        enterTransition = {
+                            slideInHorizontally(
+                                animationSpec = tween(300),
+                                initialOffsetX = { -it } // Появляется СЛЕВА
+                            )
+                        },
+                        // 2. НАЗАД: экран уезжает обратно за левый край (справа налево)
+                        popExitTransition = {
+                            slideOutHorizontally(
+                                animationSpec = tween(300),
+                                targetOffsetX = { -it } // Уезжает СЛЕВА
+                            )
+                        }
+                    ) {
+                        PremiumScreen(size = size,
+                            theme = theme,
+                            onBack = {navController.popBackStack()},
+                            innerPadding = innerPadding)
+                    }
                 }
-            ) {
-                Faq(
-                    size = size,
-                    onBack = { navController.popBackStack() },
-                    )
             }
         }
+
+
     }
 }
 
@@ -275,7 +348,7 @@ fun StartAppContent(
     categories: List<ListCategory> = emptyList(),
     toastEvents: Flow<String> = emptyFlow(),
     updateCategory: (String) -> Unit = {},
-    openPager: @Composable (innerPadding: PaddingValues, onOpenDrawer: () -> Unit, pagerStateUp: PagerState) -> Unit = { _, _, _ -> },
+    openPager: @Composable (onOpenDrawer: () -> Unit, pagerStateUp: PagerState) -> Unit = { _, _ -> },
     drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed),
     theme: Theme = ThemeNeon(),
     size: Size = SizeNormal(),
@@ -286,7 +359,7 @@ fun StartAppContent(
 ) {
     val localNavController = rememberNavController()
     val scope = rememberCoroutineScope()
-    val snackbarHostState = remember { SnackbarHostState() }
+
     val pagerState = rememberPagerState(pageCount = { 3 })
     val onOpenDrawer = remember {
         {
@@ -297,14 +370,8 @@ fun StartAppContent(
         }
     }
 
-    LaunchedEffect(toastEvents) {
-        toastEvents.collect { message ->
-            snackbarHostState.showSnackbar(message)
-        }
 
-    }
-
-    if (!LocalInspectionMode.current){
+    if (!LocalInspectionMode.current) {
         val navigationEventState = rememberNavigationEventState(
             currentInfo = NavigationEventInfo.None
         )
@@ -392,7 +459,7 @@ fun StartAppContent(
                                                     },
                                                 shape = RoundedCornerShape(10.dp),
                                                 colors = CardDefaults.cardColors(containerColor = theme.cardMenuItem)
-                                               // colors = CardDefaults.cardColors(containerColor = cardSolidColor)
+                                                // colors = CardDefaults.cardColors(containerColor = cardSolidColor)
                                             ) {
                                                 Text(
                                                     modifier = Modifier.padding(8.dp),
@@ -437,7 +504,7 @@ fun StartAppContent(
                                                 )
                                                 // 3. Добавляем клик (эффект волны подстроится под форму автоматически)
                                                 .clickable {
-                                                        onClick(SHARED_ClICK)
+                                                    onClick(SHARED_ClICK)
 //                                                    onToggleCommonMode()
 //
 //                                                    // 2. Рассчитываем роуты на основе инвертированного значения (так как стейт обновится на следующем кадре)
@@ -470,8 +537,8 @@ fun StartAppContent(
                                             modifier = Modifier.size(35.dp)
                                         ) {
                                             Icon(
-                                                imageVector = if(isCommonMode) theme.iconDrawerEveryday
-                                                    else theme.iconDrawerShare, // Замените на иконку Share, если добавлена в тему
+                                                imageVector = if (isCommonMode) theme.iconDrawerEveryday
+                                                else theme.iconDrawerShare, // Замените на иконку Share, если добавлена в тему
                                                 contentDescription = "Поделиться",
                                                 tint = theme.iconTint
                                             )
@@ -589,8 +656,8 @@ fun StartAppContent(
                                 // Кнопка Премиум
                                 Row(
                                     modifier = Modifier.fillMaxWidth()
-                                    .clickable { onClick(PREMIUM_CLICK) }
-                                    .padding(6.dp),
+                                        .clickable { onClick(PREMIUM_CLICK) }
+                                        .padding(6.dp),
                                     verticalAlignment = Alignment.CenterVertically) {
                                     Icon(
                                         imageVector = theme.iconDrawerPremium,
@@ -604,8 +671,7 @@ fun StartAppContent(
                                         color = theme.textColor,
                                         fontSize = size.drawerBottomMenuText,
                                         modifier = Modifier
-                                            .fillMaxWidth().padding(start = 4.dp)
-                                        ,
+                                            .fillMaxWidth().padding(start = 4.dp),
                                         fontWeight = FontWeight.Bold
 
                                     )
@@ -618,8 +684,8 @@ fun StartAppContent(
                                 // Кнопка Обновления
                                 Row(
                                     modifier = Modifier.fillMaxWidth()
-                                    .clickable { onClick(UPGRATE_CLICK) }
-                                    .padding(6.dp),
+                                        .clickable { onClick(UPGRATE_CLICK) }
+                                        .padding(6.dp),
                                     verticalAlignment = Alignment.CenterVertically) {
                                     Icon(
                                         imageVector = if (update) theme.iconDrawerUpdateOn else theme.iconDrawerUpdateOff,
@@ -633,7 +699,7 @@ fun StartAppContent(
                                         fontSize = size.drawerBottomMenuText,
                                         modifier = Modifier
                                             .fillMaxWidth().padding(start = 4.dp)
-                                        // .clickable { onClick(UPGRATE_CLICK) }
+
                                         ,
                                         fontWeight = FontWeight.Bold
 
@@ -646,8 +712,8 @@ fun StartAppContent(
                                 // Кнопка Настройки
                                 Row(
                                     modifier = Modifier.fillMaxWidth()
-                                    .clickable { onClick(SETTINGS_CLICK) }
-                                    .padding(6.dp),
+                                        .clickable { onClick(SETTINGS_CLICK) }
+                                        .padding(6.dp),
                                     verticalAlignment = Alignment.CenterVertically) {
                                     Icon(
                                         imageVector = theme.iconDrawerSettigs,
@@ -661,7 +727,6 @@ fun StartAppContent(
                                         fontSize = size.drawerBottomMenuText,
                                         modifier = Modifier
                                             .fillMaxWidth().padding(start = 4.dp)
-                                        //.clickable { onClick(SETTINGS_CLICK) }
                                         ,
                                         fontWeight = FontWeight.Bold
 
@@ -685,68 +750,35 @@ fun StartAppContent(
                 )
 
 
-                Scaffold(
-                    modifier = Modifier.fillMaxSize(),
-                    containerColor = Color.Transparent,
-                    bottomBar = {
-                        Box(
-                            modifier = Modifier.fillMaxWidth().navigationBarsPadding(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            // Если код запущен внутри Android Studio Preview
-                            if (LocalInspectionMode.current) {
-                                // Показываем красивую фейковую заглушку для верстки
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(50.dp) // Стандартная высота баннера
-                                        .background(Color.DarkGray),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text("Здесь будет реклама Яндекса", color = theme.iconTint)
-                                }
-                            } else {
-                                // В реальном приложении запускаем настоящий баннер
-                                YandexBannerAd(CommonConst.BANER, Modifier.fillMaxWidth())
-                            }
-                        }
-                    },
-                ) { innerPadding ->
+                NavHost(
+                    navController = localNavController,
+                    startDestination = "personal_pager_hub",
 
+                    ) {
 
+                    // Точка А: Твой текущий пейджер (Блокнот + Будильник)
+                    composable("personal_pager_hub") {
+                        openPager(onOpenDrawer, pagerState)
+                    }
 
-                    NavHost(
-                        navController = localNavController,
-                        startDestination = "personal_pager_hub",
-
-                        ) {
-
-                        // Точка А: Твой текущий пейджер (Блокнот + Будильник)
-                        composable("personal_pager_hub") {
-                            openPager(innerPadding, onOpenDrawer, pagerState)
-                        }
-
-                        // Точка Б: Новый экран Общих Дел
-                        composable("common_screen") {
-                            // Сюда мы подставим твой будущий экран общих дел
-                            // CommonTasksScreen(innerPadding = innerPadding, viewModel = viewModel)
-                        }
+                    // Точка Б: Новый экран Общих Дел
+                    composable("common_screen") {
+                        // Сюда мы подставим твой будущий экран общих дел
+                        // CommonTasksScreen(innerPadding = innerPadding, viewModel = viewModel)
                     }
                 }
+
             }
         }
-        SnackbarHost(
-            hostState = snackbarHostState,
-            modifier = Modifier.align(Alignment.BottomCenter)
-        )
+
 
     }
 
 }
 
 
- @Preview(showBackground = true)
- @Composable
- fun PreviewStartApp(){
-  StartAppContent(theme = ThemeZabor())
- }
+@Preview(showBackground = true)
+@Composable
+fun PreviewStartApp() {
+    StartAppContent(theme = ThemeZabor())
+}

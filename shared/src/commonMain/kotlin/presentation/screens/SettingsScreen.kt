@@ -52,8 +52,20 @@ import CommonConst.SIZE_LARGE
 
 import CommonConst.SORT_STANDART
 import CommonConst.SORT_USER
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material.icons.automirrored.filled.StarHalf
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.platform.LocalUriHandler
 import presentation.DialogSoundAndroid
 
@@ -68,13 +80,21 @@ fun SettingsScreen(
     onBack: () -> Unit = {},
     onClick: (String) -> Unit = {},
     viewModel: MainViewModel,
+    innerPadding: PaddingValues
 ) {
 
     val listTheme = listOf(THEME_FUTURE, THEME_ZABOR)
     val listSize = listOf(SIZE_SMALL, SIZE_STANDART, SIZE_LARGE)
     val listSort = listOf(SORT_STANDART, SORT_USER)
     val listSound by viewModel.soundState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
+    LaunchedEffect(Unit) {
+        viewModel.toast.collect { message ->
+            snackbarHostState.showSnackbar(message)
+        }
+
+    }
 
     val uriHandler = LocalUriHandler.current
 
@@ -130,120 +150,141 @@ fun SettingsScreen(
     }
 
 
-
-    Box(modifier = Modifier.fillMaxSize()) {
-        // 1. ФОН: android:background="@drawable/img"
-        Image(
-            painter = painterResource(theme.backgroundStart),
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.FillBounds
-        )
-
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-        ) {
-            // ШАПКА: im_back (ImageView) + tv_settings ("Общие настройки")
-            Box(
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 10.dp, bottom = 10.dp)
+                    .padding(innerPadding)
+                    .fillMaxSize()
+
             ) {
-                IconButton(
-                    onClick = { onBack() },
-                    modifier = Modifier.size(35.dp)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp, bottom = 10.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack, // Или ваша иконка ic_menu
-                        contentDescription = "Меню",
-                        tint = theme.iconDelTint
+                    IconButton(
+                        onClick = { onBack() },
+                        modifier = Modifier.size(35.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack, // Или ваша иконка ic_menu
+                            contentDescription = "Меню",
+                            tint = theme.iconDelTint
+                        )
+                    }
+
+
+                    Text(
+                        text = "Общие настройки", // tv_settings
+                        color = theme.textColor,
+                        fontSize = size.textMenu,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
                     )
                 }
 
-
-                Text(
-                    text = "Общие настройки", // tv_settings
-                    color = theme.textColor,
-                    fontSize = size.textMenu,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center
-                )
-            }
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 10.dp),
-                verticalArrangement = Arrangement.spacedBy(5.dp) // layout_marginBottom="3dp"
-            ) {
-                // --- СЕКЦИЯ 1: СТИЛИ И ИНСТРУКЦИИ ---
-                SettingItem(
-                    "Тема",
-                    theme,
-                    size,
-                    theme.cardMenuItem,
-                    theme.borderCardMenuItem
-                ) { viewModel.showDialog = DialogState("THEME_SETTINGS") }
-                SettingItem(
-                    "Размер шрифта",
-                    theme,
-                    size,
-                    theme.cardMenuItem,
-                    theme.borderCardMenuItem
-                ) { viewModel.showDialog = DialogState("SIZE_SETTINGS") }
-                SettingItem(
-                    "Сортировка",
-                    theme,
-                    size,
-                    theme.cardMenuItem,
-                    theme.borderCardMenuItem
-                ) { viewModel.showDialog = DialogState("SORT_SETTINGS") }
-                if (viewModel.getPlatform == "Android") {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 10.dp),
+                    verticalArrangement = Arrangement.spacedBy(5.dp) // layout_marginBottom="3dp"
+                ) {
+                    // --- СЕКЦИЯ 1: СТИЛИ И ИНСТРУКЦИИ ---
                     SettingItem(
-                        "Звук будильника",
+                        "Тема",
                         theme,
                         size,
                         theme.cardMenuItem,
                         theme.borderCardMenuItem
+                    ) { viewModel.showDialog = DialogState("THEME_SETTINGS") }
+                    SettingItem(
+                        "Размер шрифта",
+                        theme,
+                        size,
+                        theme.cardMenuItem,
+                        theme.borderCardMenuItem
+                    ) { viewModel.showDialog = DialogState("SIZE_SETTINGS") }
+                    SettingItem(
+                        "Сортировка",
+                        theme,
+                        size,
+                        theme.cardMenuItem,
+                        theme.borderCardMenuItem,
+                        true
                     ) {
-                        if(viewModel.getPremium()) viewModel.permission(ALARM_SETTINGS)
+                        if(viewModel.getPremium()) viewModel.showDialog = DialogState(SORT_SETTINGS)
                         else viewModel.sendMessage("Доступно в PREMIUM версии")
 
-
                     }
-                }
+                    if (viewModel.getPlatform == "Android") {
+                        SettingItem(
+                            "Звук будильника",
+                            theme,
+                            size,
+                            theme.cardMenuItem,
+                            theme.borderCardMenuItem,
+                            true
+                        ) {
+                            if(viewModel.getPremium()) viewModel.permission(ALARM_SETTINGS)
+                            else viewModel.sendMessage("Доступно в PREMIUM версии")
 
 
-                SettingItem(
-                    "Инструкция",
-                    theme,
-                    size,
-                    theme.cardMenuItem,
-                    theme.borderCardMenuItem
-                ) { onClick("FAQ") }
-                SettingItem(
-                    "Обратная связь",
-                    theme,
-                    size,
-                    theme.cardMenuItem,
-                    theme.borderCardMenuItem
-                ) { uriHandler.openUri("mailto:apereverzev47@gmail.com?subject=FOCUS") }
-                SettingItem(
-                    "Поддержать разработчика",
-                    theme,
-                    size,
-                    theme.cardMenuItem,
-                    theme.borderCardMenuItem
-                ) { uriHandler.openUri(DONATE) }
+                        }
+                    }
 
-                if (viewModel.getPlatform != "Desktop") {
-                    // --- СЕКЦИЯ 2: РАЗРЕШЕНИЯ (tv_settings_permissions) ---
+
+                    SettingItem(
+                        "Инструкция",
+                        theme,
+                        size,
+                        theme.cardMenuItem,
+                        theme.borderCardMenuItem
+                    ) { onClick("FAQ") }
+                    SettingItem(
+                        "Обратная связь",
+                        theme,
+                        size,
+                        theme.cardMenuItem,
+                        theme.borderCardMenuItem
+                    ) { uriHandler.openUri("mailto:apereverzev47@gmail.com?subject=FOCUS") }
+                    SettingItem(
+                        "Поддержать разработчика",
+                        theme,
+                        size,
+                        theme.cardMenuItem,
+                        theme.borderCardMenuItem
+                    ) { uriHandler.openUri(DONATE) }
+
+                    if (viewModel.getPlatform != "Desktop") {
+                        // --- СЕКЦИЯ 2: РАЗРЕШЕНИЯ (tv_settings_permissions) ---
+                        Text(
+                            text = "Разрешения",
+                            color = theme.textColor,
+                            fontSize = size.textMenu,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp),
+                            textAlign = TextAlign.Center
+                        )
+                        SettingItem(
+                            "Работа в фоне",
+                            theme,
+                            size,
+                            theme.cardMenuItem,
+                            theme.borderCardMenuItem
+                        ) { /* Настройки батареи */ }
+                        SettingItem(
+                            "Настройки приложения",
+                            theme,
+                            size,
+                            theme.cardMenuItem,
+                            theme.borderCardMenuItem
+                        ) { /* Системные настройки аппа */ }
+                    }
+
+                    // --- СЕКЦИЯ 3: РЕЗЕРВНОЕ КОПИРОВАНИЕ (tv_settings_backup) ---
                     Text(
-                        text = "Разрешения",
+                        text = "Резервное копирование",
                         color = theme.textColor,
                         fontSize = size.textMenu,
                         fontWeight = FontWeight.Bold,
@@ -251,64 +292,43 @@ fun SettingsScreen(
                         textAlign = TextAlign.Center
                     )
                     SettingItem(
-                        "Работа в фоне",
+                        "Сохранить базу данных",
                         theme,
                         size,
                         theme.cardMenuItem,
                         theme.borderCardMenuItem
-                    ) { /* Настройки батареи */ }
+                    ) {
+                        //viewModel.saveDatabase() // Пример вызова во ViewModel
+                    }
                     SettingItem(
-                        "Настройки приложения",
+                        "Загрузить базу данных",
                         theme,
                         size,
                         theme.cardMenuItem,
                         theme.borderCardMenuItem
-                    ) { /* Системные настройки аппа */ }
-                }
+                    ) {
+                        // viewModel.loadDatabase()
+                    }
 
-                // --- СЕКЦИЯ 3: РЕЗЕРВНОЕ КОПИРОВАНИЕ (tv_settings_backup) ---
-                Text(
-                    text = "Резервное копирование",
-                    color = theme.textColor,
-                    fontSize = size.textMenu,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp),
-                    textAlign = TextAlign.Center
-                )
-                SettingItem(
-                    "Сохранить базу данных",
-                    theme,
-                    size,
-                    theme.cardMenuItem,
-                    theme.borderCardMenuItem
-                ) {
-                    //viewModel.saveDatabase() // Пример вызова во ViewModel
+                    Spacer(modifier = Modifier.height(24.dp))
                 }
-                SettingItem(
-                    "Загрузить базу данных",
-                    theme,
-                    size,
-                    theme.cardMenuItem,
-                    theme.borderCardMenuItem
-                ) {
-                    // viewModel.loadDatabase()
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
             }
-        }
 
-        // 3. СЛОЙ ИНДИКАТОРА ЗАГРУЗКИ: progressBar2 (Заменяет ProgressBar из XML)
-        // Предполагаем, что во ViewModel есть переменная isLoadingState (Boolean)
-        // if (viewModel.updateState) { // Или твой флаг загрузки
-        //     CircularProgressIndicator(
-        //         modifier = Modifier
-        //             .size(48.dp)
-        //             .align(Alignment.Center),
-        //         color = theme.textColor
-        //     )
-        // }
-    }
+            // 3. СЛОЙ ИНДИКАТОРА ЗАГРУЗКИ: progressBar2 (Заменяет ProgressBar из XML)
+            // Предполагаем, что во ViewModel есть переменная isLoadingState (Boolean)
+            // if (viewModel.updateState) { // Или твой флаг загрузки
+            //     CircularProgressIndicator(
+            //         modifier = Modifier
+            //             .size(48.dp)
+            //             .align(Alignment.Center),
+            //         color = theme.textColor
+            //     )
+            // }
+
+
+
+
+
 }
 
 @Composable
@@ -318,6 +338,7 @@ fun SettingItem(
     size: Size,
     cardColor: Color,
     borderColor: Color,
+    iconPremium: Boolean = false,
     onClick: () -> Unit
 ) {
     Card(
@@ -330,13 +351,27 @@ fun SettingItem(
         shape = RoundedCornerShape(10.dp),
         colors = CardDefaults.cardColors(containerColor = cardColor)
     ) {
-        Text(
-            text = text,
-            color = theme.textColor,
-            fontSize = size.textItem,
-            lineHeight = size.lineHeightItem,
-            modifier = Modifier.padding(8.dp) // padding="8dp"
-        )
+        Row(modifier = Modifier.fillMaxWidth().padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically){
+            Text(
+                text = text,
+                color = theme.textColor,
+                fontSize = size.textItem,
+                lineHeight = size.lineHeightItem,
+                modifier = Modifier.weight(1f) // padding="8dp"
+            )
+            if(iconPremium) {
+                Icon(
+                    imageVector = Icons.Default.Star,
+                    contentDescription = "Меню",
+                    tint = theme.tintPremiumOn
+                )
+            }
+
+
+
+        }
+
     }
 }
 
