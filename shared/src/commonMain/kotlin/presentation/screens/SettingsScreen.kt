@@ -68,7 +68,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.platform.LocalUriHandler
 import presentation.DialogSoundAndroid
-
+import androidx.compose.foundation.Image
+import androidx.compose.ui.layout.ContentScale
+import org.jetbrains.compose.resources.painterResource
 
 import presentation.dialogs.DialogState
 
@@ -149,6 +151,14 @@ fun SettingsScreen(
         }
     }
 
+
+        Box(modifier = Modifier.fillMaxSize()) { 
+        Image( 
+            painter = painterResource(theme.backgroundStart), 
+            contentDescription = null, 
+            modifier = Modifier.fillMaxSize(), 
+            contentScale = ContentScale.FillBounds 
+        ) 
 
             Column(
                 modifier = Modifier
@@ -313,6 +323,7 @@ fun SettingsScreen(
                     Spacer(modifier = Modifier.height(24.dp))
                 }
             }
+        }
 
             // 3. СЛОЙ ИНДИКАТОРА ЗАГРУЗКИ: progressBar2 (Заменяет ProgressBar из XML)
             // Предполагаем, что во ViewModel есть переменная isLoadingState (Boolean)
