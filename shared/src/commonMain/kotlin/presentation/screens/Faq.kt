@@ -38,7 +38,7 @@ import presentation.theme.Theme
 import presentation.theme.ThemeNeon
 import androidx.compose.foundation.Image
 import org.jetbrains.compose.resources.painterResource
-import androidx.compose.ui.layout.ContentScale
+
 
 @Composable
 fun Faq(
