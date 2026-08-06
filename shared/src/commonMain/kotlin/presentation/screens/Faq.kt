@@ -36,6 +36,10 @@ import presentation.theme.Size
 import presentation.theme.SizeNormal
 import presentation.theme.Theme
 import presentation.theme.ThemeNeon
+import androidx.compose.foundation.Image
+import androidx.compose.ui.layout.ContentScale
+import org.jetbrains.compose.resources.painterResource
+
 
 @Composable
 fun Faq(
@@ -45,6 +49,14 @@ fun Faq(
     innerPadding : PaddingValues = PaddingValues())
 {
 
+
+        Box(modifier = Modifier.fillMaxSize()) { 
+        Image( 
+            painter = painterResource(theme.backgroundStart), 
+            contentDescription = null, 
+            modifier = Modifier.fillMaxSize(), 
+            contentScale = ContentScale.FillBounds 
+        ) 
 
         Column(
             modifier = Modifier
@@ -109,6 +121,7 @@ fun Faq(
             }
 
 
+        }
         }
 
 
