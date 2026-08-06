@@ -51,6 +51,9 @@ import presentation.theme.Size
 import presentation.theme.SizeNormal
 import presentation.theme.Theme
 import presentation.theme.ThemeNeon
+import androidx.compose.foundation.Image
+import androidx.compose.ui.layout.ContentScale
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun PremiumScreen(
