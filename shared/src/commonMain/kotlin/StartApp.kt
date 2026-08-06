@@ -169,171 +169,111 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
 
                 }
             }
-        ) { innerPadding ->
-            Box(modifier = Modifier.fillMaxSize()) {
+        ) { innerPadding -> 
+    Box(modifier = Modifier.fillMaxSize()) { 
+        Image( 
+            painter = painterResource(theme.backgroundStart), 
+            contentDescription = null, 
+            modifier = Modifier.fillMaxSize(), 
+            contentScale = ContentScale.FillBounds 
+        ) 
+        
+        NavHost( 
+            navController = navController, 
+            startDestination = "main_screen"
+        ) { 
+            // ЭКРАН №1: Главный экран
+            composable( 
+                route = "main_screen", 
+                // Старый экран замирает на месте и не исчезает, пока новый заезжает поверх
+                exitTransition = { androidx.compose.animation.ExitTransition.None },
+                popEnterTransition = { androidx.compose.animation.EnterTransition.None }
+            ) { 
+                StartAppContent( 
+                    isCommonMode = isCommonMode, 
+                    onToggleCommonMode = { isCommonMode = !isCommonMode }, 
+                    categories = categories, 
+                    toastEvents = viewModel.toast, 
+                    updateCategory = { category -> viewModel.updateCategory(category) }, 
+                    openPager = { onOpenDrawer, pagerState -> MainPager(innerPadding, viewModel, onOpenDrawer, pagerState) }, 
+                    drawerState = drawerState, 
+                    theme = viewModel.themeState, 
+                    size = viewModel.sizeState, 
+                    premium = premiumState, 
+                    update = updateState, 
+                    onClick = { click -> 
+                        when (click) { 
+                            PREMIUM_CLICK -> { navController.navigate("premium_screen") } 
+                            UPGRATE_CLICK -> {} 
+                            SETTINGS_CLICK -> { navController.navigate("settings_screen") } 
+                            SHARED_ClICK -> { viewModel.sendMessage("Общие дела появяться в следующих обновлениях") } 
+                        } 
+                    }, 
+                    onClickCategory = { listCategory, action -> 
+                        when (action) { 
+                            INSERT_DIALOG_CATEGORY -> { 
+                                if (premiumState) { 
+                                    viewModel.showDialog = DialogState(INSERT_DIALOG_CATEGORY, category = listCategory) 
+                                } else viewModel.sendMessage("Категории доступны в PREMIUM версии") 
+                            } 
+                            DELETE_DIALOG_CATEGORY -> { 
+                                viewModel.showDialog = DialogState(DELETE_DIALOG_CATEGORY, category = listCategory) 
+                            } 
+                        } 
+                    } 
+                ) 
+            } 
 
-                Image(
-                    painter = painterResource(theme.backgroundStart),
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.FillBounds
-                )
-                NavHost(
-                    navController = navController,
-                    startDestination = "main_screen" // По умолчанию показываем шторку и пейджер
-                ) {
-                    // ЭКРАН №1: Твоё приложение со шторкой
-                    composable(
-                        route = "main_screen",
-                        popEnterTransition = {
-                            androidx.compose.animation.EnterTransition.None
-                        }) {
-                        StartAppContent(
-                            isCommonMode = isCommonMode,
-                            onToggleCommonMode = { isCommonMode = !isCommonMode },
-                            categories = categories,
-                            toastEvents = viewModel.toast,
-                            updateCategory = { category -> viewModel.updateCategory(category) },
-                            openPager = { onOpenDrawer, pagerState ->
-                                MainPager(innerPadding, viewModel, onOpenDrawer, pagerState)
-                            },
-                            drawerState = drawerState,
-                            theme = viewModel.themeState,
-                            size = viewModel.sizeState,
-                            premium = premiumState,
-                            update = updateState,
-                            onClick = { click ->
-                                when (click) {
-                                    PREMIUM_CLICK -> {
-                                        navController.navigate("premium_screen")
-                                    }
+            // ЭКРАН №2: Настройки
+            composable( 
+                route = "settings_screen", 
+                enterTransition = { slideInHorizontally(animationSpec = tween(300), initialOffsetX = { -it }) }, 
+                popExitTransition = { slideOutHorizontally(animationSpec = tween(300), targetOffsetX = { -it }) },
+                // Настройки тоже должны замереть, когда поверх них открывается FAQ
+                exitTransition = { androidx.compose.animation.ExitTransition.None },
+                popEnterTransition = { androidx.compose.animation.EnterTransition.None }
+            ) { 
+                SettingsScreen( 
+                    theme = theme, 
+                    size = size, 
+                    onBack = { navController.popBackStack() }, 
+                    onClick = { click -> 
+                        when (click) { "FAQ" -> navController.navigate("faq_screen") } 
+                    }, 
+                    viewModel = viewModel, 
+                    innerPadding = innerPadding 
+                ) 
+            } 
 
-                                    UPGRATE_CLICK -> {}
+            // ЭКРАН №3: FAQ
+            composable( 
+                route = "faq_screen", 
+                enterTransition = { slideInHorizontally(animationSpec = tween(300), initialOffsetX = { -it }) }, 
+                popExitTransition = { slideOutHorizontally(animationSpec = tween(300), targetOffsetX = { -it }) },
+                exitTransition = { androidx.compose.animation.ExitTransition.None },
+                popEnterTransition = { androidx.compose.animation.EnterTransition.None }
+            ) { 
+                Faq( 
+                    theme = theme, 
+                    size = size, 
+                    onBack = { navController.popBackStack() }, 
+                    innerPadding = innerPadding 
+                ) 
+            } 
 
-                                    // 3. ОБРАБАТЫВАЕМ КЛИК НА НАСТРОЙКИ
-                                    SETTINGS_CLICK -> {
-                                        // Даем команду уйти на экран настроек (текущий экран полностью скроется)
-                                        navController.navigate("settings_screen")
-                                    }
-
-                                    SHARED_ClICK -> {
-                                        viewModel.sendMessage("Общие дела появяться в следующих обновлениях")
-                                    }
-                                }
-                            },
-                            onClickCategory = { listCategory, action ->
-                                when (action) {
-                                    INSERT_DIALOG_CATEGORY -> {
-                                        if (premiumState) {
-                                            viewModel.showDialog =
-                                                DialogState(
-                                                    INSERT_DIALOG_CATEGORY,
-                                                    category = listCategory
-                                                )
-                                        } else viewModel.sendMessage("Категории доступны в PREMIUM версии")
-                                    }
-
-                                    DELETE_DIALOG_CATEGORY -> {
-                                        viewModel.showDialog =
-                                            DialogState(
-                                                DELETE_DIALOG_CATEGORY,
-                                                category = listCategory
-                                            )
-                                    }
-                                }
-
-                            }
-                        )
-                    }
-
-                    // ЭКРАН №2: Абсолютно новый экран настроек без Дравера!
-                    composable(
-                        route = "settings_screen",
-                        popEnterTransition = {
-                            androidx.compose.animation.EnterTransition.None
-                        },
-                        // 1. ОТКРЫТИЕ: экран выезжает из-за левого края (слева направо)
-                        enterTransition = {
-                            slideInHorizontally(
-                                animationSpec = tween(300),
-                                initialOffsetX = { -it } // Появляется СЛЕВА
-                            )
-                        },
-                        // 2. НАЗАД: экран уезжает обратно за левый край (справа налево)
-                        popExitTransition = {
-                            slideOutHorizontally(
-                                animationSpec = tween(300),
-                                targetOffsetX = { -it } // Уезжает СЛЕВА
-                            )
-                        }
-                    ) {
-                        SettingsScreen(
-                            theme = theme,
-                            size = size,
-                            onBack = { navController.popBackStack() },
-                            onClick = { click ->
-                                when (click) {
-                                    "FAQ" -> navController.navigate("faq_screen")
-                                }
-                            },
-                            viewModel = viewModel,
-                            innerPadding = innerPadding
-                        )
-                    }
-
-                    composable(
-                        route = "faq_screen",
-                        // 1. ОТКРЫТИЕ: экран выезжает из-за левого края (слева направо)
-                        enterTransition = {
-                            slideInHorizontally(
-                                animationSpec = tween(300),
-                                initialOffsetX = { -it } // Появляется СЛЕВА
-                            )
-                        },
-                        // 2. НАЗАД: экран уезжает обратно за левый край (справа налево)
-                        popExitTransition = {
-                            slideOutHorizontally(
-                                animationSpec = tween(300),
-                                targetOffsetX = { -it } // Уезжает СЛЕВА
-                            )
-                        }
-                    ) {
-                        Faq(
-                            theme = theme,
-                            size = size,
-                            onBack = { navController.popBackStack() },
-                            innerPadding = innerPadding
-                        )
-                    }
-
-                    composable(
-                        route = "premium_screen",
-                        popEnterTransition = {
-                            androidx.compose.animation.EnterTransition.None
-                        },
-                        // 1. ОТКРЫТИЕ: экран выезжает из-за левого края (слева направо)
-                        enterTransition = {
-                            slideInHorizontally(
-                                animationSpec = tween(300),
-                                initialOffsetX = { -it } // Появляется СЛЕВА
-                            )
-                        },
-                        // 2. НАЗАД: экран уезжает обратно за левый край (справа налево)
-                        popExitTransition = {
-                            slideOutHorizontally(
-                                animationSpec = tween(300),
-                                targetOffsetX = { -it } // Уезжает СЛЕВА
-                            )
-                        }
-                    ) {
-                        PremiumScreen(size = size,
-                            theme = theme,
-                            onBack = {navController.popBackStack()},
-                            innerPadding = innerPadding)
-                    }
-                }
-            }
-        }
+            // ЭКРАН №4: Премиум
+            composable( 
+                route = "premium_screen", 
+                enterTransition = { slideInHorizontally(animationSpec = tween(300), initialOffsetX = { -it }) }, 
+                popExitTransition = { slideOutHorizontally(animationSpec = tween(300), targetOffsetX = { -it }) },
+                exitTransition = { androidx.compose.animation.ExitTransition.None },
+                popEnterTransition = { androidx.compose.animation.EnterTransition.None }
+            ) { 
+                PremiumScreen(size = size, theme = theme, onBack = { navController.popBackStack() }, innerPadding = innerPadding) 
+            } 
+        } 
+    } 
+}
 
 
     }
