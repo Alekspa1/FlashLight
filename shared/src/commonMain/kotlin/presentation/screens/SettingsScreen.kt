@@ -69,7 +69,6 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.platform.LocalUriHandler
 import presentation.DialogSoundAndroid
 import androidx.compose.foundation.Image
-import androidx.compose.ui.layout.ContentScale
 import org.jetbrains.compose.resources.painterResource
 
 import presentation.dialogs.DialogState
