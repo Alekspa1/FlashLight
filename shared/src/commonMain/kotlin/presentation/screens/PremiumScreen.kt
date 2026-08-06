@@ -60,6 +60,15 @@ fun PremiumScreen(
     innerPadding : PaddingValues = PaddingValues()
     ){
     var isSelected by remember { mutableStateOf("На один год") }
+
+    Box(modifier = Modifier.fillMaxSize()) { 
+        Image( 
+            painter = painterResource(theme.backgroundStart), 
+            contentDescription = null, 
+            modifier = Modifier.fillMaxSize(), 
+            contentScale = ContentScale.FillBounds 
+        ) 
+    
     Column(
         modifier = Modifier
             .padding(innerPadding)
@@ -173,6 +182,7 @@ fun PremiumScreen(
         )
 
         }
+    }
 
     }
 
