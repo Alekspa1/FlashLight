@@ -64,7 +64,8 @@ fun PremiumScreen(
         modifier = Modifier
             .padding(innerPadding)
             .fillMaxSize()
-            .padding(horizontal = 10.dp),
+            .padding(horizontal = 10.dp)
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(5.dp)
 
     ) {
@@ -107,8 +108,7 @@ fun PremiumScreen(
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState()),
+                    .fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(5.dp)
             ) {
 
