@@ -123,8 +123,10 @@ fun AddOrChangeItemDialog(
 
         text = {
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
+                .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
+               
             ) {
                 // Поле Название
                 OutlinedTextField(
@@ -148,15 +150,15 @@ fun AddOrChangeItemDialog(
                 // Поле подзадачи
 OutlinedTextField(
     modifier = Modifier.fillMaxWidth(),
-    value = stateTextDecs,
+    value = stateTextSubTask,
     onValueChange = { stateTextDecs = it },
     shape = RoundedCornerShape(10.dp),
     label = { Text("Подзадача") },
     trailingIcon = {
         IconButton(onClick = {
-            if (stateTextDecs.isNotBlank()) {
+            if (stateTextSubTask.isNotBlank()) {
                 listSubTask.add(stateTextDecs) // Добавляем в список
-                stateTextDecs = "" // Очищаем поле ввода
+                stateTextSubTask = "" // Очищаем поле ввода
             }
         }) {
             Icon(Icons.Default.Add, contentDescription = "Добавить")
