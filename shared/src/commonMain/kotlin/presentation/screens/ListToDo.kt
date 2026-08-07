@@ -35,7 +35,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 @Composable
 fun ListToDo(
     list: List<Item>,
-    selectedFileUri: (String) -> String = "",
+    selectedFileUri: (String) -> String = { _ -> "" },
     theme: Theme = ThemeNeon(),
     size: Size = SizeNormal(),
     isDragDropEnabled: Boolean = true, 
