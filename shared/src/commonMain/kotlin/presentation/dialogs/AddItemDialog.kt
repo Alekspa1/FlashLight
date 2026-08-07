@@ -63,6 +63,8 @@ import androidx.compose.material3.IconButton // или material, зависит 
 import androidx.compose.material3.Icon       // или material
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 
 
 @OptIn(ExperimentalMaterial3Api::class)
