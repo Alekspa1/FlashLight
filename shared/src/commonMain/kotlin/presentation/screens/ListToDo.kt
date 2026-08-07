@@ -34,7 +34,8 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 
 @Composable
 fun ListToDo(
-    list: List<Item>, 
+    list: List<Item>,
+    selectedFileUri: (String) -> String = "",
     theme: Theme = ThemeNeon(),
     size: Size = SizeNormal(),
     isDragDropEnabled: Boolean = true, 
@@ -125,6 +126,7 @@ fun ListToDo(
                     ) {
                         CardItem(
                             item = item,
+                            selectedFileUri = selectedFileUri(item.uri), 
                             theme = theme,
                             dragModifier = draggableHandle, // Наш готовый модификатор
                             size = size,
