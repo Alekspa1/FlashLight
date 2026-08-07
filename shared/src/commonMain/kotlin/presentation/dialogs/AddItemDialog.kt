@@ -169,7 +169,40 @@ OutlinedTextField(
 )
 Column {
     listSubTask.forEach { subTask ->
-        Text(text = subTask, modifier = Modifier.padding(vertical = 4.dp))
+        
+                                            Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 6.dp, top = 8.dp, bottom = 8.dp,end = 6.dp)
+                    ,
+                    verticalAlignment = Alignment.CenterVertically,
+
+
+                ) {
+                                     Text(
+         modifier = Modifier
+        .padding(start = 5.dp, end = 5.dp)
+        .weight(1f),  
+         text = subTask,
+                    )
+
+                                                         IconButton(
+                        onClick = { },
+                        modifier = Modifier.padding(end = 8.dp).size(24.dp)
+                    ) {
+
+                        Icon(
+                            modifier = Modifier.fillMaxSize(),
+
+                            imageVector =
+                           theme.chekBoxOn,
+                            contentDescription = "Chek",
+                            tint = theme.chekBoxTint
+                        )
+
+                    }
+                                     
+                }
     }
 }
 
