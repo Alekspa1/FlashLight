@@ -153,7 +153,7 @@ fun AddOrChangeItemDialog(
 OutlinedTextField(
     modifier = Modifier.fillMaxWidth(),
     value = stateTextSubTask,
-    onValueChange = { stateTextDecs = it },
+    onValueChange = { stateTextSubTask = it },
     shape = RoundedCornerShape(10.dp),
     label = { Text("Подзадача") },
     trailingIcon = {
