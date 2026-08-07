@@ -276,6 +276,7 @@ fun MainPager(paddingValues: PaddingValues = PaddingValues(),
                 1 -> {
                    ListToDo(
     list = todoList,
+    selectedFileUri = {uri-> viewModel.getUri(uri)},                 
     category = category,
     theme = viewModel.themeState,
     size = viewModel.sizeState,
