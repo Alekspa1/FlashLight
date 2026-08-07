@@ -159,7 +159,7 @@ OutlinedTextField(
     trailingIcon = {
         IconButton(onClick = {
             if (stateTextSubTask.isNotBlank()) {
-                listSubTask.add(stateTextDecs) // Добавляем в список
+                listSubTask.add(stateTextSubTask) // Добавляем в список
                 stateTextSubTask = "" // Очищаем поле ввода
             }
         }) {
