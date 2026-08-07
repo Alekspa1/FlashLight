@@ -336,13 +336,13 @@ fun StartAppContent(
                 ) {
                     Box(modifier = Modifier.fillMaxSize()) {
 
-                        // // СЛОЙ 1: Ваша фоновая неоновая картинка
-                        // Image(
-                        //     painter = painterResource(theme.backgroundDrawer),
-                        //     contentDescription = null,
-                        //     modifier = Modifier.fillMaxSize(),
-                        //     contentScale = ContentScale.FillBounds
-                        // )
+                  
+                        Image(
+                            painter = painterResource(theme.backgroundDrawer),
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.FillBounds
+                        )
                         Column(
                             modifier = Modifier.fillMaxSize()
                                 .padding(8.dp)
