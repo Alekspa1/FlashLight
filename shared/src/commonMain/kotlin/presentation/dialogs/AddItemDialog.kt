@@ -82,10 +82,12 @@ fun AddOrChangeItemDialog(
 ) {
     var stateTextName by remember { mutableStateOf(item?.name ?: "") }
     var stateTextDecs by remember { mutableStateOf(item?.desc ?: "") }
+    var stateTextSubTask by remember {"") }
     var openImageState by remember { mutableStateOf(false) }
     var selectedFileUri: String by remember { mutableStateOf(getUri(item?.uri ?: "")) }
     var originalFileName by remember { mutableStateOf("") }
     var categorySelected by remember { mutableStateOf(item?.category ?: if(calendar) "Повседневные" else category) }
+    val listSubTask = remember { mutableStateListOf<String>() }
     
     val fileLauncher = rememberFilePickerLauncher(type = PickerType.Image) { file ->
          if (file != null) {
@@ -125,14 +127,6 @@ fun AddOrChangeItemDialog(
                     onValueChange = { stateTextName = it },
                     shape = RoundedCornerShape(10.dp),
                     label = { Text(text = "Название") },
-//                     colors = OutlinedTextFieldDefaults.colors(
-//                     focusedTextColor = Color.White,
-//                      unfocusedTextColor = Color.Gray,
-//                      focusedBorderColor = theme.textColor, // Свечение при фокусе
-//                      unfocusedBorderColor = theme.textColor,
-//                      focusedLabelColor = theme.textColor,
-//                      unfocusedLabelColor = theme.textColor
-//                    )
                 )
 
                 // Поле Описание
@@ -142,15 +136,30 @@ fun AddOrChangeItemDialog(
                     onValueChange = { stateTextDecs = it },
                     shape = RoundedCornerShape(10.dp),
                     label = { Text("Описание") },
-//                   colors = OutlinedTextFieldDefaults.colors(
-//                      focusedTextColor = theme.textColor,
-//                      unfocusedTextColor = theme.textDesc,
-//                      focusedBorderColor = theme.textDesc, // Свечение при фокусе
-//                      unfocusedBorderColor = theme.textDesc,
-//                      focusedLabelColor = theme.textDesc,
-//                      unfocusedLabelColor = theme.textDesc
-//                    )
                 )
+                // Поле подзадачи
+OutlinedTextField(
+    modifier = Modifier.fillMaxWidth(),
+    value = stateTextDecs,
+    onValueChange = { stateTextDecs = it },
+    shape = RoundedCornerShape(10.dp),
+    label = { Text("Подзадача") },
+    trailingIcon = {
+        IconButton(onClick = {
+            if (stateTextDecs.isNotBlank()) {
+                listSubTask.add(stateTextDecs) // Добавляем в список
+                stateTextDecs = "" // Очищаем поле ввода
+            }
+        }) {
+            Icon(Icons.Default.Add, contentDescription = "Добавить")
+        }
+    }
+)
+Column {
+    listSubTask.forEach { subTask ->
+        Text(text = subTask, modifier = Modifier.padding(vertical = 4.dp))
+    }
+}
 
                 KmpSpinnerInput(
                     selectedCategory = categorySelected,
