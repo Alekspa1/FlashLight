@@ -332,7 +332,7 @@ fun StartAppContent(
             drawerContent = {
                 ModalDrawerSheet(
                     modifier = Modifier.fillMaxWidth(0.8f),
-                    drawer // Позволит увидеть фон, если шторка кастомная
+                    drawerContainerColor = Color.Transparent
                 ) {
                     Box(modifier = Modifier.fillMaxSize()) {
 
