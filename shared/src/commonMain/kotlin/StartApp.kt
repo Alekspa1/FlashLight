@@ -155,7 +155,6 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
 
         Scaffold(
             modifier = Modifier.fillMaxSize(),
-            ,
             bottomBar = {
                 Box(
                     modifier = Modifier.fillMaxWidth().navigationBarsPadding(),
