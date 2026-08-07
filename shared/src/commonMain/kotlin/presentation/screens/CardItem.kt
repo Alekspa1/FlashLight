@@ -83,6 +83,8 @@ fun CardItem(
             ) {
          var isExpanded by remember { mutableStateOf(false) }
 
+         
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically // Все три элемента будут идеально ровно по центру высоты
@@ -139,6 +141,9 @@ fun CardItem(
             else theme.cardItemFalse
     )
 ) {
+
+Column(){
+                              
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -191,7 +196,29 @@ fun CardItem(
                             )
                         }
 
-                           // анимированое продолжение
+
+                        
+                    }
+                    IconButton(
+                        onClick = { onClick(item,CHANGE) },
+                        modifier = Modifier.padding(end = 8.dp).size(24.dp)
+                    ) {
+
+                        Icon(
+                            modifier = Modifier.fillMaxSize(),
+
+                            imageVector =
+                                if(item.change)  theme.chekBoxOn
+                                else theme.chekBoxOff,
+                            contentDescription = "Chek",
+                            tint = theme.chekBoxTint
+                        )
+
+                    }
+                }
+
+
+  // анимированое продолжение
                                    AnimatedVisibility(
 
             visible = isExpanded,
@@ -356,27 +383,10 @@ fun CardItem(
             }
 
         }
-                           // закончилось анимированое продолжение
+                           // закончилось анимированое продолжение         
+}
 
-                        
-                    }
-                    IconButton(
-                        onClick = { onClick(item,CHANGE) },
-                        modifier = Modifier.padding(end = 8.dp).size(24.dp)
-                    ) {
 
-                        Icon(
-                            modifier = Modifier.fillMaxSize(),
-
-                            imageVector =
-                                if(item.change)  theme.chekBoxOn
-                                else theme.chekBoxOff,
-                            contentDescription = "Chek",
-                            tint = theme.chekBoxTint
-                        )
-
-                    }
-                }
             }
 
 
