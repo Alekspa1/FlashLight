@@ -432,10 +432,10 @@ fun StartAppContent(
                                         Card(
                                             modifier = Modifier
                                                 .weight(1f)
-                                                .clip(RoundedCornerShape(10.dp)) // corners android:radius="10dp"
-                                                // 1. Задаем фоновый цвет карточки
-                                                .background(theme.cardMenuItem)
-                                                // 2. Рисуем рамку толщиной 3dp
+                                                // .clip(RoundedCornerShape(10.dp)) // corners android:radius="10dp"
+                                                // // 1. Задаем фоновый цвет карточки
+                                                // .background(theme.cardMenuItem)
+                                                // // 2. Рисуем рамку толщиной 3dp
                                                 .border(
                                                     3.dp,
                                                     theme.borderCardMenuItem,
@@ -460,8 +460,8 @@ fun StartAppContent(
 
                                                 },
                                             shape = RoundedCornerShape(10.dp),
-                                            // Прозрачный контейнер у Card обязателен, чтобы работал наш кастомный background
-                                            colors = CardDefaults.cardColors()
+                                            
+                                            colors = CardDefaults.cardColors(containerColor = theme.cardMenuItem)
                                         ) {
                                             Text(
                                                 modifier = Modifier.padding(8.dp),
@@ -498,9 +498,9 @@ fun StartAppContent(
                                             Card(
                                                 modifier = Modifier
                                                     .weight(1f)
-                                                    .clip(RoundedCornerShape(10.dp)) // corners android:radius="10dp"
-                                                    // 1. Задаем фоновый цвет карточки
-                                                    .background(theme.cardMenuItem)
+                                                    // .clip(RoundedCornerShape(10.dp)) // corners android:radius="10dp"
+                                                    // // 1. Задаем фоновый цвет карточки
+                                                    // .background(theme.cardMenuItem)
                                                     // 2. Рисуем рамку толщиной 3dp
                                                     .border(
                                                         3.dp,
@@ -528,8 +528,8 @@ fun StartAppContent(
                                                         }
                                                     ),
                                                 shape = RoundedCornerShape(10.dp),
-                                                // Прозрачный контейнер у Card обязателен, чтобы работал наш кастомный background
-                                                colors = CardDefaults.cardColors()
+                                               
+                                                colors = CardDefaults.cardColors(containerColor = theme.cardMenuItem)
                                             ) {
                                                 Text(
                                                     modifier = Modifier.padding(8.dp),
