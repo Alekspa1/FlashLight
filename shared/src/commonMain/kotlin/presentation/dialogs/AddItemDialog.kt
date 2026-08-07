@@ -93,6 +93,7 @@ fun AddOrChangeItemDialog(
     var stateTextName by remember { mutableStateOf(item?.name ?: "") }
     var stateTextDecs by remember { mutableStateOf(item?.desc ?: "") }
     var stateTextSubTask by remember {mutableStateOf("")}
+    var isExpanded by remember { mutableStateOf(false) }
     var openImageState by remember { mutableStateOf(false) }
     var selectedFileUri: String by remember { mutableStateOf(getUri(item?.uri ?: "")) }
     var originalFileName by remember { mutableStateOf("") }
@@ -149,60 +150,88 @@ fun AddOrChangeItemDialog(
                     shape = RoundedCornerShape(10.dp),
                     label = { Text("Описание") },
                 )
+
+
+                
                 // Поле подзадачи
-OutlinedTextField(
-    modifier = Modifier.fillMaxWidth(),
-    value = stateTextSubTask,
-    onValueChange = { stateTextSubTask = it },
-    shape = RoundedCornerShape(10.dp),
-    label = { Text("Подзадача") },
-    trailingIcon = {
-        IconButton(onClick = {
-            if (stateTextSubTask.isNotBlank()) {
-                listSubTask.add(stateTextSubTask) // Добавляем в список
-                stateTextSubTask = "" // Очищаем поле ввода
-            }
-        }) {
-            Icon(Icons.Default.Add, contentDescription = "Добавить")
-        }
+   TextButton(
+    onClick = { isExpanded = !isExpanded }, // Исправлено на одну переменную
+) {
+    Row(
+        modifier = Modifier.padding(start = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.End
+    ) {
+        Text(
+            text = "Подзадачи", // Добавлены кавычки
+            fontSize = 15.sp,
+            modifier = Modifier.padding(end = 8.dp)
+        )
+        ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) // Исправлено на одну переменную
     }
-)
-Column {
-    listSubTask.forEach { subTask ->
+}
+
+AnimatedVisibility(
+    visible = isExpanded, // Исправлено на одну переменную
+    enter = expandVertically() + fadeIn(),
+    exit = shrinkVertically() + fadeOut()
+) {
+    // ВСЕ элементы внутри AnimatedVisibility обязательно оборачиваем в Column
+    Column(modifier = Modifier.fillMaxWidth()) {
         
-                                            Row(
+        // Поле ввода подзадачи
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = stateTextSubTask,
+            onValueChange = { stateTextSubTask = it },
+            shape = RoundedCornerShape(10.dp),
+            label = { Text("Подзадача") },
+            trailingIcon = {
+                IconButton(onClick = {
+                    if (stateTextSubTask.isNotBlank()) {
+                        listSubTask.add(stateTextSubTask)
+                        stateTextSubTask = ""
+                    }
+                }) {
+                    Icon(Icons.Default.Add, contentDescription = "Добавить")
+                }
+            }
+        )
+
+        // Список добавленных подзадач
+        Column(modifier = Modifier.fillMaxWidth()) {
+            listSubTask.forEach { subTask ->
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 6.dp, top = 8.dp, bottom = 8.dp,end = 6.dp)
-                    ,
+                        .padding(start = 6.dp, top = 8.dp, bottom = 8.dp, end = 6.dp),
                     verticalAlignment = Alignment.CenterVertically,
-
-
                 ) {
-                                     Text(
-         modifier = Modifier
-        .padding(start = 5.dp, end = 5.dp)
-        .weight(1f),  
-         text = subTask,
+                    Text(
+                        modifier = Modifier
+                            .padding(start = 5.dp, end = 5.dp)
+                            .weight(1f),
+                        text = subTask,
                     )
-
-                                                         IconButton(
-                        onClick = { },
-                        modifier = Modifier.padding(end = 8.dp).size(24.dp)
+                    IconButton(
+                        onClick = { 
+                            // Реализуем удаление или отметку выполнения
+                            listSubTask.remove(subTask) 
+                        },
+                        modifier = Modifier
+                            .padding(end = 8.dp)
+                            .size(24.dp)
                     ) {
-
                         Icon(
                             modifier = Modifier.fillMaxSize(),
-
-                            imageVector =
-                           theme.chekBoxOn,
-                            contentDescription = "Chek",
+                            imageVector = theme.chekBoxOn,
+                            contentDescription = "Check",
                             tint = theme.chekBoxTint
                         )
-
                     }
-                                     
                 }
+            }
+        }
     }
 }
 
