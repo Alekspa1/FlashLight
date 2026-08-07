@@ -155,7 +155,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
 
         Scaffold(
             modifier = Modifier.fillMaxSize(),
-            containerColor = Color.Transparent,
+            ,
             bottomBar = {
                 Box(
                     modifier = Modifier.fillMaxWidth().navigationBarsPadding(),
@@ -333,17 +333,17 @@ fun StartAppContent(
             drawerContent = {
                 ModalDrawerSheet(
                     modifier = Modifier.fillMaxWidth(0.8f),
-                    drawerContainerColor = Color.Transparent // Позволит увидеть фон, если шторка кастомная
+                    drawer // Позволит увидеть фон, если шторка кастомная
                 ) {
                     Box(modifier = Modifier.fillMaxSize()) {
 
-                        // СЛОЙ 1: Ваша фоновая неоновая картинка
-                        Image(
-                            painter = painterResource(theme.backgroundDrawer),
-                            contentDescription = null,
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.FillBounds
-                        )
+                        // // СЛОЙ 1: Ваша фоновая неоновая картинка
+                        // Image(
+                        //     painter = painterResource(theme.backgroundDrawer),
+                        //     contentDescription = null,
+                        //     modifier = Modifier.fillMaxSize(),
+                        //     contentScale = ContentScale.FillBounds
+                        // )
                         Column(
                             modifier = Modifier.fillMaxSize()
                                 .padding(8.dp)
@@ -462,7 +462,7 @@ fun StartAppContent(
                                                 },
                                             shape = RoundedCornerShape(10.dp),
                                             // Прозрачный контейнер у Card обязателен, чтобы работал наш кастомный background
-                                            colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+                                            colors = CardDefaults.cardColors()
                                         ) {
                                             Text(
                                                 modifier = Modifier.padding(8.dp),
@@ -530,7 +530,7 @@ fun StartAppContent(
                                                     ),
                                                 shape = RoundedCornerShape(10.dp),
                                                 // Прозрачный контейнер у Card обязателен, чтобы работал наш кастомный background
-                                                colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+                                                colors = CardDefaults.cardColors()
                                             ) {
                                                 Text(
                                                     modifier = Modifier.padding(8.dp),
@@ -551,7 +551,8 @@ fun StartAppContent(
                                             ) {
                                                 Icon(
                                                     modifier = Modifier.fillMaxSize(),
-                                                    imageVector = ThemeNeon().iconDelItem,
+                                                   // imageVector = ThemeNeon().iconDelItem,
+                                                    imageVector = theme.iconDelItem,
                                                     contentDescription = "Удалить",
                                                     tint = theme.iconDelTint
                                                 )
