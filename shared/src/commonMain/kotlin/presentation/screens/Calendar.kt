@@ -91,8 +91,10 @@ fun Calendar(
 
 
     val listItems by viewModel.getItemCalendarCombine.collectAsStateWithLifecycle(emptyList())
+    
     CalendarContent(
         listItems = listItems,
+        selectedFileUri = {uri-> viewModel.getUri(uri)},
         theme = viewModel.themeState,
         size = viewModel.sizeState,
         onClick = onClick,
@@ -105,6 +107,7 @@ fun Calendar(
 @Composable
 fun CalendarContent(
     listItems: List<Item> = emptyList(),
+    selectedFileUri: (String) -> String = "",
     theme: Theme = ThemeNeon(),
     size : Size = SizeNormal(),
     onClick : (Item, Int) -> Unit = {_,_->},
@@ -253,7 +256,12 @@ fun CalendarContent(
             } else items(selectedDateTasks) { item ->
 
 
-                    CardItem(item = item,theme = theme, size = size, onClick = onClick)
+                    CardItem(
+                        item = item,
+                        selectedFileUri = selectedFileUri(item.uri), 
+                        theme = theme, 
+                        size = size, 
+                        onClick = onClick)
 
                 
 //                 Row(
