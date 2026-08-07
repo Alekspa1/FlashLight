@@ -72,13 +72,16 @@ import coil3.compose.AsyncImage
 
 @Composable
 
-fun CardItem(item: Item,
+fun CardItem(
+         item: Item,
+         selectedFileUri : String = "",    
          theme: Theme = ThemeNeon(),
          size: Size = SizeNormal(),  
          dragModifier: Modifier = Modifier,
-         onClick : (Item, Int) -> Unit = { _, _->}) {
+         onClick : (Item, Int) -> Unit = { _, _->},
+             
+            ) {
          var isExpanded by remember { mutableStateOf(false) }
-         val selectedFileUri = viewModel.getUri(item.uri)
 
         Row(
             modifier = Modifier.fillMaxWidth(),
