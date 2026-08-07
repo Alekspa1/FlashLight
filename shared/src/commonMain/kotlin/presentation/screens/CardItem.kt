@@ -229,27 +229,8 @@ Column(){
 
         ) {
 
-            Card(
-
-                modifier = Modifier
-
-                    .fillMaxWidth()
-
-                    .padding(top = 8.dp),
-
-                shape = RoundedCornerShape(16.dp),
-
-                colors = CardDefaults.cardColors(
-                    containerColor = Color(0x80ADD8E6)
-                ),
-
-                elevation = CardDefaults.cardElevation(0.dp)
-
-            ) {
-
                 Column(
                     modifier = Modifier.padding(16.dp),
-
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                                                  AsyncImage(
@@ -378,9 +359,6 @@ Column(){
 
 
                 }
-
-
-            }
 
         }
                            // закончилось анимированое продолжение         
