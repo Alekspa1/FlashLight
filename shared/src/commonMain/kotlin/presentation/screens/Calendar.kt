@@ -107,7 +107,7 @@ fun Calendar(
 @Composable
 fun CalendarContent(
     listItems: List<Item> = emptyList(),
-    selectedFileUri: (String) -> String = "",
+    selectedFileUri: (String) -> String = { _ -> "" },
     theme: Theme = ThemeNeon(),
     size : Size = SizeNormal(),
     onClick : (Item, Int) -> Unit = {_,_->},
