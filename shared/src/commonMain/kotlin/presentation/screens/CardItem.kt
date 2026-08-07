@@ -78,6 +78,7 @@ fun CardItem(item: Item,
          dragModifier: Modifier = Modifier,
          onClick : (Item, Int) -> Unit = { _, _->}) {
          var isExpanded by remember { mutableStateOf(false) }
+         val selectedFileUri = viewModel.getUri(item.uri)
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -243,9 +244,9 @@ fun CardItem(item: Item,
                                      Text(
          modifier = Modifier
         .padding(start = 5.dp, end = 5.dp)
-        .weight(1f) // Заставляет карточку занять ВСЁ свободное место между кнопками    
-                        text = "Купить молоко",
-                        color = Color.White
+        .weight(1f),  
+         text = "Купить молоко",
+          color = Color.White
 
 
                     )
@@ -280,9 +281,9 @@ fun CardItem(item: Item,
                                      Text(
          modifier = Modifier
         .padding(start = 5.dp, end = 5.dp)
-        .weight(1f) // Заставляет карточку занять ВСЁ свободное место между кнопками    
-                        text = "Купить молоко",
-                        color = Color.White
+        .weight(1f),  
+         text = "Купить молоко",
+          color = Color.White
 
 
                     )
@@ -316,9 +317,9 @@ fun CardItem(item: Item,
                                      Text(
          modifier = Modifier
         .padding(start = 5.dp, end = 5.dp)
-        .weight(1f) // Заставляет карточку занять ВСЁ свободное место между кнопками    
-                        text = "Купить молоко",
-                        color = Color.White
+        .weight(1f),  
+         text = "Купить молоко",
+          color = Color.White
 
 
                     )
