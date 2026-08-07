@@ -53,6 +53,23 @@ import kotlinx.datetime.DayOfWeek
 import presentation.theme.ThemeZabor
 import sh.calvin.reorderable.ReorderableCollectionItemScope
 
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.fadeOut
+
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.foundation.layout.Arrangement
+
+import coil3.compose.AsyncImage
+
 @Composable
 
 fun CardItem(item: Item,
