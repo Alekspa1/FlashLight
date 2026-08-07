@@ -55,6 +55,14 @@ import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.material3.IconButton // или material, зависит от вашего проекта
+import androidx.compose.material3.Icon       // или material
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -82,7 +90,7 @@ fun AddOrChangeItemDialog(
 ) {
     var stateTextName by remember { mutableStateOf(item?.name ?: "") }
     var stateTextDecs by remember { mutableStateOf(item?.desc ?: "") }
-    var stateTextSubTask by remember {"") }
+    var stateTextSubTask by remember {mutableStateOf("")}
     var openImageState by remember { mutableStateOf(false) }
     var selectedFileUri: String by remember { mutableStateOf(getUri(item?.uri ?: "")) }
     var originalFileName by remember { mutableStateOf("") }
