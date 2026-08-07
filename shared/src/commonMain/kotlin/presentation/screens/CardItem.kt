@@ -60,6 +60,7 @@ fun CardItem(item: Item,
          size: Size = SizeNormal(),  
          dragModifier: Modifier = Modifier,
          onClick : (Item, Int) -> Unit = { _, _->}) {
+         var isExpanded by remember { mutableStateOf(false) }
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -127,7 +128,7 @@ fun CardItem(item: Item,
 
                 ) {
                     if (item.uri != "") IconButton(
-                        onClick = { onClick(item,IMAGE) },
+                        onClick = { isExpanded = !isExpanded },
                         modifier = Modifier.padding(start = 8.dp).size(24.dp)
 
                     ) {
@@ -168,6 +169,175 @@ fun CardItem(item: Item,
                                 lineHeight = size.lineHeightDescAndAlarm
                             )
                         }
+
+                           // анимированое продолжение
+                                   AnimatedVisibility(
+
+            visible = isExpanded,
+
+            enter = expandVertically() + fadeIn(),
+
+            exit = shrinkVertically() + fadeOut()
+
+        ) {
+
+            Card(
+
+                modifier = Modifier
+
+                    .fillMaxWidth()
+
+                    .padding(top = 8.dp),
+
+                shape = RoundedCornerShape(16.dp),
+
+                colors = CardDefaults.cardColors(
+                    containerColor = Color(0x80ADD8E6)
+                ),
+
+                elevation = CardDefaults.cardElevation(0.dp)
+
+            ) {
+
+                Column(
+                    modifier = Modifier.padding(16.dp),
+
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                                                 AsyncImage(
+                            model = selectedFileUri,
+                            contentDescription = "Превью фото",
+                            modifier = Modifier
+                                .size(80.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .clickable { onClick(item,IMAGE) },
+                            contentScale = ContentScale.Crop,
+                        )
+
+                                    Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 6.dp, top = 8.dp, bottom = 8.dp,end = 6.dp)
+                    ,
+                    verticalAlignment = Alignment.CenterVertically,
+
+
+                ) {
+                                     Text(
+         modifier = Modifier
+        .padding(start = 5.dp, end = 5.dp)
+        .weight(1f) // Заставляет карточку занять ВСЁ свободное место между кнопками    
+                        text = "Купить молоко",
+                        color = Color.White
+
+
+                    )
+
+                                                         IconButton(
+                        onClick = { },
+                        modifier = Modifier.padding(end = 8.dp).size(24.dp)
+                    ) {
+
+                        Icon(
+                            modifier = Modifier.fillMaxSize(),
+
+                            imageVector =
+                           theme.chekBoxOn,
+                            contentDescription = "Chek",
+                            tint = theme.chekBoxTint
+                        )
+
+                    }
+                                     
+                }         
+
+                                                    Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 6.dp, top = 8.dp, bottom = 8.dp,end = 6.dp)
+                    ,
+                    verticalAlignment = Alignment.CenterVertically,
+
+
+                ) {
+                                     Text(
+         modifier = Modifier
+        .padding(start = 5.dp, end = 5.dp)
+        .weight(1f) // Заставляет карточку занять ВСЁ свободное место между кнопками    
+                        text = "Купить молоко",
+                        color = Color.White
+
+
+                    )
+
+                                                         IconButton(
+                        onClick = { },
+                        modifier = Modifier.padding(end = 8.dp).size(24.dp)
+                    ) {
+
+                        Icon(
+                            modifier = Modifier.fillMaxSize(),
+
+                            imageVector =
+                           theme.chekBoxOn,
+                            contentDescription = "Chek",
+                            tint = theme.chekBoxTint
+                        )
+
+                    }
+                                     
+                }  
+                                                                                        Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 6.dp, top = 8.dp, bottom = 8.dp,end = 6.dp)
+                    ,
+                    verticalAlignment = Alignment.CenterVertically,
+
+
+                ) {
+                                     Text(
+         modifier = Modifier
+        .padding(start = 5.dp, end = 5.dp)
+        .weight(1f) // Заставляет карточку занять ВСЁ свободное место между кнопками    
+                        text = "Купить молоко",
+                        color = Color.White
+
+
+                    )
+
+                                                         IconButton(
+                        onClick = { },
+                        modifier = Modifier.padding(end = 8.dp).size(24.dp)
+                    ) {
+
+                        Icon(
+                            modifier = Modifier.fillMaxSize(),
+
+                            imageVector =
+                           theme.chekBoxOn,
+                            contentDescription = "Chek",
+                            tint = theme.chekBoxTint
+                        )
+
+                    }
+                                     
+                }  
+
+
+
+
+
+
+                }
+
+
+            }
+
+        }
+                           // закончилось анимированое продолжение
+
+                        
                     }
                     IconButton(
                         onClick = { onClick(item,CHANGE) },
