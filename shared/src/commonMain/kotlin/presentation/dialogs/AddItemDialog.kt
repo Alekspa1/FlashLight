@@ -169,11 +169,11 @@ fun AddOrChangeItemDialog(
     modifier = Modifier
         .fillMaxWidth()
         .padding(vertical = 8.dp)
-        // .border(
-        //     width = 1.dp,
-        //     color = theme.borderCardMenuItem,
-        //     shape = RoundedCornerShape(10.dp)
-        // )
+        .border(
+            width = 1.dp,
+            color = theme.cardItemBorderFalse,
+            shape = RoundedCornerShape(10.dp)
+        )
 ) {
     // Внешний Box занимает всю ширину, чтобы прижать кнопку вправо
     Box(
@@ -244,12 +244,7 @@ fun AddOrChangeItemDialog(
             if (listSubTask.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(8.dp))
                 
-                Column(modifier = Modifier.fillMaxWidth()
-                              .border(
-            width = 1.dp,
-            color = theme.cardItemBorderFalse,
-            shape = RoundedCornerShape(10.dp)
-        )) {
+                Column(modifier = Modifier.fillMaxWidth()) {
 Column(modifier = Modifier.fillMaxWidth()) {
     listSubTask.forEachIndexed { index, subTask ->
         val isEditing = editingSubTaskId == subTask.id && subTask.id != 0 
