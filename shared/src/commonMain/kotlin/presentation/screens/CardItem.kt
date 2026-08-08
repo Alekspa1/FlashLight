@@ -1,3 +1,6 @@
+package presentation.screens
+
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -90,8 +93,10 @@ import presentation.theme.Size
 import presentation.theme.SizeNormal
 
 // Твоя библиотека Drag-and-Drop
-import sh.calvin.reorderable.ReorderableLazyColumn
 import sh.calvin.reorderable.rememberReorderableLazyListState
+import sh.calvin.reorderable.ReorderableLazyListScope
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 
 @Composable
 fun CardItem(
