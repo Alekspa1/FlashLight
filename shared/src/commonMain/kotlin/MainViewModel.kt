@@ -11,7 +11,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import data.room.CourseDao
 import data.room.model.Item
-import data.room.model.SubItem
+//import data.room.model.SubItem
 import data.room.model.ListCategory
 import domain.repostirory.AlarmRepeadRepository
 import domain.repostirory.AlarmRepository
@@ -185,7 +185,7 @@ class MainViewModel(
 
     val sortedItemsFlow = combine(
     db.getAll(),                       // Поток всех дел Flow<List<Item>>
-    db.subItemDao().getAllSubItems(),  // Поток всех подзадач Flow<List<SubItem>>
+    db.getAllSubItems(),  // Поток всех подзадач Flow<List<SubItem>>
     sortType,                         // Поток типа сортировки
     categoryItemFlow                  // Поток выбранной категории
 ) { itemsList, allSubItems, sort, currentCategory ->
