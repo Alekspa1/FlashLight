@@ -88,7 +88,6 @@ fun CardItem(
     val subReorderableState = rememberReorderableLazyListState(
         lazyListState = subListState,
         onMove = { from, to ->
-            // Здесь нет заголовков, поэтому смещение индексов не требуется
             val fromIdx = from.index
             val toIdx = to.index
             if (fromIdx in currentSubSnapshotList.indices && toIdx in currentSubSnapshotList.indices) {
@@ -130,8 +129,8 @@ fun CardItem(
                 .clip(RoundedCornerShape(15.dp))
                 .border(
                     2.dp,
-                    if (item.change) theme.cardItemBorderTrue
-                    else if (item.changeAlarm) theme.cardItemBorderAlarm
+                    if (item.change) theme.cardItemBorderTrue 
+                    else if (item.changeAlarm) theme.cardItemBorderAlarm 
                     else theme.cardItemBorderFalse,
                     RoundedCornerShape(15.dp)
                 )
@@ -139,8 +138,8 @@ fun CardItem(
                 .then(dragModifier), // Сюда цепляется драг самой карточки
             shape = RoundedCornerShape(15.dp),
             colors = CardDefaults.cardColors(
-                containerColor = if (item.change) theme.cardItemTrue
-                else if (item.changeAlarm) theme.cardItemAlarm
+                containerColor = if (item.change) theme.cardItemTrue 
+                else if (item.changeAlarm) theme.cardItemAlarm 
                 else theme.cardItemFalse
             )
         ) {
@@ -218,35 +217,35 @@ fun CardItem(
                         modifier = Modifier.padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        AsyncImage(
-                            model = selectedFileUri,
-                            contentDescription = "Превью фото",
-                            modifier = Modifier
-                                .size(80.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                                .clickable { onClick(item, IMAGE) },
-                            contentScale = ContentScale.Crop,
-                        )
+                        if (selectedFileUri.isNotEmpty()) {
+                            AsyncImage(
+                                model = selectedFileUri,
+                                contentDescription = "Превью фото",
+                                modifier = Modifier
+                                    .size(80.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .clickable { onClick(item, IMAGE) },
+                                contentScale = ContentScale.Crop,
+                            )
+                        }
 
-                        // Используем LazyColumn внутри для поддержки Reorderable
-                        // Используем heightIn, чтобы список не сжимался в ноль и не занимал весь экран
+                        // Вложенный LazyColumn для поддержки Reorderable
                         LazyColumn(
                             state = subListState,
+                            userScrollEnabled = false, // Важно! Отключает внутренний скролл, чтобы работал Drag-and-Drop
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .heightIn(max = 400.dp), // Ограничиваем максимальную высоту раскрытия подзадач
+                                .heightIn(max = 400.dp), // Ограничиваем максимальную высоту
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             itemsIndexed(
                                 items = currentSubSnapshotList,
                                 key = { _, subItem -> subItem.id } // Ключ по ID подзадачи
                             ) { subIndex, subItem ->
-                                
                                 ReorderableItem(
                                     state = subReorderableState,
                                     key = subItem.id
                                 ) { isDragging ->
-                                    
                                     // Модификатор перетаскивания конкретной подзадачи
                                     val subDraggableHandle = Modifier.longPressDraggableHandle(
                                         enabled = true,
@@ -254,7 +253,7 @@ fun CardItem(
                                         onDragStopped = {
                                             // Обновляем поле сортировки у подзадач
                                             val subListWithUpdatedSort = currentSubSnapshotList.mapIndexed { idx, subListItem ->
-                                                subListItem.copy(sort = idx) // Предполагаем, что у SubItem тоже есть поле sort
+                                                subListItem.copy(sort = idx)
                                             }
                                             currentSubSnapshotList = subListWithUpdatedSort
                                             onSubDragDropped(subListWithUpdatedSort) // Отправляем наверх
@@ -270,11 +269,20 @@ fun CardItem(
                                             .padding(start = 6.dp, top = 8.dp, bottom = 8.dp, end = 6.dp),
                                         verticalAlignment = Alignment.CenterVertically,
                                     ) {
-                                        Text(modifier = Modifier.padding(start = 5.dp, end = 5.dp).weight(1f),
-                                             text = subItem.name,color = Color.White)IconButton(onClick = { /* Обработка клика чекбокса подзадачи */ },
-                                            modifier = Modifier.padding(end = 8.dp).size(24.dp)) {Icon(modifier = Modifier.fillMaxSize(),imageVector = theme.chekBoxOn,contentDescription = "Chek",tint = theme.chekBoxTint)}}}}}}} // Закончилось анимированное продолжение}}// 3. Правая кнопка/текст (Удаление)IconButton(onClick = { onClick(item, DELETE) },modifier = Modifier.padding(end = 8.dp).size(35.dp)) {Icon(modifier = Modifier.fillMaxSize(),imageVector = theme.iconDelItem,contentDescription = "Меню",tint = theme.iconDelTint,)}}}
-
-
+                                        Text(
+                                            modifier = Modifier.padding(start = 5.dp, end = 5.dp).weight(1f),
+                                            text = subItem.name,color = Color.White)IconButton(onClick = { /* Обработка клика чекбокса подзадачи */ },
+                                                                                               modifier = Modifier.padding(end = 8.dp).size(24.dp)) 
+                                        {Icon(modifier = Modifier.fillMaxSize(),imageVector = theme.chekBoxOn,contentDescription = "Chek",tint = theme.chekBoxTint)}}}}}}} 
+                // Закончилось анимированное продолжение
+            }} 
+                // Конец карточки Card// 
+                3. Правая кнопка/текст (Удаление)
+                IconButton(onClick = { onClick(item, DELETE) },
+                           modifier = Modifier.padding(end = 8.dp).size(35.dp)) 
+                {Icon(modifier = Modifier.fillMaxSize(),imageVector = theme.iconDelItem,contentDescription = "Меню",tint = theme.iconDelTint,)}}
+            // Конец Row
+        }
 
 //@Composable
 
