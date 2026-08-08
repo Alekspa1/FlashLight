@@ -65,6 +65,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.fadeOut
 import data.room.model.SubItem
+import androidx.compose.material.icons.filled.Close
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -156,101 +157,208 @@ fun AddOrChangeItemDialog(
                     label = { Text("Описание") },
                 )
 
+                Column(
+    modifier = Modifier
+        .fillMaxWidth()
+        .padding(vertical = 8.dp) // Отступ от соседних полей (Название/Описание)
+        .border(
+            width = 1.dp, // Стандартная толщина рамки OutlinedTextField
+            color = theme.borderCardMenuItem, // Цвет рамки из вашей темы
+            shape = RoundedCornerShape(10.dp) // Ваше скругление 10.dp
+        )
+) {
+    // Кликабельная шапка спойлера
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { isExpanded = !isExpanded } // Теперь кликабельна ВСЯ строка, а не только кнопка
+            .padding(horizontal = 16.dp, vertical = 12.dp), // Внутренние отступы шапки
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween // Текст слева, стрелочка справа
+    ) {
+        Text(
+            text = "Подзадачи",
+            fontSize = 15.sp,
+            color = theme.textColor // Цвет текста из темы
+        )
+        // Стрелочка из ExposedDropdownMenuDefaults (сама крутится при изменении isExpanded)
+        ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
+    }
 
+    // Выпадающее содержимое
+    AnimatedVisibility(
+        visible = isExpanded,
+        enter = expandVertically() + fadeIn(),
+        exit = shrinkVertically() + fadeOut()
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 12.dp, end = 12.dp, bottom = 12.dp) // Отступы внутри рамки
+        ) {
+            // Поле ввода подзадачи (внутри рамки)
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = stateTextSubTask,
+                onValueChange = { stateTextSubTask = it },
+                shape = RoundedCornerShape(10.dp),
+                label = { Text("Подзадача") },
+                trailingIcon = { 
+                    IconButton(onClick = { 
+                        if (stateTextSubTask.isNotBlank()) {
+                            val maxSort = listSubTask.maxOfOrNull { it.sort } ?: -1
+                            val newSortIndex = maxSort + 1
+
+                            listSubTask.add(
+                                SubItem(
+                                    idTask = item?.id ?: 0,
+                                    name = stateTextSubTask,
+                                    change = false,
+                                    sort = newSortIndex
+                                )
+                            )
+                            stateTextSubTask = "" 
+                        }
+                    }) { 
+                        Icon(Icons.Default.Add, contentDescription = "Добавить") 
+                    } 
+                }
+            )
+
+            // Список подзадач (если он не пустой, добавляем отступ сверху)
+            if (listSubTask.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(8.dp))
                 
-                // Поле подзадачи
-                Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.CenterEnd // Прижимает содержимое к правому краю
-                ) {
-                    TextButton(
-                        onClick = { isExpanded = !isExpanded },
-                    ) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    listSubTask.forEach { subTask ->
                         Row(
-                            modifier = Modifier.padding(start = 16.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp),
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.End
                         ) {
                             Text(
-                                text = "Подзадачи", // Добавлены кавычки
-                                fontSize = 15.sp,
-                                modifier = Modifier.padding(end = 8.dp)
+                                modifier = Modifier
+                                    .padding(start = 4.dp, end = 8.dp)
+                                    .weight(1f),
+                                text = subTask.name,
+                                color = theme.textColor,
+                                fontSize = 15.sp
                             )
-                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
+                            IconButton(
+                                onClick = { listSubTask.remove(subTask) },
+                                modifier = Modifier.size(24.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Удалить подзадачу",
+                                    tint = theme.textDesc
+                                )
+                            }
                         }
-                    }
-                }
-
-AnimatedVisibility(
-    visible = isExpanded, // Исправлено на одну переменную
-    enter = expandVertically() + fadeIn(),
-    exit = shrinkVertically() + fadeOut()
-) {
-    // ВСЕ элементы внутри AnimatedVisibility обязательно оборачиваем в Column
-    Column(modifier = Modifier.fillMaxWidth()) {
-        
-        // Поле ввода подзадачи
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = stateTextSubTask,
-            onValueChange = { stateTextSubTask = it },
-            shape = RoundedCornerShape(10.dp),
-            label = { Text("Подзадача") },
-            trailingIcon = {
-                IconButton(onClick = {
-                    if (stateTextSubTask.isNotBlank()) {
-                        listSubTask.add(
-                            SubItem(
-                                idTask = item?.id ?: 0, // ID родительского дела (если дело новое, тут будет 0)
-                                name = stateTextSubTask, // Текст из вашего TextField "Подзадача"
-                                change = false,
-                                sort = listSubTask.size
-                            )
-                        )
-                        stateTextSubTask = ""
-                    }
-                }) {
-                    Icon(Icons.Default.Add, contentDescription = "Добавить")
-                }
-            }
-        )
-
-        // Список добавленных подзадач
-        Column(modifier = Modifier.fillMaxWidth()) {
-            listSubTask.forEach { subTask ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 6.dp, top = 8.dp, bottom = 8.dp, end = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        modifier = Modifier
-                            .padding(start = 5.dp, end = 5.dp)
-                            .weight(1f),
-                        text = subTask.name,
-                    )
-                    IconButton(
-                        onClick = { 
-                            // Реализуем удаление или отметку выполнения
-                            listSubTask.remove(subTask) 
-                        },
-                        modifier = Modifier
-                            .padding(end = 8.dp)
-                            .size(24.dp)
-                    ) {
-                        Icon(
-                            modifier = Modifier.fillMaxSize(),
-                            imageVector = theme.chekBoxOn,
-                            contentDescription = "Check",
-                            tint = theme.chekBoxTint
-                        )
                     }
                 }
             }
         }
     }
 }
+
+
+                
+//                 // Поле подзадачи
+//                 Box(
+//                     modifier = Modifier.fillMaxWidth(),
+//                     contentAlignment = Alignment.CenterEnd // Прижимает содержимое к правому краю
+//                 ) {
+//                     TextButton(
+//                         onClick = { isExpanded = !isExpanded },
+//                     ) {
+//                         Row(
+//                             modifier = Modifier.padding(start = 16.dp),
+//                             verticalAlignment = Alignment.CenterVertically,
+//                             horizontalArrangement = Arrangement.End
+//                         ) {
+//                             Text(
+//                                 text = "Подзадачи", // Добавлены кавычки
+//                                 fontSize = 15.sp,
+//                                 modifier = Modifier.padding(end = 8.dp)
+//                             )
+//                             ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
+//                         }
+//                     }
+//                 }
+
+// AnimatedVisibility(
+//     visible = isExpanded, // Исправлено на одну переменную
+//     enter = expandVertically() + fadeIn(),
+//     exit = shrinkVertically() + fadeOut()
+// ) {
+//     // ВСЕ элементы внутри AnimatedVisibility обязательно оборачиваем в Column
+//     Column(modifier = Modifier.fillMaxWidth()) {
+        
+//         // Поле ввода подзадачи
+//         OutlinedTextField(
+//             modifier = Modifier.fillMaxWidth(),
+//             value = stateTextSubTask,
+//             onValueChange = { stateTextSubTask = it },
+//             shape = RoundedCornerShape(10.dp),
+//             label = { Text("Подзадача") },
+//             trailingIcon = {
+//                 IconButton(onClick = {
+//                     val newSortIndex = maxSort + 1
+//                     if (stateTextSubTask.isNotBlank()) {
+//                         listSubTask.add(
+//                             SubItem(
+//                                 idTask = item?.id ?: 0, // ID родительского дела (если дело новое, тут будет 0)
+//                                 name = stateTextSubTask, // Текст из вашего TextField "Подзадача"
+//                                 change = false,
+//                                 sort = newSortIndex
+//                             )
+//                         )
+//                         stateTextSubTask = ""
+//                     }
+//                 }) {
+//                     Icon(Icons.Default.Add, contentDescription = "Добавить")
+//                 }
+//             }
+//         )
+
+//         // Список добавленных подзадач
+//         Column(modifier = Modifier.fillMaxWidth()) {
+//             listSubTask.forEach { subTask ->
+//                 Row(
+//                     modifier = Modifier
+//                         .fillMaxWidth()
+//                         .padding(start = 6.dp, top = 8.dp, bottom = 8.dp, end = 6.dp),
+//                     verticalAlignment = Alignment.CenterVertically,
+//                 ) {
+//                     Text(
+//                         modifier = Modifier
+//                             .padding(start = 5.dp, end = 5.dp)
+//                             .weight(1f),
+//                         text = subTask.name,
+//                     )
+//                     IconButton(
+//                         onClick = { 
+//                             // Реализуем удаление или отметку выполнения
+//                             listSubTask.remove(subTask) 
+//                         },
+//                         modifier = Modifier
+//                             .padding(end = 8.dp)
+//                             .size(24.dp)
+//                     ) {
+//                         Icon(
+//                             modifier = Modifier.fillMaxSize(),
+//                             imageVector = Icons.Default.Close,
+//                             contentDescription = "Check",
+//                             tint = theme.chekBoxTint
+//                         )
+//                     }
+//                 }
+//             }
+//         }
+//     }
+// }
 
                 KmpSpinnerInput(
                     selectedCategory = categorySelected,
