@@ -42,6 +42,7 @@ fun ListToDo(
     size: Size = SizeNormal(),
     isDragDropEnabled: Boolean = true,
     onClick: (Item, Int) -> Unit = { _, _ -> },
+    onClickSubItem: (SubItem, Int) -> Unit = { _, _ -> },
     onAddItem: () -> Unit = {},
     onDragDropped: (List<Item>) -> Unit = {}, // Возвращает чистый List<Item> во ViewModel
     onSubDragDropped: (List<SubItem>) -> Unit = {},
@@ -132,7 +133,11 @@ fun ListToDo(
                             onClick = { returnedItem, action ->
                                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                 onClick(returnedItem, action)
-                            }
+                            },
+                           onClickSubItem = { returnedSubItem, action ->
+                               haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                               onClickSubItem(returnedSubItem, action)
+                           } 
                         )
                     }
                 }
