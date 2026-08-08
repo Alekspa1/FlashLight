@@ -105,7 +105,8 @@ fun CardItem(
     size: Size = SizeNormal(),
     dragModifier: Modifier = Modifier,
     onSubDragDropped: (List<SubItem>) -> Unit = {},
-    onClick: (Item, Int) -> Unit = { _, _ -> }, // 2 аргумента для главных дел
+    onClick: (Item, Int) -> Unit = { _, _ -> },
+    onClickSubItem: (SubItem, Int) -> Unit = { _, _ -> },
 ) {
     var isExpanded by remember { mutableStateOf(false) }
     
@@ -339,7 +340,7 @@ fun CardItem(
                         // КРУГЛЫЙ ЧЕКБОКС (RadioButton)
                         RadioButton(
                             selected = subItem.change,
-                            onClick = {  }, 
+                            onClick = { onClickSubItem(item, CHANGE_ITEM)  }, 
                             colors = RadioButtonDefaults.colors(
                                 selectedColor = theme.chekBoxTint,
                                 unselectedColor = theme.borderCardMenuItem
@@ -362,7 +363,7 @@ fun CardItem(
                         
                         // ИКОНКА УДАЛЕНИЯ ПОДЗАДАЧИ
                         IconButton(
-                            onClick = {  }, 
+                            onClick = { onClickSubItem(item, DELETE)  }, 
                             modifier = Modifier.size(24.dp)
                         ) {
                             Icon(
