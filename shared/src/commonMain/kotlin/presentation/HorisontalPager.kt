@@ -287,6 +287,9 @@ fun MainPager(paddingValues: PaddingValues = PaddingValues(),
     onDragDropped = { updatedList ->
         viewModel.updateItemsOrder(updatedList) 
     },
+    onSubDragDropped ={updatedList->
+    viewModel.updateSubItemsOrder(updatedList) 
+    },                 
                         onClick = {item,action->
                             when(action){
                                 ALARM->{viewModel.permission(NOTIFICATION,item)}
