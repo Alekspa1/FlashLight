@@ -82,6 +82,10 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
+import org.burnoutcrew.reorderable.*
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 
 @Composable
 fun CardItem(
@@ -153,7 +157,7 @@ fun CardItem(
                                 .padding(bottom = 12.dp)
                                 .size(75.dp)
                                 .clip(RoundedCornerShape(10.dp))
-                                .clickable { onClick(item, IMAGE, null) },
+                                .clickable { onClick(item, IMAGE) },
                             contentScale = ContentScale.Crop,
                         )
                     }
@@ -196,7 +200,7 @@ fun CardItem(
                                 ) {
                                     RadioButton(
                                         selected = subItem.change,
-                                        onClick = { onClick(item, CHANGE, subItem) },
+                                        onClick = { onClick(item, CHANGE) },
                                         colors = RadioButtonDefaults.colors(
                                             selectedColor = theme.chekBoxTint,
                                             unselectedColor = theme.borderCardMenuItem
@@ -218,7 +222,7 @@ fun CardItem(
                                     )
 
                                     IconButton(
-                                        onClick = { onClick(item, DELETE, subItem) },
+                                        onClick = { onClick(item, DELETE) },
                                         modifier = Modifier.size(24.dp)
                                     ) {
                                         Icon(
