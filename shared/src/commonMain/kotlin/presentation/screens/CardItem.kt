@@ -71,6 +71,7 @@ import coil3.compose.AsyncImage
 
 fun CardItem(
          item: Item,
+         listSubItems : List<SubItem> = emptyList(),
          selectedFileUri : String = "",    
          theme: Theme = ThemeNeon(),
          size: Size = SizeNormal(),  
@@ -150,7 +151,7 @@ Column(){
 
 
                 ) {
-                    if (item.uri != "") IconButton(
+                    if (item.uri != "" || listSubItems.isNotEmpty()) IconButton(
                         onClick = { isExpanded = !isExpanded },
                         modifier = Modifier.padding(start = 8.dp).size(24.dp)
 
@@ -240,7 +241,9 @@ Column(){
                             contentScale = ContentScale.Crop,
                         )
 
-                                    Row(
+
+                     listSubItems.forEach{subItem->
+                                                         Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 6.dp, top = 8.dp, bottom = 8.dp,end = 6.dp)
@@ -253,7 +256,7 @@ Column(){
          modifier = Modifier
         .padding(start = 5.dp, end = 5.dp)
         .weight(1f),  
-         text = "Купить молоко",
+         text = subItem.name,
           color = Color.White
 
 
@@ -275,85 +278,9 @@ Column(){
 
                     }
                                      
-                }         
-
-                                                    Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 6.dp, top = 8.dp, bottom = 8.dp,end = 6.dp)
-                    ,
-                    verticalAlignment = Alignment.CenterVertically,
-
-
-                ) {
-                                     Text(
-         modifier = Modifier
-        .padding(start = 5.dp, end = 5.dp)
-        .weight(1f),  
-         text = "Купить молоко",
-          color = Color.White
-
-
-                    )
-
-                                                         IconButton(
-                        onClick = { },
-                        modifier = Modifier.padding(end = 8.dp).size(24.dp)
-                    ) {
-
-                        Icon(
-                            modifier = Modifier.fillMaxSize(),
-
-                            imageVector =
-                           theme.chekBoxOn,
-                            contentDescription = "Chek",
-                            tint = theme.chekBoxTint
-                        )
-
-                    }
-                                     
-                }  
-                                                                                        Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 6.dp, top = 8.dp, bottom = 8.dp,end = 6.dp)
-                    ,
-                    verticalAlignment = Alignment.CenterVertically,
-
-
-                ) {
-                                     Text(
-         modifier = Modifier
-        .padding(start = 5.dp, end = 5.dp)
-        .weight(1f),  
-         text = "Купить молоко",
-          color = Color.White
-
-
-                    )
-
-                                                         IconButton(
-                        onClick = { },
-                        modifier = Modifier.padding(end = 8.dp).size(24.dp)
-                    ) {
-
-                        Icon(
-                            modifier = Modifier.fillMaxSize(),
-
-                            imageVector =
-                           theme.chekBoxOn,
-                            contentDescription = "Chek",
-                            tint = theme.chekBoxTint
-                        )
-
-                    }
-                                     
-                }  
-
-
-
-
-
+                } 
+                     
+                     }                                   
 
                 }
 
