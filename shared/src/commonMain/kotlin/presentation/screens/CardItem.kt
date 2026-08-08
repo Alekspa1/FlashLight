@@ -92,12 +92,6 @@ import presentation.theme.ThemeZabor
 import presentation.theme.Size
 import presentation.theme.SizeNormal
 
-// Твоя библиотека Drag-and-Drop
-import sh.calvin.reorderable.rememberReorderableLazyListState
-import sh.calvin.reorderable.ReorderableLazyListScope
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
-
 @Composable
 fun CardItem(
     item: Item,
@@ -303,7 +297,7 @@ fun CardItem(
                         
                         // ИКОНКА УДАЛЕНИЯ ПОДЗАДАЧИ
                         IconButton(
-                            onClick = { onSubItemClick(subItem, DELETE) }, 
+                            onClick = {  }, 
                             modifier = Modifier.size(24.dp)
                         ) {
                             Icon(
