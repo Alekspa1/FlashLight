@@ -252,6 +252,17 @@ val sortedItemsFlow: StateFlow<List<ItemWithSubItems>> = combine(
         }
     }
 
+        fun updateSubItemsOrder(newList: List<SubItem>) {
+    viewModelScope.launch(Dispatchers.IO) {
+        try {
+            // Room запишет обновленные индексы sort для подзадач в одну транзакцию
+            db.subItemDao().insertSubItems(newList) 
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+}
+
 
      
 
