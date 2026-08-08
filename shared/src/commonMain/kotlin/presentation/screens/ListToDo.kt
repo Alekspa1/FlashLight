@@ -134,7 +134,7 @@ fun ListToDo(
                                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                 onClick(returnedItem, action)
                             },
-                            onSubDragDropped = {list-> onSubDragDropped(list)}
+                            //onSubDragDropped = {list-> onSubDragDropped(list)}
                         )
                     }
                 }
