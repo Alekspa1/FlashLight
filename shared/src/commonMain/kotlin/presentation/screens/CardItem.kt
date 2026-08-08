@@ -275,7 +275,7 @@ fun CardItem(
                         // КРУГЛЫЙ ЧЕКБОКС (RadioButton)
                         RadioButton(
                             selected = subItem.change,
-                            onClick = { onSubItemClick(subItem, CHANGE) }, 
+                            onClick = {  }, 
                             colors = RadioButtonDefaults.colors(
                                 selectedColor = theme.chekBoxTint,
                                 unselectedColor = theme.borderCardMenuItem
