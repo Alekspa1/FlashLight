@@ -288,7 +288,7 @@ fun CardItem(
             itemsIndexed(
                 items = currentSnapshotList,
                 key = { _, subItem -> subItem.id } // Ключ работает по ID дела, всё чётко
-            ) { index, item ->
+            ) { index, subItem ->
 
                 ReorderableItem(
                     state = reorderableState,
