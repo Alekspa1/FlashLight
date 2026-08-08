@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import data.room.model.Item
+import data.room.model.SubItem
 import data.room.model.ItemWithSubItems
 import presentation.theme.Theme
 import presentation.theme.ThemeNeon
