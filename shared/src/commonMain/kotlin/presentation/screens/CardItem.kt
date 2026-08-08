@@ -322,6 +322,13 @@ fun CardItem(
                             .animateItem()
                             .graphicsLayer { alpha = if (isDragging) 0.5f else 1f }
                     ) {
+                                    if (subItem.id != currentSnapshotList.firstOrNull()?.id) {
+                HorizontalDivider(
+                    thickness = 0.5.dp,
+                    color = theme.borderCardMenuItem.copy(alpha = 0.15f),
+                    modifier = Modifier.padding(bottom = 6.dp) // Отталкиваем текст от верхней линии
+                )
+            }
 
              Row(
                         modifier = Modifier
@@ -367,17 +374,7 @@ fun CardItem(
                         }
                     }
 
-                    }
-                    
-                    if (index < currentSnapshotList.lastIndex) {
-                        HorizontalDivider(
-                            thickness = 0.5.dp,
-                            color = theme.borderCardMenuItem.copy(alpha = 0.15f)
-                        )
-                    } 
-                    
-
-                
+                    }      
                 }
             }
         }
