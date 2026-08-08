@@ -67,104 +67,91 @@ import androidx.compose.foundation.layout.Arrangement
 
 import coil3.compose.AsyncImage
 import data.room.model.SubItem
+import androidx.compose.ui.zIndex
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.BorderStroke
 
 @Composable
-
 fun CardItem(
-         item: Item,
-         listSubItems : List<SubItem> = emptyList(),
-         selectedFileUri : String = "",    
-         theme: Theme = ThemeNeon(),
-         size: Size = SizeNormal(),  
-         dragModifier: Modifier = Modifier,
-         onClick : (Item, Int) -> Unit = { _, _->},
-             
-            ) {
-         var isExpanded by remember { mutableStateOf(false) }
-
-         
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically // Все три элемента будут идеально ровно по центру высоты
-        ) {
-            // 1. Левая кнопка/текст
-
-                Box(
-                    modifier = Modifier
-                        .padding(start = 8.dp)
-                        .size(35.dp).combinedClickable(
-                        onClick = {onClick(item,ALARM)},
-                        onLongClick = {onClick(item,ALARM_LONG)}
-                    )
-
-
-
-                ) {
-
-                    Icon(
-                        imageVector = Icons.Default.Alarm, // Нужен импорт androidx.compose.material.icons.Icons
-                        contentDescription = "Будильник",
-                       tint =  if(item.changeAlarm) theme.tintAlarmOn else theme.tintAlarmOff,
-                        modifier = Modifier.fillMaxSize(),
-                    )
-
-                }
-
-
-            // 2. Центральная карточка (занимает всё оставшееся пространство)
-
-            Card(
-
-    modifier = Modifier
-        .padding(start = 5.dp, end = 5.dp)
-        .weight(1f) // Заставляет карточку занять ВСЁ свободное место между кнопками
-        .clip(RoundedCornerShape(15.dp))
-        .border(
-            2.dp,
-            if(item.change) theme.cardItemBorderTrue
-            else if (item.changeAlarm) theme.cardItemBorderAlarm
-            else theme.cardItemBorderFalse,
-            RoundedCornerShape(15.dp)
-        )
-        // 1. Сначала вешаем обычный клик (для открытия диалога)
-        .clickable { onClick(item, CHANGE_ITEM) }
-         .then(dragModifier)
-                     ,
-             shape = RoundedCornerShape(15.dp),
-
-    colors = CardDefaults.cardColors(
-        containerColor =
-            if(item.change) theme.cardItemTrue
-            else if(item.changeAlarm) theme.cardItemAlarm
-            else theme.cardItemFalse
-    )
+    item: Item,
+    listSubItems: List<SubItem> = emptyList(),
+    selectedFileUri: String = "",
+    theme: Theme = ThemeNeon(),
+    size: Size = SizeNormal(),
+    dragModifier: Modifier = Modifier,
+    onClick: (Item, Int) -> Unit = { _, _ -> },
 ) {
+    var isExpanded by remember { mutableStateOf(false) }
 
-Column(){
-                              
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // 1. Левая кнопка (Будильник)
+        Box(
+            modifier = Modifier
+                .padding(start = 8.dp)
+                .size(35.dp)
+                .combinedClickable(
+                    onClick = { onClick(item, ALARM) },
+                    onLongClick = { onClick(item, ALARM_LONG) }
+                )
+        ) {
+            Icon(
+                imageVector = Icons.Default.Alarm,
+                contentDescription = "Будильник",
+                tint = if (item.changeAlarm) theme.tintAlarmOn else theme.tintAlarmOff,
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+
+        // 2. Центральный интерактивный блок
+        Column(
+            modifier = Modifier
+                .padding(start = 5.dp, end = 5.dp)
+                .weight(1f)
+        ) {
+            // ГЛАВНАЯ КАРТОЧКА (Слой выше, zIndex = 1f)
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .zIndex(1f) // Поднимаем её над выезжающей карточкой
+                    .clip(RoundedCornerShape(15.dp))
+                    .border(
+                        2.dp,
+                        if (item.change) theme.cardItemBorderTrue 
+                        else if (item.changeAlarm) theme.cardItemBorderAlarm 
+                        else theme.cardItemBorderFalse,
+                        RoundedCornerShape(15.dp)
+                    )
+                    .clickable { onClick(item, CHANGE_ITEM) }
+                    .then(dragModifier),
+                shape = RoundedCornerShape(15.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = if (item.change) theme.cardItemTrue 
+                    else if (item.changeAlarm) theme.cardItemAlarm 
+                    else theme.cardItemFalse
+                )
+            ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 6.dp, top = 8.dp, bottom = 8.dp,end = 6.dp)
-                    ,
+                        .padding(start = 6.dp, top = 8.dp, bottom = 8.dp, end = 6.dp),
                     verticalAlignment = Alignment.CenterVertically,
-
-
                 ) {
-                    if (item.uri != "" || listSubItems.isNotEmpty()) IconButton(
-                        onClick = { isExpanded = !isExpanded },
-                        modifier = Modifier.padding(start = 8.dp).size(24.dp)
-
-                    ) {
-
-                        Icon(
-                            modifier = Modifier.fillMaxSize(),
-                            imageVector = theme.iconImage, // Нужен импорт androidx.compose.material.icons.Icons
-                            contentDescription = "Картинка",
-                            tint = theme.iconTint
-                        )
-
+                    // Иконка стрелочки-спойлера
+                    if (item.uri.isNotEmpty() || listSubItems.isNotEmpty()) {
+                        IconButton(
+                            onClick = { isExpanded = !isExpanded },
+                            modifier = Modifier.padding(start = 4.dp).size(24.dp)
+                        ) {
+                            Icon(
+                                modifier = Modifier.fillMaxSize(),
+                                imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                                contentDescription = "Раскрыть",
+                                tint = theme.iconTint
+                            )
+                        }
                     }
 
                     Column(
@@ -173,158 +160,392 @@ Column(){
                             .padding(start = 6.dp, end = 6.dp),
                     ) {
                         Text(
-                            modifier = Modifier.padding(start = 5.dp,end = 5.dp),
                             text = item.name,
                             color = theme.textColor,
                             lineHeight = size.lineHeightItem,
-                            fontSize = size.textItem)
-                        if (item.desc.isNotEmpty())  {
+                            fontSize = size.textItem
+                        )
+
+                        if (item.desc.isNotEmpty()) {
                             Text(
-                                modifier = Modifier.padding(start = 5.dp,top = 2.dp, end = 5.dp),
+                                modifier = Modifier.padding(top = 2.dp),
                                 text = item.desc,
                                 color = theme.textDesc,
                                 lineHeight = size.lineHeightDescAndAlarm,
-                                fontSize = size.textDesc) }
+                                fontSize = size.textDesc
+                            )
+                        }
                         if (item.changeAlarm) {
                             Text(
-                                modifier = Modifier.padding(start = 5.dp,top = 8.dp, end = 5.dp),
+                                modifier = Modifier.padding(top = 4.dp),
                                 text = alarmText(item),
                                 color = theme.textAlarm,
                                 fontSize = size.textAlarm,
                                 lineHeight = size.lineHeightDescAndAlarm
                             )
                         }
+                    }
+
+                    IconButton(
+                        onClick = { onClick(item, CHANGE) },
+                        modifier = Modifier.padding(end = 4.dp).size(24.dp)
+                    ) {
+                        Icon(
+                            modifier = Modifier.fillMaxSize(),
+                            imageVector = if (item.change) theme.chekBoxOn else theme.chekBoxOff,
+                            contentDescription = "Check",
+                            tint = theme.chekBoxTint
+                        )
+                    }
+                }
+            }
+
+            // ВЫЕЗЖАЮЩАЯ КАРТОЧКА (Слой ниже, zIndex = 0f)
+            AnimatedVisibility(
+                visible = isExpanded,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut(),
+                modifier = Modifier.zIndex(0f)
+            ) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp) // Чуть уже основной, чтобы подчеркнуть вложенность
+                        .offset(y = (-8).dp), // Накладываем под верхнюю карточку, убирая щель
+                    shape = RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp), // Скругляем только низ
+                    colors = CardDefaults.cardColors(
+                        containerColor = theme.cardMenuItem // Твой темный глубокий фон из диалогов
+                    ),
+                    border = BorderStroke(1.dp, theme.borderCardMenuItem.copy(alpha = 0.5f))
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 12.dp, end = 12.dp, top = 16.dp, bottom = 12.dp) // top побольше из-за offset
+                    ) {
+                        if (selectedFileUri.isNotEmpty()) {
+                            AsyncImage(
+                                model = selectedFileUri,
+                                contentDescription = "Фото",
+                                modifier = Modifier
+                                    .padding(bottom = 8.dp)
+                                    .size(70.dp)
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .clickable { onClick(item, IMAGE) },
+                                contentScale = ContentScale.Crop,
+                            )
+                        }
+
+                        listSubItems.forEachIndexed { index, subItem ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Text(
+                                    text = subItem.name,
+                                    color = if (subItem.change) theme.textDesc else theme.textColor,
+                                    fontSize = size.textDesc,
+                                    style = if (subItem.change) {
+                                        LocalTextStyle.current.copy(textDecoration = TextDecoration.LineThrough)
+                                    } else {
+                                        LocalTextStyle.current
+                                    },
+                                    modifier = Modifier.weight(1f).padding(end = 8.dp)
+                                )
+                                Icon(
+                                    imageVector = if (subItem.change) theme.chekBoxOn else theme.chekBoxOff,
+                                    contentDescription = "Status",
+                                    tint = theme.chekBoxTint,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+
+                            if (index < listSubItems.lastIndex) {
+                                HorizontalDivider(
+                                    thickness = 0.5.dp,
+                                    color = theme.borderCardMenuItem.copy(alpha = 0.15f)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // 3. Правая кнопка (Удаление)
+        IconButton(
+            onClick = { onClick(item, DELETE) },
+            modifier = Modifier.padding(end = 8.dp).size(35.dp)
+        ) {
+            Icon(
+                modifier = Modifier.fillMaxSize(),
+                imageVector = theme.iconDelItem,
+                contentDescription = "Удалить",
+                tint = theme.iconDelTint,
+            )
+        }
+    }
+}
+
+//@Composable
+
+// fun CardItem(
+//          item: Item,
+//          listSubItems : List<SubItem> = emptyList(),
+//          selectedFileUri : String = "",    
+//          theme: Theme = ThemeNeon(),
+//          size: Size = SizeNormal(),  
+//          dragModifier: Modifier = Modifier,
+//          onClick : (Item, Int) -> Unit = { _, _->},
+             
+//             ) {
+//          var isExpanded by remember { mutableStateOf(false) }
+
+         
+
+//         Row(
+//             modifier = Modifier.fillMaxWidth(),
+//             verticalAlignment = Alignment.CenterVertically // Все три элемента будут идеально ровно по центру высоты
+//         ) {
+//             // 1. Левая кнопка/текст
+
+//                 Box(
+//                     modifier = Modifier
+//                         .padding(start = 8.dp)
+//                         .size(35.dp).combinedClickable(
+//                         onClick = {onClick(item,ALARM)},
+//                         onLongClick = {onClick(item,ALARM_LONG)}
+//                     )
+
+
+
+//                 ) {
+
+//                     Icon(
+//                         imageVector = Icons.Default.Alarm, // Нужен импорт androidx.compose.material.icons.Icons
+//                         contentDescription = "Будильник",
+//                        tint =  if(item.changeAlarm) theme.tintAlarmOn else theme.tintAlarmOff,
+//                         modifier = Modifier.fillMaxSize(),
+//                     )
+
+//                 }
+
+
+//             // 2. Центральная карточка (занимает всё оставшееся пространство)
+
+//             Card(
+
+//     modifier = Modifier
+//         .padding(start = 5.dp, end = 5.dp)
+//         .weight(1f) // Заставляет карточку занять ВСЁ свободное место между кнопками
+//         .clip(RoundedCornerShape(15.dp))
+//         .border(
+//             2.dp,
+//             if(item.change) theme.cardItemBorderTrue
+//             else if (item.changeAlarm) theme.cardItemBorderAlarm
+//             else theme.cardItemBorderFalse,
+//             RoundedCornerShape(15.dp)
+//         )
+//         // 1. Сначала вешаем обычный клик (для открытия диалога)
+//         .clickable { onClick(item, CHANGE_ITEM) }
+//          .then(dragModifier)
+//                      ,
+//              shape = RoundedCornerShape(15.dp),
+
+//     colors = CardDefaults.cardColors(
+//         containerColor =
+//             if(item.change) theme.cardItemTrue
+//             else if(item.changeAlarm) theme.cardItemAlarm
+//             else theme.cardItemFalse
+//     )
+// ) {
+
+// Column(){
+                              
+//                 Row(
+//                     modifier = Modifier
+//                         .fillMaxWidth()
+//                         .padding(start = 6.dp, top = 8.dp, bottom = 8.dp,end = 6.dp)
+//                     ,
+//                     verticalAlignment = Alignment.CenterVertically,
+
+
+//                 ) {
+//                     if (item.uri != "" || listSubItems.isNotEmpty()) IconButton(
+//                         onClick = { isExpanded = !isExpanded },
+//                         modifier = Modifier.padding(start = 8.dp).size(24.dp)
+
+//                     ) {
+
+//                         Icon(
+//                             modifier = Modifier.fillMaxSize(),
+//                             imageVector = theme.iconImage, // Нужен импорт androidx.compose.material.icons.Icons
+//                             contentDescription = "Картинка",
+//                             tint = theme.iconTint
+//                         )
+
+//                     }
+
+//                     Column(
+//                         modifier = Modifier
+//                             .weight(1f)
+//                             .padding(start = 6.dp, end = 6.dp),
+//                     ) {
+//                         Text(
+//                             modifier = Modifier.padding(start = 5.dp,end = 5.dp),
+//                             text = item.name,
+//                             color = theme.textColor,
+//                             lineHeight = size.lineHeightItem,
+//                             fontSize = size.textItem)
+//                         if (item.desc.isNotEmpty())  {
+//                             Text(
+//                                 modifier = Modifier.padding(start = 5.dp,top = 2.dp, end = 5.dp),
+//                                 text = item.desc,
+//                                 color = theme.textDesc,
+//                                 lineHeight = size.lineHeightDescAndAlarm,
+//                                 fontSize = size.textDesc) }
+//                         if (item.changeAlarm) {
+//                             Text(
+//                                 modifier = Modifier.padding(start = 5.dp,top = 8.dp, end = 5.dp),
+//                                 text = alarmText(item),
+//                                 color = theme.textAlarm,
+//                                 fontSize = size.textAlarm,
+//                                 lineHeight = size.lineHeightDescAndAlarm
+//                             )
+//                         }
 
 
                         
-                    }
-                    IconButton(
-                        onClick = { onClick(item,CHANGE) },
-                        modifier = Modifier.padding(end = 8.dp).size(24.dp)
-                    ) {
+//                     }
+//                     IconButton(
+//                         onClick = { onClick(item,CHANGE) },
+//                         modifier = Modifier.padding(end = 8.dp).size(24.dp)
+//                     ) {
 
-                        Icon(
-                            modifier = Modifier.fillMaxSize(),
+//                         Icon(
+//                             modifier = Modifier.fillMaxSize(),
 
-                            imageVector =
-                                if(item.change)  theme.chekBoxOn
-                                else theme.chekBoxOff,
-                            contentDescription = "Chek",
-                            tint = theme.chekBoxTint
-                        )
+//                             imageVector =
+//                                 if(item.change)  theme.chekBoxOn
+//                                 else theme.chekBoxOff,
+//                             contentDescription = "Chek",
+//                             tint = theme.chekBoxTint
+//                         )
 
-                    }
-                }
-
-
-  // анимированое продолжение
-                                   AnimatedVisibility(
-
-            visible = isExpanded,
-
-            enter = expandVertically() + fadeIn(),
-
-            exit = shrinkVertically() + fadeOut()
-
-        ) {
-
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                                                 AsyncImage(
-                            model = selectedFileUri,
-                            contentDescription = "Превью фото",
-                            modifier = Modifier
-                                .size(80.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                                .clickable { onClick(item,IMAGE) },
-                            contentScale = ContentScale.Crop,
-                        )
+//                     }
+//                 }
 
 
-                     listSubItems.forEach{subItem->
-                                                         Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 6.dp, top = 8.dp, bottom = 8.dp,end = 6.dp)
-                    ,
-                    verticalAlignment = Alignment.CenterVertically,
+//   // анимированое продолжение
+//                                    AnimatedVisibility(
+
+//             visible = isExpanded,
+
+//             enter = expandVertically() + fadeIn(),
+
+//             exit = shrinkVertically() + fadeOut()
+
+//         ) {
+
+//                 Column(
+//                     modifier = Modifier.padding(16.dp),
+//                     verticalArrangement = Arrangement.spacedBy(8.dp)
+//                 ) {
+//                                                  AsyncImage(
+//                             model = selectedFileUri,
+//                             contentDescription = "Превью фото",
+//                             modifier = Modifier
+//                                 .size(80.dp)
+//                                 .clip(RoundedCornerShape(12.dp))
+//                                 .clickable { onClick(item,IMAGE) },
+//                             contentScale = ContentScale.Crop,
+//                         )
 
 
-                ) {
-                                     Text(
-         modifier = Modifier
-        .padding(start = 5.dp, end = 5.dp)
-        .weight(1f),  
-         text = subItem.name,
-          color = Color.White
+//                      listSubItems.forEach{subItem->
+//                                                          Row(
+//                     modifier = Modifier
+//                         .fillMaxWidth()
+//                         .padding(start = 6.dp, top = 8.dp, bottom = 8.dp,end = 6.dp)
+//                     ,
+//                     verticalAlignment = Alignment.CenterVertically,
 
 
-                    )
+//                 ) {
+//                                      Text(
+//          modifier = Modifier
+//         .padding(start = 5.dp, end = 5.dp)
+//         .weight(1f),  
+//          text = subItem.name,
+//           color = Color.White
 
-                                                         IconButton(
-                        onClick = { },
-                        modifier = Modifier.padding(end = 8.dp).size(24.dp)
-                    ) {
 
-                        Icon(
-                            modifier = Modifier.fillMaxSize(),
+//                     )
 
-                            imageVector =
-                           theme.chekBoxOn,
-                            contentDescription = "Chek",
-                            tint = theme.chekBoxTint
-                        )
+//                                                          IconButton(
+//                         onClick = { },
+//                         modifier = Modifier.padding(end = 8.dp).size(24.dp)
+//                     ) {
 
-                    }
+//                         Icon(
+//                             modifier = Modifier.fillMaxSize(),
+
+//                             imageVector =
+//                            theme.chekBoxOn,
+//                             contentDescription = "Chek",
+//                             tint = theme.chekBoxTint
+//                         )
+
+//                     }
                                      
-                } 
+//                 } 
                      
-                     }                                   
+//                      }                                   
 
-                }
+//                 }
 
-        }
-                           // закончилось анимированое продолжение         
-}
-
-
-            }
+//         }
+//                            // закончилось анимированое продолжение         
+// }
 
 
-
-            // 3. Правая кнопка/текст
+//             }
 
 
 
-                IconButton(
-
-                    onClick = {onClick(item,DELETE)  },
-                    modifier = Modifier.padding(end = 8.dp).size(35.dp)
-
-
-                ) {
-
-                    Icon(
-                        modifier = Modifier.fillMaxSize(),
-                        imageVector = theme.iconDelItem, // Нужен импорт androidx.compose.material.icons.Icons
-                        contentDescription = "Меню",
-                        tint = theme.iconDelTint,
-
-                    )
-
-                }
+//             // 3. Правая кнопка/текст
 
 
 
-        } // Конец Row
+//                 IconButton(
+
+//                     onClick = {onClick(item,DELETE)  },
+//                     modifier = Modifier.padding(end = 8.dp).size(35.dp)
+
+
+//                 ) {
+
+//                     Icon(
+//                         modifier = Modifier.fillMaxSize(),
+//                         imageVector = theme.iconDelItem, // Нужен импорт androidx.compose.material.icons.Icons
+//                         contentDescription = "Меню",
+//                         tint = theme.iconDelTint,
+
+//                     )
+
+//                 }
+
+
+
+//         } // Конец Row
 
 
 
 
 
-}
+// }
 
 // Вспомогательная функция для форматирования времени в строку HH:mm вручную (чтобы не тащить тяжелые форматировщики в commonMain)
 private fun formatTime(hour: Int, minute: Int): String {
