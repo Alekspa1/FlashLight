@@ -349,6 +349,18 @@ val sortedItemsFlow: StateFlow<List<ItemWithSubItems>> = combine(
         }
     }
 
+    fun deleteSubItem(subItem: SubItem) {
+           viewModelScope.launch(Dispatchers.IO) {
+            db.deleteSubItem(subItem) 
+        }     
+    }
+
+        fun updateSubItem(subItem: SubItem) {
+           viewModelScope.launch(Dispatchers.IO) {
+            db.updateSubItem(subItem) 
+        }     
+    }
+
 //    fun updateItem(
 //        item: Item,
 //        alarm: Boolean = false,
