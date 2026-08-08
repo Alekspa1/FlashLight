@@ -125,8 +125,8 @@ fun CardItem(
         lazyListState = listState,
         onMove = { from, to ->
             if (from.index == 0 || to.index == 0) return@rememberReorderableLazyListState
-            val fromIdx = from.index - 1
-            val toIdx = to.index - 1
+            val fromIdx = from.index 
+            val toIdx = to.index 
             if (fromIdx in currentSnapshotList.indices && toIdx in currentSnapshotList.indices) {
                 val updatedList = currentSnapshotList.toMutableList().apply { add(toIdx, removeAt(fromIdx)) }
                 currentSnapshotList = updatedList
@@ -317,7 +317,7 @@ fun CardItem(
                                 listItem.copy(sort = idx) 
                             }
                             currentSnapshotList = listWithUpdatedSort
-                            //onSubDragDropped(listWithUpdatedSort) 
+                            onSubDragDropped(listWithUpdatedSort) 
                         }
                     )
                             .animateItem()
@@ -368,16 +368,14 @@ fun CardItem(
                         }
                     }
 
-                    if (index < listSubItems.lastIndex) {
-                        HorizontalDivider(
-                            thickness = 0.5.dp,
-                            color = theme.borderCardMenuItem.copy(alpha = 0.15f)
-                        )
-                    } 
-
                     }
                     
-
+                    // if (index < currentSnapshotList.lastIndex) {
+                    //     HorizontalDivider(
+                    //         thickness = 0.5.dp,
+                    //         color = theme.borderCardMenuItem.copy(alpha = 0.15f)
+                    //     )
+                    // } 
                     
 
                 
