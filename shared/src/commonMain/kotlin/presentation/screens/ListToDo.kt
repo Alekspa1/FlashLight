@@ -128,6 +128,7 @@ fun ListToDo(
                             theme = theme,
                             dragModifier = draggableHandle,
                             size = size,
+                            onSubDragDropped = {listSubItems->onSubDragDropped(listSubItems) }
                             onClick = { returnedItem, action ->
                                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                 onClick(returnedItem, action)
