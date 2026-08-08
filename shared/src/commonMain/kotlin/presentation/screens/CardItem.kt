@@ -266,7 +266,19 @@ fun CardItem(
             enter = expandVertically() + fadeIn(),
             exit = shrinkVertically() + fadeOut()
         ) {
-        Column(modifier = Modifier.fillMaxSize()) {
+
+
+                                             Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 48.dp, end = 48.dp, top = 6.dp, bottom = 4.dp) 
+                    .clip(RoundedCornerShape(15.dp))
+                    .border(1.dp, theme.borderCardMenuItem, RoundedCornerShape(15.dp)),
+                shape = RoundedCornerShape(15.dp),
+                colors = CardDefaults.cardColors(containerColor = theme.cardMenuItem)
+            )   {
+        Column(modifier = Modifier.fillMaxSize().padding(12.dp)
+              ) {
                             if (selectedFileUri.isNotEmpty()) {
                         AsyncImage(
                             model = selectedFileUri,
@@ -294,7 +306,10 @@ fun CardItem(
                     state = reorderableState,
                     key = subItem.id
                 ) { isDragging ->
-                    val draggableHandle = Modifier.longPressDraggableHandle(
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .longPressDraggableHandle(
                         enabled = true,
                         onDragStarted = { haptic.performHapticFeedback(HapticFeedbackType.LongPress) },
                         onDragStopped = {
@@ -305,23 +320,11 @@ fun CardItem(
                             onSubDragDropped(listWithUpdatedSort) // Возвращаем чистый List<Item> во ViewModel
                         }
                     )
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
                             .animateItem()
                             .graphicsLayer { alpha = if (isDragging) 0.5f else 1f }
                     ) {
 
-                                    Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 48.dp, end = 48.dp, top = 6.dp, bottom = 4.dp) 
-                    .clip(RoundedCornerShape(15.dp))
-                    .border(1.dp, theme.borderCardMenuItem, RoundedCornerShape(15.dp)),
-                shape = RoundedCornerShape(15.dp),
-                colors = CardDefaults.cardColors(containerColor = theme.cardMenuItem)
-            ) {
-                                               Row(
+             Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 6.dp),
@@ -371,9 +374,7 @@ fun CardItem(
                             color = theme.borderCardMenuItem.copy(alpha = 0.15f)
                         )
                     } 
-                                        
-            }
-       
+
                     }
                     
 
@@ -382,6 +383,7 @@ fun CardItem(
                 
                 }
             }
+        }
         }
         }
             
