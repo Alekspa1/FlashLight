@@ -66,6 +66,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.foundation.layout.Arrangement
 
 import coil3.compose.AsyncImage
+import data.room.model.SubItem
 
 @Composable
 
