@@ -95,7 +95,10 @@ fun ListToDo(
                 items = currentSnapshotList, 
                 key = { _, item -> item.id }
             ) { index, item ->
-
+                val currentTaskId = item?.id ?: 0
+                val subItems by remember(currentDialogTaskId) {
+                viewModel.getSubItemsForTask(currentDialogTaskId)
+                }.collectAsStateWithLifecycle(initialValue = emptyList())
                 ReorderableItem(
                     state = reorderableState,
                     key = item.id
@@ -125,6 +128,7 @@ fun ListToDo(
                     ) {
                         CardItem(
                             item = item,
+                            listSubItems = subItems,
                             selectedFileUri = selectedFileUri(item.uri), 
                             theme = theme,
                             dragModifier = draggableHandle, // Наш готовый модификатор
