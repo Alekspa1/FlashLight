@@ -25,7 +25,7 @@ import presentation.theme.ThemeNeon
 import presentation.theme.Size
 import presentation.theme.SizeNormal
 import androidx.compose.ui.graphics.graphicsLayer
-
+import presentation.screens.CardItem
 // ИМПОРТЫ СТАБИЛЬНОЙ БИБЛИОТЕКИ CALVIN REORDERABLE
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
