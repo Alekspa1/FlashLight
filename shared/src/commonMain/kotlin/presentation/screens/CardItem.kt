@@ -124,7 +124,6 @@ fun CardItem(
         val reorderableState = rememberReorderableLazyListState(
         lazyListState = listState,
         onMove = { from, to ->
-            if (from.index == 0 || to.index == 0) return@rememberReorderableLazyListState
             val fromIdx = from.index 
             val toIdx = to.index 
             if (fromIdx in currentSnapshotList.indices && toIdx in currentSnapshotList.indices) {
@@ -370,12 +369,12 @@ fun CardItem(
 
                     }
                     
-                    // if (index < currentSnapshotList.lastIndex) {
-                    //     HorizontalDivider(
-                    //         thickness = 0.5.dp,
-                    //         color = theme.borderCardMenuItem.copy(alpha = 0.15f)
-                    //     )
-                    // } 
+                    if (index < currentSnapshotList.lastIndex) {
+                        HorizontalDivider(
+                            thickness = 0.5.dp,
+                            color = theme.borderCardMenuItem.copy(alpha = 0.15f)
+                        )
+                    } 
                     
 
                 
