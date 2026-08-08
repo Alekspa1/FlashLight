@@ -11,7 +11,6 @@ import CommonConst.NOTIFICATION
 import MainViewModel
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -58,7 +57,7 @@ import presentation.screens.Notebook
 import CommonConst.TIME
 import CommonConst.ACTION
 import CommonConst.ALARM_LONG
-import data.room.Item
+import data.room.model.Item
 import androidx.compose.runtime.mutableStateOf // ДОБАВЛЕНО
 import androidx.compose.runtime.remember // ДОБАВЛЕНО
 import androidx.compose.runtime.setValue
@@ -67,7 +66,6 @@ import androidx.compose.runtime.LaunchedEffect
 import presentation.screens.Calendar
 import presentation.theme.ThemeNeon
 import CommonConst.SORT_USER
-import androidx.compose.foundation.layout.width
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 
@@ -93,6 +91,10 @@ fun MainPager(paddingValues: PaddingValues = PaddingValues(),
         OpenImage(selectedFileUri){openImageState = false}
     }
         val item = viewModel.showDialog.item
+        val currentDialogTaskId = item?.id ?: 0
+        val subItemsForDialog by remember(currentDialogTaskId) {
+        viewModel.getSubItemsForTask(currentDialogTaskId)
+        }.collectAsStateWithLifecycle(initialValue = emptyList())
         when(viewModel.showDialog.isWho){
 
             DELETE_DIALOG_ITEM->{
@@ -108,38 +110,39 @@ fun MainPager(paddingValues: PaddingValues = PaddingValues(),
                     theme = ThemeNeon(),
                     listCategory = listCategory,
                     category = category,
+                    listSubItems = subItemsForDialog,
                     calendar = viewModel.showDialog.calendar,
                     date = viewModel.showDialog.date,
                     onCancel = {viewModel.showDialog = DialogState()},
-                    onSave ={ item, name, desc, uri, category, calendar,alarm,originalFileName,date ->
+                    onSave ={ item, name, desc, uri, category, calendar,alarm,originalFileName,date,listSubitem ->
 
                         val finalItem = item?.copy(name = name, desc = desc, category = category)
                             ?: Item(name = name, desc = desc, category = category, alarmTime = date)
 
                         if(item == null) { // новый item
                             if (originalFileName != "") viewModel.saveImage(uri, originalFileName)
-                            viewModel.insertItem(finalItem.copy(uri = originalFileName), alarm = alarm,calendar = calendar)
+                            viewModel.insertItem(finalItem.copy(uri = originalFileName), alarm = alarm,calendar = calendar, subItems = listSubitem)
                         }
                         else { // старый item
                             when {
                                 // СЦЕНАРИЙ 1: Юзер нажал кнопку "Удалить фото" в диалоге (uri пришел пустым)
                                 uri == "" -> {
                                     // 1. Затираем путь в Room пустой строкой
-                                    viewModel.updateItem(finalItem.copy(uri = ""), alarm)
+                                    viewModel.updateItem(finalItem.copy(uri = ""),listSubitem, alarm)
                                     // 2. Стираем старый физический файл с диска устройства
                                     if (item.uri != "") viewModel.deleteImage(item.uri)
                                 }
 
                                 // СЦЕНАРИЙ 2: Юзер выбрал НОВУЮ картинку в пикере
                                 originalFileName != "" -> {
-                                    viewModel.updateItem(finalItem.copy(uri = originalFileName), alarm)
+                                    viewModel.updateItem(finalItem.copy(uri = originalFileName),listSubitem, alarm)
                                     viewModel.saveImage(uri, originalFileName)
                                     if (item.uri != "") viewModel.deleteImage(item.uri)
                                 }
 
                                 // СЦЕНАРИЙ 3: Картинку НЕ ТРОГАЛИ (поменяли только текст)
                                 else -> {
-                                    viewModel.updateItem(finalItem.copy(uri = item.uri), alarm)
+                                    viewModel.updateItem(finalItem.copy(uri = item.uri),listSubitem, alarm)
                                 }
                             }
                         } // старый

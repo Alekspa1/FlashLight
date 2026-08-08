@@ -3,12 +3,11 @@ package data.repostitory
 import CommonConst.KEY_INTENT
 import CommonConst.KEY_INTENT_ALARM
 import android.app.AlarmManager
-import android.app.Application
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import data.alarmReceiwer.AlarmReceiwer
-import data.room.Item
+import data.room.model.Item
 import domain.repostirory.AlarmRepository
 import kotlin.jvm.java
 

@@ -1,19 +1,14 @@
 package com.dragon.shared.data.repostitory
 
 import CommonConst.ALARM_ONE
-import MainViewModel
-import androidx.lifecycle.viewModelScope
 import data.room.CourseDao
-import data.room.Item
+import data.room.model.Item
 import domain.repostirory.AlarmRepeadRepository
 import domain.repostirory.AlarmRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.core.context.GlobalContext
-import java.awt.SystemTray
-import java.awt.TrayIcon
-import java.awt.image.BufferedImage
 import java.io.File
 import java.nio.charset.Charset
 import java.util.concurrent.ConcurrentHashMap

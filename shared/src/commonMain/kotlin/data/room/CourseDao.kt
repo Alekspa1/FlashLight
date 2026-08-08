@@ -6,6 +6,9 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import data.room.model.Item
+import data.room.model.ListCategory
+import data.room.model.SubItem
 import kotlinx.coroutines.flow.Flow
 
 
@@ -55,9 +58,6 @@ interface CourseDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertItem(item: Item) : Long
 
-   // @Query("SELECT * FROM Item WHERE sort = (SELECT MIN(sort) FROM Item)")
-   // suspend fun getItemWithMaxSort(): Item?
-
     @Update
     suspend fun updateItems(items: List<Item>)
 
@@ -85,6 +85,25 @@ interface CourseDao {
 
     @Update
     suspend fun updateCategory(Course: ListCategory)
+
+    // SubItem
+
+    @Query("SELECT * FROM sub_items WHERE idTask = :taskId ORDER BY sort ASC")
+    fun getSubItemsForTask(taskId: Int): Flow<List<SubItem>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertSubItems(subItems: List<SubItem>)
+
+    @Update
+    suspend fun updateSubItem(subItem: SubItem)
+
+    @Delete
+    suspend fun deleteSubItem(subItem: SubItem)
+
+    @Query("DELETE FROM sub_items WHERE idTask = :taskId")
+    suspend fun deleteAllSubItemsForTask(taskId: Int)
+
+
 
 
 }

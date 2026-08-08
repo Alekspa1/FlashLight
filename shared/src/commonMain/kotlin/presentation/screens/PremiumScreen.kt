@@ -120,7 +120,8 @@ fun PremiumScreen(
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .padding(8.dp),
                 verticalArrangement = Arrangement.spacedBy(5.dp)
             ) {
 
@@ -165,7 +166,7 @@ fun PremiumScreen(
 
         CardBuyPremium(
             text = "На один год",
-            desc = "🔥 АКЦИЯ: Всего 57 ₽/мес",
+            desc = "🔥 АКЦИЯ: 57 ₽/мес",
             price = "690 ₽",
             badgeText = "ВЫГОДНО", // Самый сильный триггер остается здесь
             theme = theme,
@@ -198,7 +199,7 @@ fun PremiumItem(text: String,
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 6.dp, top = 8.dp, bottom = 8.dp, end = 6.dp),
+            ,
             verticalAlignment = Alignment.CenterVertically,
 
 
@@ -227,7 +228,6 @@ fun PremiumItem(text: String,
 
                 Icon(
                     modifier = Modifier.fillMaxSize(),
-
                     imageVector = Icons.Default.Warning,
                     contentDescription = "Chek",
                     tint = theme.chekBoxTint
@@ -251,7 +251,6 @@ fun CardBuyPremium(
 ) {
     val currentSelected = isSelected == text
 
-    // Оборачиваем в Box, чтобы шильдик мог красиво накладываться поверх верхней грани
     Box(modifier = Modifier.fillMaxWidth()) {
         Card(
             modifier = Modifier
@@ -292,7 +291,7 @@ fun CardBuyPremium(
                         text = text,
                         color = theme.textColor,
                         lineHeight = size.lineHeightItem,
-                        fontSize = size.textMenu,
+                        fontSize = size.textItem,
                         fontWeight = if (currentSelected) FontWeight.Bold else FontWeight.Medium // Выделяем текст жирным
                     )
 

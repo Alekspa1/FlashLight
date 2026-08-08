@@ -1,6 +1,5 @@
 package presentation.screens
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -30,7 +29,6 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.daysUntil
 import kotlinx.datetime.toLocalDateTime
 // Если используешь Clock из kotlinx-datetime (в коде у тебя опечатка с kotlin.time, об этом ниже)
-import kotlinx.datetime.Clock 
 import CommonConst.ALARM
 import CommonConst.ALARM_DAY
 import CommonConst.ALARM_LONG
@@ -43,7 +41,7 @@ import CommonConst.CHANGE_ITEM
 import CommonConst.DELETE
 import CommonConst.IMAGE
 import androidx.compose.ui.tooling.preview.Preview
-import data.room.Item
+import data.room.model.Item
 import presentation.theme.Theme
 import presentation.theme.ThemeNeon
 import presentation.theme.Size
@@ -51,7 +49,6 @@ import presentation.theme.SizeNormal
 import kotlinx.datetime.number
 import kotlinx.datetime.DayOfWeek
 import presentation.theme.ThemeZabor
-import sh.calvin.reorderable.ReorderableCollectionItemScope
 
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf

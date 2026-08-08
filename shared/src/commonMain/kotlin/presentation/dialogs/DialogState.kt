@@ -1,7 +1,7 @@
 package presentation.dialogs
 
-import data.room.Item
-import data.room.ListCategory
+import data.room.model.Item
+import data.room.model.ListCategory
 
 data class DialogState(
     val isWho: String = CommonConst.DEFAULT_DIALOG,

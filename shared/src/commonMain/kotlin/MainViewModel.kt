@@ -10,8 +10,8 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import data.room.CourseDao
-import data.room.Item
-import data.room.ListCategory
+import data.room.model.Item
+import data.room.model.ListCategory
 import domain.repostirory.AlarmRepeadRepository
 import domain.repostirory.AlarmRepository
 
@@ -35,7 +35,6 @@ import kotlin.time.Clock
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import presentation.theme.SizeNormal
-import presentation.theme.Theme
 import presentation.theme.ThemeNeon
 import domain.repostirory.SettingsAppRepository
 
@@ -47,7 +46,9 @@ import CommonConst.SIZE_STANDART
 import CommonConst.SIZE_LARGE
 
 import CommonConst.ALARM_SETTINGS
+import data.room.model.SubItem
 import domain.repostirory.GetPlatrormRepository
+import kotlinx.coroutines.flow.Flow
 
 import presentation.theme.ThemeZabor
 import presentation.theme.SizeSmall
@@ -231,22 +232,69 @@ class MainViewModel(
     }
 
 
-    fun insertItem(item: Item, alarm: Boolean = false,calendar: Boolean){
+    fun getSubItemsForTask(taskId: Int): Flow<List<SubItem>> {
+        return db.getSubItemsForTask(taskId)
+    }
 
+
+//    fun insertItem(item: Item, alarm: Boolean = false,calendar: Boolean){
+//
+//        viewModelScope.launch(Dispatchers.IO) {
+//
+//            val currentMinSort = db.getItemWithMinSort()?.sort ?: 0
+//            val newSortIndex = currentMinSort - 1
+//            val newItem = item.copy(sort = newSortIndex)
+//
+//            val insertedId = db.insertItem(newItem)
+//            withContext(Dispatchers.Main){
+//                if(alarm) {
+//                    val savedItem = newItem.copy(id = insertedId.toInt())
+//                    permission(NOTIFICATION, savedItem,calendar)
+//                } else showDialog = DialogState()
+//            }
+//
+//        }
+//    }
+
+    fun insertItem(
+        item: Item,
+        subItems: List<SubItem>,
+        alarm: Boolean = false,
+        calendar: Boolean
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
-
-            val currentMinSort = db.getItemWithMinSort()?.sort ?: 0
-            val newSortIndex = currentMinSort - 1
-            val newItem = item.copy(sort = newSortIndex)
-
-            val insertedId = db.insertItem(newItem)
-            withContext(Dispatchers.Main){
-                if(alarm) {
-                    val savedItem = newItem.copy(id = insertedId.toInt())
-                    permission(NOTIFICATION, savedItem,calendar)
-                } else showDialog = DialogState()
+            val finalItem = if (item.id == 0) {
+                val currentMinSort = db.getItemWithMinSort()?.sort ?: 0
+                item.copy(sort = currentMinSort - 1)
+            } else {
+                item
             }
 
+            // 1. Сохраняем дело и получаем его реальный ID
+            val insertedId = db.insertItem(finalItem).toInt()
+
+            // 2. ЕСЛИ ЭТО РЕДАКТИРОВАНИЕ (item.id != 0), чистим старые подзадачи дела в БД
+            if (item.id != 0) {
+                db.deleteAllSubItemsForTask(item.id)
+            }
+
+            // 3. Перепривязываем подзадачи к ID дела (для новых дел это будет insertedId)
+            val updatedSubItems = subItems.map { subItem ->
+                // Важно: обнуляем id самой подзадачи, так как мы пишем их заново как новые строки
+                subItem.copy(id = 0, idTask = insertedId)
+            }
+
+            // 4. Записываем финальный список подзадач из диалога
+            db.insertSubItems(updatedSubItems)
+
+            withContext(Dispatchers.Main) {
+                if (alarm) {
+                    val savedItem = finalItem.copy(id = insertedId)
+                    permission(NOTIFICATION, savedItem, calendar)
+                } else {
+                    showDialog = DialogState()
+                }
+            }
         }
     }
     fun deleteItem(item: Item){
@@ -257,36 +305,45 @@ class MainViewModel(
         }
     }
 
-    fun updateItem(item: Item,alarm: Boolean = false,calendar: Boolean = false){
+//    fun updateItem(
+//        item: Item,
+//        alarm: Boolean = false,
+//        calendar: Boolean = false){
+//        viewModelScope.launch(Dispatchers.IO) {
+//            db.updateItem(item)
+//            withContext(Dispatchers.Main){
+//                if(alarm) permission(NOTIFICATION, item, calendar)
+//                else showDialog = DialogState()
+//            }
+//
+//        }
+//    }
+
+    fun updateItem(
+        item: Item,
+        subItems: List<SubItem>? = null, // 👈 Сделали Nullable со значением по умолчанию null
+        alarm: Boolean = false,
+        calendar: Boolean = false
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
+            // 1. Обновляем только само родительское дело в базе
             db.updateItem(item)
-            withContext(Dispatchers.Main){
-                if(alarm) permission(NOTIFICATION, item, calendar)
-                else showDialog = DialogState()
+
+            // 2. ОБРАБАТЫВАЕМ ПОДЗАДАЧИ ТОЛЬКО ЕСЛИ СПИСОК БЫЛ ПЕРЕДАН (из диалога)
+            if (subItems != null) {
+                db.deleteAllSubItemsForTask(item.id)
+                val updatedSubItems = subItems.map { subItem ->
+                    subItem.copy(id = 0, idTask = item.id)
+                }
+                db.insertSubItems(updatedSubItems)
             }
 
+            withContext(Dispatchers.Main) {
+                if (alarm) permission(NOTIFICATION, item, calendar)
+                else showDialog = DialogState()
+            }
         }
     }
-
-//    fun permission(permissionName: String, item: Item,calendar: Boolean = false) {
-//        viewModelScope.launch{
-//         val isChekedPermission = permission.isChekedPermission(permissionName)
-//
-//        if(isChekedPermission) {
-//            val dialog = if(calendar) TIME else NOTIFICATION
-//            sendMessage(dialog)
-//            showDialog = DialogState(dialog,item) }
-//        else {
-//            val isGranted = permission.requestPermission(permissionName)
-//            if(isGranted){
-//                showDialog = DialogState(permissionName,item)
-//            }
-//            else {sendMessage("Для стабильной работы, необходимо дать разрешение")}
-//
-//        }
-//        }
-//
-//    }
 
     fun permission(permissionName: String, item: Item? = null,calendar: Boolean = false) {
         viewModelScope.launch{
@@ -354,7 +411,7 @@ class MainViewModel(
                     else -> {
                         if (!premiumState.value) {
                             deleteAlarm(item.id)
-                            updateItem(item.copy(changeAlarm = false))
+                            updateItem(item = item.copy(changeAlarm = false))
                         } else {
                             insertAlarm(item)
                         }
@@ -363,34 +420,6 @@ class MainViewModel(
                 }
             }
         }
-    }
-
-    suspend fun getAllCategories(item: Item?, calendar: Boolean) : List<String> {
-        val listCategory = mutableListOf("Повседневные")
-        listCategory.addAll(db.getAllCategories())
-        if (!calendar) {
-            if (item == null) {
-                val currentCategory = categoryItemFlow.value
-                listCategory.remove(currentCategory)
-                listCategory.add(0, currentCategory)
-            } else {
-                listCategory.remove(item.category)
-                listCategory.add(0, item.category)
-            }
-        } else {
-            if (item != null) {
-                listCategory.remove(item.category)
-                listCategory.add(0, item.category)
-            }
-
-        }
-        return listCategory
-    }
-
-    suspend fun getAllCategoriesTwo() : List<String> {
-        val listCategory = mutableListOf("Повседневные")
-        listCategory.addAll(db.getAllCategories())
-        return listCategory
     }
 
     fun insertCategory(name: String) {

@@ -1,6 +1,6 @@
 package data.repository
 
-import data.room.Item
+import data.room.model.Item
 import domain.repostirory.AlarmRepository
 
 import platform.UserNotifications.UNUserNotificationCenter

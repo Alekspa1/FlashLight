@@ -7,10 +7,13 @@ import androidx.room.DeleteColumn
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 import androidx.room.migration.AutoMigrationSpec
+import data.room.model.Item
+import data.room.model.ListCategory
+import data.room.model.SubItem
 
 
-@Database(entities = [Item::class, ListCategory::class],
-    version = 11,
+@Database(entities = [Item::class, ListCategory::class, SubItem::class],
+    version = 12,
     autoMigrations = [
         AutoMigration (from = 1, to = 2),
         AutoMigration (from = 2, to = 3),
@@ -21,7 +24,8 @@ import androidx.room.migration.AutoMigrationSpec
         AutoMigration (from = 7, to = 8),
         AutoMigration (from = 8, to = 9),
         AutoMigration (from = 9, to = 10, spec = myDataBase.DeleteAlarmRepeatSpec::class),
-        AutoMigration (from = 10, to = 11)
+        AutoMigration (from = 10, to = 11),
+        AutoMigration (from = 11, to = 12)
                      ]
 
 )

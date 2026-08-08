@@ -1,6 +1,5 @@
 package presentation.dialogs
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,7 +13,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -29,13 +27,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 
-import data.room.Item
+import data.room.model.Item
 import io.github.vinceglb.filekit.compose.rememberFilePickerLauncher
 import io.github.vinceglb.filekit.core.PickerType
 import io.github.vinceglb.filekit.core.PlatformFile
@@ -48,14 +45,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import presentation.theme.ThemeNeon
 import presentation.theme.Theme
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.material3.IconButton // или material, зависит от вашего проекта
 import androidx.compose.material3.Icon       // или material
@@ -69,6 +64,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.fadeOut
+import data.room.model.SubItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,6 +72,7 @@ fun AddOrChangeItemDialog(
     item: Item? = null,
     onCancel : ()-> Unit = {},
     listCategory : List<String> = emptyList(),
+    listSubItems : List<SubItem> = emptyList(),
     calendar : Boolean = false,
     date: Long = 0L,
     category: String = "Повседневные",
@@ -90,7 +87,8 @@ fun AddOrChangeItemDialog(
         alarlm : Boolean, // Оставил старое имя, чтобы не ломать лямбду в INSERT_DIALOG_ITEM
         originalNameImage : String,
         date: Long,
-    ) -> Unit ={_,_,_,_,_,_,_,_,_->},
+        newListSubItems: List<SubItem>
+    ) -> Unit ={_,_,_,_,_,_,_,_,_,_->},
     getUri : (String) -> String = {""},
 ) {
     var stateTextName by remember { mutableStateOf(item?.name ?: "") }
@@ -101,8 +99,13 @@ fun AddOrChangeItemDialog(
     var selectedFileUri: String by remember { mutableStateOf(getUri(item?.uri ?: "")) }
     var originalFileName by remember { mutableStateOf("") }
     var categorySelected by remember { mutableStateOf(item?.category ?: if(calendar) "Повседневные" else category) }
-    val listSubTask = remember { mutableStateListOf<String>() }
-    
+    val listSubTask = remember { mutableStateListOf<SubItem>() }
+
+    LaunchedEffect(listSubItems) {
+        listSubTask.clear()
+        listSubTask.addAll(listSubItems)
+    }
+
     val fileLauncher = rememberFilePickerLauncher(type = PickerType.Image) { file ->
          if (file != null) {
              selectedFileUri = parsePlatformUri(file)
@@ -131,7 +134,6 @@ fun AddOrChangeItemDialog(
             Column(
                 modifier = Modifier.fillMaxWidth()
                 .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
                
             ) {
                 // Поле Название
@@ -157,22 +159,27 @@ fun AddOrChangeItemDialog(
 
                 
                 // Поле подзадачи
-   TextButton(
-    onClick = { isExpanded = !isExpanded }, // Исправлено на одну переменную
-) {
-    Row(
-        modifier = Modifier.padding(start = 16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.End
-    ) {
-        Text(
-            text = "Подзадачи", // Добавлены кавычки
-            fontSize = 15.sp,
-            modifier = Modifier.padding(end = 8.dp)
-        )
-        ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) // Исправлено на одну переменную
-    }
-}
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.CenterEnd // Прижимает содержимое к правому краю
+                ) {
+                    TextButton(
+                        onClick = { isExpanded = !isExpanded },
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(start = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            Text(
+                                text = "Подзадачи", // Добавлены кавычки
+                                fontSize = 15.sp,
+                                modifier = Modifier.padding(end = 8.dp)
+                            )
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
+                        }
+                    }
+                }
 
 AnimatedVisibility(
     visible = isExpanded, // Исправлено на одну переменную
@@ -192,7 +199,14 @@ AnimatedVisibility(
             trailingIcon = {
                 IconButton(onClick = {
                     if (stateTextSubTask.isNotBlank()) {
-                        listSubTask.add(stateTextSubTask)
+                        listSubTask.add(
+                            SubItem(
+                                idTask = item?.id ?: 0, // ID родительского дела (если дело новое, тут будет 0)
+                                name = stateTextSubTask, // Текст из вашего TextField "Подзадача"
+                                change = false,
+                                sort = listSubTask.size
+                            )
+                        )
                         stateTextSubTask = ""
                     }
                 }) {
@@ -214,7 +228,7 @@ AnimatedVisibility(
                         modifier = Modifier
                             .padding(start = 5.dp, end = 5.dp)
                             .weight(1f),
-                        text = subTask,
+                        text = subTask.name,
                     )
                     IconButton(
                         onClick = { 
@@ -300,9 +314,8 @@ AnimatedVisibility(
             TextButton(
                 onClick = {
                     val text = stateTextName.trim().ifEmpty { "Без названия" }
-                    onSave(item,text,stateTextDecs,selectedFileUri,categorySelected,calendar,false,originalFileName,date)
+                    onSave(item,text,stateTextDecs,selectedFileUri,categorySelected,calendar,false,originalFileName,date,listSubTask)
                 },
-               // colors = ButtonDefaults.textButtonColors(contentColor = theme.textColor)
             ) {
                 Text("Ок", fontWeight = FontWeight.Bold)
             }
@@ -315,7 +328,7 @@ AnimatedVisibility(
                 TextButton(
                     onClick = {
                         val text = stateTextName.trim().ifEmpty { "Без названия" }
-                        onSave(item,text,stateTextDecs,selectedFileUri,categorySelected,calendar,true,originalFileName,date)
+                        onSave(item,text,stateTextDecs,selectedFileUri,categorySelected,calendar,true,originalFileName,date,listSubTask)
                     },
 
                 ) {
