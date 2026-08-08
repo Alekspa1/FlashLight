@@ -317,7 +317,7 @@ fun CardItem(
                                 listItem.copy(sort = idx) 
                             }
                             currentSnapshotList = listWithUpdatedSort
-                            onSubDragDropped(listWithUpdatedSort) // Возвращаем чистый List<Item> во ViewModel
+                            //onSubDragDropped(listWithUpdatedSort) 
                         }
                     )
                             .animateItem()
@@ -368,12 +368,12 @@ fun CardItem(
                         }
                     }
 
-                    // if (index < listSubItems.lastIndex) {
-                    //     HorizontalDivider(
-                    //         thickness = 0.5.dp,
-                    //         color = theme.borderCardMenuItem.copy(alpha = 0.15f)
-                    //     )
-                    // } 
+                    if (index < listSubItems.lastIndex) {
+                        HorizontalDivider(
+                            thickness = 0.5.dp,
+                            color = theme.borderCardMenuItem.copy(alpha = 0.15f)
+                        )
+                    } 
 
                     }
                     
