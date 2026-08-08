@@ -200,7 +200,7 @@ fun CardItem(
                                 ) {
                                     RadioButton(
                                         selected = subItem.change,
-                                        onClick = { onClick(item, CHANGE) },
+                                        onClick = {  },
                                         colors = RadioButtonDefaults.colors(
                                             selectedColor = theme.chekBoxTint,
                                             unselectedColor = theme.borderCardMenuItem
@@ -222,7 +222,7 @@ fun CardItem(
                                     )
 
                                     IconButton(
-                                        onClick = { onClick(item, DELETE) },
+                                        onClick = { },
                                         modifier = Modifier.size(24.dp)
                                     ) {
                                         Icon(
