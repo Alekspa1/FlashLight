@@ -340,7 +340,7 @@ fun CardItem(
                         // КРУГЛЫЙ ЧЕКБОКС (RadioButton)
                         RadioButton(
                             selected = subItem.change,
-                            onClick = { onClickSubItem(item, CHANGE_ITEM)  }, 
+                            onClick = { onClickSubItem(subItem, CHANGE_ITEM)  }, 
                             colors = RadioButtonDefaults.colors(
                                 selectedColor = theme.chekBoxTint,
                                 unselectedColor = theme.borderCardMenuItem
@@ -363,7 +363,7 @@ fun CardItem(
                         
                         // ИКОНКА УДАЛЕНИЯ ПОДЗАДАЧИ
                         IconButton(
-                            onClick = { onClickSubItem(item, DELETE)  }, 
+                            onClick = { onClickSubItem(subItem, DELETE)  }, 
                             modifier = Modifier.size(24.dp)
                         ) {
                             Icon(
