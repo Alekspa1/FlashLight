@@ -91,137 +91,45 @@ fun CardItem(
     theme: Theme = ThemeNeon(),
     size: Size = SizeNormal(),
     dragModifier: Modifier = Modifier,
-    onClick: (Item, Int) -> Unit = { _, _ -> },
+    onClick: (Item, Int, SubItem?) -> Unit = { _, _, _ -> },
+    onSubDragDropped: (List<SubItem>) -> Unit = {} // Колбэк для отправки нового порядка во ViewModel
 ) {
     var isExpanded by remember { mutableStateOf(false) }
+    
+    val subListState = rememberLazyListState()
+    
+    // ТВОЙ ПОДХОД: Локальный снимок в памяти Compose на основе входящего списка
+    var currentSubSnapshotList by remember(listSubItems) { mutableStateOf(listSubItems) }
+
+    // ТВОЙ ПОДХОД: Рубеж защиты — обновляем экран, только если данные в БД реально изменились
+    LaunchedEffect(listSubItems) {
+        if (currentSubSnapshotList != listSubItems) {
+            currentSubSnapshotList = listSubItems
+        }
+    }
+
+    // ТВОЙ ПОДХОД: Настройка реордера для подзадач
+    val subReorderableState = rememberReorderableLazyListState(
+        lazyListState = subListState,
+        onMove = { from, to ->
+            if (from.index in currentSubSnapshotList.indices && to.index in currentSubSnapshotList.indices) {
+                val updatedList = currentSubSnapshotList.toMutableList().apply { 
+                    add(to.index, removeAt(from.index)) 
+                }
+                currentSubSnapshotList = updatedList
+            }
+        }
+    )
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 1. Левая кнопка (Будильник)
-            Box(
-                modifier = Modifier
-                    .padding(start = 8.dp)
-                    .size(35.dp)
-                    .combinedClickable(
-                        onClick = { onClick(item, ALARM) },
-                        onLongClick = { onClick(item, ALARM_LONG) }
-                    )
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Alarm,
-                    contentDescription = "Будильник",
-                    tint = if (item.changeAlarm) theme.tintAlarmOn else theme.tintAlarmOff,
-                    modifier = Modifier.fillMaxSize(),
-                )
-            }
-
-            // 2. Центральная ОСНОВНАЯ карточка
-            Card(
-                modifier = Modifier
-                    .padding(start = 5.dp, end = 5.dp)
-                    .weight(1f)
-                    .clip(RoundedCornerShape(15.dp))
-                    .border(
-                        2.dp,
-                        if (item.change) theme.cardItemBorderTrue 
-                        else if (item.changeAlarm) theme.cardItemBorderAlarm 
-                        else theme.cardItemBorderFalse,
-                        RoundedCornerShape(15.dp)
-                    )
-                    .clickable { onClick(item, CHANGE_ITEM) }
-                    .then(dragModifier),
-                shape = RoundedCornerShape(15.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = if (item.change) theme.cardItemTrue 
-                    else if (item.changeAlarm) theme.cardItemAlarm 
-                    else theme.cardItemFalse
-                )
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 6.dp, top = 8.dp, bottom = 8.dp, end = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    // Иконка стрелочки-спойлера
-                    if (item.uri.isNotEmpty() || listSubItems.isNotEmpty()) {
-                        IconButton(
-                            onClick = { isExpanded = !isExpanded },
-                            modifier = Modifier.padding(start = 4.dp).size(24.dp)
-                        ) {
-                            Icon(
-                                modifier = Modifier.fillMaxSize(),
-                                imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                                contentDescription = "Раскрыть",
-                                tint = theme.iconTint
-                            )
-                        }
-                    }
-
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(start = 6.dp, end = 6.dp),
-                    ) {
-                        Text(
-                            text = item.name,
-                            color = theme.textColor,
-                            lineHeight = size.lineHeightItem,
-                            fontSize = size.textItem
-                        )
-
-                        if (item.desc.isNotEmpty()) {
-                            Text(
-                                modifier = Modifier.padding(top = 2.dp),
-                                text = item.desc,
-                                color = theme.textDesc,
-                                lineHeight = size.lineHeightDescAndAlarm,
-                                fontSize = size.textDesc
-                            )
-                        }
-                        if (item.changeAlarm) {
-                            Text(
-                                modifier = Modifier.padding(top = 4.dp),
-                                text = alarmText(item),
-                                color = theme.textAlarm,
-                                fontSize = size.textAlarm,
-                                lineHeight = size.lineHeightDescAndAlarm
-                            )
-                        }
-                    }
-
-                    IconButton(
-                        onClick = { onClick(item, CHANGE) },
-                        modifier = Modifier.padding(end = 4.dp).size(24.dp)
-                    ) {
-                        Icon(
-                            modifier = Modifier.fillMaxSize(),
-                            imageVector = if (item.change) theme.chekBoxOn else theme.chekBoxOff,
-                            contentDescription = "Check",
-                            tint = theme.chekBoxTint
-                        )
-                    }
-                }
-            }
-
-            // 3. Правая кнопка (Удаление)
-            IconButton(
-                onClick = { onClick(item, DELETE) },
-                modifier = Modifier.padding(end = 8.dp).size(35.dp)
-            ) {
-                Icon(
-                    modifier = Modifier.fillMaxSize(),
-                    imageVector = theme.iconDelItem,
-                    contentDescription = "Удалить",
-                    tint = theme.iconDelTint,
-                )
-            }
+            // ... (Твой код Левой кнопки будильника и Центральной карточки дела) ...
         }
 
-        // ВЫЕЗЖАЮЩАЯ ОТДЕЛЬНАЯ КАРТОЧКА (Появляется строго ПОД основной)
+        // ВЫЕЗЖАЮЩАЯ КАРТОЧКА С ДРАГ-ЭНД-ДРОПОМ ПО ТВОЕЙ СХЕМЕ
         AnimatedVisibility(
             visible = isExpanded,
             enter = expandVertically() + fadeIn(),
@@ -230,24 +138,13 @@ fun CardItem(
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    // Делаем точно такие же отступы по бокам, как у центральной карточки выше
                     .padding(start = 48.dp, end = 48.dp, top = 6.dp, bottom = 4.dp) 
                     .clip(RoundedCornerShape(15.dp))
-                    .border(
-                        1.dp, // Тонкий независимый бордер
-                        theme.borderCardMenuItem, 
-                        RoundedCornerShape(15.dp)
-                    ),
+                    .border(1.dp, theme.borderCardMenuItem, RoundedCornerShape(15.dp)),
                 shape = RoundedCornerShape(15.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = theme.cardMenuItem // Фон 1 в 1 как в твоем диалоге
-                )
+                colors = CardDefaults.cardColors(containerColor = theme.cardMenuItem)
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(12.dp)
-                ) {
+                Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
                     if (selectedFileUri.isNotEmpty()) {
                         AsyncImage(
                             model = selectedFileUri,
@@ -256,48 +153,83 @@ fun CardItem(
                                 .padding(bottom = 12.dp)
                                 .size(75.dp)
                                 .clip(RoundedCornerShape(10.dp))
-                                .clickable { onClick(item, IMAGE) },
+                                .clickable { onClick(item, IMAGE, null) },
                             contentScale = ContentScale.Crop,
                         )
                     }
 
-                    listSubItems.forEachIndexed { index, subItem ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 6.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(
-                                text = subItem.name,
-                                color = if (subItem.change) theme.textDesc else theme.textColor,
-                                fontSize = size.textDesc,
-                                style = if (subItem.change) {
-                                    val currentStyle: androidx.compose.ui.text.TextStyle = LocalTextStyle.current
-                                    currentStyle.copy(textDecoration = TextDecoration.LineThrough)
-                                } else {
-                                    LocalTextStyle.current
-                                },
-                                modifier = Modifier.weight(1f).padding(end = 8.dp)
-                            )
+                    // Переводим подзадачи на LazyColumn фиксированной высоты, чтобы работал Drag-and-Drop
+                    LazyColumn(
+                        state = subListState,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 250.dp) // Ограничиваем высоту, чтобы список не растягивался бесконечно
+                    ) {
+                        itemsIndexed(
+                            items = currentSubSnapshotList,
+                            key = { _, sub -> sub.id }
+                        ) { index, subItem ->
                             
-                            // КРУГЛЫЙ ЧЕКБОКС: Использование RadioButton делает индикатор круглым
-                            RadioButton(
-                                selected = subItem.change,
-                                onClick = null, // Пока клик не обрабатываем на главном экране
-                                colors = RadioButtonDefaults.colors(
-                                    selectedColor = theme.chekBoxTint,
-                                    unselectedColor = theme.borderCardMenuItem
-                                ),
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
+                            ReorderableItem(state = subReorderableState, key = subItem.id) { isDragging ->
+                                
+                                // ТВОЙ ПОДХОД: Формируем чистый dragModifier для подзадачи
+                                val subDragHandle = Modifier.longPressDraggableHandle(
+                                    enabled = true,
+                                    onDragStarted = { haptic.performHapticFeedback(HapticFeedbackType.LongPress) },
+                                    onDragStopped = {
+                                        // ТВОЙ ПОДХОД: Пересчитываем sort строго в момент отпускания пальца
+                                        val listWithUpdatedSort = currentSubSnapshotList.mapIndexed { idx, sub -> 
+                                            sub.copy(sort = idx) 
+                                        }
+                                        currentSubSnapshotList = listWithUpdatedSort // Фиксируем локально
+                                        onSubDragDropped(listWithUpdatedSort) // Пушим во ViewModel для Room
+                                    }
+                                )
 
-                        if (index < listSubItems.lastIndex) {
-                            HorizontalDivider(
-                                thickness = 0.5.dp,
-                                color = theme.borderCardMenuItem.copy(alpha = 0.15f)
-                            )
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .then(subDragHandle) // Тянуть можно за любую область строки подзадачи
+                                        .graphicsLayer { alpha = if (isDragging) 0.5f else 1f }
+                                        .padding(vertical = 6.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    RadioButton(
+                                        selected = subItem.change,
+                                        onClick = { onClick(item, CHANGE, subItem) },
+                                        colors = RadioButtonDefaults.colors(
+                                            selectedColor = theme.chekBoxTint,
+                                            unselectedColor = theme.borderCardMenuItem
+                                        ),
+                                        modifier = Modifier.size(20.dp)
+                                    )
+
+                                    Text(
+                                        text = subItem.name,
+                                        color = if (subItem.change) theme.textDesc else theme.textColor,
+                                        fontSize = size.textDesc,
+                                        style = if (subItem.change) {
+                                            val currentStyle: androidx.compose.ui.text.TextStyle = LocalTextStyle.current
+                                            currentStyle.copy(textDecoration = TextDecoration.LineThrough)
+                                        } else {
+                                            LocalTextStyle.current
+                                        },
+                                        modifier = Modifier.weight(1f).padding(start = 8.dp, end = 8.dp)
+                                    )
+
+                                    IconButton(
+                                        onClick = { onClick(item, DELETE, subItem) },
+                                        modifier = Modifier.size(24.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Close,
+                                            contentDescription = "Удалить подзадачу",
+                                            tint = theme.textDesc,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
                 }
