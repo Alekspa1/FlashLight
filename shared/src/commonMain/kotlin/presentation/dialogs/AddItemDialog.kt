@@ -68,6 +68,7 @@ import data.room.model.SubItem
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.height
+import androidx.compose.material.icons.filled.Check
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -103,7 +104,7 @@ fun AddOrChangeItemDialog(
     var originalFileName by remember { mutableStateOf("") }
     var categorySelected by remember { mutableStateOf(item?.category ?: if(calendar) "Повседневные" else category) }
     val listSubTask = remember { mutableStateListOf<SubItem>() }
-
+    var editingSubTaskId by remember { mutableIntStateOf(-1) }
     LaunchedEffect(listSubItems) {
         listSubTask.clear()
         listSubTask.addAll(listSubItems)
@@ -244,33 +245,73 @@ fun AddOrChangeItemDialog(
             color = theme.cardItemBorderFalse,
             shape = RoundedCornerShape(10.dp)
         )) {
-                    listSubTask.forEach { subTask ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(
-                                modifier = Modifier
-                                    .padding(start = 4.dp, end = 8.dp)
-                                    .weight(1f),
-                                text = subTask.name,
-                                color = theme.textColor,
-                                fontSize = 15.sp
-                            )
-                            IconButton(
-                                onClick = { listSubTask.remove(subTask) },
-                                modifier = Modifier.size(24.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = "Удалить подзадачу",
-                                    tint = theme.textDesc
-                                )
-                            }
-                        }
-                    }
+Column(modifier = Modifier.fillMaxWidth()) {
+    listSubTask.forEachIndexed { index, subTask ->
+        val isEditing = editingSubTaskId == subTask.id && subTask.id != 0 
+                || (subTask.id == 0 && editingSubTaskId == index + 100000) // Хитрый ключ для новых подзадач, у которых id еще 0
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 2.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (isEditing) {
+                // РЕЖИМ РЕДАКТИРОВАНИЯ: Поле ввода вместо статичного текста
+                BasicTextField(
+                    value = subTask.name,
+                    onValueChange = { newText ->
+                        listSubTask[index] = subTask.copy(name = newText)
+                    },
+                    textStyle = LocalTextStyle.current.copy(color = theme.textColor, fontSize = 15.sp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 4.dp, end = 8.dp)
+                        .border(1.dp, theme.tintPremiumOn, RoundedCornerShape(4.dp)) // Подсвечиваем рамкой цвет темы
+                        .padding(8.dp)
+                )
+
+                // Кнопка сохранения правок (Галочка)
+                IconButton(
+                    onClick = { editingSubTaskId = -1 }, // Выходим из режима редактирования
+                    modifier = Modifier.size(24.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Check, // Нужен импорт androidx.compose.material.icons.filled.Check
+                        contentDescription = "Сохранить правку",
+                        tint = theme.tintPremiumOn
+                    )
+                }
+            } else {
+                // ОБЫЧНЫЙ РЕЖИМ: Просто текст подзадачи
+                Text(
+                    modifier = Modifier
+                        .padding(start = 4.dp, end = 8.dp)
+                        .weight(1f)
+                        .clickable { 
+                            // По клику на текст включаем редактирование этой строки
+                            editingSubTaskId = if (subTask.id != 0) subTask.id else index + 100000 
+                        },
+                    text = subTask.name,
+                    color = theme.textColor,
+                    fontSize = 15.sp
+                )
+
+                // Кнопка удаления (Крестик)
+                IconButton(
+                    onClick = { listSubTask.remove(subTask) },
+                    modifier = Modifier.size(24.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Удалить подзадачу",
+                        tint = theme.textDesc
+                    )
+                }
+            }
+        }
+    }
+}
                 }
             }
         }
