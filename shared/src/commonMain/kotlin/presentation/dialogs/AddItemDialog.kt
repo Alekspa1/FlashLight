@@ -66,6 +66,8 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.fadeOut
 import data.room.model.SubItem
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.height
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -157,35 +159,43 @@ fun AddOrChangeItemDialog(
                     label = { Text("Описание") },
                 )
 
-                Column(
+               Column(
     modifier = Modifier
         .fillMaxWidth()
-        .padding(vertical = 8.dp) // Отступ от соседних полей (Название/Описание)
+        .padding(vertical = 8.dp)
         .border(
-            width = 1.dp, // Стандартная толщина рамки OutlinedTextField
-            color = theme.borderCardMenuItem, // Цвет рамки из вашей темы
-            shape = RoundedCornerShape(10.dp) // Ваше скругление 10.dp
+            width = 1.dp,
+            color = theme.borderCardMenuItem,
+            shape = RoundedCornerShape(10.dp)
         )
 ) {
-    // Кликабельная шапка спойлера
-    Row(
+    // Внешний Box занимает всю ширину, чтобы прижать кнопку вправо
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { isExpanded = !isExpanded } // Теперь кликабельна ВСЯ строка, а не только кнопка
-            .padding(horizontal = 16.dp, vertical = 12.dp), // Внутренние отступы шапки
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween // Текст слева, стрелочка справа
+            .padding(top = 4.dp, end = 4.dp), // Небольшой отступ от внешней рамки
+        contentAlignment = Alignment.CenterEnd
     ) {
-        Text(
-            text = "Подзадачи",
-            fontSize = 15.sp,
-            color = theme.textColor // Цвет текста из темы
-        )
-        // Стрелочка из ExposedDropdownMenuDefaults (сама крутится при изменении isExpanded)
-        ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
+        // Row теперь кликабелен сам по себе и сжимается под контент
+        Row(
+            modifier = Modifier
+                .clip(RoundedCornerShape(8.dp)) // Чтобы эффект нажатия не вылезал за границы
+                .clickable { isExpanded = !isExpanded }
+                .padding(horizontal = 12.dp, vertical = 8.dp), // Внутренние отступы самой кнопки
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.End
+        ) {
+            Text(
+                text = "Подзадачи",
+                fontSize = 15.sp,
+                color = theme.textColor,
+                modifier = Modifier.padding(end = 8.dp)
+            )
+            ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
+        }
     }
 
-    // Выпадающее содержимое
+    // Выпадающее содержимое (остается без изменений)
     AnimatedVisibility(
         visible = isExpanded,
         enter = expandVertically() + fadeIn(),
@@ -194,7 +204,7 @@ fun AddOrChangeItemDialog(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 12.dp, end = 12.dp, bottom = 12.dp) // Отступы внутри рамки
+                .padding(start = 12.dp, end = 12.dp, bottom = 12.dp)
         ) {
             // Поле ввода подзадачи (внутри рамки)
             OutlinedTextField(
