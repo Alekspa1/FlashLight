@@ -95,7 +95,7 @@ fun CardItem(
     theme: Theme = ThemeNeon(),
     size: Size = SizeNormal(),
     dragModifier: Modifier = Modifier,
-    onClick: (Item, Int) -> Unit = { _, _, _ -> },
+    onClick: (Item, Int) -> Unit = { _, _, -> },
     onSubDragDropped: (List<SubItem>) -> Unit = {} // Колбэк для отправки нового порядка во ViewModel
 ) {
     var isExpanded by remember { mutableStateOf(false) }
