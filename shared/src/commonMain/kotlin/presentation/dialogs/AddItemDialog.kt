@@ -206,115 +206,111 @@ fun AddOrChangeItemDialog(
         enter = expandVertically() + fadeIn(),
         exit = shrinkVertically() + fadeOut()
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 12.dp, end = 12.dp, bottom = 12.dp)
-        ) {
-            // Поле ввода подзадачи (внутри рамки)
-            OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(),
-                value = stateTextSubTask,
-                onValueChange = { stateTextSubTask = it },
-                shape = RoundedCornerShape(10.dp),
-                label = { Text("Подзадача") },
-                trailingIcon = { 
-                    IconButton(onClick = { 
+       Column(
+    modifier = Modifier
+        .fillMaxWidth()
+        .padding(start = 16.dp, end = 16.dp, bottom = 16.dp) // Даем отступы от внешних краев
+) {
+    // 1. Поле ввода новой подзадачи (убрали тяжелую рамку OutlinedTextField)
+    BasicTextField(
+        value = stateTextSubTask,
+        onValueChange = { stateTextSubTask = it },
+        textStyle = LocalTextStyle.current.copy(color = theme.textColor, fontSize = 15.sp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        decorationBox = { innerTextField ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(1.dp, theme.borderCardMenuItem, RoundedCornerShape(8.dp))
+                    .padding(horizontal = 12.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Box(modifier = Modifier.weight(1f)) {
+                    if (stateTextSubTask.isEmpty()) {
+                        Text("Добавить подзадачу...", color = theme.textDesc, fontSize = 15.sp)
+                    }
+                    innerTextField()
+                }
+                IconButton(
+                    onClick = { 
                         if (stateTextSubTask.isNotBlank()) {
                             val maxSort = listSubTask.maxOfOrNull { it.sort } ?: -1
-                            val newSortIndex = maxSort + 1
-
                             listSubTask.add(
                                 SubItem(
                                     idTask = item?.id ?: 0,
                                     name = stateTextSubTask,
                                     change = false,
-                                    sort = newSortIndex
+                                    sort = maxSort + 1
                                 )
                             )
                             stateTextSubTask = "" 
                         }
-                    }) { 
-                        Icon(Icons.Default.Add, contentDescription = "Добавить") 
-                    } 
-                }
-            )
-
-            // Список подзадач (если он не пустой, добавляем отступ сверху)
-            if (listSubTask.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(8.dp))
-                
-                Column(modifier = Modifier.fillMaxWidth()) {
-Column(modifier = Modifier.fillMaxWidth()) {
-    listSubTask.forEachIndexed { index, subTask ->
-        val isEditing = editingSubTaskId == subTask.id && subTask.id != 0 
-                || (subTask.id == 0 && editingSubTaskId == index + 100000) // Хитрый ключ для новых подзадач, у которых id еще 0
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 2.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            if (isEditing) {
-                // РЕЖИМ РЕДАКТИРОВАНИЯ: Поле ввода вместо статичного текста
-                BasicTextField(
-                    value = subTask.name,
-                    onValueChange = { newText ->
-                        listSubTask[index] = subTask.copy(name = newText)
                     },
-                    textStyle = LocalTextStyle.current.copy(color = theme.textColor, fontSize = 15.sp),
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 4.dp, end = 8.dp)
-                        .border(1.dp, theme.tintPremiumOn, RoundedCornerShape(4.dp)) // Подсвечиваем рамкой цвет темы
-                        .padding(8.dp)
-                )
-
-                // Кнопка сохранения правок (Галочка)
-                IconButton(
-                    onClick = { editingSubTaskId = -1 }, // Выходим из режима редактирования
-                    modifier = Modifier.size(24.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Check, // Нужен импорт androidx.compose.material.icons.filled.Check
-                        contentDescription = "Сохранить правку",
-                        tint = theme.tintPremiumOn
-                    )
+                    modifier = Modifier.size(20.dp)
+                ) { 
+                    Icon(Icons.Default.Add, contentDescription = "Добавить", tint = theme.tintPremiumOn) 
                 }
-            } else {
-                // ОБЫЧНЫЙ РЕЖИМ: Просто текст подзадачи
-                Text(
-                    modifier = Modifier
-                        .padding(start = 4.dp, end = 8.dp)
-                        .weight(1f)
-                        .clickable { 
-                            // По клику на текст включаем редактирование этой строки
-                            editingSubTaskId = if (subTask.id != 0) subTask.id else index + 100000 
-                        },
-                    text = subTask.name,
-                    color = theme.textColor,
-                    fontSize = 15.sp
-                )
+            }
+        }
+    )
 
-                // Кнопка удаления (Крестик)
-                IconButton(
-                    onClick = { listSubTask.remove(subTask) },
-                    modifier = Modifier.size(24.dp)
+    if (listSubTask.isNotEmpty()) {
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // 2. Список подзадач с разделителями
+        Column(modifier = Modifier.fillMaxWidth()) {
+            listSubTask.forEachIndexed { index, subTask ->
+                val isEditing = editingSubTaskId == subTask.id && subTask.id != 0 
+                        || (subTask.id == 0 && editingSubTaskId == index + 100000)
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 10.dp), // Увеличили кликабельную высоту строки
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Удалить подзадачу",
-                        tint = theme.textDesc
+                    if (isEditing) {
+                        BasicTextField(
+                            value = subTask.name,
+                            onValueChange = { newText -> listSubTask[index] = subTask.copy(name = newText) },
+                            textStyle = LocalTextStyle.current.copy(color = theme.textColor, fontSize = 15.sp),
+                            modifier = Modifier
+                                .weight(1f)
+                                .border(1.dp, theme.tintPremiumOn, RoundedCornerShape(4.dp))
+                                .padding(8.dp)
+                        )
+                        IconButton(onClick = { editingSubTaskId = -1 }, modifier = Modifier.size(24.dp)) {
+                            Icon(Icons.Default.Check, contentDescription = "ОК", tint = theme.tintPremiumOn)
+                        }
+                    } else {
+                        Text(
+                            text = subTask.name,
+                            color = theme.textColor,
+                            fontSize = 15.sp,
+                            modifier = Modifier
+                                        .weight(1f)
+                                        .clickable { editingSubTaskId = if (subTask.id != 0) subTask.id else index + 100000 }
+                        )
+                        IconButton(onClick = { listSubTask.remove(subTask) }, modifier = Modifier.size(24.dp)) {
+                            Icon(Icons.Default.Close, contentDescription = "Удалить", tint = theme.textDesc)
+                        }
+                    }
+                }
+
+                // 3. Тонкая разделительная линия между пунктами (кроме последнего элемента)
+                if (index < listSubTask.lastIndex) {
+                    HorizontalDivider(
+                        thickness = 0.5.dp,
+                        color = theme.borderCardMenuItem.copy(alpha = 0.3f) // Полупрозрачная линия
                     )
                 }
             }
         }
     }
 }
-                }
-            }
-        }
     }
 }
 
