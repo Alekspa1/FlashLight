@@ -183,41 +183,37 @@ class MainViewModel(
 
     fun deleteImage(fileName: String) = image.delete(fileName)
 
-  val sortedItemsFlow = combine(
-        db.getAll(),                       // Поток всех дел Flow<List<Item>>
-        db.getAllSubItems(),               // Поток всех подзадач Flow<List<SubItem>>
-        sortType,                          // Поток типа сортировки
-        categoryItemFlow                   // Поток выбранной категории
-    ) { itemsList: List<Item>, allSubItems: List<SubItem>, sort: Int, currentCategory: String -> // УКАЗАЛИ ТИПЫ ЯВНО
+val sortedItemsFlow: StateFlow<List<ItemWithSubItems>> = combine(
+    db.getAll(),
+    db.getAllSubItems(),
+    sortType,
+    categoryItemFlow
+) { itemsList, allSubItems, sort, currentCategory ->
+    val filteredList = itemsList.filter { it.category == currentCategory }
 
-        // 1. СНАЧАЛА ФИЛЬТРУЕМ СПИСОК ДЕЛ по категории
-        val filteredList = itemsList.filter { it.category == currentCategory }
-
-        // 2. ЗАТЕМ СОРТИРУЕМ ОТФИЛЬТРОВАННЫЙ СПИСОК
-        val sortedList = if (sort == SORT_STANDART) {
-            filteredList.sortedWith(
-                compareBy<Item> { if (it.changeAlarm) 0 else 1 } // 1. Сначала ВСЕ с активным будильником (желтые)
-                    .thenBy { if (it.change) 1 else 0 }          // 2. ОПУСКАЕМ ЗЕЛЕНЫЕ: сначала незавершенные (0), выполненные (1) вниз!
-                    .thenBy { it.alarmTime }                     // 3. Сортируем будильники по времени
-                    .thenBy { it.sort }                          // 4. Стандартная сортировка для остальных
-            )
-        } else {
-            filteredList.sortedBy { it.sort }
-        }
-
-        // 3. СКЛЕИВАЕМ ДЕЛА С ИХ ПОДЗАДАЧАМИ
-        sortedList.map { item ->
-            ItemWithSubItems(
-                item = item,
-                subItems = allSubItems.filter { it.idTask == item.id }.sortedBy { it.sort }
-            )
-        }
-    }.flowOn(Dispatchers.Default)
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList<ItemWithSubItems>() // ИСПРАВЛЕНО: Явно подсказали тип пустого списка
+    val sortedList = if (sort == SORT_STANDART) {
+        filteredList.sortedWith(
+            compareBy<Item> { if (it.changeAlarm) 0 else 1 }
+                .thenBy { if (it.change) 1 else 0 }
+                .thenBy { it.alarmTime }
+                .thenBy { it.sort }
         )
+    } else {
+        filteredList.sortedBy { it.sort }
+    }
+
+    sortedList.map { item ->
+        ItemWithSubItems(
+            item = item,
+            subItems = allSubItems.filter { it.idTask == item.id }.sortedBy { it.sort }
+        )
+    }
+}.flowOn(Dispatchers.Default)
+    .stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+    )
 
     //  val sortedItemsFlow = combine(
     //     db.getAll(), // Поток всех дел
