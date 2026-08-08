@@ -87,6 +87,9 @@ interface CourseDao {
     suspend fun updateCategory(Course: ListCategory)
 
     // SubItem
+    
+    @Query("SELECT * FROM sub_items")
+    fun getAllSubItems(): Flow<List<SubItem>>
 
     @Query("SELECT * FROM sub_items WHERE idTask = :taskId ORDER BY sort ASC")
     fun getSubItemsForTask(taskId: Int): Flow<List<SubItem>>
