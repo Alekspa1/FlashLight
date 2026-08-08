@@ -36,28 +36,26 @@ import androidx.compose.runtime.LaunchedEffect
 
 @Composable
 fun ListToDo(
-    list: List<ItemWithSubItems>, // Принимаем связку с подзадачами
+    list: List<ItemWithSubItems>, // Принимаем связку
     selectedFileUri: (String) -> String = { _ -> "" },
     theme: Theme = ThemeNeon(),
     size: Size = SizeNormal(),
     isDragDropEnabled: Boolean = true,
     onClick: (Item, Int) -> Unit = { _, _ -> },
     onAddItem: () -> Unit = {},
-    // Возвращаем назад чистый List<Item> для твоей ViewModel, как ты и просил!
-    onDragDropped: (List<Item>) -> Unit = {}, 
+    onDragDropped: (List<Item>) -> Unit = {}, // Возвращает чистый List<Item> во ViewModel
     onSubDragDropped: (List<SubItem>) -> Unit = {},
     category: String = "Тест"
 ) {
     val listState = rememberLazyListState()
     val haptic = LocalHapticFeedback.current
 
-    // Вытаскиваем только дела для работы Drag-and-Drop, чтобы ничего не ломать
-    val itemsOnly = remember(list) { list.map { it.item } }
-    var currentSnapshotList by remember { mutableStateOf<List<Item>>(itemsOnly) }
+    // ОПТИМИЗАЦИЯ: Снимок теперь хранит всю связку целиком
+    var currentSnapshotList by remember { mutableStateOf<List<ItemWithSubItems>>(list) }
 
     LaunchedEffect(list) {
-        if (currentSnapshotList != itemsOnly) {
-            currentSnapshotList = itemsOnly
+        if (currentSnapshotList != list) {
+            currentSnapshotList = list
         }
     }
 
@@ -95,25 +93,25 @@ fun ListToDo(
 
             itemsIndexed(
                 items = currentSnapshotList,
-                key = { _, item -> item.id } // Ключ работает по ID дела, всё чётко
-            ) { index, item ->
-                
-                // Находим подзадачи для текущей карточки из исходного списка на лету
-                val subItems = list.find { it.item.id == item.id }?.subItems ?: emptyList()
+                key = { _, target -> target.item.id } // Ключ по ID вложенного item
+            ) { index, target -> // target — это теперь ItemWithSubItems
 
                 ReorderableItem(
                     state = reorderableState,
-                    key = item.id
+                    key = target.item.id
                 ) { isDragging ->
                     val draggableHandle = Modifier.longPressDraggableHandle(
                         enabled = isDragDropEnabled,
                         onDragStarted = { haptic.performHapticFeedback(HapticFeedbackType.LongPress) },
                         onDragStopped = {
-                            val listWithUpdatedSort = currentSnapshotList.mapIndexed { idx, listItem -> 
-                                listItem.copy(sort = idx) 
+                            // Пересчитываем sort во вложенных Item, сохраняя подзадачи
+                            val listWithUpdatedSort = currentSnapshotList.mapIndexed { idx, oldTarget -> 
+                                oldTarget.copy(item = oldTarget.item.copy(sort = idx)) 
                             }
                             currentSnapshotList = listWithUpdatedSort
-                            onDragDropped(listWithUpdatedSort) // Возвращаем чистый List<Item> во ViewModel
+                            
+                            // Извлекаем только чистый List<Item> для твоей ViewModel
+                            onDragDropped(listWithUpdatedSort.map { it.item }) 
                         }
                     )
 
@@ -124,24 +122,23 @@ fun ListToDo(
                             .graphicsLayer { alpha = if (isDragging) 0.5f else 1f }
                     ) {
                         CardItem(
-                            item = item,
-                            listSubItems = subItems, // Передаем найденные подзадачи!
-                            selectedFileUri = selectedFileUri(item.uri),
+                            item = target.item, // Берем из target мгновенно
+                            listSubItems = target.subItems, // Берем из target мгновенно без поиска!
+                            selectedFileUri = selectedFileUri(target.item.uri),
                             theme = theme,
                             dragModifier = draggableHandle,
                             size = size,
                             onClick = { returnedItem, action ->
                                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                 onClick(returnedItem, action)
-                            },
-                            //onSubDragDropped = {list-> onSubDragDropped(list)}
+                            }
                         )
                     }
                 }
             }
         }
 
-        // Блок нижних кнопок (Микрофон и Плюс)
+        // Блок нижних кнопок (остался без изменений)
         Row(modifier = Modifier.fillMaxWidth()) {
             Box(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
                 IconButton(
@@ -172,26 +169,28 @@ fun ListToDo(
 
 // @Composable
 // fun ListToDo(
-//     list: List<ItemWithSubItems>,
+//     list: List<ItemWithSubItems>, // Принимаем связку с подзадачами
 //     selectedFileUri: (String) -> String = { _ -> "" },
 //     theme: Theme = ThemeNeon(),
 //     size: Size = SizeNormal(),
-//     isDragDropEnabled: Boolean = true, 
+//     isDragDropEnabled: Boolean = true,
 //     onClick: (Item, Int) -> Unit = { _, _ -> },
 //     onAddItem: () -> Unit = {},
+//     // Возвращаем назад чистый List<Item> для твоей ViewModel, как ты и просил!
 //     onDragDropped: (List<Item>) -> Unit = {}, 
+//     onSubDragDropped: (List<SubItem>) -> Unit = {},
 //     category: String = "Тест"
 // ) {
 //     val listState = rememberLazyListState()
+//     val haptic = LocalHapticFeedback.current
 
-//     // Наш локальный "адаптер" в памяти Compose
+//     // Вытаскиваем только дела для работы Drag-and-Drop, чтобы ничего не ломать
 //     val itemsOnly = remember(list) { list.map { it.item } }
 //     var currentSnapshotList by remember { mutableStateOf<List<Item>>(itemsOnly) }
-//     val haptic = LocalHapticFeedback.current
-//     // Рубеж защиты: обновляем экран только если из БД прилетел реально измененный чекбокс
-//     androidx.compose.runtime.LaunchedEffect(list) {
-//         if (currentSnapshotList != list) {
-//             currentSnapshotList = list
+
+//     LaunchedEffect(list) {
+//         if (currentSnapshotList != itemsOnly) {
+//             currentSnapshotList = itemsOnly
 //         }
 //     }
 
@@ -199,15 +198,11 @@ fun ListToDo(
 //         lazyListState = listState,
 //         onMove = { from, to ->
 //             if (from.index == 0 || to.index == 0) return@rememberReorderableLazyListState
-
 //             val fromIdx = from.index - 1
 //             val toIdx = to.index - 1
-
 //             if (fromIdx in currentSnapshotList.indices && toIdx in currentSnapshotList.indices) {
-//                 val updatedList = currentSnapshotList.toMutableList().apply {
-//                     add(toIdx, removeAt(fromIdx))
-//                 }
-//                 currentSnapshotList = updatedList 
+//                 val updatedList = currentSnapshotList.toMutableList().apply { add(toIdx, removeAt(fromIdx)) }
+//                 currentSnapshotList = updatedList
 //             }
 //         }
 //     )
@@ -216,7 +211,7 @@ fun ListToDo(
 //         LazyColumn(
 //             state = listState,
 //             modifier = Modifier.fillMaxWidth().weight(1f),
-//             verticalArrangement = Arrangement.spacedBy(5.dp), 
+//             verticalArrangement = Arrangement.spacedBy(5.dp),
 //         ) {
 //             val categoryName = category
 //             item(key = categoryName) {
@@ -232,54 +227,54 @@ fun ListToDo(
 //             }
 
 //             itemsIndexed(
-//                 items = currentSnapshotList, 
-//                 key = { _, item -> item.item.id }
+//                 items = currentSnapshotList,
+//                 key = { _, item -> item.id } // Ключ работает по ID дела, всё чётко
 //             ) { index, item ->
+                
+//                 // Находим подзадачи для текущей карточки из исходного списка на лету
+//                 val subItems = list.find { it.item.id == item.id }?.subItems ?: emptyList()
 
 //                 ReorderableItem(
 //                     state = reorderableState,
 //                     key = item.id
-//                 ) { isDragging -> 
-//                     // Формируем чистый dragModifier для проброса внутрь карточки
+//                 ) { isDragging ->
 //                     val draggableHandle = Modifier.longPressDraggableHandle(
 //                         enabled = isDragDropEnabled,
-//                         onDragStarted = {haptic.performHapticFeedback(HapticFeedbackType.LongPress)},
+//                         onDragStarted = { haptic.performHapticFeedback(HapticFeedbackType.LongPress) },
 //                         onDragStopped = {
-//                             // Пересчитываем sort строго в момент отпускания пальца
-//                             val listWithUpdatedSort = currentSnapshotList.mapIndexed { idx, listItem ->
-//                                 listItem.copy(sort = idx)
+//                             val listWithUpdatedSort = currentSnapshotList.mapIndexed { idx, listItem -> 
+//                                 listItem.copy(sort = idx) 
 //                             }
-//                             currentSnapshotList = listWithUpdatedSort // Фиксируем новые sort локально на экране
-//                             onDragDropped(listWithUpdatedSort) // Отправляем готовый список во ViewModel для Room
+//                             currentSnapshotList = listWithUpdatedSort
+//                             onDragDropped(listWithUpdatedSort) // Возвращаем чистый List<Item> во ViewModel
 //                         }
-                       
 //                     )
 
 //                     Box(
 //                         modifier = Modifier
 //                             .fillMaxWidth()
 //                             .animateItem()
-//                             .graphicsLayer {
-//                                 alpha = if (isDragging) 0.5f else 1f
-//                             }
+//                             .graphicsLayer { alpha = if (isDragging) 0.5f else 1f }
 //                     ) {
 //                         CardItem(
-//                             item = item.item,
-//                             listSubItems = item.subItems,
-//                             selectedFileUri = selectedFileUri(item.uri), 
+//                             item = item,
+//                             listSubItems = subItems, // Передаем найденные подзадачи!
+//                             selectedFileUri = selectedFileUri(item.uri),
 //                             theme = theme,
-//                             dragModifier = draggableHandle, // Наш готовый модификатор
+//                             dragModifier = draggableHandle,
 //                             size = size,
-//                             onClick = { 
-//                                 returnedItem, action ->
+//                             onClick = { returnedItem, action ->
 //                                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-//                                 onClick(returnedItem, action) }
+//                                 onClick(returnedItem, action)
+//                             },
+//                             //onSubDragDropped = {list-> onSubDragDropped(list)}
 //                         )
 //                     }
 //                 }
 //             }
 //         }
 
+//         // Блок нижних кнопок (Микрофон и Плюс)
 //         Row(modifier = Modifier.fillMaxWidth()) {
 //             Box(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
 //                 IconButton(
@@ -292,7 +287,6 @@ fun ListToDo(
 //                         modifier = Modifier.fillMaxSize()
 //                     )
 //                 }
-
 //                 IconButton(
 //                     modifier = Modifier.size(50.dp).align(Alignment.CenterEnd),
 //                     onClick = { onAddItem() },
@@ -308,7 +302,6 @@ fun ListToDo(
 //         }
 //     }
 // }
-
 
 
 // @Preview(showBackground = true)
