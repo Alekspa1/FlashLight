@@ -62,10 +62,9 @@ import CommonConst.CHANGE_ITEM
 import CommonConst.DELETE
 import CommonConst.IMAGE
 
-// Поштучные импорты для библиотеки Drag-and-Drop
-import org.burnoutcrew.reorderable.ReorderableItem
-import org.burnoutcrew.reorderable.rememberReorderableLazyListState
-import org.burnoutcrew.reorderable.longPressDraggableHandle
+// ИМПОРТЫ СТАБИЛЬНОЙ БИБЛИОТЕКИ CALVIN REORDERABLE
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
