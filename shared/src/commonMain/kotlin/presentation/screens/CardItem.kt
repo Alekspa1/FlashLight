@@ -90,9 +90,8 @@ import presentation.theme.Size
 import presentation.theme.SizeNormal
 
 // Твоя библиотека Drag-and-Drop
-import org.burnoutcrew.reorderable.ReorderableItem
-import org.burnoutcrew.reorderable.rememberReorderableLazyListState
-import org.burnoutcrew.reorderable.longPressDraggableHandle
+import sh.calvin.reorderable.ReorderableLazyColumn
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @Composable
 fun CardItem(
@@ -103,7 +102,6 @@ fun CardItem(
     size: Size = SizeNormal(),
     dragModifier: Modifier = Modifier,
     onClick: (Item, Int) -> Unit = { _, _ -> }, // 2 аргумента для главных дел
-    onSubItemClick: (SubItem, Int) -> Unit = { _, _ -> } // 2 аргумента для подзадач
 ) {
     var isExpanded by remember { mutableStateOf(false) }
 
