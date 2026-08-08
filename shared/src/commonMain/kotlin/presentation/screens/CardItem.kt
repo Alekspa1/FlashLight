@@ -285,6 +285,8 @@ fun CardItem(
         }
     }
 }
+    }
+}
 
 
 //@Composable
