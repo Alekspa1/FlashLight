@@ -44,6 +44,7 @@ fun ListToDo(
     onAddItem: () -> Unit = {},
     // Возвращаем назад чистый List<Item> для твоей ViewModel, как ты и просил!
     onDragDropped: (List<Item>) -> Unit = {}, 
+    onSubDragDropped: (List<SubItem>) -> Unit = {}
     category: String = "Тест"
 ) {
     val listState = rememberLazyListState()
@@ -131,7 +132,8 @@ fun ListToDo(
                             onClick = { returnedItem, action ->
                                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                 onClick(returnedItem, action)
-                            }
+                            },
+                            onSubDragDropped = {list-> onSubDragDropped(list)}
                         )
                     }
                 }
