@@ -70,6 +70,18 @@ import data.room.model.SubItem
 import androidx.compose.ui.zIndex
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.BorderStroke
+// Для стрелочек раскрытия списка (ошибки на строках 150:77 и 150:112)
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+
+// Для работы со стилями текста по умолчанию (ошибки на строках 251:41 и 253:41)
+import androidx.compose.material3.LocalTextStyle
+
+// Для зачеркивания текста выполненной задачи (ошибка на строке 251:86)
+import androidx.compose.ui.text.style.TextDecoration
+
+// Для тонкой линии-разделителя (ошибка на строке 266:33)
+import androidx.compose.material3.HorizontalDivider
 
 @Composable
 fun CardItem(
