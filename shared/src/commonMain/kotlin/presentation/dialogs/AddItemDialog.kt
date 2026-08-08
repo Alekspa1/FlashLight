@@ -70,7 +70,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.ui.Alignment
 
 // Для инлайнового текстового поля и стилей (BasicTextField, LocalTextStyle)
 import androidx.compose.foundation.text.BasicTextField
