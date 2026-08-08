@@ -92,6 +92,10 @@ import presentation.theme.ThemeZabor
 import presentation.theme.Size
 import presentation.theme.SizeNormal
 
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
+
+
 @Composable
 fun CardItem(
     item: Item,
@@ -109,9 +113,9 @@ fun CardItem(
     val haptic = LocalHapticFeedback.current
 
 
-    var currentSnapshotList by remember { mutableStateOf<List<Item>>(listSubItems) }
+    var currentSnapshotList by remember { mutableStateOf<List<SubItem>>(listSubItems) }
 
-    LaunchedEffect(list) {
+    LaunchedEffect(listSubItems) {
         if (currentSnapshotList != listSubItems) {
             currentSnapshotList = listSubItems
         }
