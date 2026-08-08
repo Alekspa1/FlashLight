@@ -69,6 +69,12 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.ui.Alignment
+
+// Для инлайнового текстового поля и стилей (BasicTextField, LocalTextStyle)
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material3.LocalTextStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -173,7 +179,7 @@ fun AddOrChangeItemDialog(
     // Внешний Box занимает всю ширину, чтобы прижать кнопку вправо
     Box(
         modifier = Modifier
-            .fillMaxWidth()
+            .fillMaxWidth(),
         contentAlignment = Alignment.CenterEnd
     ) {
         // Row теперь кликабелен сам по себе и сжимается под контент
