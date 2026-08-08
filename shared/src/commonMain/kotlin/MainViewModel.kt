@@ -54,7 +54,7 @@ import kotlinx.coroutines.flow.Flow
 import presentation.theme.ThemeZabor
 import presentation.theme.SizeSmall
 import presentation.theme.SizeLarge
-
+import data.room.model.ItemWithSubItems
 
 class MainViewModel(
     private val pref: SharedPrefRepository,
@@ -183,42 +183,41 @@ class MainViewModel(
 
     fun deleteImage(fileName: String) = image.delete(fileName)
 
-    val sortedItemsFlow = combine(
-    db.getAll(),                       // Поток всех дел Flow<List<Item>>
-    db.getAllSubItems(),  // Поток всех подзадач Flow<List<SubItem>>
-    sortType,                         // Поток типа сортировки
-    categoryItemFlow                  // Поток выбранной категории
-) { itemsList, allSubItems, sort, currentCategory ->
+  val sortedItemsFlow = combine(
+        db.getAll(),                       // Поток всех дел Flow<List<Item>>
+        db.getAllSubItems(),               // Поток всех подзадач Flow<List<SubItem>>
+        sortType,                          // Поток типа сортировки
+        categoryItemFlow                   // Поток выбранной категории
+    ) { itemsList: List<Item>, allSubItems: List<SubItem>, sort: Int, currentCategory: String -> // УКАЗАЛИ ТИПЫ ЯВНО
 
-    // 1. СНАЧАЛА ФИЛЬТРУЕМ СПИСОК ДЕЛ по категории
-    val filteredList = itemsList.filter { it.category == currentCategory }
+        // 1. СНАЧАЛА ФИЛЬТРУЕМ СПИСОК ДЕЛ по категории
+        val filteredList = itemsList.filter { it.category == currentCategory }
 
-    // 2. ЗАТЕМ СОРТИРУЕМ ОТФИЛЬТРОВАННЫЙ СПИСОК (твой оригинальный код сортировки)
-    val sortedList = if (sort == SORT_STANDART) {
-        filteredList.sortedWith(
-            compareBy<Item> { if (it.changeAlarm) 0 else 1 } // 1. Сначала ВСЕ с активным будильником (желтые)
-                .thenBy { if (it.change) 1 else 0 }          // 2. ОПУСКАЕМ ЗЕЛЕНЫЕ: сначала незавершенные (0), выполненные (1) вниз!
-                .thenBy { it.alarmTime }                     // 3. Сортируем будильники по времени
-                .thenBy { it.sort }                          // 4. Стандартная сортировка для остальных
+        // 2. ЗАТЕМ СОРТИРУЕМ ОТФИЛЬТРОВАННЫЙ СПИСОК
+        val sortedList = if (sort == SORT_STANDART) {
+            filteredList.sortedWith(
+                compareBy<Item> { if (it.changeAlarm) 0 else 1 } // 1. Сначала ВСЕ с активным будильником (желтые)
+                    .thenBy { if (it.change) 1 else 0 }          // 2. ОПУСКАЕМ ЗЕЛЕНЫЕ: сначала незавершенные (0), выполненные (1) вниз!
+                    .thenBy { it.alarmTime }                     // 3. Сортируем будильники по времени
+                    .thenBy { it.sort }                          // 4. Стандартная сортировка для остальных
+            )
+        } else {
+            filteredList.sortedBy { it.sort }
+        }
+
+        // 3. СКЛЕИВАЕМ ДЕЛА С ИХ ПОДЗАДАЧАМИ
+        sortedList.map { item ->
+            ItemWithSubItems(
+                item = item,
+                subItems = allSubItems.filter { it.idTask == item.id }.sortedBy { it.sort }
+            )
+        }
+    }.flowOn(Dispatchers.Default)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList<ItemWithSubItems>() // ИСПРАВЛЕНО: Явно подсказали тип пустого списка
         )
-    } else {
-        filteredList.sortedBy { it.sort }
-    }
-
-    // 3. СКЛЕИВАЕМ ДЕЛА С ИХ ПОДЗАДАЧАМИ
-    sortedList.map { item ->
-        ItemWithSubItems(
-            item = item,
-            // Фильтруем подзадачи, которые принадлежат этому делу, и сортируем их по порядку sort
-            subItems = allSubItems.filter { it.idTask == item.id }.sortedBy { it.sort }
-        )
-    }
-}.flowOn(Dispatchers.Default)
-    .stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = emptyList() // Теперь тут будет лежать List<ItemWithSubItems>
-    )
 
     //  val sortedItemsFlow = combine(
     //     db.getAll(), // Поток всех дел
