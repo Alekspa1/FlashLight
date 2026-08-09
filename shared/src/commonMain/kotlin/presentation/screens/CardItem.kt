@@ -333,14 +333,17 @@ AnimatedVisibility(
                                 )
                                 .animateItem()
                                 .graphicsLayer { alpha = if (isDragging) 0.5f else 1f }
-                                .drawBehind {
-                                    // Корректная отрисовка точки-узла
-                                    drawCircle(
-                                        color = neonColor,
-                                        radius = 4.dp.toPx(),
-                                        center = Offset(x = -16.dp.toPx(), y = size.height / 2)
-                                    )
-                                }
+.drawBehind {
+    val xPos = -16.dp.toPx()
+    drawLine(
+        color = neonColor,
+        start = Offset(x = xPos, y = -10.dp.toPx()),
+        // Исправлено: берем height из объекта size встроенного DrawScope
+        end = Offset(x = xPos, y = this.size.height), 
+        strokeWidth = 2.dp.toPx(),
+        cap = StrokeCap.Round
+    )
+}
                         ) {
                             Row(
                                 modifier = Modifier
