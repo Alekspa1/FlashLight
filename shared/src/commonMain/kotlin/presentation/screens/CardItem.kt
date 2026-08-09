@@ -96,16 +96,15 @@ import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
 
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.height
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.unit.Dp
 
 
 @Composable
@@ -121,13 +120,7 @@ fun CardItem(
     onClickSubItem: (SubItem, Int) -> Unit = { _, _ -> },
 ) {
     var isExpanded by remember { mutableStateOf(false) }
-    val mainCardShape = if (isExpanded) {
-    RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp, bottomStart = 0.dp, bottomEnd = 0.dp)
-    } else {
-    RoundedCornerShape(15.dp)
-    }
 
-    val currentBorderColor = if (item.change) theme.cardItemBorderTrue else if (item.changeAlarm) theme.cardItemBorderAlarm else theme.cardItemBorderFalse
     
     val listState = rememberLazyListState()
     val haptic = LocalHapticFeedback.current
@@ -178,20 +171,26 @@ fun CardItem(
 
             // 2. Центральная ОСНОВНАЯ карточка
             Card(
-                // modifier = Modifier
-                //     .padding(start = 5.dp, end = 5.dp)
-                //     .weight(1f)
-                //     .clip(RoundedCornerShape(15.dp))
-                //     .border(
-                //         2.dp,
-                //         if (item.change) theme.cardItemBorderTrue 
-                //         else if (item.changeAlarm) theme.cardItemBorderAlarm 
-                //         else theme.cardItemBorderFalse,
-                //         RoundedCornerShape(15.dp)
-                //     )
-                //     .clickable { onClick(item, CHANGE_ITEM) }
-                //     .then(dragModifier),
-                // shape = RoundedCornerShape(15.dp),
+                modifier = Modifier
+                    .padding(start = 5.dp, end = 5.dp)
+                    .weight(1f)
+                    .clip(RoundedCornerShape(15.dp))
+.borderThreeSidesRounded(
+    strokeWidth = 2.dp,
+    color = if (item.change) theme.cardItemBorderTrue else if (item.changeAlarm) theme.cardItemBorderAlarm else theme.cardItemBorderFalse,
+    cornerRadius = 15.dp,
+    openSide = "BOTTOM_OPEN"
+)
+                    // .border(
+                    //     2.dp,
+                    //     if (item.change) theme.cardItemBorderTrue 
+                    //     else if (item.changeAlarm) theme.cardItemBorderAlarm 
+                    //     else theme.cardItemBorderFalse,
+                    //     RoundedCornerShape(15.dp)
+                    // )
+                    .clickable { onClick(item, CHANGE_ITEM) }
+                    .then(dragModifier),
+                shape = RoundedCornerShape(15.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = if (item.change) theme.cardItemTrue 
                     else if (item.changeAlarm) theme.cardItemAlarm 
@@ -295,7 +294,14 @@ fun CardItem(
                     .fillMaxWidth()
                     .padding(start = 48.dp, end = 48.dp, top = 6.dp, bottom = 4.dp) 
                     .clip(RoundedCornerShape(15.dp))
-                    .border(1.dp, theme.borderCardMenuItem, RoundedCornerShape(15.dp)),
+                   //.border(1.dp, theme.borderCardMenuItem, RoundedCornerShape(15.dp))
+                   .borderThreeSidesRounded(
+    strokeWidth = 1.dp,
+    color = theme.borderCardMenuItem,
+    cornerRadius = 15.dp,
+    openSide = "TOP_OPEN"
+)
+                                                 ,
                 shape = RoundedCornerShape(15.dp),
                 colors = CardDefaults.cardColors(containerColor = theme.cardMenuItem)
             )   {
@@ -481,4 +487,69 @@ private fun getDayOfWeekWithPreposition(dayOfWeek: DayOfWeek): String {
         DayOfWeek.SATURDAY -> "в субботу"
         DayOfWeek.SUNDAY -> "в воскресенье"
     }
+}
+
+fun Modifier.borderThreeSidesRounded(
+    strokeWidth: Dp,
+    color: Color,
+    cornerRadius: Dp,
+    openSide: String
+): Modifier = this.drawBehind {
+    val strokePx = strokeWidth.toPx()
+    val radiusPx = cornerRadius.toPx()
+    val width = size.width
+    val height = size.height
+
+    // Смещение на половину толщины линии внутрь, чтобы границы не обрезались краями контейнера
+    val halfStroke = strokePx / 2f
+
+    val path = Path().apply {
+        when (openSide) {
+            "BOTTOM_OPEN" -> {
+                moveTo(halfStroke, height)
+                lineTo(halfStroke, radiusPx)
+                arcTo(
+                    rect = Rect(halfStroke, halfStroke, radiusPx * 2, radiusPx * 2),
+                    startAngleDegrees = 180f,
+                    sweepAngleDegrees = 90f,
+                    forceMoveTo = false
+                )
+                lineTo(width - radiusPx, halfStroke)
+                arcTo(
+                    rect = Rect(width - radiusPx * 2, halfStroke, width - halfStroke, radiusPx * 2),
+                    startAngleDegrees = -90f,
+                    sweepAngleDegrees = 90f,
+                    forceMoveTo = false
+                )
+                lineTo(width - halfStroke, height)
+            }
+            "TOP_OPEN" -> {
+                moveTo(halfStroke, 0f)
+                lineTo(halfStroke, height - radiusPx)
+                arcTo(
+                    rect = Rect(halfStroke, height - radiusPx * 2, radiusPx * 2, height - halfStroke),
+                    startAngleDegrees = 180f,
+                    sweepAngleDegrees = -90f,
+                    forceMoveTo = false
+                )
+                lineTo(width - radiusPx, height - halfStroke)
+                arcTo(
+                    rect = Rect(width - radiusPx * 2, height - radiusPx * 2, width - halfStroke, height - halfStroke),
+                    startAngleDegrees = 90f,
+                    sweepAngleDegrees = -90f,
+                    forceMoveTo = false
+                )
+                lineTo(width - halfStroke, 0f)
+            }
+        }
+    }
+
+    drawPath(
+        path = path,
+        color = color,
+        style = Stroke(
+            width = strokePx,
+            cap = StrokeCap.Round
+        )
+    )
 }
