@@ -177,65 +177,27 @@ fun CardItem(
             }
 
             // 2. Центральная ОСНОВНАЯ карточка
-            // Card(
-            //     // modifier = Modifier
-            //     //     .padding(start = 5.dp, end = 5.dp)
-            //     //     .weight(1f)
-            //     //     .clip(RoundedCornerShape(15.dp))
-            //     //     .border(
-            //     //         2.dp,
-            //     //         if (item.change) theme.cardItemBorderTrue 
-            //     //         else if (item.changeAlarm) theme.cardItemBorderAlarm 
-            //     //         else theme.cardItemBorderFalse,
-            //     //         RoundedCornerShape(15.dp)
-            //     //     )
-            //     //     .clickable { onClick(item, CHANGE_ITEM) }
-            //     //     .then(dragModifier),
-            //     // shape = RoundedCornerShape(15.dp),
-            //     colors = CardDefaults.cardColors(
-            //         containerColor = if (item.change) theme.cardItemTrue 
-            //         else if (item.changeAlarm) theme.cardItemAlarm 
-            //         else theme.cardItemFalse
-            //     )
-            // ) 
-Card(
-    modifier = Modifier
-        .padding(start = 5.dp, end = 5.dp)
-        .weight(1f)
-        .clip(mainCardShape)
-        .then(
-            if (isExpanded) {
-                Modifier.drawBehind {
-                    val strokePx = 2.dp.toPx()
-                    val cornerPx = 15.dp.toPx()
-                    val canvasWidth = this.size.width
-                    val canvasHeight = this.size.height
-                    
-                    val path = Path().apply {
-                        moveTo(0f, canvasHeight)
-                        lineTo(0f, cornerPx)
-                        quadraticBezierTo(0f, 0f, cornerPx, 0f)
-                        lineTo(canvasWidth - cornerPx, 0f)
-                        quadraticBezierTo(canvasWidth, 0f, canvasWidth, cornerPx)
-                        lineTo(canvasWidth, canvasHeight)
-                    }
-                    drawPath(
-                        path = path,
-                        color = currentBorderColor,
-                        style = Stroke(width = strokePx)
-                    )
-                }
-            } else {
-                Modifier.border(2.dp, currentBorderColor, mainCardShape)
-            }
-        )
-        .clickable { onClick(item, CHANGE_ITEM) }
-        .then(dragModifier),
-    shape = mainCardShape,
-    colors = CardDefaults.cardColors(
-        containerColor = if (item.change) theme.cardItemTrue else if (item.changeAlarm) theme.cardItemAlarm else theme.cardItemFalse
-    )
-)
+            Card(
+                // modifier = Modifier
+                //     .padding(start = 5.dp, end = 5.dp)
+                //     .weight(1f)
+                //     .clip(RoundedCornerShape(15.dp))
+                //     .border(
+                //         2.dp,
+                //         if (item.change) theme.cardItemBorderTrue 
+                //         else if (item.changeAlarm) theme.cardItemBorderAlarm 
+                //         else theme.cardItemBorderFalse,
+                //         RoundedCornerShape(15.dp)
+                //     )
+                //     .clickable { onClick(item, CHANGE_ITEM) }
+                //     .then(dragModifier),
+                // shape = RoundedCornerShape(15.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = if (item.change) theme.cardItemTrue 
+                    else if (item.changeAlarm) theme.cardItemAlarm 
+                    else theme.cardItemFalse
+                )
+            ) 
             {
                 Row(
                     modifier = Modifier
@@ -318,278 +280,131 @@ Card(
             }
         }
 
-AnimatedVisibility(
-    visible = isExpanded,
-    enter = expandVertically() + fadeIn(),
-    exit = shrinkVertically() + fadeOut()
-) {
-    // Скругление только для нижних углов
-    val subCardShape = RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomStart = 15.dp, bottomEnd = 15.dp)
-    val subBorderColor = theme.borderCardMenuItem
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            // Возвращаем ваши исходные отступы 48.dp по бокам
-            .padding(start = 48.dp, end = 48.dp, top = 0.dp, bottom = 4.dp)
-            .clip(subCardShape)
-            // Рисуем перевернутый П-образный контур (лево, низ, право) без верха
-            .drawBehind {
-                val strokePx = 1.dp.toPx()
-                val cornerPx = 15.dp.toPx()
-                
-val path = Path().apply {
-    moveTo(0f, 0f)
-    lineTo(0f, this.size.height - cornerPx)
-    quadraticBezierTo(0f, this.size.height, cornerPx, this.size.height)
-    lineTo(this.size.width - cornerPx, this.size.height)
-    quadraticBezierTo(this.size.width, this.size.height, this.size.width, this.size.height - cornerPx)
-    lineTo(this.size.width, 0f)
-}
-                drawPath(
-                    path = path,
-                    color = subBorderColor,
-                    style = Stroke(width = strokePx)
-                )
-            },
-        shape = subCardShape,
-        colors = CardDefaults.cardColors(containerColor = theme.cardMenuItem) // Возвращаем ваш исходный цвет
-    ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            
-            // Тот самый ЛАЗЕРНЫЙ разделитель на стыке блоков дел (теперь он лежит внутри)
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .then(Modifier.height(2.dp))
-                    .background(
-                        brush = Brush.horizontalGradient(
-                            colors = listOf(
-                                subBorderColor.copy(alpha = 0.1f),
-                                subBorderColor,
-                                subBorderColor.copy(alpha = 0.1f)
-                            )
-                        )
-                    )
-            )
-
-            Column(modifier = Modifier.fillMaxSize().padding(12.dp)) {
-                if (selectedFileUri.isNotEmpty()) {
-                    AsyncImage(
-                        model = selectedFileUri,
-                        contentDescription = "Фото",
-                        modifier = Modifier
-                            .padding(bottom = 12.dp)
-                            .size(75.dp)
-                            .clip(RoundedCornerShape(10.dp))
-                            .clickable { onClick(item, IMAGE) },
-                        contentScale = ContentScale.Crop,
-                    )
-                }
-                LazyColumn(
-                    state = listState,
-                    modifier = Modifier.fillMaxWidth().heightIn(max = 200.dp),
-                    verticalArrangement = Arrangement.spacedBy(5.dp),
-                ) {
-                    itemsIndexed(items = currentSnapshotList, key = { _, subItem -> subItem.id }) { index, subItem ->
-                        ReorderableItem(state = reorderableState, key = subItem.id) { isDragging ->
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .longPressDraggableHandle(
-                                        enabled = true,
-                                        onDragStarted = { haptic.performHapticFeedback(HapticFeedbackType.LongPress) },
-                                        onDragStopped = {
-                                            val listWithUpdatedSort = currentSnapshotList.mapIndexed { idx, listItem -> listItem.copy(sort = idx) }
-                                            currentSnapshotList = listWithUpdatedSort
-                                            onSubDragDropped(listWithUpdatedSort)
-                                        }
-                                    )
-                                    .animateItem()
-                                    .graphicsLayer { alpha = if (isDragging) 0.5f else 1f }
-                            ) {
-                                if (subItem.id != currentSnapshotList.firstOrNull()?.id) {
-                                    HorizontalDivider(
-                                        thickness = 0.5.dp,
-                                        color = theme.borderCardMenuItem.copy(alpha = 0.15f),
-                                        modifier = Modifier.padding(bottom = 6.dp)
-                                    )
-                                }
-                                Row(
-                                    modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    RadioButton(
-                                        selected = subItem.change,
-                                        onClick = { onClickSubItem(subItem, CHANGE_ITEM) },
-                                        colors = RadioButtonDefaults.colors(
-                                            selectedColor = theme.chekBoxTint,
-                                            unselectedColor = theme.borderCardMenuItem
-                                        ),
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                    Text(
-                                        text = subItem.name,
-                                        color = if (subItem.change) theme.textDesc else theme.textColor,
-                                        fontSize = size.textDesc,
-                                        style = if (subItem.change) {
-                                            LocalTextStyle.current.copy(textDecoration = TextDecoration.LineThrough)
-                                        } else {
-                                            LocalTextStyle.current
-                                        },
-                                        modifier = Modifier.weight(1f).padding(start = 8.dp, end = 8.dp)
-                                    )
-                                    IconButton(
-                                        onClick = { onClickSubItem(subItem, DELETE) },
-                                        modifier = Modifier.size(24.dp)
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Close,
-                                            contentDescription = "Удалить подзадачу",
-                                            tint = theme.textDesc,
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-
-
-
-
-
         
 
         // ВЫЕЗЖАЮЩАЯ ОТДЕЛЬНАЯ КАРТОЧКА ПОДЗАДАЧ (Строго ПОД основной)
-//         AnimatedVisibility(
-//             visible = isExpanded,
-//             enter = expandVertically() + fadeIn(),
-//             exit = shrinkVertically() + fadeOut()
-//         ) {
+        AnimatedVisibility(
+            visible = isExpanded,
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut()
+        ) {
 
 
-//                                              Card(
-//                 modifier = Modifier
-//                     .fillMaxWidth()
-//                     .padding(start = 48.dp, end = 48.dp, top = 6.dp, bottom = 4.dp) 
-//                     .clip(RoundedCornerShape(15.dp))
-//                     .border(1.dp, theme.borderCardMenuItem, RoundedCornerShape(15.dp)),
-//                 shape = RoundedCornerShape(15.dp),
-//                 colors = CardDefaults.cardColors(containerColor = theme.cardMenuItem)
-//             )   {
-//         Column(modifier = Modifier.fillMaxSize().padding(12.dp)
-//               ) {
-//                             if (selectedFileUri.isNotEmpty()) {
-//                         AsyncImage(
-//                             model = selectedFileUri,
-//                             contentDescription = "Фото",
-//                             modifier = Modifier
-//                                 .padding(bottom = 12.dp)
-//                                 .size(75.dp)
-//                                 .clip(RoundedCornerShape(10.dp))
-//                                 .clickable { onClick(item, IMAGE) },
-//                             contentScale = ContentScale.Crop,
-//                         )
-//                     }
+                                             Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 48.dp, end = 48.dp, top = 6.dp, bottom = 4.dp) 
+                    .clip(RoundedCornerShape(15.dp))
+                    .border(1.dp, theme.borderCardMenuItem, RoundedCornerShape(15.dp)),
+                shape = RoundedCornerShape(15.dp),
+                colors = CardDefaults.cardColors(containerColor = theme.cardMenuItem)
+            )   {
+        Column(modifier = Modifier.fillMaxSize().padding(12.dp)
+              ) {
+                            if (selectedFileUri.isNotEmpty()) {
+                        AsyncImage(
+                            model = selectedFileUri,
+                            contentDescription = "Фото",
+                            modifier = Modifier
+                                .padding(bottom = 12.dp)
+                                .size(75.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .clickable { onClick(item, IMAGE) },
+                            contentScale = ContentScale.Crop,
+                        )
+                    }
             
-//              LazyColumn(
-//             state = listState,
-//             modifier = Modifier.fillMaxWidth().heightIn(max = 200.dp),
-//             verticalArrangement = Arrangement.spacedBy(5.dp),
-//         ) {
-//             itemsIndexed(
-//                 items = currentSnapshotList,
-//                 key = { _, subItem -> subItem.id } // Ключ работает по ID дела, всё чётко
-//             ) { index, subItem ->
+             LazyColumn(
+            state = listState,
+            modifier = Modifier.fillMaxWidth().heightIn(max = 200.dp),
+            verticalArrangement = Arrangement.spacedBy(5.dp),
+        ) {
+            itemsIndexed(
+                items = currentSnapshotList,
+                key = { _, subItem -> subItem.id } // Ключ работает по ID дела, всё чётко
+            ) { index, subItem ->
 
-//                 ReorderableItem(
-//                     state = reorderableState,
-//                     key = subItem.id
-//                 ) { isDragging ->
-//                     Box(
-//                         modifier = Modifier
-//                             .fillMaxWidth()
-//                             .longPressDraggableHandle(
-//                         enabled = true,
-//                         onDragStarted = { haptic.performHapticFeedback(HapticFeedbackType.LongPress) },
-//                         onDragStopped = {
-//                             val listWithUpdatedSort = currentSnapshotList.mapIndexed { idx, listItem -> 
-//                                 listItem.copy(sort = idx) 
-//                             }
-//                             currentSnapshotList = listWithUpdatedSort
-//                             onSubDragDropped(listWithUpdatedSort) 
-//                         }
-//                     )
-//                             .animateItem()
-//                             .graphicsLayer { alpha = if (isDragging) 0.5f else 1f }
-//                     ) {
-//                                     if (subItem.id != currentSnapshotList.firstOrNull()?.id) {
-//                 HorizontalDivider(
-//                     thickness = 0.5.dp,
-//                     color = theme.borderCardMenuItem.copy(alpha = 0.15f),
-//                     modifier = Modifier.padding(bottom = 6.dp) // Отталкиваем текст от верхней линии
-//                 )
-//             }
+                ReorderableItem(
+                    state = reorderableState,
+                    key = subItem.id
+                ) { isDragging ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .longPressDraggableHandle(
+                        enabled = true,
+                        onDragStarted = { haptic.performHapticFeedback(HapticFeedbackType.LongPress) },
+                        onDragStopped = {
+                            val listWithUpdatedSort = currentSnapshotList.mapIndexed { idx, listItem -> 
+                                listItem.copy(sort = idx) 
+                            }
+                            currentSnapshotList = listWithUpdatedSort
+                            onSubDragDropped(listWithUpdatedSort) 
+                        }
+                    )
+                            .animateItem()
+                            .graphicsLayer { alpha = if (isDragging) 0.5f else 1f }
+                    ) {
+                                    if (subItem.id != currentSnapshotList.firstOrNull()?.id) {
+                HorizontalDivider(
+                    thickness = 0.5.dp,
+                    color = theme.borderCardMenuItem.copy(alpha = 0.15f),
+                    modifier = Modifier.padding(bottom = 6.dp) // Отталкиваем текст от верхней линии
+                )
+            }
 
-//              Row(
-//                         modifier = Modifier
-//                             .fillMaxWidth()
-//                             .padding(vertical = 6.dp),
-//                         verticalAlignment = Alignment.CenterVertically,
-//                     ) {
-//                         // КРУГЛЫЙ ЧЕКБОКС (RadioButton)
-//                         RadioButton(
-//                             selected = subItem.change,
-//                             onClick = { onClickSubItem(subItem, CHANGE_ITEM)  }, 
-//                             colors = RadioButtonDefaults.colors(
-//                                 selectedColor = theme.chekBoxTint,
-//                                 unselectedColor = theme.borderCardMenuItem
-//                             ),
-//                             modifier = Modifier.size(20.dp)
-//                         )
+             Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        // КРУГЛЫЙ ЧЕКБОКС (RadioButton)
+                        RadioButton(
+                            selected = subItem.change,
+                            onClick = { onClickSubItem(subItem, CHANGE_ITEM)  }, 
+                            colors = RadioButtonDefaults.colors(
+                                selectedColor = theme.chekBoxTint,
+                                unselectedColor = theme.borderCardMenuItem
+                            ),
+                            modifier = Modifier.size(20.dp)
+                        )
 
-//                         Text(
-//                             text = subItem.name,
-//                             color = if (subItem.change) theme.textDesc else theme.textColor,
-//                             fontSize = size.textDesc,
-//                             style = if (subItem.change) {
-//                                 val currentStyle: androidx.compose.ui.text.TextStyle = LocalTextStyle.current
-//                                 currentStyle.copy(textDecoration = TextDecoration.LineThrough)
-//                             } else {
-//                                 LocalTextStyle.current
-//                             },
-//                             modifier = Modifier.weight(1f).padding(start = 8.dp, end = 8.dp)
-//                         )
+                        Text(
+                            text = subItem.name,
+                            color = if (subItem.change) theme.textDesc else theme.textColor,
+                            fontSize = size.textDesc,
+                            style = if (subItem.change) {
+                                val currentStyle: androidx.compose.ui.text.TextStyle = LocalTextStyle.current
+                                currentStyle.copy(textDecoration = TextDecoration.LineThrough)
+                            } else {
+                                LocalTextStyle.current
+                            },
+                            modifier = Modifier.weight(1f).padding(start = 8.dp, end = 8.dp)
+                        )
                         
-//                         // ИКОНКА УДАЛЕНИЯ ПОДЗАДАЧИ
-//                         IconButton(
-//                             onClick = { onClickSubItem(subItem, DELETE)  }, 
-//                             modifier = Modifier.size(24.dp)
-//                         ) {
-//                             Icon(
-//                                 imageVector = Icons.Default.Close,
-//                                 contentDescription = "Удалить подзадачу",
-//                                 tint = theme.textDesc,
-//                                 modifier = Modifier.size(16.dp)
-//                             )
-//                         }
-//                     }
+                        // ИКОНКА УДАЛЕНИЯ ПОДЗАДАЧИ
+                        IconButton(
+                            onClick = { onClickSubItem(subItem, DELETE)  }, 
+                            modifier = Modifier.size(24.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Удалить подзадачу",
+                                tint = theme.textDesc,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
 
-//                     }      
-//                 }
-//             }
-//         }
-//         }
-//         }
+                    }      
+                }
+            }
+        }
+        }
+        }
             
-// }
+}
     }
 }
 
