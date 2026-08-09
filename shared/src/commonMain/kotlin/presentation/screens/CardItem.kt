@@ -558,37 +558,62 @@ fun Modifier.borderThreeSidesRounded(
     val path = Path().apply {
         when (openSide) {
             "BOTTOM_OPEN" -> {
+                // Начинаем строго с левого нижнего угла без дублирования точек
                 moveTo(halfStroke, height)
                 lineTo(halfStroke, radiusPx)
+                
+                // Левый верхний угол
                 arcTo(
                     rect = Rect(halfStroke, halfStroke, radiusPx * 2, radiusPx * 2),
-                    startAngleDegrees = 180f, sweepAngleDegrees = 90f, forceMoveTo = false
+                    startAngleDegrees = 180f, 
+                    sweepAngleDegrees = 90f, 
+                    forceMoveTo = false
                 )
+                
+                // Верхний мост напрямую до начала правого скругления
                 lineTo(width - radiusPx, halfStroke)
+                
+                // Правый верхний угол
                 arcTo(
                     rect = Rect(width - radiusPx * 2, halfStroke, width - halfStroke, radiusPx * 2),
-                    startAngleDegrees = -90f, sweepAngleDegrees = 90f, forceMoveTo = false
+                    startAngleDegrees = -90f, 
+                    sweepAngleDegrees = 90f, 
+                    forceMoveTo = false
                 )
+                
+                // Спускаемся строго до правого нижнего угла
                 lineTo(width - halfStroke, height)
             }
             "TOP_OPEN" -> {
-                moveTo(halfStroke, 0f)
-                lineTo(halfStroke, height - radiusPx)
-                arcTo(
-                    rect = Rect(halfStroke, height - radiusPx * 2, radiusPx * 2, height - halfStroke),
-                    startAngleDegrees = 180f, sweepAngleDegrees = -90f, forceMoveTo = false
-                )
-                lineTo(width - radiusPx, height - halfStroke)
+                // Начинаем строго с правого верхнего угла
+                moveTo(width - halfStroke, 0f)
+                lineTo(width - halfStroke, height - radiusPx)
+                
+                // Правый нижний угол
                 arcTo(
                     rect = Rect(width - radiusPx * 2, height - radiusPx * 2, width - halfStroke, height - halfStroke),
-                    startAngleDegrees = 90f, sweepAngleDegrees = -90f, forceMoveTo = false
+                    startAngleDegrees = 0f, 
+                    sweepAngleDegrees = 90f, 
+                    forceMoveTo = false
                 )
-                lineTo(width - halfStroke, 0f)
+                
+                // Нижний мост до левого скругления
+                lineTo(radiusPx, height - halfStroke)
+                
+                // Левый нижний угол
+                arcTo(
+                    rect = Rect(halfStroke, height - radiusPx * 2, radiusPx * 2, height - halfStroke),
+                    startAngleDegrees = 90f, 
+                    sweepAngleDegrees = 90f, 
+                    forceMoveTo = false
+                )
+                
+                // Поднимаемся до левого верхнего угла
+                lineTo(halfStroke, 0f)
             }
         }
     }
 
-    // Рисуем обводку. Мы используем drawBehind, который у тебя работал
     drawPath(
         path = path,
         color = color,
@@ -598,3 +623,59 @@ fun Modifier.borderThreeSidesRounded(
         )
     )
 }
+
+// fun Modifier.borderThreeSidesRounded(
+//     strokeWidth: Dp,
+//     color: Color,
+//     cornerRadius: Dp,
+//     openSide: String
+// ): Modifier = this.drawBehind {
+//     val strokePx = strokeWidth.toPx()
+//     val radiusPx = cornerRadius.toPx()
+//     val width = size.width
+//     val height = size.height
+//     val halfStroke = strokePx / 2f
+
+//     val path = Path().apply {
+//         when (openSide) {
+//             "BOTTOM_OPEN" -> {
+//                 moveTo(halfStroke, height)
+//                 lineTo(halfStroke, radiusPx)
+//                 arcTo(
+//                     rect = Rect(halfStroke, halfStroke, radiusPx * 2, radiusPx * 2),
+//                     startAngleDegrees = 180f, sweepAngleDegrees = 90f, forceMoveTo = false
+//                 )
+//                 lineTo(width - radiusPx, halfStroke)
+//                 arcTo(
+//                     rect = Rect(width - radiusPx * 2, halfStroke, width - halfStroke, radiusPx * 2),
+//                     startAngleDegrees = -90f, sweepAngleDegrees = 90f, forceMoveTo = false
+//                 )
+//                 lineTo(width - halfStroke, height)
+//             }
+//             "TOP_OPEN" -> {
+//                 moveTo(halfStroke, 0f)
+//                 lineTo(halfStroke, height - radiusPx)
+//                 arcTo(
+//                     rect = Rect(halfStroke, height - radiusPx * 2, radiusPx * 2, height - halfStroke),
+//                     startAngleDegrees = 180f, sweepAngleDegrees = -90f, forceMoveTo = false
+//                 )
+//                 lineTo(width - radiusPx, height - halfStroke)
+//                 arcTo(
+//                     rect = Rect(width - radiusPx * 2, height - radiusPx * 2, width - halfStroke, height - halfStroke),
+//                     startAngleDegrees = 90f, sweepAngleDegrees = -90f, forceMoveTo = false
+//                 )
+//                 lineTo(width - halfStroke, 0f)
+//             }
+//         }
+//     }
+
+//     // Рисуем обводку. Мы используем drawBehind, который у тебя работал
+//     drawPath(
+//         path = path,
+//         color = color,
+//         style = Stroke(
+//             width = strokePx,
+//             cap = StrokeCap.Butt
+//         )
+//     )
+// }
