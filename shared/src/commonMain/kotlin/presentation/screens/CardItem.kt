@@ -104,6 +104,9 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.height
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
+
 
 @Composable
 fun CardItem(
@@ -118,6 +121,13 @@ fun CardItem(
     onClickSubItem: (SubItem, Int) -> Unit = { _, _ -> },
 ) {
     var isExpanded by remember { mutableStateOf(false) }
+    val mainCardShape = if (isExpanded) {
+    RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp, bottomStart = 0.dp, bottomEnd = 0.dp)
+    } else {
+    RoundedCornerShape(15.dp)
+    }
+
+    val currentBorderColor = if (item.change) theme.cardItemBorderTrue else if (item.changeAlarm) theme.cardItemBorderAlarm else theme.cardItemBorderFalse
     
     val listState = rememberLazyListState()
     val haptic = LocalHapticFeedback.current
@@ -167,44 +177,66 @@ fun CardItem(
             }
 
             // 2. Центральная ОСНОВНАЯ карточка
+            // Card(
+            //     // modifier = Modifier
+            //     //     .padding(start = 5.dp, end = 5.dp)
+            //     //     .weight(1f)
+            //     //     .clip(RoundedCornerShape(15.dp))
+            //     //     .border(
+            //     //         2.dp,
+            //     //         if (item.change) theme.cardItemBorderTrue 
+            //     //         else if (item.changeAlarm) theme.cardItemBorderAlarm 
+            //     //         else theme.cardItemBorderFalse,
+            //     //         RoundedCornerShape(15.dp)
+            //     //     )
+            //     //     .clickable { onClick(item, CHANGE_ITEM) }
+            //     //     .then(dragModifier),
+            //     // shape = RoundedCornerShape(15.dp),
+            //     colors = CardDefaults.cardColors(
+            //         containerColor = if (item.change) theme.cardItemTrue 
+            //         else if (item.changeAlarm) theme.cardItemAlarm 
+            //         else theme.cardItemFalse
+            //     )
+            // ) 
             Card(
-                    modifier = Modifier
+    modifier = Modifier
         .padding(start = 5.dp, end = 5.dp)
         .weight(1f)
-        // Если раскрыто — скругляем только верх, низ становится плоским для монолитного стыка
-        .clip(
-            if (isExpanded) RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp) 
-            else RoundedCornerShape(15.dp)
-        )
-        .border(
-            2.dp,
-            if (item.change) theme.cardItemBorderTrue else if (item.changeAlarm) theme.cardItemBorderAlarm else theme.cardItemBorderFalse,
-            if (isExpanded) RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp) else RoundedCornerShape(15.dp)
+        .clip(mainCardShape)
+        // Если раскрыто, рисуем обводку через drawBehind, чтобы не было нижней линии
+        .then(
+            if (isExpanded) {
+                Modifier.drawBehind {
+                    val strokePx = 2.dp.toPx()
+                    val cornerPx = 15.dp.toPx()
+                    
+                    // Рисуем П-образный контур (лево, верх, право) без низа
+                    val path = Path().apply {
+                        moveTo(0f, size.height)
+                        lineTo(0f, cornerPx)
+                        quadraticBezierTo(0f, 0f, cornerPx, 0f)
+                        lineTo(size.width - cornerPx, 0f)
+                        quadraticBezierTo(size.width, 0f, size.width, cornerPx)
+                        lineTo(size.width, size.height)
+                    }
+                    drawPath(
+                        path = path,
+                        color = currentBorderColor,
+                        style = Stroke(width = strokePx)
+                    )
+                }
+            } else {
+                Modifier.border(2.dp, currentBorderColor, mainCardShape)
+            }
         )
         .clickable { onClick(item, CHANGE_ITEM) }
         .then(dragModifier),
-    shape = if (isExpanded) RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp) else RoundedCornerShape(15.dp),
-   
-                // modifier = Modifier
-                //     .padding(start = 5.dp, end = 5.dp)
-                //     .weight(1f)
-                //     .clip(RoundedCornerShape(15.dp))
-                //     .border(
-                //         2.dp,
-                //         if (item.change) theme.cardItemBorderTrue 
-                //         else if (item.changeAlarm) theme.cardItemBorderAlarm 
-                //         else theme.cardItemBorderFalse,
-                //         RoundedCornerShape(15.dp)
-                //     )
-                //     .clickable { onClick(item, CHANGE_ITEM) }
-                //     .then(dragModifier),
-                // shape = RoundedCornerShape(15.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = if (item.change) theme.cardItemTrue 
-                    else if (item.changeAlarm) theme.cardItemAlarm 
-                    else theme.cardItemFalse
-                )
-            ) {
+    shape = mainCardShape,
+    colors = CardDefaults.cardColors(
+        containerColor = if (item.change) theme.cardItemTrue else if (item.changeAlarm) theme.cardItemAlarm else theme.cardItemFalse
+    )
+)
+            {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -291,41 +323,57 @@ AnimatedVisibility(
     enter = expandVertically() + fadeIn(),
     exit = shrinkVertically() + fadeOut()
 ) {
-    val laserColor = if (item.changeAlarm) theme.cardItemBorderAlarm else theme.cardItemBorderFalse
+    // Скругление только для нижних углов
+    val subCardShape = RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomStart = 15.dp, bottomEnd = 15.dp)
+    val subBorderColor = theme.borderCardMenuItem
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            // Отступы идеально совпадают с основной карточкой (5.dp), убирая зазор
-            .padding(start = 5.dp, end = 5.dp, top = 0.dp, bottom = 4.dp)
-            .clip(RoundedCornerShape(bottomStart = 15.dp, bottomEnd = 15.dp))
-            .border(
-                2.dp,
-                laserColor,
-                RoundedCornerShape(bottomStart = 15.dp, bottomEnd = 15.dp)
-            ),
-        shape = RoundedCornerShape(bottomStart = 15.dp, bottomEnd = 15.dp),
-        colors = CardDefaults.cardColors(containerColor = theme.cardItemFalse) // берем фон основного контейнера
+            // Возвращаем ваши исходные отступы 48.dp по бокам
+            .padding(start = 48.dp, end = 48.dp, top = 0.dp, bottom = 4.dp)
+            .clip(subCardShape)
+            // Рисуем перевернутый П-образный контур (лево, низ, право) без верха
+            .drawBehind {
+                val strokePx = 1.dp.toPx()
+                val cornerPx = 15.dp.toPx()
+                
+                val path = Path().apply {
+                    moveTo(0f, 0f)
+                    lineTo(0f, size.height - cornerPx)
+                    quadraticBezierTo(0f, size.height, cornerPx, size.height)
+                    lineTo(size.width - cornerPx, size.height)
+                    quadraticBezierTo(size.width, size.height, size.width, size.height - cornerPx)
+                    lineTo(size.width, 0f)
+                }
+                drawPath(
+                    path = path,
+                    color = subBorderColor,
+                    style = Stroke(width = strokePx)
+                )
+            },
+        shape = subCardShape,
+        colors = CardDefaults.cardColors(containerColor = theme.cardMenuItem) // Возвращаем ваш исходный цвет
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             
-            // Тот самый ЛАЗЕРНЫЙ разделитель на стыке блоков дел
-Box(
-    modifier = Modifier
-        .fillMaxWidth()
-        .then(Modifier.height(2.dp)) // Явный вызов исключает конфликт с параметром size
-        .background(
-            brush = Brush.horizontalGradient(
-                colors = listOf(
-                    laserColor.copy(alpha = 0.1f),
-                    laserColor,
-                    laserColor.copy(alpha = 0.1f)
-                )
+            // Тот самый ЛАЗЕРНЫЙ разделитель на стыке блоков дел (теперь он лежит внутри)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .then(Modifier.height(2.dp))
+                    .background(
+                        brush = Brush.horizontalGradient(
+                            colors = listOf(
+                                subBorderColor.copy(alpha = 0.1f),
+                                subBorderColor,
+                                subBorderColor.copy(alpha = 0.1f)
+                            )
+                        )
+                    )
             )
-        )
-)
 
-            Column(modifier = Modifier.fillMaxSize().padding(horizontal = 14.dp, vertical = 12.dp)) {
+            Column(modifier = Modifier.fillMaxSize().padding(12.dp)) {
                 if (selectedFileUri.isNotEmpty()) {
                     AsyncImage(
                         model = selectedFileUri,
@@ -341,7 +389,7 @@ Box(
                 LazyColumn(
                     state = listState,
                     modifier = Modifier.fillMaxWidth().heightIn(max = 200.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalArrangement = Arrangement.spacedBy(5.dp),
                 ) {
                     itemsIndexed(items = currentSnapshotList, key = { _, subItem -> subItem.id }) { index, subItem ->
                         ReorderableItem(state = reorderableState, key = subItem.id) { isDragging ->
@@ -360,8 +408,15 @@ Box(
                                     .animateItem()
                                     .graphicsLayer { alpha = if (isDragging) 0.5f else 1f }
                             ) {
+                                if (subItem.id != currentSnapshotList.firstOrNull()?.id) {
+                                    HorizontalDivider(
+                                        thickness = 0.5.dp,
+                                        color = theme.borderCardMenuItem.copy(alpha = 0.15f),
+                                        modifier = Modifier.padding(bottom = 6.dp)
+                                    )
+                                }
                                 Row(
-                                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                                    modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
                                     verticalAlignment = Alignment.CenterVertically,
                                 ) {
                                     RadioButton(
@@ -382,7 +437,7 @@ Box(
                                         } else {
                                             LocalTextStyle.current
                                         },
-                                        modifier = Modifier.weight(1f).padding(start = 12.dp, end = 8.dp)
+                                        modifier = Modifier.weight(1f).padding(start = 8.dp, end = 8.dp)
                                     )
                                     IconButton(
                                         onClick = { onClickSubItem(subItem, DELETE) },
