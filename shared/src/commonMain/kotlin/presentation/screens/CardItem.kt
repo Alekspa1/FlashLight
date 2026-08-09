@@ -274,21 +274,19 @@ AnimatedVisibility(
     enter = expandVertically() + fadeIn(),
     exit = shrinkVertically() + fadeOut()
 ) {
-    // Вычисляем отступ, чтобы линия шла ровно по центру иконки стрелочки
-    // Стрелка находится внутри основной карточки (отступ 5.dp + внутренний 4.dp + половина размера 24.dp)
-    val lineXOffset = 5.dp + 4.dp + 12.dp 
-    val neonColor = theme.tintAlarmOn // берем яркий цвет из вашей темы
+    val neonColor = theme.tintAlarmOn
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 48.dp, end = 48.dp, top = 2.dp, bottom = 8.dp)
             .drawBehind {
-                // Рисуем вертикальную неоновую нить-направляющую
+                // Внутри drawBehind метод toPx() доступен напрямую через Density область
+                val xPos = -16.dp.toPx()
                 drawLine(
                     color = neonColor,
-                    start = Offset(x = -16.dp.toPx(), y = -10.dp.toPx()), // уходит под стрелку
-                    end = Offset(x = -16.dp.toPx(), y = size.height),
+                    start = Offset(x = xPos, y = -10.dp.toPx()),
+                    end = Offset(x = xPos, y = size.height),
                     strokeWidth = 2.dp.toPx(),
                     cap = StrokeCap.Round
                 )
@@ -321,7 +319,6 @@ AnimatedVisibility(
                         state = reorderableState,
                         key = subItem.id
                     ) { isDragging ->
-                        // Каждый элемент списка рисует свой светящийся узел на линии
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -337,7 +334,7 @@ AnimatedVisibility(
                                 .animateItem()
                                 .graphicsLayer { alpha = if (isDragging) 0.5f else 1f }
                                 .drawBehind {
-                                    // Рисуем светящуюся точку-узел напротив каждого круглого чекбокса
+                                    // Корректная отрисовка точки-узла
                                     drawCircle(
                                         color = neonColor,
                                         radius = 4.dp.toPx(),
@@ -348,7 +345,7 @@ AnimatedVisibility(
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(vertical = 4.bindPx()),
+                                    .padding(vertical = 4.dp), // Исправлено на .dp
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 RadioButton(
