@@ -338,14 +338,14 @@ AnimatedVisibility(
                 val strokePx = 1.dp.toPx()
                 val cornerPx = 15.dp.toPx()
                 
-                val path = Path().apply {
-                    moveTo(0f, 0f)
-                    lineTo(0f, size.height - cornerPx)
-                    quadraticBezierTo(0f, size.height, cornerPx, size.height)
-                    lineTo(size.width - cornerPx, size.height)
-                    quadraticBezierTo(size.width, size.height, size.width, size.height - cornerPx)
-                    lineTo(size.width, 0f)
-                }
+val path = Path().apply {
+    moveTo(0f, 0f)
+    lineTo(0f, this.size.height - cornerPx)
+    quadraticBezierTo(0f, this.size.height, cornerPx, this.size.height)
+    lineTo(this.size.width - cornerPx, this.size.height)
+    quadraticBezierTo(this.size.width, this.size.height, this.size.width, this.size.height - cornerPx)
+    lineTo(this.size.width, 0f)
+}
                 drawPath(
                     path = path,
                     color = subBorderColor,
