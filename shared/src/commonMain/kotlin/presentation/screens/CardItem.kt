@@ -104,6 +104,9 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.material.Checkbox
+import androidx.compose.material.CheckboxDefaults
+
 
 @Composable
 fun CardItem(
