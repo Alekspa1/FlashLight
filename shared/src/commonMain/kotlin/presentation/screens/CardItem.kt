@@ -603,7 +603,7 @@ fun Modifier.borderThreeSidesRounded(
         color = color,
         style = Stroke(
             width = strokePx,
-            cap = StrokeCap.Round
+            cap = StrokeCap.Butt
         )
     )
 }
