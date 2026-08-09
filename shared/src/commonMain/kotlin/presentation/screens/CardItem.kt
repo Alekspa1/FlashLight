@@ -298,11 +298,108 @@ AnimatedVisibility(
     ) {
         // Контент (Column, LazyColumn и элементы) остается точно таким же, как в вашем исходном коде, 
         // но со стильными круглыми радио-баттонами без разделительных линий.
-        Column(modifier = Modifier.fillMaxSize().padding(horizontal = 14.dp, vertical = 10.dp)) {
-            if (selectedFileUri.isNotEmpty()) { ... }
-            LazyColumn(state = listState, modifier = Modifier.fillMaxWidth().heightIn(max = 200.dp)) {
-               // Ваш стандартный itemsIndexed без HorizontalDivider
+        Column(modifier = Modifier.fillMaxSize().padding(12.dp)
+              ) {
+                            if (selectedFileUri.isNotEmpty()) {
+                        AsyncImage(
+                            model = selectedFileUri,
+                            contentDescription = "Фото",
+                            modifier = Modifier
+                                .padding(bottom = 12.dp)
+                                .size(75.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .clickable { onClick(item, IMAGE) },
+                            contentScale = ContentScale.Crop,
+                        )
+                    }
+            
+             LazyColumn(
+            state = listState,
+            modifier = Modifier.fillMaxWidth().heightIn(max = 200.dp),
+            verticalArrangement = Arrangement.spacedBy(5.dp),
+        ) {
+            itemsIndexed(
+                items = currentSnapshotList,
+                key = { _, subItem -> subItem.id } // Ключ работает по ID дела, всё чётко
+            ) { index, subItem ->
+
+                ReorderableItem(
+                    state = reorderableState,
+                    key = subItem.id
+                ) { isDragging ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .longPressDraggableHandle(
+                        enabled = true,
+                        onDragStarted = { haptic.performHapticFeedback(HapticFeedbackType.LongPress) },
+                        onDragStopped = {
+                            val listWithUpdatedSort = currentSnapshotList.mapIndexed { idx, listItem -> 
+                                listItem.copy(sort = idx) 
+                            }
+                            currentSnapshotList = listWithUpdatedSort
+                            onSubDragDropped(listWithUpdatedSort) 
+                        }
+                    )
+                            .animateItem()
+                            .graphicsLayer { alpha = if (isDragging) 0.5f else 1f }
+                    ) {
+                                    if (subItem.id != currentSnapshotList.firstOrNull()?.id) {
+                HorizontalDivider(
+                    thickness = 0.5.dp,
+                    color = theme.borderCardMenuItem.copy(alpha = 0.15f),
+                    modifier = Modifier.padding(bottom = 6.dp) // Отталкиваем текст от верхней линии
+                )
             }
+
+             Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        // КРУГЛЫЙ ЧЕКБОКС (RadioButton)
+                        RadioButton(
+                            selected = subItem.change,
+                            onClick = { onClickSubItem(subItem, CHANGE_ITEM)  }, 
+                            colors = RadioButtonDefaults.colors(
+                                selectedColor = theme.chekBoxTint,
+                                unselectedColor = theme.borderCardMenuItem
+                            ),
+                            modifier = Modifier.size(20.dp)
+                        )
+
+                        Text(
+                            text = subItem.name,
+                            color = if (subItem.change) theme.textDesc else theme.textColor,
+                            fontSize = size.textDesc,
+                            style = if (subItem.change) {
+                                val currentStyle: androidx.compose.ui.text.TextStyle = LocalTextStyle.current
+                                currentStyle.copy(textDecoration = TextDecoration.LineThrough)
+                            } else {
+                                LocalTextStyle.current
+                            },
+                            modifier = Modifier.weight(1f).padding(start = 8.dp, end = 8.dp)
+                        )
+                        
+                        // ИКОНКА УДАЛЕНИЯ ПОДЗАДАЧИ
+                        IconButton(
+                            onClick = { onClickSubItem(subItem, DELETE)  }, 
+                            modifier = Modifier.size(24.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Удалить подзадачу",
+                                tint = theme.textDesc,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
+
+                    }      
+                }
+            }
+        }
         }
     }
 }
