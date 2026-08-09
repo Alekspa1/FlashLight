@@ -548,10 +548,7 @@ fun Modifier.borderThreeSidesRounded(
     color: Color,
     cornerRadius: Dp,
     openSide: String
-): Modifier = this.drawWithContent { // ИСПРАВЛЕНО: drawWithContent вместо drawBehind
-    // Сначала рисуем саму карточку и её фон
-    drawContent() 
-
+): Modifier = this.drawBehind {
     val strokePx = strokeWidth.toPx()
     val radiusPx = cornerRadius.toPx()
     val width = size.width
@@ -591,7 +588,7 @@ fun Modifier.borderThreeSidesRounded(
         }
     }
 
-    // Рисуем обводку ПОВЕРХ контента
+    // Рисуем обводку. Мы используем drawBehind, который у тебя работал
     drawPath(
         path = path,
         color = color,
