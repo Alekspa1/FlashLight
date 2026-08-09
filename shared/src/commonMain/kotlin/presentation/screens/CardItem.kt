@@ -293,17 +293,27 @@ Card(
                         }
                     }
 
-                    IconButton(
-                        onClick = { onClick(item, CHANGE) },
-                        modifier = Modifier.padding(end = 4.dp).size(24.dp)
-                    ) {
-                        Icon(
-                            modifier = Modifier.fillMaxSize(),
-                            imageVector = if (item.change) theme.chekBoxOn else theme.chekBoxOff,
-                            contentDescription = "Check",
-                            tint = theme.chekBoxTint
-                        )
-                    }
+                    Checkbox(
+    checked = item.change,
+    onCheckedChange = { onClick(item, CHANGE) },
+    modifier = Modifier.padding(end = 4.dp).size(24.dp),
+    colors = CheckboxDefaults.colors(
+        checkedColor = theme.chekBoxTint,
+        uncheckedColor = theme.borderCardMenuItem
+    )
+)
+
+                    // IconButton(
+                    //     onClick = { onClick(item, CHANGE) },
+                    //     modifier = Modifier.padding(end = 4.dp).size(24.dp)
+                    // ) {
+                    //     Icon(
+                    //         modifier = Modifier.fillMaxSize(),
+                    //         imageVector = if (item.change) theme.chekBoxOn else theme.chekBoxOff,
+                    //         contentDescription = "Check",
+                    //         tint = theme.chekBoxTint
+                    //     )
+                    // }
                 }
             }
 
@@ -420,16 +430,17 @@ Card(
                             .padding(vertical = 6.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        // КРУГЛЫЙ ЧЕКБОКС (RadioButton)
-                        RadioButton(
-                            selected = subItem.change,
-                            onClick = { onClickSubItem(subItem, CHANGE_ITEM)  }, 
-                            colors = RadioButtonDefaults.colors(
-                                selectedColor = theme.chekBoxTint,
-                                unselectedColor = theme.borderCardMenuItem
-                            ),
-                            modifier = Modifier.size(20.dp)
-                        )
+                       
+                    Checkbox(
+    checked = subItem.change,
+    onCheckedChange = { onClickSubItem(subItem, CHANGE_ITEM) },
+    colors = CheckboxDefaults.colors(
+        checkedColor = theme.chekBoxTint,
+        uncheckedColor = theme.borderCardMenuItem,
+        checkmarkColor = Color.White
+    ),
+    modifier = Modifier.size(20.dp)
+)
 
                         Text(
                             text = subItem.name,
