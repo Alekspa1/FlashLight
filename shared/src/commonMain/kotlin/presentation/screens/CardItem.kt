@@ -168,20 +168,37 @@ fun CardItem(
 
             // 2. Центральная ОСНОВНАЯ карточка
             Card(
-                modifier = Modifier
-                    .padding(start = 5.dp, end = 5.dp)
-                    .weight(1f)
-                    .clip(RoundedCornerShape(15.dp))
-                    .border(
-                        2.dp,
-                        if (item.change) theme.cardItemBorderTrue 
-                        else if (item.changeAlarm) theme.cardItemBorderAlarm 
-                        else theme.cardItemBorderFalse,
-                        RoundedCornerShape(15.dp)
-                    )
-                    .clickable { onClick(item, CHANGE_ITEM) }
-                    .then(dragModifier),
-                shape = RoundedCornerShape(15.dp),
+                    modifier = Modifier
+        .padding(start = 5.dp, end = 5.dp)
+        .weight(1f)
+        // Если раскрыто — скругляем только верх, низ становится плоским для монолитного стыка
+        .clip(
+            if (isExpanded) RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp) 
+            else RoundedCornerShape(15.dp)
+        )
+        .border(
+            2.dp,
+            if (item.change) theme.cardItemBorderTrue else if (item.changeAlarm) theme.cardItemBorderAlarm else theme.cardItemBorderFalse,
+            if (isExpanded) RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp) else RoundedCornerShape(15.dp)
+        )
+        .clickable { onClick(item, CHANGE_ITEM) }
+        .then(dragModifier),
+    shape = if (isExpanded) RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp) else RoundedCornerShape(15.dp),
+   
+                // modifier = Modifier
+                //     .padding(start = 5.dp, end = 5.dp)
+                //     .weight(1f)
+                //     .clip(RoundedCornerShape(15.dp))
+                //     .border(
+                //         2.dp,
+                //         if (item.change) theme.cardItemBorderTrue 
+                //         else if (item.changeAlarm) theme.cardItemBorderAlarm 
+                //         else theme.cardItemBorderFalse,
+                //         RoundedCornerShape(15.dp)
+                //     )
+                //     .clickable { onClick(item, CHANGE_ITEM) }
+                //     .then(dragModifier),
+                // shape = RoundedCornerShape(15.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = if (item.change) theme.cardItemTrue 
                     else if (item.changeAlarm) theme.cardItemAlarm 
@@ -271,135 +288,119 @@ fun CardItem(
 
 AnimatedVisibility(
     visible = isExpanded,
-    enter = expandVertically(expandFrom = Alignment.Top) + fadeIn(),
-    exit = shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut()
+    enter = expandVertically() + fadeIn(),
+    exit = shrinkVertically() + fadeOut()
 ) {
+    val laserColor = if (item.changeAlarm) theme.cardItemBorderAlarm else theme.cardItemBorderFalse
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            // Делаем карточку чуть уже (64.dp вместо 48.dp), чтобы она заходила "внутрь" геометрии верхней карточки
-            .padding(start = 64.dp, end = 64.dp, top = 0.dp, bottom = 6.dp)
-            .graphicsLayer {
-                // Сдвигаем слой по оси Z назад, под основную карточку
-                shadowElevation = 0f
-            }
+            // Отступы идеально совпадают с основной карточкой (5.dp), убирая зазор
+            .padding(start = 5.dp, end = 5.dp, top = 0.dp, bottom = 4.dp)
             .clip(RoundedCornerShape(bottomStart = 15.dp, bottomEnd = 15.dp))
             .border(
-                1.dp,
-                // Полупрозрачный бордюр для эффекта стекла
-                theme.borderCardMenuItem.copy(alpha = 0.3f),
+                2.dp,
+                laserColor,
                 RoundedCornerShape(bottomStart = 15.dp, bottomEnd = 15.dp)
             ),
         shape = RoundedCornerShape(bottomStart = 15.dp, bottomEnd = 15.dp),
-        colors = CardDefaults.cardColors(
-            // Слегка тонируем фон подзадач, делая его темнее основного
-            containerColor = theme.cardMenuItem.copy(alpha = 0.85f)
-        )
+        colors = CardDefaults.cardColors(containerColor = theme.cardItemFalse) // берем фон основного контейнера
     ) {
-        // Контент (Column, LazyColumn и элементы) остается точно таким же, как в вашем исходном коде, 
-        // но со стильными круглыми радио-баттонами без разделительных линий.
-        Column(modifier = Modifier.fillMaxSize().padding(12.dp)
-              ) {
-                            if (selectedFileUri.isNotEmpty()) {
-                        AsyncImage(
-                            model = selectedFileUri,
-                            contentDescription = "Фото",
-                            modifier = Modifier
-                                .padding(bottom = 12.dp)
-                                .size(75.dp)
-                                .clip(RoundedCornerShape(10.dp))
-                                .clickable { onClick(item, IMAGE) },
-                            contentScale = ContentScale.Crop,
-                        )
-                    }
+        Column(modifier = Modifier.fillMaxSize()) {
             
-             LazyColumn(
-            state = listState,
-            modifier = Modifier.fillMaxWidth().heightIn(max = 200.dp),
-            verticalArrangement = Arrangement.spacedBy(5.dp),
-        ) {
-            itemsIndexed(
-                items = currentSnapshotList,
-                key = { _, subItem -> subItem.id } // Ключ работает по ID дела, всё чётко
-            ) { index, subItem ->
-
-                ReorderableItem(
-                    state = reorderableState,
-                    key = subItem.id
-                ) { isDragging ->
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .longPressDraggableHandle(
-                        enabled = true,
-                        onDragStarted = { haptic.performHapticFeedback(HapticFeedbackType.LongPress) },
-                        onDragStopped = {
-                            val listWithUpdatedSort = currentSnapshotList.mapIndexed { idx, listItem -> 
-                                listItem.copy(sort = idx) 
-                            }
-                            currentSnapshotList = listWithUpdatedSort
-                            onSubDragDropped(listWithUpdatedSort) 
-                        }
-                    )
-                            .animateItem()
-                            .graphicsLayer { alpha = if (isDragging) 0.5f else 1f }
-                    ) {
-                                    if (subItem.id != currentSnapshotList.firstOrNull()?.id) {
-                HorizontalDivider(
-                    thickness = 0.5.dp,
-                    color = theme.borderCardMenuItem.copy(alpha = 0.15f),
-                    modifier = Modifier.padding(bottom = 6.dp) // Отталкиваем текст от верхней линии
-                )
-            }
-
-             Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        // КРУГЛЫЙ ЧЕКБОКС (RadioButton)
-                        RadioButton(
-                            selected = subItem.change,
-                            onClick = { onClickSubItem(subItem, CHANGE_ITEM)  }, 
-                            colors = RadioButtonDefaults.colors(
-                                selectedColor = theme.chekBoxTint,
-                                unselectedColor = theme.borderCardMenuItem
-                            ),
-                            modifier = Modifier.size(20.dp)
-                        )
-
-                        Text(
-                            text = subItem.name,
-                            color = if (subItem.change) theme.textDesc else theme.textColor,
-                            fontSize = size.textDesc,
-                            style = if (subItem.change) {
-                                val currentStyle: androidx.compose.ui.text.TextStyle = LocalTextStyle.current
-                                currentStyle.copy(textDecoration = TextDecoration.LineThrough)
-                            } else {
-                                LocalTextStyle.current
-                            },
-                            modifier = Modifier.weight(1f).padding(start = 8.dp, end = 8.dp)
-                        )
-                        
-                        // ИКОНКА УДАЛЕНИЯ ПОДЗАДАЧИ
-                        IconButton(
-                            onClick = { onClickSubItem(subItem, DELETE)  }, 
-                            modifier = Modifier.size(24.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "Удалить подзадачу",
-                                tint = theme.textDesc,
-                                modifier = Modifier.size(16.dp)
+            // Тот самый ЛАЗЕРНЫЙ разделитель на стыке блоков дел
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(2.dp)
+                    .background(
+                        brush = Brush.horizontalGradient(
+                            colors = listOf(
+                                laserColor.copy(alpha = 0.1f),
+                                laserColor,
+                                laserColor.copy(alpha = 0.1f)
                             )
+                        )
+                    )
+            )
+
+            Column(modifier = Modifier.fillMaxSize().padding(horizontal = 14.dp, vertical = 12.dp)) {
+                if (selectedFileUri.isNotEmpty()) {
+                    AsyncImage(
+                        model = selectedFileUri,
+                        contentDescription = "Фото",
+                        modifier = Modifier
+                            .padding(bottom = 12.dp)
+                            .size(75.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .clickable { onClick(item, IMAGE) },
+                        contentScale = ContentScale.Crop,
+                    )
+                }
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.fillMaxWidth().heightIn(max = 200.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    itemsIndexed(items = currentSnapshotList, key = { _, subItem -> subItem.id }) { index, subItem ->
+                        ReorderableItem(state = reorderableState, key = subItem.id) { isDragging ->
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .longPressDraggableHandle(
+                                        enabled = true,
+                                        onDragStarted = { haptic.performHapticFeedback(HapticFeedbackType.LongPress) },
+                                        onDragStopped = {
+                                            val listWithUpdatedSort = currentSnapshotList.mapIndexed { idx, listItem -> listItem.copy(sort = idx) }
+                                            currentSnapshotList = listWithUpdatedSort
+                                            onSubDragDropped(listWithUpdatedSort)
+                                        }
+                                    )
+                                    .animateItem()
+                                    .graphicsLayer { alpha = if (isDragging) 0.5f else 1f }
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    RadioButton(
+                                        selected = subItem.change,
+                                        onClick = { onClickSubItem(subItem, CHANGE_ITEM) },
+                                        colors = RadioButtonDefaults.colors(
+                                            selectedColor = theme.chekBoxTint,
+                                            unselectedColor = theme.borderCardMenuItem
+                                        ),
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Text(
+                                        text = subItem.name,
+                                        color = if (subItem.change) theme.textDesc else theme.textColor,
+                                        fontSize = size.textDesc,
+                                        style = if (subItem.change) {
+                                            LocalTextStyle.current.copy(textDecoration = TextDecoration.LineThrough)
+                                        } else {
+                                            LocalTextStyle.current
+                                        },
+                                        modifier = Modifier.weight(1f).padding(start = 12.dp, end = 8.dp)
+                                    )
+                                    IconButton(
+                                        onClick = { onClickSubItem(subItem, DELETE) },
+                                        modifier = Modifier.size(24.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Close,
+                                            contentDescription = "Удалить подзадачу",
+                                            tint = theme.textDesc,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
-
-                    }      
                 }
             }
-        }
         }
     }
 }
