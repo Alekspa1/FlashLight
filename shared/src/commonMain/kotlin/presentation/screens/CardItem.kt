@@ -338,7 +338,8 @@ Card(
                     openSide = "TOP_OPEN"
                 ),
     shape = menuCardShape,
-    colors = CardDefaults.cardColors(containerColor = theme.cardMenuItem)
+    colors = CardDefaults.cardColors(containerColor = theme.cardMenuItem),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp) 
 )
 
 //                                              Card(
