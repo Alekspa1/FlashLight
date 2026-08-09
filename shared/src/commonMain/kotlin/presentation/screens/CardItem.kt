@@ -548,13 +548,14 @@ fun Modifier.borderThreeSidesRounded(
     color: Color,
     cornerRadius: Dp,
     openSide: String
-): Modifier = this.drawBehind {
+): Modifier = this.drawWithContent { // ИСПРАВЛЕНО: drawWithContent вместо drawBehind
+    // Сначала рисуем саму карточку и её фон
+    drawContent() 
+
     val strokePx = strokeWidth.toPx()
     val radiusPx = cornerRadius.toPx()
     val width = size.width
     val height = size.height
-
-    // Смещение на половину толщины линии внутрь, чтобы границы не обрезались краями контейнера
     val halfStroke = strokePx / 2f
 
     val path = Path().apply {
@@ -564,16 +565,12 @@ fun Modifier.borderThreeSidesRounded(
                 lineTo(halfStroke, radiusPx)
                 arcTo(
                     rect = Rect(halfStroke, halfStroke, radiusPx * 2, radiusPx * 2),
-                    startAngleDegrees = 180f,
-                    sweepAngleDegrees = 90f,
-                    forceMoveTo = false
+                    startAngleDegrees = 180f, sweepAngleDegrees = 90f, forceMoveTo = false
                 )
                 lineTo(width - radiusPx, halfStroke)
                 arcTo(
                     rect = Rect(width - radiusPx * 2, halfStroke, width - halfStroke, radiusPx * 2),
-                    startAngleDegrees = -90f,
-                    sweepAngleDegrees = 90f,
-                    forceMoveTo = false
+                    startAngleDegrees = -90f, sweepAngleDegrees = 90f, forceMoveTo = false
                 )
                 lineTo(width - halfStroke, height)
             }
@@ -582,22 +579,19 @@ fun Modifier.borderThreeSidesRounded(
                 lineTo(halfStroke, height - radiusPx)
                 arcTo(
                     rect = Rect(halfStroke, height - radiusPx * 2, radiusPx * 2, height - halfStroke),
-                    startAngleDegrees = 180f,
-                    sweepAngleDegrees = -90f,
-                    forceMoveTo = false
+                    startAngleDegrees = 180f, sweepAngleDegrees = -90f, forceMoveTo = false
                 )
                 lineTo(width - radiusPx, height - halfStroke)
                 arcTo(
                     rect = Rect(width - radiusPx * 2, height - radiusPx * 2, width - halfStroke, height - halfStroke),
-                    startAngleDegrees = 90f,
-                    sweepAngleDegrees = -90f,
-                    forceMoveTo = false
+                    startAngleDegrees = 90f, sweepAngleDegrees = -90f, forceMoveTo = false
                 )
                 lineTo(width - halfStroke, 0f)
             }
         }
     }
 
+    // Рисуем обводку ПОВЕРХ контента
     drawPath(
         path = path,
         color = color,
