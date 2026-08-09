@@ -118,6 +118,7 @@ fun CardItem(
     onClickSubItem: (SubItem, Int) -> Unit = { _, _ -> },
 ) {
     var isExpanded by remember { mutableStateOf(false) }
+    
     val cardShape = if (isExpanded) {
     RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp, bottomStart = 0.dp, bottomEnd = 0.dp)
     } else {
@@ -234,7 +235,8 @@ Card(
     shape = cardShape,
     colors = CardDefaults.cardColors(
         containerColor = if (item.change) theme.cardItemTrue else if (item.changeAlarm) theme.cardItemAlarm else theme.cardItemFalse
-    )
+    ),
+    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp) 
 )
             {
                 Row(
@@ -329,27 +331,14 @@ Card(
         .fillMaxWidth()
         .padding(start = 48.dp, end = 48.dp, bottom = 4.dp)
         .clip(menuCardShape)
-        // 2. Переключаем бордер в зависимости от раскрытия
-        .then(
-            if (isExpanded) {
-                // Если раскрыта: обводка без верха
-                Modifier.borderThreeSidesRounded(
-                    strokeWidth = 1.dp,
+         .borderThreeSidesRounded(
+                    strokeWidth = 2.dp,
                     color = theme.borderCardMenuItem,
                     cornerRadius = 15.dp,
                     openSide = "TOP_OPEN"
-                )
-            } else {
-                // Если закрыта: твой оригинальный закомментированный бордер по кругу
-                Modifier.border(
-                    1.dp, 
-                    theme.borderCardMenuItem, 
-                    RoundedCornerShape(15.dp)
-                )
-            }
-        ),
+                ),
     shape = menuCardShape,
-    colors = CardDefaults.cardColors(containerColor = theme.borderCardMenuItem)
+    colors = CardDefaults.cardColors(containerColor = theme.cardMenuItem)
 )
 
 //                                              Card(
