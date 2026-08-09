@@ -96,7 +96,6 @@ import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
 
-
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.Brush
@@ -310,20 +309,20 @@ AnimatedVisibility(
         Column(modifier = Modifier.fillMaxSize()) {
             
             // Тот самый ЛАЗЕРНЫЙ разделитель на стыке блоков дел
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(2.dp)
-                    .background(
-                        brush = Brush.horizontalGradient(
-                            colors = listOf(
-                                laserColor.copy(alpha = 0.1f),
-                                laserColor,
-                                laserColor.copy(alpha = 0.1f)
-                            )
-                        )
-                    )
+Box(
+    modifier = Modifier
+        .fillMaxWidth()
+        .then(Modifier.height(2.dp)) // Явный вызов исключает конфликт с параметром size
+        .background(
+            brush = Brush.horizontalGradient(
+                colors = listOf(
+                    laserColor.copy(alpha = 0.1f),
+                    laserColor,
+                    laserColor.copy(alpha = 0.1f)
+                )
             )
+        )
+)
 
             Column(modifier = Modifier.fillMaxSize().padding(horizontal = 14.dp, vertical = 12.dp)) {
                 if (selectedFileUri.isNotEmpty()) {
