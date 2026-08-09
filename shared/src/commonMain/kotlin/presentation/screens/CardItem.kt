@@ -550,10 +550,8 @@ fun Modifier.borderThreeSidesRounded(
     cornerRadius: Dp,
     openSide: String
 ): Modifier = this.drawWithContent {
-    // 1. Сначала принудительно рисуем саму карточку и ее фон
     drawContent() 
 
-    // 2. Теперь поверх фона рисуем незамкнутый бордер
     val strokePx = strokeWidth.toPx()
     val radiusPx = cornerRadius.toPx()
     val width = size.width
@@ -567,13 +565,15 @@ fun Modifier.borderThreeSidesRounded(
                 moveTo(halfStroke, height)
                 lineTo(halfStroke, radiusPx + halfStroke)
                 addArc(
-                    rect = Rect(halfStroke, halfStroke, diameter + halfStroke, diameter + halfStroke),
+                    // ИСПРАВЛЕНО: 'oval' вместо 'rect'
+                    oval = Rect(halfStroke, halfStroke, diameter + halfStroke, diameter + halfStroke),
                     startAngleDegrees = 180f,
                     sweepAngleDegrees = 90f
                 )
                 lineTo(width - radiusPx - halfStroke, halfStroke)
                 addArc(
-                    rect = Rect(width - diameter - halfStroke, halfStroke, width - halfStroke, diameter + halfStroke),
+                    // ИСПРАВЛЕНО: 'oval' вместо 'rect'
+                    oval = Rect(width - diameter - halfStroke, halfStroke, width - halfStroke, diameter + halfStroke),
                     startAngleDegrees = -90f,
                     sweepAngleDegrees = 90f
                 )
@@ -583,13 +583,15 @@ fun Modifier.borderThreeSidesRounded(
                 moveTo(halfStroke, 0f)
                 lineTo(halfStroke, height - radiusPx - halfStroke)
                 addArc(
-                    rect = Rect(halfStroke, height - diameter - halfStroke, diameter + halfStroke, height - halfStroke),
+                    // ИСПРАВЛЕНО: 'oval' вместо 'rect'
+                    oval = Rect(halfStroke, height - diameter - halfStroke, diameter + halfStroke, height - halfStroke),
                     startAngleDegrees = 180f,
                     sweepAngleDegrees = -90f
                 )
                 lineTo(width - radiusPx - halfStroke, height - halfStroke)
                 addArc(
-                    rect = Rect(width - diameter - halfStroke, height - diameter - halfStroke, width - halfStroke, height - halfStroke),
+                    // ИСПРАВЛЕНО: 'oval' вместо 'rect'
+                    oval = Rect(width - diameter - halfStroke, height - diameter - halfStroke, width - halfStroke, height - halfStroke),
                     startAngleDegrees = 90f,
                     sweepAngleDegrees = -90f
                 )
