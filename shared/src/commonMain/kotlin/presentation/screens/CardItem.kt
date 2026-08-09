@@ -198,26 +198,26 @@ fun CardItem(
             //         else theme.cardItemFalse
             //     )
             // ) 
-            Card(
+Card(
     modifier = Modifier
         .padding(start = 5.dp, end = 5.dp)
         .weight(1f)
         .clip(mainCardShape)
-        // Если раскрыто, рисуем обводку через drawBehind, чтобы не было нижней линии
         .then(
             if (isExpanded) {
                 Modifier.drawBehind {
                     val strokePx = 2.dp.toPx()
                     val cornerPx = 15.dp.toPx()
+                    val canvasWidth = this.size.width
+                    val canvasHeight = this.size.height
                     
-                    // Рисуем П-образный контур (лево, верх, право) без низа
                     val path = Path().apply {
-                        moveTo(0f, size.height)
+                        moveTo(0f, canvasHeight)
                         lineTo(0f, cornerPx)
                         quadraticBezierTo(0f, 0f, cornerPx, 0f)
-                        lineTo(size.width - cornerPx, 0f)
-                        quadraticBezierTo(size.width, 0f, size.width, cornerPx)
-                        lineTo(size.width, size.height)
+                        lineTo(canvasWidth - cornerPx, 0f)
+                        quadraticBezierTo(canvasWidth, 0f, canvasWidth, cornerPx)
+                        lineTo(canvasWidth, canvasHeight)
                     }
                     drawPath(
                         path = path,
