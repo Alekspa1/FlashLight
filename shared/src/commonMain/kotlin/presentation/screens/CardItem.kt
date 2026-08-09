@@ -96,6 +96,15 @@ import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
 
+
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.unit.dp
+
+
 @Composable
 fun CardItem(
     item: Item,
@@ -260,129 +269,125 @@ fun CardItem(
             }
         }
 
-        // ВЫЕЗЖАЮЩАЯ ОТДЕЛЬНАЯ КАРТОЧКА ПОДЗАДАЧ (Строго ПОД основной)
-        AnimatedVisibility(
-            visible = isExpanded,
-            enter = expandVertically() + fadeIn(),
-            exit = shrinkVertically() + fadeOut()
-        ) {
+AnimatedVisibility(
+    visible = isExpanded,
+    enter = expandVertically() + fadeIn(),
+    exit = shrinkVertically() + fadeOut()
+) {
+    // Вычисляем отступ, чтобы линия шла ровно по центру иконки стрелочки
+    // Стрелка находится внутри основной карточки (отступ 5.dp + внутренний 4.dp + половина размера 24.dp)
+    val lineXOffset = 5.dp + 4.dp + 12.dp 
+    val neonColor = theme.tintAlarmOn // берем яркий цвет из вашей темы
 
-
-                                             Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 48.dp, end = 48.dp, top = 6.dp, bottom = 4.dp) 
-                    .clip(RoundedCornerShape(15.dp))
-                    .border(1.dp, theme.borderCardMenuItem, RoundedCornerShape(15.dp)),
-                shape = RoundedCornerShape(15.dp),
-                colors = CardDefaults.cardColors(containerColor = theme.cardMenuItem)
-            )   {
-        Column(modifier = Modifier.fillMaxSize().padding(12.dp)
-              ) {
-                            if (selectedFileUri.isNotEmpty()) {
-                        AsyncImage(
-                            model = selectedFileUri,
-                            contentDescription = "Фото",
-                            modifier = Modifier
-                                .padding(bottom = 12.dp)
-                                .size(75.dp)
-                                .clip(RoundedCornerShape(10.dp))
-                                .clickable { onClick(item, IMAGE) },
-                            contentScale = ContentScale.Crop,
-                        )
-                    }
-            
-             LazyColumn(
-            state = listState,
-            modifier = Modifier.fillMaxWidth().heightIn(max = 200.dp),
-            verticalArrangement = Arrangement.spacedBy(5.dp),
-        ) {
-            itemsIndexed(
-                items = currentSnapshotList,
-                key = { _, subItem -> subItem.id } // Ключ работает по ID дела, всё чётко
-            ) { index, subItem ->
-
-                ReorderableItem(
-                    state = reorderableState,
-                    key = subItem.id
-                ) { isDragging ->
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .longPressDraggableHandle(
-                        enabled = true,
-                        onDragStarted = { haptic.performHapticFeedback(HapticFeedbackType.LongPress) },
-                        onDragStopped = {
-                            val listWithUpdatedSort = currentSnapshotList.mapIndexed { idx, listItem -> 
-                                listItem.copy(sort = idx) 
-                            }
-                            currentSnapshotList = listWithUpdatedSort
-                            onSubDragDropped(listWithUpdatedSort) 
-                        }
-                    )
-                            .animateItem()
-                            .graphicsLayer { alpha = if (isDragging) 0.5f else 1f }
-                    ) {
-                                    if (subItem.id != currentSnapshotList.firstOrNull()?.id) {
-                HorizontalDivider(
-                    thickness = 0.5.dp,
-                    color = theme.borderCardMenuItem.copy(alpha = 0.15f),
-                    modifier = Modifier.padding(bottom = 6.dp) // Отталкиваем текст от верхней линии
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 48.dp, end = 48.dp, top = 2.dp, bottom = 8.dp)
+            .drawBehind {
+                // Рисуем вертикальную неоновую нить-направляющую
+                drawLine(
+                    color = neonColor,
+                    start = Offset(x = -16.dp.toPx(), y = -10.dp.toPx()), // уходит под стрелку
+                    end = Offset(x = -16.dp.toPx(), y = size.height),
+                    strokeWidth = 2.dp.toPx(),
+                    cap = StrokeCap.Round
+                )
+            }
+    ) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            if (selectedFileUri.isNotEmpty()) {
+                AsyncImage(
+                    model = selectedFileUri,
+                    contentDescription = "Фото",
+                    modifier = Modifier
+                        .padding(bottom = 12.dp)
+                        .size(75.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .clickable { onClick(item, IMAGE) },
+                    contentScale = ContentScale.Crop,
                 )
             }
 
-             Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        // КРУГЛЫЙ ЧЕКБОКС (RadioButton)
-                        RadioButton(
-                            selected = subItem.change,
-                            onClick = { onClickSubItem(subItem, CHANGE_ITEM)  }, 
-                            colors = RadioButtonDefaults.colors(
-                                selectedColor = theme.chekBoxTint,
-                                unselectedColor = theme.borderCardMenuItem
-                            ),
-                            modifier = Modifier.size(20.dp)
-                        )
-
-                        Text(
-                            text = subItem.name,
-                            color = if (subItem.change) theme.textDesc else theme.textColor,
-                            fontSize = size.textDesc,
-                            style = if (subItem.change) {
-                                val currentStyle: androidx.compose.ui.text.TextStyle = LocalTextStyle.current
-                                currentStyle.copy(textDecoration = TextDecoration.LineThrough)
-                            } else {
-                                LocalTextStyle.current
-                            },
-                            modifier = Modifier.weight(1f).padding(start = 8.dp, end = 8.dp)
-                        )
-                        
-                        // ИКОНКА УДАЛЕНИЯ ПОДЗАДАЧИ
-                        IconButton(
-                            onClick = { onClickSubItem(subItem, DELETE)  }, 
-                            modifier = Modifier.size(24.dp)
+            LazyColumn(
+                state = listState,
+                modifier = Modifier.fillMaxWidth().heightIn(max = 240.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                itemsIndexed(
+                    items = currentSnapshotList,
+                    key = { _, subItem -> subItem.id }
+                ) { index, subItem ->
+                    ReorderableItem(
+                        state = reorderableState,
+                        key = subItem.id
+                    ) { isDragging ->
+                        // Каждый элемент списка рисует свой светящийся узел на линии
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .longPressDraggableHandle(
+                                    enabled = true,
+                                    onDragStarted = { haptic.performHapticFeedback(HapticFeedbackType.LongPress) },
+                                    onDragStopped = {
+                                        val listWithUpdatedSort = currentSnapshotList.mapIndexed { idx, listItem -> listItem.copy(sort = idx) }
+                                        currentSnapshotList = listWithUpdatedSort
+                                        onSubDragDropped(listWithUpdatedSort)
+                                    }
+                                )
+                                .animateItem()
+                                .graphicsLayer { alpha = if (isDragging) 0.5f else 1f }
+                                .drawBehind {
+                                    // Рисуем светящуюся точку-узел напротив каждого круглого чекбокса
+                                    drawCircle(
+                                        color = neonColor,
+                                        radius = 4.dp.toPx(),
+                                        center = Offset(x = -16.dp.toPx(), y = size.height / 2)
+                                    )
+                                }
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "Удалить подзадачу",
-                                tint = theme.textDesc,
-                                modifier = Modifier.size(16.dp)
-                            )
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.bindPx()),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                RadioButton(
+                                    selected = subItem.change,
+                                    onClick = { onClickSubItem(subItem, CHANGE_ITEM) },
+                                    colors = RadioButtonDefaults.colors(
+                                        selectedColor = theme.chekBoxTint,
+                                        unselectedColor = theme.borderCardMenuItem
+                                    ),
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Text(
+                                    text = subItem.name,
+                                    color = if (subItem.change) theme.textDesc else theme.textColor,
+                                    fontSize = size.textDesc,
+                                    style = if (subItem.change) {
+                                        LocalTextStyle.current.copy(textDecoration = TextDecoration.LineThrough)
+                                    } else {
+                                        LocalTextStyle.current
+                                    },
+                                    modifier = Modifier.weight(1f).padding(start = 12.dp, end = 8.dp)
+                                )
+                                IconButton(
+                                    onClick = { onClickSubItem(subItem, DELETE) },
+                                    modifier = Modifier.size(24.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = "Удалить подзадачу",
+                                        tint = theme.textDesc,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                            }
                         }
                     }
-
-                    }      
                 }
             }
         }
-        }
-        }
-            
-}
     }
 }
 
@@ -391,152 +396,17 @@ fun CardItem(
 
 
 
+        
 
-// @Composable
-// fun CardItem(
-//     item: Item,
-//     listSubItems: List<SubItem> = emptyList(),
-//     selectedFileUri: String = "",
-//     theme: Theme = ThemeNeon(),
-//     size: Size = SizeNormal(),
-//     dragModifier: Modifier = Modifier,
-//     onClick: (Item, Int) -> Unit = { _, _ -> }, // 2 аргумента для главных дел
-// ) {
-//     var isExpanded by remember { mutableStateOf(false) }
-
-//     Column(modifier = Modifier.fillMaxWidth()) {
-//         Row(
-//             modifier = Modifier.fillMaxWidth(),
-//             verticalAlignment = Alignment.CenterVertically
-//         ) {
-//             // 1. Левая кнопка (Будильник)
-//             Box(
-//                 modifier = Modifier
-//                     .padding(start = 8.dp)
-//                     .size(35.dp)
-//                     .combinedClickable(
-//                         onClick = { onClick(item, ALARM) },
-//                         onLongClick = { onClick(item, ALARM_LONG) }
-//                     )
-//             ) {
-//                 Icon(
-//                     imageVector = Icons.Default.Alarm,
-//                     contentDescription = "Будильник",
-//                     tint = if (item.changeAlarm) theme.tintAlarmOn else theme.tintAlarmOff,
-//                     modifier = Modifier.fillMaxSize(),
-//                 )
-//             }
-
-//             // 2. Центральная ОСНОВНАЯ карточка
-//             Card(
-//                 modifier = Modifier
-//                     .padding(start = 5.dp, end = 5.dp)
-//                     .weight(1f)
-//                     .clip(RoundedCornerShape(15.dp))
-//                     .border(
-//                         2.dp,
-//                         if (item.change) theme.cardItemBorderTrue 
-//                         else if (item.changeAlarm) theme.cardItemBorderAlarm 
-//                         else theme.cardItemBorderFalse,
-//                         RoundedCornerShape(15.dp)
-//                     )
-//                     .clickable { onClick(item, CHANGE_ITEM) }
-//                     .then(dragModifier),
-//                 shape = RoundedCornerShape(15.dp),
-//                 colors = CardDefaults.cardColors(
-//                     containerColor = if (item.change) theme.cardItemTrue 
-//                     else if (item.changeAlarm) theme.cardItemAlarm 
-//                     else theme.cardItemFalse
-//                 )
-//             ) {
-//                 Row(
-//                     modifier = Modifier
-//                         .fillMaxWidth()
-//                         .padding(start = 6.dp, top = 8.dp, bottom = 8.dp, end = 6.dp),
-//                     verticalAlignment = Alignment.CenterVertically,
-//                 ) {
-//                     // Иконка стрелочки-спойлера
-//                     if (item.uri.isNotEmpty() || listSubItems.isNotEmpty()) {
-//                         IconButton(
-//                             onClick = { isExpanded = !isExpanded },
-//                             modifier = Modifier.padding(start = 4.dp).size(24.dp)
-//                         ) {
-//                             Icon(
-//                                 modifier = Modifier.fillMaxSize(),
-//                                 imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-//                                 contentDescription = "Раскрыть",
-//                                 tint = theme.iconTint
-//                             )
-//                         }
-//                     }
-
-//                     Column(
-//                         modifier = Modifier
-//                             .weight(1f)
-//                             .padding(start = 6.dp, end = 6.dp),
-//                     ) {
-//                         Text(
-//                             text = item.name,
-//                             color = theme.textColor,
-//                             lineHeight = size.lineHeightItem,
-//                             fontSize = size.textItem
-//                         )
-
-//                         if (item.desc.isNotEmpty()) {
-//                             Text(
-//                                 modifier = Modifier.padding(top = 2.dp),
-//                                 text = item.desc,
-//                                 color = theme.textDesc,
-//                                 lineHeight = size.lineHeightDescAndAlarm,
-//                                 fontSize = size.textDesc
-//                             )
-//                         }
-//                         if (item.changeAlarm) {
-//                             Text(
-//                                 modifier = Modifier.padding(top = 4.dp),
-//                                 text = alarmText(item),
-//                                 color = theme.textAlarm,
-//                                 fontSize = size.textAlarm,
-//                                 lineHeight = size.lineHeightDescAndAlarm
-//                             )
-//                         }
-//                     }
-
-//                     IconButton(
-//                         onClick = { onClick(item, CHANGE) },
-//                         modifier = Modifier.padding(end = 4.dp).size(24.dp)
-//                     ) {
-//                         Icon(
-//                             modifier = Modifier.fillMaxSize(),
-//                             imageVector = if (item.change) theme.chekBoxOn else theme.chekBoxOff,
-//                             contentDescription = "Check",
-//                             tint = theme.chekBoxTint
-//                         )
-//                     }
-//                 }
-//             }
-
-//             // 3. Правая кнопка (Удаление)
-//             IconButton(
-//                 onClick = { onClick(item, DELETE) },
-//                 modifier = Modifier.padding(end = 8.dp).size(35.dp)
-//             ) {
-//                 Icon(
-//                     modifier = Modifier.fillMaxSize(),
-//                     imageVector = theme.iconDelItem,
-//                     contentDescription = "Удалить",
-//                     tint = theme.iconDelTint,
-//                 )
-//             }
-//         }
-
-//         // ВЫЕЗЖАЮЩАЯ ОТДЕЛЬНАЯ КАРТОЧКА ПОДЗАДАЧ (Строго ПОД основной)
+        // ВЫЕЗЖАЮЩАЯ ОТДЕЛЬНАЯ КАРТОЧКА ПОДЗАДАЧ (Строго ПОД основной)
 //         AnimatedVisibility(
 //             visible = isExpanded,
 //             enter = expandVertically() + fadeIn(),
 //             exit = shrinkVertically() + fadeOut()
 //         ) {
-//             Card(
+
+
+//                                              Card(
 //                 modifier = Modifier
 //                     .fillMaxWidth()
 //                     .padding(start = 48.dp, end = 48.dp, top = 6.dp, bottom = 4.dp) 
@@ -544,13 +414,10 @@ fun CardItem(
 //                     .border(1.dp, theme.borderCardMenuItem, RoundedCornerShape(15.dp)),
 //                 shape = RoundedCornerShape(15.dp),
 //                 colors = CardDefaults.cardColors(containerColor = theme.cardMenuItem)
-//             ) {
-//                 Column(
-//                     modifier = Modifier
-//                         .fillMaxWidth()
-//                         .padding(12.dp)
-//                 ) {
-//                     if (selectedFileUri.isNotEmpty()) {
+//             )   {
+//         Column(modifier = Modifier.fillMaxSize().padding(12.dp)
+//               ) {
+//                             if (selectedFileUri.isNotEmpty()) {
 //                         AsyncImage(
 //                             model = selectedFileUri,
 //                             contentDescription = "Фото",
@@ -562,10 +429,47 @@ fun CardItem(
 //                             contentScale = ContentScale.Crop,
 //                         )
 //                     }
+            
+//              LazyColumn(
+//             state = listState,
+//             modifier = Modifier.fillMaxWidth().heightIn(max = 200.dp),
+//             verticalArrangement = Arrangement.spacedBy(5.dp),
+//         ) {
+//             itemsIndexed(
+//                 items = currentSnapshotList,
+//                 key = { _, subItem -> subItem.id } // Ключ работает по ID дела, всё чётко
+//             ) { index, subItem ->
 
-//                     Column(modifier = Modifier.fillMaxWidth()) {
-//                         listSubItems.forEachIndexed { index, subItem ->
-//                            Row(
+//                 ReorderableItem(
+//                     state = reorderableState,
+//                     key = subItem.id
+//                 ) { isDragging ->
+//                     Box(
+//                         modifier = Modifier
+//                             .fillMaxWidth()
+//                             .longPressDraggableHandle(
+//                         enabled = true,
+//                         onDragStarted = { haptic.performHapticFeedback(HapticFeedbackType.LongPress) },
+//                         onDragStopped = {
+//                             val listWithUpdatedSort = currentSnapshotList.mapIndexed { idx, listItem -> 
+//                                 listItem.copy(sort = idx) 
+//                             }
+//                             currentSnapshotList = listWithUpdatedSort
+//                             onSubDragDropped(listWithUpdatedSort) 
+//                         }
+//                     )
+//                             .animateItem()
+//                             .graphicsLayer { alpha = if (isDragging) 0.5f else 1f }
+//                     ) {
+//                                     if (subItem.id != currentSnapshotList.firstOrNull()?.id) {
+//                 HorizontalDivider(
+//                     thickness = 0.5.dp,
+//                     color = theme.borderCardMenuItem.copy(alpha = 0.15f),
+//                     modifier = Modifier.padding(bottom = 6.dp) // Отталкиваем текст от верхней линии
+//                 )
+//             }
+
+//              Row(
 //                         modifier = Modifier
 //                             .fillMaxWidth()
 //                             .padding(vertical = 6.dp),
@@ -574,7 +478,7 @@ fun CardItem(
 //                         // КРУГЛЫЙ ЧЕКБОКС (RadioButton)
 //                         RadioButton(
 //                             selected = subItem.change,
-//                             onClick = {  }, 
+//                             onClick = { onClickSubItem(subItem, CHANGE_ITEM)  }, 
 //                             colors = RadioButtonDefaults.colors(
 //                                 selectedColor = theme.chekBoxTint,
 //                                 unselectedColor = theme.borderCardMenuItem
@@ -597,7 +501,7 @@ fun CardItem(
                         
 //                         // ИКОНКА УДАЛЕНИЯ ПОДЗАДАЧИ
 //                         IconButton(
-//                             onClick = {  }, 
+//                             onClick = { onClickSubItem(subItem, DELETE)  }, 
 //                             modifier = Modifier.size(24.dp)
 //                         ) {
 //                             Icon(
@@ -609,19 +513,19 @@ fun CardItem(
 //                         }
 //                     }
 
-//                     if (index < listSubItems.lastIndex) {
-//                         HorizontalDivider(
-//                             thickness = 0.5.dp,
-//                             color = theme.borderCardMenuItem.copy(alpha = 0.15f)
-//                         )
-//                     }
+//                     }      
 //                 }
 //             }
 //         }
-//     }
+//         }
+//         }
+            
 // }
-//     }
-// }
+    }
+}
+
+
+
 
 
 // Вспомогательная функция для форматирования времени в строку HH:mm вручную (чтобы не тащить тяжелые форматировщики в commonMain)
