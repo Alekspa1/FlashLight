@@ -236,10 +236,10 @@ Card(
         .clickable { onClick(item, CHANGE_ITEM) }
         .then(dragModifier),
     shape = cardShape,
-    // colors = CardDefaults.cardColors(
-    //     containerColor = if (item.change) theme.cardItemTrue else if (item.changeAlarm) theme.cardItemAlarm else theme.cardItemFalse
-    // )
-    //,
+    colors = CardDefaults.cardColors(
+        containerColor = if (item.change) theme.cardItemTrue else if (item.changeAlarm) theme.cardItemAlarm else theme.cardItemFalse
+    )
+    ,
     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp) 
 )
             {
@@ -302,7 +302,7 @@ Card(
     modifier = Modifier.padding(end = 4.dp).size(24.dp),
     colors = CheckboxDefaults.colors(
         checkedColor = theme.chekBoxTint,
-        uncheckedColor = theme.borderCardMenuItem
+        uncheckedColor = theme.chekBoxTint
     )
 )
 
@@ -440,7 +440,6 @@ Card(
     colors = CheckboxDefaults.colors(
         checkedColor = theme.chekBoxTint,
         uncheckedColor = theme.borderCardMenuItem,
-        checkmarkColor = Color.White
     ),
     modifier = Modifier.size(20.dp)
 )
