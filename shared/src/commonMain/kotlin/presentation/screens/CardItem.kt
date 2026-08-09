@@ -118,8 +118,17 @@ fun CardItem(
     onClickSubItem: (SubItem, Int) -> Unit = { _, _ -> },
 ) {
     var isExpanded by remember { mutableStateOf(false) }
-
+    val cardShape = if (isExpanded) {
+    RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp, bottomStart = 0.dp, bottomEnd = 0.dp)
+    } else {
+    RoundedCornerShape(15.dp)
+    }
+    val menuCardShape = if (isExpanded) {
+    RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomStart = 15.dp, bottomEnd = 15.dp)
+    } else {
+    RoundedCornerShape(15.dp)
     
+    }
     val listState = rememberLazyListState()
     val haptic = LocalHapticFeedback.current
 
@@ -168,33 +177,65 @@ fun CardItem(
             }
 
             // 2. Центральная ОСНОВНАЯ карточка
-            Card(
-                modifier = Modifier
-                    .padding(start = 5.dp, end = 5.dp)
-                    .weight(1f)
-                    .clip(RoundedCornerShape(15.dp))
-.borderThreeSidesRounded(
-    strokeWidth = 2.dp,
-    color = if (item.change) theme.cardItemBorderTrue else if (item.changeAlarm) theme.cardItemBorderAlarm else theme.cardItemBorderFalse,
-    cornerRadius = 15.dp,
-    openSide = "BOTTOM_OPEN"
-)
-                    // .border(
-                    //     2.dp,
-                    //     if (item.change) theme.cardItemBorderTrue 
-                    //     else if (item.changeAlarm) theme.cardItemBorderAlarm 
-                    //     else theme.cardItemBorderFalse,
-                    //     RoundedCornerShape(15.dp)
-                    // )
-                    .clickable { onClick(item, CHANGE_ITEM) }
-                    .then(dragModifier),
-                shape = RoundedCornerShape(15.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = if (item.change) theme.cardItemTrue 
-                    else if (item.changeAlarm) theme.cardItemAlarm 
-                    else theme.cardItemFalse
+//             Card(
+//                 modifier = Modifier
+//                     .padding(start = 5.dp, end = 5.dp)
+//                     .weight(1f)
+//                     .clip(RoundedCornerShape(15.dp))
+// .borderThreeSidesRounded(
+//     strokeWidth = 2.dp,
+//     color = if (item.change) theme.cardItemBorderTrue else if (item.changeAlarm) theme.cardItemBorderAlarm else theme.cardItemBorderFalse,
+//     cornerRadius = 15.dp,
+//     openSide = "BOTTOM_OPEN"
+// )
+//                     // .border(
+//                     //     2.dp,
+//                     //     if (item.change) theme.cardItemBorderTrue 
+//                     //     else if (item.changeAlarm) theme.cardItemBorderAlarm 
+//                     //     else theme.cardItemBorderFalse,
+//                     //     RoundedCornerShape(15.dp)
+//                     // )
+//                     .clickable { onClick(item, CHANGE_ITEM) }
+//                     .then(dragModifier),
+//                 shape = RoundedCornerShape(15.dp),
+//                 colors = CardDefaults.cardColors(
+//                     containerColor = if (item.change) theme.cardItemTrue 
+//                     else if (item.changeAlarm) theme.cardItemAlarm 
+//                     else theme.cardItemFalse
+//                 )
+//             )
+
+Card(
+    modifier = Modifier
+        .padding(start = 5.dp, end = 5.dp)
+        .weight(1f)
+        .clip(cardShape)
+        // 2. Выбираем нужный бордер в зависимости от isExpanded
+        .then(
+            if (isExpanded) {
+                // Если раскрыта: обводка по трем сторонам без низа
+                Modifier.borderThreeSidesRounded(
+                    strokeWidth = 2.dp,
+                    color = if (item.change) theme.cardItemBorderTrue else if (item.changeAlarm) theme.cardItemBorderAlarm else theme.cardItemBorderFalse,
+                    cornerRadius = 15.dp,
+                    openSide = "BOTTOM_OPEN"
                 )
-            ) 
+            } else {
+                // Если закрыта: твой оригинальный закомментированный бордер по кругу
+                Modifier.border(
+                    2.dp,
+                    if (item.change) theme.cardItemBorderTrue else if (item.changeAlarm) theme.cardItemBorderAlarm else theme.cardItemBorderFalse,
+                    RoundedCornerShape(15.dp)
+                )
+            }
+        )
+        .clickable { onClick(item, CHANGE_ITEM) }
+        .then(dragModifier),
+    shape = cardShape,
+    colors = CardDefaults.cardColors(
+        containerColor = if (item.change) theme.cardItemTrue else if (item.changeAlarm) theme.cardItemAlarm else theme.cardItemFalse
+    )
+)
             {
                 Row(
                     modifier = Modifier
@@ -277,32 +318,57 @@ fun CardItem(
             }
         }
 
-        
-
         // ВЫЕЗЖАЮЩАЯ ОТДЕЛЬНАЯ КАРТОЧКА ПОДЗАДАЧ (Строго ПОД основной)
         AnimatedVisibility(
             visible = isExpanded,
             enter = expandVertically() + fadeIn(),
             exit = shrinkVertically() + fadeOut()
         ) {
-
-
-                                             Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 48.dp, end = 48.dp, top = 6.dp, bottom = 4.dp) 
-                    .clip(RoundedCornerShape(15.dp))
-                   //.border(1.dp, theme.borderCardMenuItem, RoundedCornerShape(15.dp))
-                   .borderThreeSidesRounded(
-    strokeWidth = 1.dp,
-    color = theme.borderCardMenuItem,
-    cornerRadius = 15.dp,
-    openSide = "TOP_OPEN"
+Card(
+    modifier = Modifier
+        .fillMaxWidth()
+        .padding(start = 48.dp, end = 48.dp, top = 6.dp, bottom = 4.dp)
+        .clip(menuCardShape)
+        // 2. Переключаем бордер в зависимости от раскрытия
+        .then(
+            if (isExpanded) {
+                // Если раскрыта: обводка без верха
+                Modifier.borderThreeSidesRounded(
+                    strokeWidth = 1.dp,
+                    color = theme.borderCardMenuItem,
+                    cornerRadius = 15.dp,
+                    openSide = "TOP_OPEN"
+                )
+            } else {
+                // Если закрыта: твой оригинальный закомментированный бордер по кругу
+                Modifier.border(
+                    1.dp, 
+                    theme.borderCardMenuItem, 
+                    RoundedCornerShape(15.dp)
+                )
+            }
+        ),
+    shape = menuCardShape,
+    colors = CardDefaults.cardColors(containerColor = theme.borderCardMenuItem)
 )
-                                                 ,
-                shape = RoundedCornerShape(15.dp),
-                colors = CardDefaults.cardColors(containerColor = theme.cardMenuItem)
-            )   {
+
+//                                              Card(
+//                 modifier = Modifier
+//                     .fillMaxWidth()
+//                     .padding(start = 48.dp, end = 48.dp, top = 6.dp, bottom = 4.dp) 
+//                     .clip(RoundedCornerShape(15.dp))
+//                    //.border(1.dp, theme.borderCardMenuItem, RoundedCornerShape(15.dp))
+//                    .borderThreeSidesRounded(
+//     strokeWidth = 1.dp,
+//     color = theme.borderCardMenuItem,
+//     cornerRadius = 15.dp,
+//     openSide = "TOP_OPEN"
+// )
+//                                                  ,
+//                 shape = RoundedCornerShape(15.dp),
+//                 colors = CardDefaults.cardColors(containerColor = theme.cardMenuItem)
+//             )   
+            {
         Column(modifier = Modifier.fillMaxSize().padding(12.dp)
               ) {
                             if (selectedFileUri.isNotEmpty()) {
