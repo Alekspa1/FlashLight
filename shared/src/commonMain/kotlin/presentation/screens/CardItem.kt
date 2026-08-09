@@ -103,7 +103,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.Dp
-
+import androidx.compose.ui.draw.drawWithContent
 
 @Composable
 fun CardItem(
@@ -549,68 +549,51 @@ fun Modifier.borderThreeSidesRounded(
     color: Color,
     cornerRadius: Dp,
     openSide: String
-): Modifier = this.drawBehind {
+): Modifier = this.drawWithContent {
+    // 1. Сначала принудительно рисуем саму карточку и ее фон
+    drawContent() 
+
+    // 2. Теперь поверх фона рисуем незамкнутый бордер
     val strokePx = strokeWidth.toPx()
     val radiusPx = cornerRadius.toPx()
     val width = size.width
     val height = size.height
     val halfStroke = strokePx / 2f
+    val diameter = radiusPx * 2
 
     val path = Path().apply {
         when (openSide) {
             "BOTTOM_OPEN" -> {
-                // Начинаем строго с левого нижнего угла без дублирования точек
                 moveTo(halfStroke, height)
-                lineTo(halfStroke, radiusPx)
-                
-                // Левый верхний угол
-                arcTo(
-                    rect = Rect(halfStroke, halfStroke, radiusPx * 2, radiusPx * 2),
-                    startAngleDegrees = 180f, 
-                    sweepAngleDegrees = 90f, 
-                    forceMoveTo = false
+                lineTo(halfStroke, radiusPx + halfStroke)
+                addArc(
+                    rect = Rect(halfStroke, halfStroke, diameter + halfStroke, diameter + halfStroke),
+                    startAngleDegrees = 180f,
+                    sweepAngleDegrees = 90f
                 )
-                
-                // Верхний мост напрямую до начала правого скругления
-                lineTo(width - radiusPx, halfStroke)
-                
-                // Правый верхний угол
-                arcTo(
-                    rect = Rect(width - radiusPx * 2, halfStroke, width - halfStroke, radiusPx * 2),
-                    startAngleDegrees = -90f, 
-                    sweepAngleDegrees = 90f, 
-                    forceMoveTo = false
+                lineTo(width - radiusPx - halfStroke, halfStroke)
+                addArc(
+                    rect = Rect(width - diameter - halfStroke, halfStroke, width - halfStroke, diameter + halfStroke),
+                    startAngleDegrees = -90f,
+                    sweepAngleDegrees = 90f
                 )
-                
-                // Спускаемся строго до правого нижнего угла
                 lineTo(width - halfStroke, height)
             }
             "TOP_OPEN" -> {
-                // Начинаем строго с правого верхнего угла
-                moveTo(width - halfStroke, 0f)
-                lineTo(width - halfStroke, height - radiusPx)
-                
-                // Правый нижний угол
-                arcTo(
-                    rect = Rect(width - radiusPx * 2, height - radiusPx * 2, width - halfStroke, height - halfStroke),
-                    startAngleDegrees = 0f, 
-                    sweepAngleDegrees = 90f, 
-                    forceMoveTo = false
+                moveTo(halfStroke, 0f)
+                lineTo(halfStroke, height - radiusPx - halfStroke)
+                addArc(
+                    rect = Rect(halfStroke, height - diameter - halfStroke, diameter + halfStroke, height - halfStroke),
+                    startAngleDegrees = 180f,
+                    sweepAngleDegrees = -90f
                 )
-                
-                // Нижний мост до левого скругления
-                lineTo(radiusPx, height - halfStroke)
-                
-                // Левый нижний угол
-                arcTo(
-                    rect = Rect(halfStroke, height - radiusPx * 2, radiusPx * 2, height - halfStroke),
-                    startAngleDegrees = 90f, 
-                    sweepAngleDegrees = 90f, 
-                    forceMoveTo = false
+                lineTo(width - radiusPx - halfStroke, height - halfStroke)
+                addArc(
+                    rect = Rect(width - diameter - halfStroke, height - diameter - halfStroke, width - halfStroke, height - halfStroke),
+                    startAngleDegrees = 90f,
+                    sweepAngleDegrees = -90f
                 )
-                
-                // Поднимаемся до левого верхнего угла
-                lineTo(halfStroke, 0f)
+                lineTo(width - halfStroke, 0f)
             }
         }
     }
