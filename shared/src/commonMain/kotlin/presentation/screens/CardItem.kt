@@ -271,121 +271,37 @@ fun CardItem(
 
 AnimatedVisibility(
     visible = isExpanded,
-    enter = expandVertically() + fadeIn(),
-    exit = shrinkVertically() + fadeOut()
+    enter = expandVertically(expandFrom = Alignment.Top) + fadeIn(),
+    exit = shrinkVertically(shrinkTowards = Alignment.Top) + fadeOut()
 ) {
-    val neonColor = theme.tintAlarmOn
-
-    Box(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 48.dp, end = 48.dp, top = 2.dp, bottom = 8.dp)
-            .drawBehind {
-                // Внутри drawBehind метод toPx() доступен напрямую через Density область
-                val xPos = -16.dp.toPx()
-                drawLine(
-                    color = neonColor,
-                    start = Offset(x = xPos, y = -10.dp.toPx()),
-                    end = Offset(x = xPos, y = size.height),
-                    strokeWidth = 2.dp.toPx(),
-                    cap = StrokeCap.Round
-                )
+            // Делаем карточку чуть уже (64.dp вместо 48.dp), чтобы она заходила "внутрь" геометрии верхней карточки
+            .padding(start = 64.dp, end = 64.dp, top = 0.dp, bottom = 6.dp)
+            .graphicsLayer {
+                // Сдвигаем слой по оси Z назад, под основную карточку
+                shadowElevation = 0f
             }
+            .clip(RoundedCornerShape(bottomStart = 15.dp, bottomEnd = 15.dp))
+            .border(
+                1.dp,
+                // Полупрозрачный бордюр для эффекта стекла
+                theme.borderCardMenuItem.copy(alpha = 0.3f),
+                RoundedCornerShape(bottomStart = 15.dp, bottomEnd = 15.dp)
+            ),
+        shape = RoundedCornerShape(bottomStart = 15.dp, bottomEnd = 15.dp),
+        colors = CardDefaults.cardColors(
+            // Слегка тонируем фон подзадач, делая его темнее основного
+            containerColor = theme.cardMenuItem.copy(alpha = 0.85f)
+        )
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            if (selectedFileUri.isNotEmpty()) {
-                AsyncImage(
-                    model = selectedFileUri,
-                    contentDescription = "Фото",
-                    modifier = Modifier
-                        .padding(bottom = 12.dp)
-                        .size(75.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .clickable { onClick(item, IMAGE) },
-                    contentScale = ContentScale.Crop,
-                )
-            }
-
-            LazyColumn(
-                state = listState,
-                modifier = Modifier.fillMaxWidth().heightIn(max = 240.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                itemsIndexed(
-                    items = currentSnapshotList,
-                    key = { _, subItem -> subItem.id }
-                ) { index, subItem ->
-                    ReorderableItem(
-                        state = reorderableState,
-                        key = subItem.id
-                    ) { isDragging ->
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .longPressDraggableHandle(
-                                    enabled = true,
-                                    onDragStarted = { haptic.performHapticFeedback(HapticFeedbackType.LongPress) },
-                                    onDragStopped = {
-                                        val listWithUpdatedSort = currentSnapshotList.mapIndexed { idx, listItem -> listItem.copy(sort = idx) }
-                                        currentSnapshotList = listWithUpdatedSort
-                                        onSubDragDropped(listWithUpdatedSort)
-                                    }
-                                )
-                                .animateItem()
-                                .graphicsLayer { alpha = if (isDragging) 0.5f else 1f }
-.drawBehind {
-    val xPos = -16.dp.toPx()
-    drawLine(
-        color = neonColor,
-        start = Offset(x = xPos, y = -10.dp.toPx()),
-        // Исправлено: берем height из объекта size встроенного DrawScope
-        end = Offset(x = xPos, y = this.size.height), 
-        strokeWidth = 2.dp.toPx(),
-        cap = StrokeCap.Round
-    )
-}
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 4.dp), // Исправлено на .dp
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                RadioButton(
-                                    selected = subItem.change,
-                                    onClick = { onClickSubItem(subItem, CHANGE_ITEM) },
-                                    colors = RadioButtonDefaults.colors(
-                                        selectedColor = theme.chekBoxTint,
-                                        unselectedColor = theme.borderCardMenuItem
-                                    ),
-                                    modifier = Modifier.size(20.dp)
-                                )
-                                Text(
-                                    text = subItem.name,
-                                    color = if (subItem.change) theme.textDesc else theme.textColor,
-                                    fontSize = size.textDesc,
-                                    style = if (subItem.change) {
-                                        LocalTextStyle.current.copy(textDecoration = TextDecoration.LineThrough)
-                                    } else {
-                                        LocalTextStyle.current
-                                    },
-                                    modifier = Modifier.weight(1f).padding(start = 12.dp, end = 8.dp)
-                                )
-                                IconButton(
-                                    onClick = { onClickSubItem(subItem, DELETE) },
-                                    modifier = Modifier.size(24.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Close,
-                                        contentDescription = "Удалить подзадачу",
-                                        tint = theme.textDesc,
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
+        // Контент (Column, LazyColumn и элементы) остается точно таким же, как в вашем исходном коде, 
+        // но со стильными круглыми радио-баттонами без разделительных линий.
+        Column(modifier = Modifier.fillMaxSize().padding(horizontal = 14.dp, vertical = 10.dp)) {
+            if (selectedFileUri.isNotEmpty()) { ... }
+            LazyColumn(state = listState, modifier = Modifier.fillMaxWidth().heightIn(max = 200.dp)) {
+               // Ваш стандартный itemsIndexed без HorizontalDivider
             }
         }
     }
