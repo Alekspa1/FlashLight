@@ -102,7 +102,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.unit.dp
-
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.height
 
 @Composable
 fun CardItem(
