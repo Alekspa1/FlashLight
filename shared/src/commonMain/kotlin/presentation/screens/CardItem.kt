@@ -233,9 +233,10 @@ Card(
         .clickable { onClick(item, CHANGE_ITEM) }
         .then(dragModifier),
     shape = cardShape,
-    colors = CardDefaults.cardColors(
-        containerColor = if (item.change) theme.cardItemTrue else if (item.changeAlarm) theme.cardItemAlarm else theme.cardItemFalse
-    ),
+    // colors = CardDefaults.cardColors(
+    //     containerColor = if (item.change) theme.cardItemTrue else if (item.changeAlarm) theme.cardItemAlarm else theme.cardItemFalse
+    // )
+    //,
     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp) 
 )
             {
