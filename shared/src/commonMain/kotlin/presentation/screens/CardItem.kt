@@ -327,7 +327,7 @@ Card(
 Card(
     modifier = Modifier
         .fillMaxWidth()
-        .padding(start = 48.dp, end = 48.dp, top = 6.dp, bottom = 4.dp)
+        .padding(start = 48.dp, end = 48.dp, bottom = 4.dp)
         .clip(menuCardShape)
         // 2. Переключаем бордер в зависимости от раскрытия
         .then(
