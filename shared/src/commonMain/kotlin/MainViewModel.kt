@@ -87,10 +87,9 @@ class MainViewModel(
     private var _toast = MutableSharedFlow<String>()
     var toast = _toast.asSharedFlow()
 
-   private val _premiumState = MutableStateFlow(pref.getPremium())
+  // private val _premiumState = MutableStateFlow(pref.getPremium())
 
-
-   //private val _premiumState = MutableStateFlow(false)
+   private val _premiumState = MutableStateFlow(true)
    var premiumState = _premiumState.asStateFlow()
 
     private val _updateState = MutableStateFlow(false)
