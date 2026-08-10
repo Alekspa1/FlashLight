@@ -106,6 +106,9 @@ interface CourseDao {
     @Query("DELETE FROM sub_items WHERE idTask = :taskId")
     suspend fun deleteAllSubItemsForTask(taskId: Int)
 
+    @Query("UPDATE sub_items SET change = 1 WHERE idTask = :taskId AND change = 0")
+    suspend fun markAllSubItemsAsCompleted(taskId: Int)
+
 
 
 

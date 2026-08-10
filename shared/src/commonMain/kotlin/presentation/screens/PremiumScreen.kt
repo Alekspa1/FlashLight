@@ -131,6 +131,7 @@ fun PremiumScreen(
                 PremiumItem("Повторяющиеся напоминания",theme,size)
                 PremiumItem("Создание своих списков дел",theme,size)
                 PremiumItem("Поддержка разработчика",theme,size)
+                PremiumItem("Создание подзадач",theme,size)
 
             }
         }

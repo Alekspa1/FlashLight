@@ -79,6 +79,7 @@ import androidx.compose.material3.LocalTextStyle
 @Composable
 fun AddOrChangeItemDialog(
     item: Item? = null,
+    premium : Boolean = false,
     onCancel : ()-> Unit = {},
     listCategory : List<String> = emptyList(),
     listSubItems : List<SubItem> = emptyList(),
@@ -110,6 +111,7 @@ fun AddOrChangeItemDialog(
     var categorySelected by remember { mutableStateOf(item?.category ?: if(calendar) "Повседневные" else category) }
     val listSubTask = remember { mutableStateListOf<SubItem>() }
     var editingSubTaskId by remember { mutableIntStateOf(-1) }
+    var errorMessage by remember {mutableStateOf(false)}
     LaunchedEffect(listSubItems) {
         listSubTask.clear()
         listSubTask.addAll(listSubItems)
@@ -140,11 +142,14 @@ fun AddOrChangeItemDialog(
         title = { Text("Сфокусироваться") },
 
         text = {
+
             Column(
                 modifier = Modifier.fillMaxWidth()
                 .verticalScroll(rememberScrollState()),
                
             ) {
+
+
                 // Поле Название
                 OutlinedTextField(
                     modifier = Modifier
@@ -169,11 +174,11 @@ fun AddOrChangeItemDialog(
     modifier = Modifier
         .fillMaxWidth()
         .padding(vertical = 8.dp)
-        .border(
-            width = 1.dp,
-            color = theme.cardItemBorderFalse,
-            shape = RoundedCornerShape(10.dp)
-        )
+//        .border(
+//            width = 1.dp,
+//            color = theme.cardItemBorderFalse,
+//            shape = RoundedCornerShape(10.dp)
+//        )
 ) {
     // Внешний Box занимает всю ширину, чтобы прижать кнопку вправо
     Box(
@@ -185,17 +190,17 @@ fun AddOrChangeItemDialog(
         Row(
             modifier = Modifier
                 .clip(RoundedCornerShape(8.dp)) // Чтобы эффект нажатия не вылезал за границы
-                .clickable { isExpanded = !isExpanded }
+                .clickable { isExpanded = !isExpanded}
                 .padding(horizontal = 12.dp, vertical = 8.dp), // Внутренние отступы самой кнопки
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.End
         ) {
-            Text(
-                text = "Подзадачи",
-                fontSize = 15.sp,
-                color = theme.textColor,
-                modifier = Modifier.padding(end = 8.dp)
-            )
+                Text(
+                    text = "Подзадачи",
+                    fontSize = 15.sp,
+                    color = theme.textColor,
+                    modifier = Modifier.padding(end = 8.dp)
+                )
             ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
         }
     }
@@ -211,51 +216,68 @@ fun AddOrChangeItemDialog(
         .fillMaxWidth()
         .padding(start = 16.dp, end = 16.dp, bottom = 16.dp) // Даем отступы от внешних краев
 ) {
-    // 1. Поле ввода новой подзадачи (убрали тяжелую рамку OutlinedTextField)
-    BasicTextField(
-        value = stateTextSubTask,
-        onValueChange = { stateTextSubTask = it },
-        textStyle = LocalTextStyle.current.copy(color = theme.textColor, fontSize = 15.sp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        decorationBox = { innerTextField ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .border(1.dp, theme.borderCardMenuItem, RoundedCornerShape(8.dp))
-                    .padding(horizontal = 12.dp, vertical = 10.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Box(modifier = Modifier.weight(1f)) {
-                    if (stateTextSubTask.isEmpty()) {
-                        Text("Добавить подзадачу...", color = theme.textDesc, fontSize = 15.sp)
-                    }
-                    innerTextField()
-                }
-                IconButton(
-                    onClick = { 
-                        if (stateTextSubTask.isNotBlank()) {
-                            val maxSort = listSubTask.maxOfOrNull { it.sort } ?: -1
-                            listSubTask.add(
-                                SubItem(
-                                    idTask = item?.id ?: 0,
-                                    name = stateTextSubTask,
-                                    change = false,
-                                    sort = maxSort + 1
-                                )
-                            )
-                            stateTextSubTask = "" 
-                        }
-                    },
-                    modifier = Modifier.size(20.dp)
-                ) { 
-                    Icon(Icons.Default.Add, contentDescription = "Добавить", tint = theme.tintPremiumOn) 
-                }
-            }
-        }
-    )
+           if(errorMessage){
+               Text(
+                   text = "Больше подзадач доступно в PREMIUM версии",
+                   color = MaterialTheme.colorScheme.error,
+                   style = MaterialTheme.typography.bodyMedium,
+                   modifier = Modifier.padding(start = 24.dp, top = 16.dp)
+               )
+           } else {
+               BasicTextField(
+                   value = stateTextSubTask,
+                   onValueChange = { stateTextSubTask = it },
+                   textStyle = LocalTextStyle.current.copy(color = theme.textColor, fontSize = 15.sp),
+                   modifier = Modifier
+                       .fillMaxWidth()
+                       .padding(vertical = 8.dp),
+                   decorationBox = { innerTextField ->
+                       Row(
+                           modifier = Modifier
+                               .fillMaxWidth()
+                               .border(1.dp, theme.textColor, RoundedCornerShape(8.dp))
+                               .padding(horizontal = 12.dp, vertical = 10.dp),
+                           verticalAlignment = Alignment.CenterVertically,
+                           horizontalArrangement = Arrangement.SpaceBetween
+                       ) {
+                           Box(modifier = Modifier.weight(1f)) {
+                               if (stateTextSubTask.isEmpty()) {
+                                   Text("Добавить подзадачу...", color = theme.textDesc, fontSize = 15.sp)
+                               }
+                               innerTextField()
+
+
+
+                           }
+                           IconButton(
+                               onClick = {
+                                   val textSubItem =  if(stateTextSubTask.trim().isNotEmpty()) stateTextSubTask.trim() else "Без названия"
+                                   //if (stateTextSubTask.isNotBlank()) {
+                                       val maxSort = listSubTask.maxOfOrNull { it.sort } ?: -1
+                                           listSubTask.add(
+                                               SubItem(
+                                                   idTask = item?.id ?: 0,
+                                                   name = textSubItem,
+                                                   change = false,
+                                                   sort = maxSort + 1
+                                               )
+                                           )
+                                           if(listSubTask.size >= 2 && !premium ) errorMessage = true
+
+
+                                       stateTextSubTask = ""
+                                  // }
+                               },
+                               modifier = Modifier.size(20.dp)
+                           ) {
+                               Icon(Icons.Default.Add, contentDescription = "Добавить", tint = theme.iconTint)
+                           }
+                       }
+                   }
+               )
+           }
+
+
 
     if (listSubTask.isNotEmpty()) {
         Spacer(modifier = Modifier.height(12.dp))
@@ -294,8 +316,11 @@ fun AddOrChangeItemDialog(
                                         .weight(1f)
                                         .clickable { editingSubTaskId = if (subTask.id != 0) subTask.id else index + 100000 }
                         )
-                        IconButton(onClick = { listSubTask.remove(subTask) }, modifier = Modifier.size(24.dp)) {
-                            Icon(Icons.Default.Close, contentDescription = "Удалить", tint = theme.textDesc)
+                        IconButton(onClick = {
+                            listSubTask.remove(subTask)
+                            if(listSubTask.size < 2 && !premium ) errorMessage = false
+                                             }, modifier = Modifier.size(24.dp)) {
+                            Icon(Icons.Default.Close, contentDescription = "Удалить", tint = theme.cardItemBorderFalse)
                         }
                     }
                 }
@@ -314,102 +339,6 @@ fun AddOrChangeItemDialog(
     }
 }
 
-
-                
-//                 // Поле подзадачи
-//                 Box(
-//                     modifier = Modifier.fillMaxWidth(),
-//                     contentAlignment = Alignment.CenterEnd // Прижимает содержимое к правому краю
-//                 ) {
-//                     TextButton(
-//                         onClick = { isExpanded = !isExpanded },
-//                     ) {
-//                         Row(
-//                             modifier = Modifier.padding(start = 16.dp),
-//                             verticalAlignment = Alignment.CenterVertically,
-//                             horizontalArrangement = Arrangement.End
-//                         ) {
-//                             Text(
-//                                 text = "Подзадачи", // Добавлены кавычки
-//                                 fontSize = 15.sp,
-//                                 modifier = Modifier.padding(end = 8.dp)
-//                             )
-//                             ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
-//                         }
-//                     }
-//                 }
-
-// AnimatedVisibility(
-//     visible = isExpanded, // Исправлено на одну переменную
-//     enter = expandVertically() + fadeIn(),
-//     exit = shrinkVertically() + fadeOut()
-// ) {
-//     // ВСЕ элементы внутри AnimatedVisibility обязательно оборачиваем в Column
-//     Column(modifier = Modifier.fillMaxWidth()) {
-        
-//         // Поле ввода подзадачи
-//         OutlinedTextField(
-//             modifier = Modifier.fillMaxWidth(),
-//             value = stateTextSubTask,
-//             onValueChange = { stateTextSubTask = it },
-//             shape = RoundedCornerShape(10.dp),
-//             label = { Text("Подзадача") },
-//             trailingIcon = {
-//                 IconButton(onClick = {
-//                     val newSortIndex = maxSort + 1
-//                     if (stateTextSubTask.isNotBlank()) {
-//                         listSubTask.add(
-//                             SubItem(
-//                                 idTask = item?.id ?: 0, // ID родительского дела (если дело новое, тут будет 0)
-//                                 name = stateTextSubTask, // Текст из вашего TextField "Подзадача"
-//                                 change = false,
-//                                 sort = newSortIndex
-//                             )
-//                         )
-//                         stateTextSubTask = ""
-//                     }
-//                 }) {
-//                     Icon(Icons.Default.Add, contentDescription = "Добавить")
-//                 }
-//             }
-//         )
-
-//         // Список добавленных подзадач
-//         Column(modifier = Modifier.fillMaxWidth()) {
-//             listSubTask.forEach { subTask ->
-//                 Row(
-//                     modifier = Modifier
-//                         .fillMaxWidth()
-//                         .padding(start = 6.dp, top = 8.dp, bottom = 8.dp, end = 6.dp),
-//                     verticalAlignment = Alignment.CenterVertically,
-//                 ) {
-//                     Text(
-//                         modifier = Modifier
-//                             .padding(start = 5.dp, end = 5.dp)
-//                             .weight(1f),
-//                         text = subTask.name,
-//                     )
-//                     IconButton(
-//                         onClick = { 
-//                             // Реализуем удаление или отметку выполнения
-//                             listSubTask.remove(subTask) 
-//                         },
-//                         modifier = Modifier
-//                             .padding(end = 8.dp)
-//                             .size(24.dp)
-//                     ) {
-//                         Icon(
-//                             modifier = Modifier.fillMaxSize(),
-//                             imageVector = Icons.Default.Close,
-//                             contentDescription = "Check",
-//                             tint = theme.chekBoxTint
-//                         )
-//                     }
-//                 }
-//             }
-//         }
-//     }
-// }
 
                 KmpSpinnerInput(
                     selectedCategory = categorySelected,

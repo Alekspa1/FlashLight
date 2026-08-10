@@ -153,10 +153,10 @@ data class ThemeZabor (
     // Контуры карточек (делаем их помягче для светлой темы)
     override val cardItemBorderAlarm: Color = Color(0x7FFFEB3B),
     override val cardItemBorderTrue: Color = Color(0x6623BD00),
-    override val cardItemBorderFalse: Color = Color(0x6623BD00),
+    override val cardItemBorderFalse: Color = Color(0xB3FB4141),
 
     // Фоны карточек делаем ПАСТЕЛЬНЫМИ (разбеленными). Тёмный текст на них будет выглядеть супер
-    override val cardItemAlarm: Color = Color(0x80F30404), // Мягкий светло-желтый
+    override val cardItemAlarm: Color = Color(0xB3D6C000), // Мягкий светло-желтый
     override val cardItemTrue: Color = Color(0xFF6623BD00),  // Нежно-салатовый
     override val cardItemFalse: Color = Color(0x80F30404), // Приглушенно-розовый
 

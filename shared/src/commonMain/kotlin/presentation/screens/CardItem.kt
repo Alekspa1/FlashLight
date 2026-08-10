@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -189,14 +190,15 @@ fun CardItem(
                 Card(
                     modifier = Modifier
                         .padding(start = 48.dp, end = 48.dp)
-                        .weight(1f)
                         .clip(cardShape)
                         .then(
                             if (isExpanded) {
                                 // Если раскрыта: обводка по трем сторонам без низа
                                 Modifier.borderThreeSidesRounded(
                                     strokeWidth = 2.dp,
-                                    color = if (item.change) theme.cardItemBorderTrue else if (item.changeAlarm) theme.cardItemBorderAlarm else theme.cardItemBorderFalse,
+                                    color = if (item.change) theme.cardItemBorderTrue
+                                    else if (item.changeAlarm) theme.cardItemBorderAlarm
+                                    else theme.cardItemBorderFalse,
                                     cornerRadius = 15.dp,
                                     openSide = "BOTTOM_OPEN"
                                 )
@@ -219,32 +221,36 @@ fun CardItem(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .size(75.dp)
-                            // Скругляем только верхние углы контейнера
+                            .height(75.dp)
+                            .padding(start = 2.dp, top = 2.dp, end = 2.dp)
                             .clip(
                                 RoundedCornerShape(
-                                    topStart = 15.dp,
-                                    topEnd = 15.dp
+                                    topStart = 13.dp,
+                                    topEnd = 13.dp,
+                                    bottomStart = 0.dp,
+                                    bottomEnd = 0.dp
                                 )
                             )
                             .clickable { onClick(item, IMAGE) }
                     ) {
                         // 1. Задний размытый фон
-                        AsyncImage(
-                            model = selectedFileUri,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .blur(radius = 15.dp), // Эффект размытия
-                            contentScale = ContentScale.Crop // Заполняет весь контейнер
-                        )
+//                        AsyncImage(
+//                            model = selectedFileUri,
+//                            contentDescription = null,
+//                            modifier = Modifier
+//                                .fillMaxSize()
+//                                .blur(radius = 15.dp), // Эффект размытия
+//                            contentScale = ContentScale.Crop // Заполняет весь контейнер
+//                        )
 
                         // 2. Передний план (оригинальное фото без искажений)
                         AsyncImage(
                             model = selectedFileUri,
                             contentDescription = "Фото",
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Fit // Картинка помещается целиком без обрезки
+                            modifier = Modifier
+                                .fillMaxSize()
+                               // .clip(RoundedCornerShape(12.dp)),
+                            ,contentScale = ContentScale.Crop // Картинка помещается целиком без обрезки
                         )
                     }
                 }
@@ -419,7 +425,7 @@ fun CardItem(
                 Column(
                     modifier = Modifier.fillMaxSize().padding(12.dp)
                 ) {
-                    if (listSubItems.isNotEmpty()) {
+                    if (currentSnapshotList.isNotEmpty()) {
                         HorizontalDivider(
                             thickness = 1.dp,
                             color = theme.textColor.copy(alpha = 0.15f),
@@ -465,7 +471,7 @@ fun CardItem(
                                     if (subItem.id != currentSnapshotList.firstOrNull()?.id) {
                                         HorizontalDivider(
                                             thickness = 0.5.dp,
-                                            color = theme.borderCardMenuItem.copy(alpha = 0.15f),
+                                            color = theme.textColor.copy(alpha = 0.5f),
                                             modifier = Modifier.padding(bottom = 6.dp) // Отталкиваем текст от верхней линии
                                         )
                                     }
@@ -487,7 +493,7 @@ fun CardItem(
                                             },
                                             colors = CheckboxDefaults.colors(
                                                 checkedColor = theme.chekBoxTint,
-                                                uncheckedColor = theme.borderCardMenuItem,
+                                                uncheckedColor = theme.cardItemBorderFalse,
                                             ),
                                             modifier = Modifier.size(24.dp)
                                         )

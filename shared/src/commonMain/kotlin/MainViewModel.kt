@@ -87,8 +87,10 @@ class MainViewModel(
     private var _toast = MutableSharedFlow<String>()
     var toast = _toast.asSharedFlow()
 
-  // private val _premiumState = MutableStateFlow(pref.getPremium())
-   private val _premiumState = MutableStateFlow(true)
+   private val _premiumState = MutableStateFlow(pref.getPremium())
+
+
+   //private val _premiumState = MutableStateFlow(false)
    var premiumState = _premiumState.asStateFlow()
 
     private val _updateState = MutableStateFlow(false)
@@ -146,6 +148,7 @@ class MainViewModel(
         pref.savePremium(value)
         _premiumState.value = value
         }
+
     fun getPremium() = pref.getPremium()
     
     private val _categoryItemFlow = MutableStateFlow("Повседневные")
@@ -158,10 +161,36 @@ class MainViewModel(
         started = SharingStarted.WhileSubscribed(5000), // Засыпает через 5 сек после закрытия экрана
         initialValue = emptyList() // Начальное значение, пока база грузится
     )
-    val getItemCalendarCombine = combine(getItemsInCalendar, premiumState) { list, premium ->
-        if (premium) list
-        else emptyList()
-    }
+//    val getItemCalendarCombine = combine(getItemsInCalendar, premiumState) { list, premium ->
+//        if (premium) list
+//        else emptyList()
+//    }
+
+    val getCalendarWithSubItemsCombine: StateFlow<List<ItemWithSubItems>> = combine(
+        db.getItemsInCalendar(), // 1. Поток дел для календаря из БД
+        db.getAllSubItems(),     // 2. Поток всех подзадач из БД
+        premiumState             // 3. Поток статуса премиума
+    ) { calendarItems, allSubItems, isPremium ->
+
+        // Если у пользователя нет премиума — сразу возвращаем пустой список
+        if (!isPremium) return@combine emptyList()
+
+        // Если премиум есть, группируем подзадачи по idTask для скорости
+        val subItemsGrouped = allSubItems.groupBy { it.idTask }
+
+        // Склеиваем дела календаря с их подзадачами
+        calendarItems.map { item ->
+            ItemWithSubItems(
+                item = item,
+                subItems = (subItemsGrouped[item.id] ?: emptyList()).sortedBy { it.sort }
+            )
+        }
+    }.flowOn(Dispatchers.Default)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
     fun getUri(fileName :  String) = image.getUri(fileName)
 
     fun saveImage(temporaryPathString: String, fileName: String) {
@@ -183,64 +212,79 @@ class MainViewModel(
 
     fun deleteImage(fileName: String) = image.delete(fileName)
 
-val sortedItemsFlow: StateFlow<List<ItemWithSubItems>> = combine(
-    db.getAll(),
-    db.getAllSubItems(),
-    sortType,
-    categoryItemFlow
-) { itemsList, allSubItems, sort, currentCategory ->
-    val filteredList = itemsList.filter { it.category == currentCategory }
+    val sortedItemsFlow: StateFlow<List<ItemWithSubItems>> = combine(
+        db.getAll(),
+        db.getAllSubItems(),
+        sortType,
+        categoryItemFlow
+    ) { itemsList, allSubItems, sort, currentCategory ->
+        // 1. Фильтруем дела по категории
+        val filteredList = itemsList.filter { it.category == currentCategory }
 
-    val sortedList = if (sort == SORT_STANDART) {
-        filteredList.sortedWith(
-            compareBy<Item> { if (it.changeAlarm) 0 else 1 }
-                .thenBy { if (it.change) 1 else 0 }
-                .thenBy { it.alarmTime }
-                .thenBy { it.sort }
+        // 2. Сортируем дела
+        val sortedList = if (sort == SORT_STANDART) {
+            filteredList.sortedWith(
+                compareBy<Item> { if (it.changeAlarm) 0 else 1 }
+                    .thenBy { if (it.change) 1 else 0 }
+                    .thenBy { it.alarmTime }
+                    .thenBy { it.sort }
+            )
+        } else {
+            filteredList.sortedBy { it.sort }
+        }
+
+        // 💡 ОПТИМИЗАЦИЯ: Группируем ВСЕ подзадачи по idTask один раз.
+        // Получится Map<Int, List<SubItem>>, где ключ — это idTask.
+        val subItemsGrouped = allSubItems.groupBy { it.idTask }
+
+        // 3. Мгновенно маппим за один проход O(N)
+        sortedList.map { item ->
+            val subItemsForThisTask = subItemsGrouped[item.id] ?: emptyList()
+            ItemWithSubItems(
+                item = item,
+                // Сортируем уже только подзадачи конкретно этого дела
+                subItems = subItemsForThisTask.sortedBy { it.sort }
+            )
+        }
+    }.flowOn(Dispatchers.Default)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
         )
-    } else {
-        filteredList.sortedBy { it.sort }
-    }
 
-    sortedList.map { item ->
-        ItemWithSubItems(
-            item = item,
-            subItems = allSubItems.filter { it.idTask == item.id }.sortedBy { it.sort }
-        )
-    }
-}.flowOn(Dispatchers.Default)
-    .stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = emptyList()
-    )
+//val sortedItemsFlow: StateFlow<List<ItemWithSubItems>> = combine(
+//    db.getAll(),
+//    db.getAllSubItems(),
+//    sortType,
+//    categoryItemFlow
+//) { itemsList, allSubItems, sort, currentCategory ->
+//    val filteredList = itemsList.filter { it.category == currentCategory }
+//
+//    val sortedList = if (sort == SORT_STANDART) {
+//        filteredList.sortedWith(
+//            compareBy<Item> { if (it.changeAlarm) 0 else 1 }
+//                .thenBy { if (it.change) 1 else 0 }
+//                .thenBy { it.alarmTime }
+//                .thenBy { it.sort }
+//        )
+//    } else {
+//        filteredList.sortedBy { it.sort }
+//    }
+//
+//    sortedList.map { item ->
+//        ItemWithSubItems(
+//            item = item,
+//            subItems = allSubItems.filter { it.idTask == item.id }.sortedBy { it.sort }
+//        )
+//    }
+//}.flowOn(Dispatchers.Default)
+//    .stateIn(
+//        scope = viewModelScope,
+//        started = SharingStarted.WhileSubscribed(5000),
+//        initialValue = emptyList()
+//    )
 
-    //  val sortedItemsFlow = combine(
-    //     db.getAll(), // Поток всех дел
-    //     sortType,                         // Поток типа сортировки
-    //     categoryItemFlow                  // Поток выбранной категории
-    // ) { list, sort, currentCategory ->
-
-    //     // 1. СНАЧАЛА ФИЛЬТРУЕМ СПИСОК: оставляем только дела из выбранной категории
-    //     val filteredList = list.filter { it.category == currentCategory }
-
-    //     // 2. ЗАТЕМ СОРТИРУЕМ ОТФИЛЬТРОВАННЫЙ СПИСОК
-    //      if (sort == SORT_STANDART) {
-    //          filteredList.sortedWith(
-    //              compareBy<Item> { if (it.changeAlarm) 0 else 1 } // 1. Сначала ВСЕ с активным будильником (желтые)
-    //                  .thenBy { if (it.change) 1 else 0 }          // 2. ОПУСКАЕМ ЗЕЛЕНЫЕ: сначала незавершенные (0), выполненные (1) вниз!
-    //                  .thenBy { it.alarmTime }                     // 3. Сортируем будильники по времени
-    //                  .thenBy { it.sort }                          // 4. Стандартная сортировка для остальных
-    //          )
-    //      } else {
-    //         filteredList.sortedBy { it.sort }
-    //     }
-    // }.flowOn(Dispatchers.Default)
-    //     .stateIn(
-    //     scope = viewModelScope, // Корутина привязана к жизни ViewModel
-    //     started = SharingStarted.WhileSubscribed(5000), // Бережёт оперативку и батарейку
-    //     initialValue = emptyList() // Пока база данных считывается с диска, отдаем пустой список
-    // )
 
             fun updateItemsOrder(newList: List<Item>) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -280,25 +324,6 @@ val sortedItemsFlow: StateFlow<List<ItemWithSubItems>> = combine(
         return db.getSubItemsForTask(taskId)
     }
 
-
-//    fun insertItem(item: Item, alarm: Boolean = false,calendar: Boolean){
-//
-//        viewModelScope.launch(Dispatchers.IO) {
-//
-//            val currentMinSort = db.getItemWithMinSort()?.sort ?: 0
-//            val newSortIndex = currentMinSort - 1
-//            val newItem = item.copy(sort = newSortIndex)
-//
-//            val insertedId = db.insertItem(newItem)
-//            withContext(Dispatchers.Main){
-//                if(alarm) {
-//                    val savedItem = newItem.copy(id = insertedId.toInt())
-//                    permission(NOTIFICATION, savedItem,calendar)
-//                } else showDialog = DialogState()
-//            }
-//
-//        }
-//    }
 
     fun insertItem(
         item: Item,
@@ -361,20 +386,6 @@ val sortedItemsFlow: StateFlow<List<ItemWithSubItems>> = combine(
         }     
     }
 
-//    fun updateItem(
-//        item: Item,
-//        alarm: Boolean = false,
-//        calendar: Boolean = false){
-//        viewModelScope.launch(Dispatchers.IO) {
-//            db.updateItem(item)
-//            withContext(Dispatchers.Main){
-//                if(alarm) permission(NOTIFICATION, item, calendar)
-//                else showDialog = DialogState()
-//            }
-//
-//        }
-//    }
-
     fun updateItem(
         item: Item,
         subItems: List<SubItem>? = null, // 👈 Сделали Nullable со значением по умолчанию null
@@ -384,6 +395,10 @@ val sortedItemsFlow: StateFlow<List<ItemWithSubItems>> = combine(
         viewModelScope.launch(Dispatchers.IO) {
             // 1. Обновляем только само родительское дело в базе
             db.updateItem(item)
+            // делаю все поля true у подзадач если главное дело true
+            if (item.change) {
+                db.markAllSubItemsAsCompleted(item.id)
+            }
 
             // 2. ОБРАБАТЫВАЕМ ПОДЗАДАЧИ ТОЛЬКО ЕСЛИ СПИСОК БЫЛ ПЕРЕДАН (из диалога)
             if (subItems != null) {

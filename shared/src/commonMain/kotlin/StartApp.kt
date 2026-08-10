@@ -602,7 +602,7 @@ fun StartAppContent(
                                     )
                                     Text(
                                         text = if (premium) "PREMIUM версия активировна"
-                                        else "Активитировать PREMIUM версию", // Отвечает tvNewPremium
+                                        else "Активировать PREMIUM версию", // Отвечает tvNewPremium
                                         color = theme.textColor,
                                         fontSize = size.drawerBottomMenuText,
                                         modifier = Modifier

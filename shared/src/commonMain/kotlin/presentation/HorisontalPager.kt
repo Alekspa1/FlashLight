@@ -107,7 +107,7 @@ fun MainPager(paddingValues: PaddingValues = PaddingValues(),
             INSERT_DIALOG_ITEM -> {
                 AddOrChangeItemDialog(
                     item = item,
-                    theme = ThemeNeon(),
+                    theme = viewModel.themeState,
                     listCategory = listCategory,
                     category = category,
                     listSubItems = subItemsForDialog,

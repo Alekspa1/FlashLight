@@ -60,17 +60,7 @@ fun CreateDateInAlarmDialog(viewModel: MainViewModel){
     val item = viewModel.showDialog.item ?: return
     val kotlinInstant = kotlin.time.Clock.System.now()
     val nowInstant = kotlinx.datetime.Instant.fromEpochMilliseconds(kotlinInstant.toEpochMilliseconds())
-    
-    // val todayDate = nowInstant
-    //     .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
-    //     .date
-    
-    // val todayMillis = kotlinx.datetime.LocalDateTime(
-    //     year = todayDate.year,
-    //     monthNumber = todayDate.monthNumber,
-    //     dayOfMonth = todayDate.dayOfMonth,
-    //     hour = 0, minute = 0, second = 0, nanosecond = 0
-    // ).toInstant(kotlinx.datetime.TimeZone.currentSystemDefault()).toEpochMilliseconds()
+
 
     val localDateTime = kotlinx.datetime.Instant
     .fromEpochMilliseconds(item.alarmTime)
@@ -84,17 +74,7 @@ val itemUtcMillis = kotlinx.datetime.LocalDateTime(
     dayOfMonth = localDateTime.dayOfMonth,
     hour = 0, minute = 0, second = 0, nanosecond = 0
 ).toInstant(kotlinx.datetime.TimeZone.UTC).toEpochMilliseconds()
-    
-    val todayDateUtc = nowInstant
-    .toLocalDateTime(kotlinx.datetime.TimeZone.UTC)
-    .date
 
-//     val todayMillisUtc = kotlinx.datetime.LocalDateTime(
-//     year = todayDateUtc.year,
-//     monthNumber = todayDateUtc.monthNumber,
-//     dayOfMonth = todayDateUtc.dayOfMonth,
-//     hour = 0, minute = 0, second = 0, nanosecond = 0
-// ).toInstant(kotlinx.datetime.TimeZone.UTC).toEpochMilliseconds()
 
   val todayMillisUtc = remember {
     // Используем твою готовую переменную nowInstant
@@ -122,13 +102,8 @@ val itemUtcMillis = kotlinx.datetime.LocalDateTime(
                 TextButton(onClick = {
                     
                     val date = datePickerState.selectedDateMillis ?: 0L
-                    // val selectedDate = kotlinx.datetime.Instant
-                    // .fromEpochMilliseconds(date)
-                    // .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault())
-                    // .date
 
                     // Получаем текущую локальную дату без зачеркнутых классов
-                // if(selectedDate < todayDate)
                  if(date < todayMillisUtc)
                     {
                   errorMessage = "Вы выбрали дату которая прошла" 

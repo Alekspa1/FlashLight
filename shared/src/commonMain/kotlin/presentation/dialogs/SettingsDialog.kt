@@ -35,6 +35,7 @@ fun SettingsDialog(
    var selected by remember { mutableStateOf(select) }
    
   AlertDialog(
+      title = { Text(title) },
     onDismissRequest = { onCancel() },
     confirmButton = {
                 TextButton(onClick = {
@@ -54,7 +55,6 @@ fun SettingsDialog(
         verticalArrangement = Arrangement.spacedBy(8.dp)
 
     ){
-      Text(title)
                 Column(Modifier.selectableGroup() .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(10.dp) ) {
                     listAction.forEach {text ->
@@ -67,10 +67,9 @@ fun SettingsDialog(
                         {
                             RadioButton(
                                 selected = (text == selected),
-                               
                                 onClick = null 
                             )
-                            Text( text = text, fontSize = 24.sp )
+                            Text( text = text, fontSize = 16.sp )
                         }
                     }
                 }
