@@ -55,8 +55,11 @@ import androidx.compose.foundation.Image
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.LocalTextStyle
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.Dp
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
@@ -375,9 +378,12 @@ fun CardBuyPremium(
     }
 }
 
+
+
     @Preview
     @Composable
     fun PrevItemTwo() {
         PremiumScreen()
 }
+
 
