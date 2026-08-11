@@ -3,6 +3,7 @@ import CommonConst.INSERT_DIALOG_CATEGORY
 import CommonConst.PREMIUM_CLICK
 import CommonConst.SETTINGS_CLICK
 import CommonConst.SHARED_ClICK
+import CommonConst.SORT_SETTINGS
 import CommonConst.UPGRATE_CLICK
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
@@ -187,7 +188,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                     isCommonMode = isCommonMode, 
                     onToggleCommonMode = { isCommonMode = !isCommonMode }, 
                     categories = categories, 
-                    toastEvents = viewModel.toast, 
+                    toastEvents = {message -> viewModel.sendMessage(message) },
                     updateCategory = { category -> viewModel.updateCategory(category) }, 
                     openPager = { onOpenDrawer, pagerState -> MainPager(innerPadding, viewModel, onOpenDrawer, pagerState) }, 
                     drawerState = drawerState, 
@@ -280,7 +281,7 @@ fun StartAppContent(
     isCommonMode: Boolean = false,
     onToggleCommonMode: () -> Unit = {},
     categories: List<ListCategory> = emptyList(),
-    toastEvents: Flow<String> = emptyFlow(),
+    toastEvents: (String) -> Unit = {},
     updateCategory: (String) -> Unit = {},
     openPager: @Composable (onOpenDrawer: () -> Unit, pagerStateUp: PagerState) -> Unit = { _, _ -> },
     drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed),
@@ -567,7 +568,11 @@ fun StartAppContent(
                                     modifier = Modifier
                                         .size(50.dp)
                                         .align(Alignment.CenterEnd),
-                                    onClick = { onClickCategory(null, INSERT_DIALOG_CATEGORY) }
+                                    onClick = {
+                                        if(premium) onClickCategory(null, INSERT_DIALOG_CATEGORY)
+                                        else toastEvents("Доступно в PREMIUM версии")
+
+                                    }
                                 ) {
                                     Icon(
                                         imageVector = ThemeNeon().iconAdd,

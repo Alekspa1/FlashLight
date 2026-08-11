@@ -222,7 +222,7 @@ fun SettingsScreen(
                         theme.borderCardMenuItem,
                         true
                     ) {
-                        if(viewModel.getPremium()) viewModel.showDialog = DialogState(SORT_SETTINGS)
+                        if(viewModel.premiumState.value) viewModel.showDialog = DialogState(SORT_SETTINGS)
                         else viewModel.sendMessage("Доступно в PREMIUM версии")
 
                     }
@@ -235,7 +235,7 @@ fun SettingsScreen(
                             theme.borderCardMenuItem,
                             true
                         ) {
-                            if(viewModel.getPremium()) viewModel.permission(ALARM_SETTINGS)
+                            if(viewModel.premiumState.value) viewModel.permission(ALARM_SETTINGS)
                             else viewModel.sendMessage("Доступно в PREMIUM версии")
 
 

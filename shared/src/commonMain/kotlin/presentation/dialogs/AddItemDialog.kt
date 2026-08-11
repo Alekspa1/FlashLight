@@ -115,6 +115,7 @@ fun AddOrChangeItemDialog(
     LaunchedEffect(listSubItems) {
         listSubTask.clear()
         listSubTask.addAll(listSubItems)
+        if(listSubTask.size >= 2 && !premium ) errorMessage = true
     }
 
     val fileLauncher = rememberFilePickerLauncher(type = PickerType.Image) { file ->
@@ -402,7 +403,8 @@ fun AddOrChangeItemDialog(
             TextButton(
                 onClick = {
                     val text = stateTextName.trim().ifEmpty { "Без названия" }
-                    onSave(item,text,stateTextDecs,selectedFileUri,categorySelected,calendar,false,originalFileName,date,listSubTask)
+
+                    onSave(item,text,stateTextDecs.trim(),selectedFileUri,categorySelected,calendar,false,originalFileName,date,listSubTask)
                 },
             ) {
                 Text("Ок", fontWeight = FontWeight.Bold)
@@ -416,7 +418,7 @@ fun AddOrChangeItemDialog(
                 TextButton(
                     onClick = {
                         val text = stateTextName.trim().ifEmpty { "Без названия" }
-                        onSave(item,text,stateTextDecs,selectedFileUri,categorySelected,calendar,true,originalFileName,date,listSubTask)
+                        onSave(item,text,stateTextDecs.trim(),selectedFileUri,categorySelected,calendar,true,originalFileName,date,listSubTask)
                     },
 
                 ) {

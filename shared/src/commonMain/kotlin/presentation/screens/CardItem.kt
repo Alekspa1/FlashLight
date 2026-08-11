@@ -44,6 +44,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Card
@@ -111,48 +112,47 @@ fun CardItem(
 ) {
     var isExpanded by remember { mutableStateOf(false) }
     var currentSnapshotList by remember { mutableStateOf(listSubItems) }
-    val cardShape by remember(isExpanded) {
-        derivedStateOf {
-            if (isExpanded) {
+
+
+
+
+
+    val cardShape =  if (isExpanded && (currentSnapshotList.isNotEmpty() || selectedFileUri.isNotEmpty())) {
                 RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp, bottomStart = 0.dp, bottomEnd = 0.dp)
             } else {
                 RoundedCornerShape(15.dp)
             }
-        }
-    }
 
-    val cardMiddleShape = if (isExpanded) {
-        when {
-            // 1. Есть и фото, и подзадачи -> зажата между ними, все углы прямые (0.dp)
-            selectedFileUri.isNotEmpty() && currentSnapshotList.isNotEmpty() ->
-                RoundedCornerShape(0.dp)
+//    val cardMiddleShape = if (isExpanded) {
+//        when {
+//            // 1. Есть и фото, и подзадачи -> зажата между ними, все углы прямые (0.dp)
+//            selectedFileUri.isNotEmpty() && currentSnapshotList.isNotEmpty() ->
+//                RoundedCornerShape(0.dp)
+//
+//            // 2. Есть только фото (подзадач нет) -> средняя карта стала НИЖНЕЙ, скругляем НИЗ
+//            selectedFileUri.isNotEmpty() ->
+//                RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomStart = 15.dp, bottomEnd = 15.dp)
+//
+//            // 3. Фото нет, но есть подзадачи -> средняя карта стала ВЕРХНЕЙ, скругляем ВЕРХ
+//            currentSnapshotList.isNotEmpty() ->
+//                RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp, bottomStart = 0.dp, bottomEnd = 0.dp)
+//
+//            // 4. ОШИБОЧНЫЙ ХВОСТ: Фото нет И подзадач нет, но кнопка раскрытия нажата (isExpanded == true)
+//            // В этом случае средняя карточка осталась совершенно одна! Она должна скруглить ВСЕ углы (15.dp)
+//            else ->
+//                RoundedCornerShape(15.dp)
+//        }
+//    } else {
+//        RoundedCornerShape(15.dp)
+//    }
 
-            // 2. Есть только фото (подзадач нет) -> средняя карта стала НИЖНЕЙ, скругляем НИЗ
-            selectedFileUri.isNotEmpty() ->
-                RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomStart = 15.dp, bottomEnd = 15.dp)
-
-            // 3. Фото нет, но есть подзадачи -> средняя карта стала ВЕРХНЕЙ, скругляем ВЕРХ
-            currentSnapshotList.isNotEmpty() ->
-                RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp, bottomStart = 0.dp, bottomEnd = 0.dp)
-
-            // 4. ОШИБОЧНЫЙ ХВОСТ: Фото нет И подзадач нет, но кнопка раскрытия нажата (isExpanded == true)
-            // В этом случае средняя карточка осталась совершенно одна! Она должна скруглить ВСЕ углы (15.dp)
-            else ->
-                RoundedCornerShape(15.dp)
-        }
-    } else {
-        RoundedCornerShape(15.dp)
-    }
-
-    val menuCardShape by remember(isExpanded) {
-        derivedStateOf {
-            if (isExpanded) {
+    val menuCardShape = if (isExpanded) {
                 RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomStart = 15.dp, bottomEnd = 15.dp)
             } else {
                 RoundedCornerShape(15.dp)
             }
-        }
-    }
+
+
 
     val listState = rememberLazyListState()
     val haptic = LocalHapticFeedback.current
@@ -181,82 +181,83 @@ fun CardItem(
 
     Column(modifier = Modifier.fillMaxWidth()) {
 
-        AnimatedVisibility(
-            visible = isExpanded,
-            enter = expandVertically() + fadeIn(),
-            exit = shrinkVertically() + fadeOut()
-        ) {
-            if (selectedFileUri.isNotEmpty() && isExpanded) {
-                Card(
-                    modifier = Modifier
-                        .padding(start = 48.dp, end = 48.dp)
-                        .clip(cardShape)
-                        .then(
-                            if (isExpanded) {
-                                // Если раскрыта: обводка по трем сторонам без низа
-                                Modifier.borderThreeSidesRounded(
-                                    strokeWidth = 2.dp,
-                                    color = if (item.change) theme.cardItemBorderTrue
-                                    else if (item.changeAlarm) theme.cardItemBorderAlarm
-                                    else theme.cardItemBorderFalse,
-                                    cornerRadius = 15.dp,
-                                    openSide = "BOTTOM_OPEN"
-                                )
-                            } else {
-                                Modifier.border(
-                                    2.dp,
-                                    if (item.change) theme.cardItemBorderTrue else if (item.changeAlarm) theme.cardItemBorderAlarm else theme.cardItemBorderFalse,
-                                    RoundedCornerShape(15.dp)
-                                )
-                            }
-                        )
-                        .clickable { onClick(item, CHANGE_ITEM) }
-                        .then(dragModifier),
-                    shape = cardShape,
-                    colors = CardDefaults.cardColors(
-                        containerColor = if (item.change) theme.cardItemTrue else if (item.changeAlarm) theme.cardItemAlarm else theme.cardItemFalse
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(75.dp)
-                            .padding(start = 2.dp, top = 2.dp, end = 2.dp)
-                            .clip(
-                                RoundedCornerShape(
-                                    topStart = 13.dp,
-                                    topEnd = 13.dp,
-                                    bottomStart = 0.dp,
-                                    bottomEnd = 0.dp
-                                )
-                            )
-                            .clickable { onClick(item, IMAGE) }
-                    ) {
-                        // 1. Задний размытый фон
+//        AnimatedVisibility(
+//            visible = isExpanded,
+//            enter = expandVertically() + fadeIn(),
+//            exit = shrinkVertically() + fadeOut()
+//        ) {
+//            if (selectedFileUri.isNotEmpty() && isExpanded) {
+//                Card(
+//                    modifier = Modifier
+//                        .padding(start = 48.dp, end = 48.dp)
+//                        .clip(cardShape)
+//                        .then(
+//                            if (isExpanded) {
+//                                // Если раскрыта: обводка по трем сторонам без низа
+//                                Modifier.borderThreeSidesRounded(
+//                                    strokeWidth = 2.dp,
+//                                    color = if (item.change) theme.cardItemBorderTrue
+//                                    else if (item.changeAlarm) theme.cardItemBorderAlarm
+//                                    else theme.cardItemBorderFalse,
+//                                    cornerRadius = 15.dp,
+//                                    openSide = "BOTTOM_OPEN"
+//                                )
+//                            } else {
+//                                Modifier.border(
+//                                    2.dp,
+//                                    if (item.change) theme.cardItemBorderTrue else if (item.changeAlarm) theme.cardItemBorderAlarm else theme.cardItemBorderFalse,
+//                                    RoundedCornerShape(15.dp)
+//                                )
+//                            }
+//                        )
+//                        .clickable { onClick(item, CHANGE_ITEM) }
+//                        .then(dragModifier),
+//                    shape = cardShape,
+//                    colors = CardDefaults.cardColors(
+//                        containerColor = if (item.change) theme.cardItemTrue else if (item.changeAlarm) theme.cardItemAlarm else theme.cardItemFalse
+//                    ),
+//                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+//                ) {
+//                    Box(
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .height(75.dp)
+//                            .padding(start = 2.dp, top = 2.dp, end = 2.dp)
+//                            .clip(
+//                                RoundedCornerShape(
+//                                    topStart = 13.dp,
+//                                    topEnd = 13.dp,
+//                                    bottomStart = 0.dp,
+//                                    bottomEnd = 0.dp
+//                                )
+//                            )
+//                            .clickable { onClick(item, IMAGE) }
+//                    ) {
+//                        // 1. Задний размытый фон
+////                        AsyncImage(
+////                            model = selectedFileUri,
+////                            contentDescription = null,
+////                            modifier = Modifier
+////                                .fillMaxSize()
+////                                .blur(radius = 15.dp), // Эффект размытия
+////                            contentScale = ContentScale.Crop // Заполняет весь контейнер
+////                        )
+//
+//                        // 2. Передний план (оригинальное фото без искажений)
 //                        AsyncImage(
 //                            model = selectedFileUri,
-//                            contentDescription = null,
+//                            contentDescription = "Фото",
 //                            modifier = Modifier
 //                                .fillMaxSize()
-//                                .blur(radius = 15.dp), // Эффект размытия
-//                            contentScale = ContentScale.Crop // Заполняет весь контейнер
+//                               // .clip(RoundedCornerShape(12.dp)),
+//                            ,contentScale = ContentScale.Crop // Картинка помещается целиком без обрезки
 //                        )
+//                    }
+//                }
+//
+//            }
+//        }
 
-                        // 2. Передний план (оригинальное фото без искажений)
-                        AsyncImage(
-                            model = selectedFileUri,
-                            contentDescription = "Фото",
-                            modifier = Modifier
-                                .fillMaxSize()
-                               // .clip(RoundedCornerShape(12.dp)),
-                            ,contentScale = ContentScale.Crop // Картинка помещается целиком без обрезки
-                        )
-                    }
-                }
-
-            }
-        }
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
@@ -283,20 +284,16 @@ fun CardItem(
                 modifier = Modifier
                     .padding(start = 5.dp, end = 5.dp)
                     .weight(1f)
-                    .clip(cardMiddleShape)
+                    .clip(cardShape)
                     .then(
                         // Проверяем: раскрыта ЛИ карточка И есть ли ХОТЯ БЫ один смежный блок (фото или подзадача)
-                        if (isExpanded && (selectedFileUri.isNotEmpty() || currentSnapshotList.isNotEmpty())) {
+                        if (isExpanded && (currentSnapshotList.isNotEmpty() || selectedFileUri.isNotEmpty())) {
                             // Если есть смежные блоки — рисуем кастомный трехсторонний бордер
                             Modifier.borderThreeSidesRounded(
                                 strokeWidth = 2.dp,
                                 color = if (item.change) theme.cardItemBorderTrue else if (item.changeAlarm) theme.cardItemBorderAlarm else theme.cardItemBorderFalse,
                                 cornerRadius = 15.dp,
-                                openSide = when {
-                                    selectedFileUri.isNotEmpty() && currentSnapshotList.isNotEmpty() -> "LEFT_RIGHT_ONLY"
-                                    selectedFileUri.isNotEmpty() -> "TOP_OPEN"
-                                    else -> "BOTTOM_OPEN"
-                                }
+                                openSide = "BOTTOM_OPEN"
                             )
                         } else {
                             // Если карточка закрыта ИЛИ она раскрыта, но оказалась абсолютно пустой (нет ни фото, ни подзадач) —
@@ -304,13 +301,13 @@ fun CardItem(
                             Modifier.border(
                                 width = 2.dp,
                                 color = if (item.change) theme.cardItemBorderTrue else if (item.changeAlarm) theme.cardItemBorderAlarm else theme.cardItemBorderFalse,
-                                shape = cardMiddleShape // Передаем сюда наш правильный шейп (он уже равен RoundedCornerShape(15.dp))
+                                shape = cardShape
                             )
                         }
                     )
                     .clickable { onClick(item, CHANGE_ITEM) }
                     .then(dragModifier),
-                shape = cardMiddleShape,
+                shape = cardShape,
                 colors = CardDefaults.cardColors(
                     containerColor = if (item.change) theme.cardItemTrue else if (item.changeAlarm) theme.cardItemAlarm else theme.cardItemFalse
                 ),
@@ -324,7 +321,7 @@ fun CardItem(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     // Иконка стрелочки-спойлера
-                    if (item.uri.isNotEmpty() || listSubItems.isNotEmpty()) {
+                    if (listSubItems.isNotEmpty() || selectedFileUri != "") {
                         IconButton(
                             onClick = { isExpanded = !isExpanded },
                             modifier = Modifier.padding(start = 4.dp).size(24.dp)
@@ -343,31 +340,39 @@ fun CardItem(
                             .weight(1f)
                             .padding(start = 6.dp, end = 6.dp),
                     ) {
-                        Text(
-                            text = item.name,
-                            color = theme.textColor,
-                            lineHeight = size.lineHeightItem,
-                            fontSize = size.textItem
-                        )
+                            Text(
+                                text = item.name,
+                                color = theme.textColor,
+                                lineHeight = size.lineHeightItem,
+                                fontSize = size.textItem
+                            )
 
-                        if (item.desc.isNotEmpty()) {
-                            Text(
-                                modifier = Modifier.padding(top = 2.dp),
-                                text = item.desc,
-                                color = theme.textDesc,
-                                lineHeight = size.lineHeightDescAndAlarm,
-                                fontSize = size.textDesc
-                            )
-                        }
-                        if (item.changeAlarm) {
-                            Text(
-                                modifier = Modifier.padding(top = 4.dp),
-                                text = alarmText(item),
-                                color = theme.textAlarm,
-                                fontSize = size.textAlarm,
-                                lineHeight = size.lineHeightDescAndAlarm
-                            )
-                        }
+                            if (item.desc.isNotEmpty()) {
+                                Text(
+                                    modifier = Modifier.padding(top = 2.dp),
+                                    text = item.desc,
+                                    color = theme.textDesc,
+                                    lineHeight = size.lineHeightDescAndAlarm,
+                                    fontSize = size.textDesc
+                                )
+                            }
+
+
+                            if (item.changeAlarm) {
+                                Text(
+                                    modifier = Modifier.padding(top = 4.dp),
+                                    text = alarmText(item),
+                                    color = theme.textAlarm,
+                                    fontSize = size.textAlarm,
+                                    lineHeight = size.lineHeightDescAndAlarm
+                                )
+                            }
+
+
+
+
+
+
                     }
 
                     Checkbox(
@@ -399,7 +404,7 @@ fun CardItem(
 
         // ВЫЕЗЖАЮЩАЯ ОТДЕЛЬНАЯ КАРТОЧКА ПОДЗАДАЧ (Строго ПОД основной)
         AnimatedVisibility(
-            visible = isExpanded && currentSnapshotList.isNotEmpty(),
+            visible = isExpanded,
             enter = expandVertically() + fadeIn(),
             exit = shrinkVertically() + fadeOut()
         ) {
@@ -408,6 +413,7 @@ fun CardItem(
                     .fillMaxWidth()
                     .padding(start = 48.dp, end = 48.dp, bottom = 4.dp)
                     .clip(menuCardShape)
+                   // .clickable { onClick(item, CHANGE_ITEM) }
                     .borderThreeSidesRounded(
                         strokeWidth = 2.dp,
                         color = if (item.change) theme.cardItemBorderTrue else if (item.changeAlarm) theme.cardItemBorderAlarm else theme.cardItemBorderFalse,
@@ -425,13 +431,36 @@ fun CardItem(
                 Column(
                     modifier = Modifier.fillMaxSize().padding(12.dp)
                 ) {
-                    if (currentSnapshotList.isNotEmpty()) {
+
+
+
+                    if(selectedFileUri.isNotEmpty()){
                         HorizontalDivider(
                             thickness = 1.dp,
                             color = theme.textColor.copy(alpha = 0.15f),
                             modifier = Modifier.padding(bottom = 6.dp) // Отталкиваем текст от верхней линии
                         )
+                        AsyncImage(
+                            model = selectedFileUri,
+                            contentDescription = "Превью фото",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(120.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .clickable {onClick(item, IMAGE)  },
+                            contentScale = ContentScale.Crop,
+                        )
+
                     }
+                    if(currentSnapshotList.isNotEmpty()) {
+                        HorizontalDivider(
+                            thickness = 1.dp,
+                            color = theme.textColor.copy(alpha = 0.15f),
+                            modifier = Modifier.padding(top = 6.dp) // Отталкиваем текст от верхней линии
+                        )
+                    }
+
+
                     LazyColumn(
                         state = listState,
                         modifier = Modifier.fillMaxWidth().heightIn(max = 200.dp),

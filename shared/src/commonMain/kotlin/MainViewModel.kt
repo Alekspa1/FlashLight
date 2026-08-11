@@ -89,7 +89,7 @@ class MainViewModel(
 
   // private val _premiumState = MutableStateFlow(pref.getPremium())
 
-   private val _premiumState = MutableStateFlow(true)
+   private val _premiumState = MutableStateFlow(false)
    var premiumState = _premiumState.asStateFlow()
 
     private val _updateState = MutableStateFlow(false)
@@ -153,17 +153,13 @@ class MainViewModel(
     private val _categoryItemFlow = MutableStateFlow("Повседневные")
     val categoryItemFlow = _categoryItemFlow.asStateFlow()
 
-    val getItemsInCalendar = db.getItemsInCalendar()
+
     val categories: StateFlow<List<ListCategory>> = db.getAllListCategory()
     .stateIn(
         scope = viewModelScope, // Привязываем к жизненному циклу ViewModel
         started = SharingStarted.WhileSubscribed(5000), // Засыпает через 5 сек после закрытия экрана
         initialValue = emptyList() // Начальное значение, пока база грузится
     )
-//    val getItemCalendarCombine = combine(getItemsInCalendar, premiumState) { list, premium ->
-//        if (premium) list
-//        else emptyList()
-//    }
 
     val getCalendarWithSubItemsCombine: StateFlow<List<ItemWithSubItems>> = combine(
         db.getItemsInCalendar(), // 1. Поток дел для календаря из БД

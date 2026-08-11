@@ -52,6 +52,10 @@ import presentation.theme.SizeNormal
 import presentation.theme.Theme
 import presentation.theme.ThemeNeon
 import androidx.compose.foundation.Image
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
 import org.jetbrains.compose.resources.painterResource
 
@@ -64,128 +68,164 @@ fun PremiumScreen(
     ){
     var isSelected by remember { mutableStateOf("На один год") }
 
-    Box(modifier = Modifier.fillMaxSize()) { 
-        Image( 
-            painter = painterResource(theme.backgroundStart), 
-            contentDescription = null, 
-            modifier = Modifier.fillMaxSize(), 
-            contentScale = ContentScale.FillBounds 
-        ) 
-    
-    Column(
-        modifier = Modifier
-            .padding(innerPadding)
-            .fillMaxSize()
-            .padding(horizontal = 10.dp)
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(5.dp)
 
-    ) {
-        Box(
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        Image(
+            painter = painterResource(theme.backgroundStart),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.FillBounds
+        )
+
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 10.dp, bottom = 10.dp)
+                .padding(innerPadding)
+                .fillMaxSize()
         ) {
-            IconButton(
-                onClick = { onBack() },
-                modifier = Modifier.size(35.dp)
+            // 1. ВЕРХНЯЯ ПАНЕЛЬ (Всегда статична на экране)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 10.dp, bottom = 10.dp)
             ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack, // Или ваша иконка ic_menu
-                    contentDescription = "Меню",
-                    tint = theme.iconDelTint
+                IconButton(
+                    onClick = { onBack() },
+                    modifier = Modifier.size(35.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Назад",
+                        tint = theme.iconDelTint
+                    )
+                }
+
+                Text(
+                    text = "PREMIUM функции",
+                    color = theme.textColor,
+                    fontSize = size.textMenu,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
                 )
             }
 
-
-            Text(
-                text = "PREMIUM функции", // tv_settings
-                color = theme.textColor,
-                fontSize = size.textMenu,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center
-            )
-
-            }
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 3.dp)
-                .border(3.dp, theme.borderCardMenuItem, RoundedCornerShape(10.dp))
-                .clip(RoundedCornerShape(10.dp))
-                .clickable {  },
-            shape = RoundedCornerShape(10.dp),
-            colors = CardDefaults.cardColors(containerColor =  theme.cardMenuItem,)
-        ) {
+            // 2. СРЕДНИЙ COLUMN (Единственный скроллящийся элемент)
+            // ИСПРАВЛЕНО: Добавлен .weight(1f), чтобы занять всё свободное место между верхом и низом
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp),
-                verticalArrangement = Arrangement.spacedBy(5.dp)
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 10.dp),
             ) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 3.dp)
+                        .border(3.dp, theme.borderCardMenuItem, RoundedCornerShape(10.dp))
+                        .clip(RoundedCornerShape(10.dp))
+                        .clickable {  },
+                    shape = RoundedCornerShape(10.dp),
+                    colors = CardDefaults.cardColors(containerColor = theme.cardMenuItem)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(5.dp)
+                    ) {
+                        PremiumItem(text = "Отключение рекламы", theme = theme, size = size)
+                        PremiumItem("Пользовательская сортировка", theme, size)
+                        PremiumItem("Отображение дел в календаре", theme, size)
+                        PremiumItem("Повторяющиеся напоминания", theme, size)
+                        PremiumItem("Создание своих списков дел", theme, size)
+                        PremiumItem("Поддержка разработчика", theme, size)
+                        PremiumItem("Создание подзадач", theme, size)
+                    }
+                }
 
-                PremiumItem(text = "Отключение рекламы",theme = theme, size = size)
-                PremiumItem("Пользовательская сортировка",theme,size)
-                PremiumItem("Отображение дел в календаре",theme,size)
-                PremiumItem("Повторяющиеся напоминания",theme,size)
-                PremiumItem("Создание своих списков дел",theme,size)
-                PremiumItem("Поддержка разработчика",theme,size)
-                PremiumItem("Создание подзадач",theme,size)
+                Text(
+                    text = "Тарифы",
+                    color = theme.textColor,
+                    fontSize = size.textMenu,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp),
+                    textAlign = TextAlign.Center
+                )
 
+                CardBuyPremium(
+                    text = "На один месяц",
+                    desc = "7 дней бесплатно",
+                    price = "99 р",
+                    theme = theme,
+                    size = size,
+                    isSelected = isSelected,
+                    onClick = { isSelected = it }
+                )
+
+                CardBuyPremium(
+                    text = "На шесть месяцев",
+                    desc = "81р/мес",
+                    price = "490 р",
+                    theme = theme,
+                    size = size,
+                    isSelected = isSelected,
+                    onClick = { isSelected = it }
+                )
+
+                CardBuyPremium(
+                    text = "На один год",
+                    desc = "🔥 АКЦИЯ: 57 ₽/мес",
+                    price = "690 ₽",
+                    badgeText = "ВЫГОДНО",
+                    theme = theme,
+                    size = size,
+                    isSelected = isSelected,
+                    onClick = { isSelected = it }
+                )
+
+                CardBuyPremium(
+                    text = "На всю жизнь",
+                    desc = "Навсегда без подписок",
+                    price = "1990 р",
+                    theme = theme,
+                    size = size,
+                    isSelected = isSelected,
+                    onClick = { isSelected = it }
+                )
             }
-        }
 
-        Text(
-            text = "Оформить PREMIUM",
-            color = theme.textColor,
-            fontSize = size.textMenu,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp),
-            textAlign = TextAlign.Center
-        )
-
-        CardBuyPremium(
-            text = "На один месяц",
-            desc = "7 дней бесплатно",
-            price = "99 р",
-            theme = theme,
-            size = size,
-            isSelected = isSelected,
-            onClick = { isSelected = it }
-        )
-
-        CardBuyPremium(
-            text = "На шесть месяцев",
-            desc = "81р/мес",
-            price = "490 р",
-            theme = theme,
-            size = size,
-            isSelected = isSelected,
-            onClick = { isSelected = it }
-        )
-
-        CardBuyPremium(
-            text = "На один год",
-            desc = "🔥 АКЦИЯ: 57 ₽/мес",
-            price = "690 ₽",
-            badgeText = "ВЫГОДНО", // Самый сильный триггер остается здесь
-            theme = theme,
-            size = size,
-            isSelected = isSelected,
-            onClick = { isSelected = it }
-        )
-
-        CardBuyPremium(
-            text = "На всю жизнь",
-            desc = "Навсегда без подписок", // Заменил "Хит" на ценность (навсегда)
-            price = "1990 р", // Выше мы обсуждали 1999р, но если оставляете эту — описание ниже сбалансирует её
-            theme = theme,
-            size = size,
-            isSelected = isSelected,
-            onClick = { isSelected = it }
-        )
-
+            // 3. НИЖНЯЯ КНОПКА (Вынесена за пределы скролла, всегда на экране)
+            Button(
+                onClick = { /* Логика оплаты */ },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 10.dp, horizontal = 16.dp)
+                    .border(
+                        width = 2.dp,
+                        color = theme.tintPremiumOn,
+                        shape = RoundedCornerShape(12.dp)
+                    ),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = theme.cardMenuItem,
+                    contentColor = theme.tintPremiumOn
+                ),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+            ) {
+                Text(
+                    text = "ОФОРМИТЬ PREMIUM",
+                    fontSize = size.textMenu,
+                    fontWeight = FontWeight.ExtraBold,
+                    style = LocalTextStyle.current.copy(
+                        shadow = Shadow(
+                            color = theme.tintPremiumOn.copy(alpha = 0.5f),
+                            blurRadius = 8f
+                        )
+                    )
+                )
+            }
         }
     }
 
@@ -276,12 +316,12 @@ fun CardBuyPremium(
             ) {
                 // Вместо IconButton используем обычный Icon.
                 // IconButton внутри кликабельной карточки блокирует нажатия на себя!
-                Icon(
-                    imageVector = if (currentSelected) Icons.Default.Star else Icons.Outlined.Star, // Меняем на контурную, если не выбрана
-                    contentDescription = null,
-                    tint = if (currentSelected) theme.tintPremiumOn else theme.tintPremiumOff,
-                    modifier = Modifier.size(24.dp)
-                )
+//                Icon(
+//                    imageVector = if (currentSelected) Icons.Default.Star else Icons.Outlined.Star, // Меняем на контурную, если не выбрана
+//                    contentDescription = null,
+//                    tint = if (currentSelected) theme.tintPremiumOn else theme.tintPremiumOff,
+//                    modifier = Modifier.size(24.dp)
+//                )
 
                 Column(
                     modifier = Modifier
