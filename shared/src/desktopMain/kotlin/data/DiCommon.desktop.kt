@@ -9,6 +9,7 @@ import androidx.room.RoomDatabase
 import com.dragon.shared.data.repostitory.DesktopAlarmImpl
 import com.dragon.shared.data.repostitory.DesktopGetPlatformImpl
 import com.dragon.shared.data.repostitory.DesktopPathProviderImpl
+import com.dragon.shared.data.repostitory.DesktopPaySdkImpl
 import com.dragon.shared.data.repostitory.DesktopPermissonImp
 import data.perository.AlarmRepeadImp
 import java.io.File
@@ -21,6 +22,7 @@ import domain.repostirory.PermissionRepository
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.PreferencesSettings
 import domain.repostirory.GetPlatrormRepository
+import domain.repostirory.PaySdkRepository
 import java.util.prefs.Preferences
 import org.koin.core.qualifier.named
 actual val moduleAnotherPlatform: Module = module {
@@ -43,4 +45,5 @@ actual val moduleAnotherPlatform: Module = module {
     single<AlarmRepository> { DesktopAlarmImpl(db = get()) }
     factory<PathProviderRepostitory> { DesktopPathProviderImpl() }
     factory<GetPlatrormRepository> { DesktopGetPlatformImpl() }
+    factory<PaySdkRepository> { DesktopPaySdkImpl() }
 }

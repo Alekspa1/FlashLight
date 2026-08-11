@@ -53,11 +53,11 @@ object CommonConst {
     const val ALARM_YEAR = 4
     const val DELETE_ALARM = 5
     const val ALARM_REPEAT = 6
-   // val ONE_MONTH = ProductId("premium_version_podpiska_flash_light")
-   // val SIX_MONTH = ProductId("premium_version_podpiska_six_month_flash_light")
-   // val ONE_YEAR = ProductId("premium_version_podpiska_one_year_flash_light")
-   // val FOREVER = ProductId("premium_version_flash_light")
-   // val MONTH = AlarmManager.INTERVAL_DAY* dayInMonth
+    val ONE_MONTH = "premium_version_podpiska_flash_light"
+    val SIX_MONTH = "premium_version_podpiska_six_month_flash_light"
+    val ONE_YEAR = "premium_version_podpiska_one_year_flash_light"
+    val FOREVER = "premium_version_flash_light"
+
 //    val PURCHASE_LIST: List<ProductId> = listOf(
 //        FOREVER,
 //        ONE_MONTH,

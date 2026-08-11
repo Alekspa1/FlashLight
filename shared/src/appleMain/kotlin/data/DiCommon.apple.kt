@@ -5,9 +5,11 @@ import androidx.room.RoomDatabase
 import com.russhwolf.settings.NSUserDefaultsSettings
 import com.russhwolf.settings.Settings
 import data.repository.IosGetPlatformImpl
+import data.repository.IosPaySdkImpl
 import data.repository.IosPermissionImpl
 import data.room.myDataBase
 import domain.repostirory.GetPlatrormRepository
+import domain.repostirory.PaySdkRepository
 import domain.repostirory.PermissionRepository
 import kotlinx.cinterop.ExperimentalForeignApi
 import org.koin.core.module.Module
@@ -49,5 +51,6 @@ actual val moduleAnotherPlatform: Module = module {
     }
     single <PermissionRepository> { IosPermissionImpl() }
     factory<GetPlatrormRepository> { IosGetPlatformImpl() }
+    factory<PaySdkRepository> { IosPaySdkImpl() }
 
 }

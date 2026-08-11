@@ -1,13 +1,12 @@
 package presentation.screens
 
-import CommonConst.CHANGE
-import CommonConst.CHANGE_ITEM
-import CommonConst.IMAGE
-import CommonConst.INSERT_DIALOG_CATEGORY
-import androidx.compose.foundation.background
+import CommonConst.FOREVER
+import CommonConst.ONE_MONTH
+import CommonConst.ONE_YEAR
+import CommonConst.SIX_MONTH
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,14 +21,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.StarHalf
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -42,34 +42,29 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
+import domain.model.ProductCommon
+import org.jetbrains.compose.resources.painterResource
 import presentation.theme.Size
 import presentation.theme.SizeNormal
 import presentation.theme.Theme
 import presentation.theme.ThemeNeon
-import androidx.compose.foundation.Image
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.LocalTextStyle
-import androidx.compose.ui.draw.blur
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.graphics.Shadow
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.unit.Dp
-import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun PremiumScreen(
     size: Size = SizeNormal(),
+    listProduct : List<ProductCommon> = emptyList(),
     theme: Theme = ThemeNeon(),
     onBack: () -> Unit = {},
+    onClickBuy: (String) -> Unit = {},
     innerPadding : PaddingValues = PaddingValues()
     ){
-    var isSelected by remember { mutableStateOf("На один год") }
+    var isSelected by remember { mutableStateOf(ONE_YEAR) }
 
 
 
@@ -127,8 +122,7 @@ fun PremiumScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 3.dp)
                         .border(3.dp, theme.borderCardMenuItem, RoundedCornerShape(10.dp))
-                        .clip(RoundedCornerShape(10.dp))
-                        .clickable {  },
+                        .clip(RoundedCornerShape(10.dp)),
                     shape = RoundedCornerShape(10.dp),
                     colors = CardDefaults.cardColors(containerColor = theme.cardMenuItem)
                 ) {
@@ -148,8 +142,28 @@ fun PremiumScreen(
                     }
                 }
 
-                Text(
-                    text = "Тарифы",
+
+                if(listProduct.isNotEmpty()){
+                    Text(
+                        text = "Тарифы",
+                        color = theme.textColor,
+                        fontSize = size.textMenu,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp),
+                        textAlign = TextAlign.Center
+                    )
+                    listProduct.forEach { productCommon ->
+
+                        CardBuyPremium(
+                            productCommon = productCommon,
+                            theme = theme,
+                            size = size,
+                            isSelected = isSelected,
+                            onClick = { isSelected = it }
+                        )
+                    }
+                } else Text(
+                    text = "Не удалось загрузить список тарифов",
                     color = theme.textColor,
                     fontSize = size.textMenu,
                     fontWeight = FontWeight.Bold,
@@ -157,51 +171,12 @@ fun PremiumScreen(
                     textAlign = TextAlign.Center
                 )
 
-                CardBuyPremium(
-                    text = "На один месяц",
-                    desc = "7 дней бесплатно",
-                    price = "99 р",
-                    theme = theme,
-                    size = size,
-                    isSelected = isSelected,
-                    onClick = { isSelected = it }
-                )
 
-                CardBuyPremium(
-                    text = "На шесть месяцев",
-                    desc = "81р/мес",
-                    price = "490 р",
-                    theme = theme,
-                    size = size,
-                    isSelected = isSelected,
-                    onClick = { isSelected = it }
-                )
-
-                CardBuyPremium(
-                    text = "На один год",
-                    desc = "🔥 АКЦИЯ: 57 ₽/мес",
-                    price = "690 ₽",
-                    badgeText = "ВЫГОДНО",
-                    theme = theme,
-                    size = size,
-                    isSelected = isSelected,
-                    onClick = { isSelected = it }
-                )
-
-                CardBuyPremium(
-                    text = "На всю жизнь",
-                    desc = "Навсегда без подписок",
-                    price = "1990 р",
-                    theme = theme,
-                    size = size,
-                    isSelected = isSelected,
-                    onClick = { isSelected = it }
-                )
             }
 
             // 3. НИЖНЯЯ КНОПКА (Вынесена за пределы скролла, всегда на экране)
             Button(
-                onClick = { /* Логика оплаты */ },
+                onClick = { onClickBuy(isSelected) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 10.dp, horizontal = 16.dp)
@@ -218,8 +193,10 @@ fun PremiumScreen(
                 elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
             ) {
                 Text(
-                    text = "ОФОРМИТЬ PREMIUM",
+                    text = if(listProduct.isNotEmpty())"Оформить PREMIUM"
+                    else "Оплата временно недоступна",
                     fontSize = size.textMenu,
+                    textAlign = TextAlign.Center,
                     fontWeight = FontWeight.ExtraBold,
                     style = LocalTextStyle.current.copy(
                         shadow = Shadow(
@@ -272,7 +249,7 @@ fun PremiumItem(text: String,
 
                 Icon(
                     modifier = Modifier.fillMaxSize(),
-                    imageVector = Icons.Default.Warning,
+                    imageVector = Icons.Default.Info,
                     contentDescription = "Chek",
                     tint = theme.chekBoxTint
                 )
@@ -284,16 +261,22 @@ fun PremiumItem(text: String,
 
 @Composable
 fun CardBuyPremium(
-    text: String,
-    desc: String,
+    productCommon: ProductCommon,
     theme: Theme,
     size: Size,
-    price: String = "199",
     isSelected: String = "На один год",
-    badgeText: String? = null, // Добавляем параметр для плашки (например, "-50%" или "АКЦИЯ")
     onClick: (String) -> Unit = {}
 ) {
-    val currentSelected = isSelected == text
+    val currentSelected = isSelected == productCommon.productId
+
+    val desc = when(productCommon.productId){
+        ONE_MONTH -> "Неделя бесплатно"
+        SIX_MONTH -> "${productCommon.price/6} р/мес"
+        ONE_YEAR -> "\uD83D\uDD25 АКЦИЯ:${productCommon.price/12} р/мес"
+        FOREVER -> "Навсегда без подписок"
+        else -> ""
+    }
+    val price = "${productCommon.price} р"
 
     Box(modifier = Modifier.fillMaxWidth()) {
         Card(
@@ -306,7 +289,7 @@ fun CardBuyPremium(
                     shape = RoundedCornerShape(10.dp)
                 )
                 .clip(RoundedCornerShape(10.dp))
-                .clickable { onClick(text) },
+                .clickable { onClick(productCommon.productId) },
             shape = RoundedCornerShape(10.dp),
             // Задаем цвет контейнера правильно через CardDefaults, чтобы не использовать .background
             colors = CardDefaults.cardColors(containerColor = theme.cardMenuItem)
@@ -332,7 +315,7 @@ fun CardBuyPremium(
                         .padding(start = 12.dp, end = 12.dp),
                 ) {
                     Text(
-                        text = text,
+                        text = productCommon.name,
                         color = theme.textColor,
                         lineHeight = size.lineHeightItem,
                         fontSize = size.textItem,
@@ -359,7 +342,7 @@ fun CardBuyPremium(
         }
 
         // Рисуем шильдик "АКЦИЯ" только если передан текст и карточка выбрана
-        if (badgeText != null) {
+        if (productCommon.productId == ONE_YEAR) {
             Surface(
                 shape = RoundedCornerShape(4.dp),
                 color = theme.tintPremiumOn, // Берем ваш золотой/желтый цвет
@@ -368,7 +351,7 @@ fun CardBuyPremium(
                     .padding(end = 16.dp) // Сдвиг к правому краю карточки
             ) {
                 Text(
-                    text = badgeText,
+                    text = "ВЫГОДНО",
                     color = Color.Black, // Черный текст на желтом фоне читается идеально
                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                     modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)

@@ -12,6 +12,7 @@ import data.perository.MultiplatrormAppSettings
 import data.repostitory.AndroidAlarmImpl
 import data.repostitory.AndroidGetPlatrormImp
 import data.repostitory.AndroidPathProviderImp
+import data.repostitory.AndroidPaySdkImpl
 import data.repostitory.AndroidPermissionImpl
 import data.repostitory.AndroidSaveDeleteImpl
 import data.repostitory.AndroidSoundPlayer
@@ -19,6 +20,7 @@ import data.room.myDataBase
 import domain.repostirory.AlarmRepository
 import domain.repostirory.GetPlatrormRepository
 import domain.repostirory.PathProviderRepostitory
+import domain.repostirory.PaySdkRepository
 import domain.repostirory.PermissionRepository
 import domain.repostirory.SaveDeleteImageRepositpry
 import domain.repostirory.SettingsAppRepository
@@ -83,5 +85,6 @@ actual val moduleAnotherPlatform = module {
     factory<SaveDeleteImageRepositpry> { AndroidSaveDeleteImpl(get()) }
     factory<GetPlatrormRepository> { AndroidGetPlatrormImp(get(),get()) }
     factory<AndroidSoundPlayer> { AndroidSoundPlayer(get()) }
+    factory<PaySdkRepository> { AndroidPaySdkImpl (get(),get()) }
 
 }

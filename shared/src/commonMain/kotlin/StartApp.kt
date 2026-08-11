@@ -114,7 +114,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
         var isCommonMode by remember { mutableStateOf(false) }
         val category = viewModel.showDialog.category
         val snackbarHostState = remember { SnackbarHostState() }
-
+        val productList by viewModel.productState.collectAsStateWithLifecycle()
         LaunchedEffect(Unit) {
             viewModel.toast.collect { message ->
                 snackbarHostState.showSnackbar(message)
@@ -263,8 +263,14 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                 popExitTransition = { slideOutHorizontally(animationSpec = tween(300), targetOffsetX = { -it }) },
                 exitTransition = { androidx.compose.animation.ExitTransition.None },
                 popEnterTransition = { androidx.compose.animation.EnterTransition.None }
-            ) { 
-                PremiumScreen(size = size, theme = theme, onBack = { navController.popBackStack() }, innerPadding = innerPadding) 
+            ) {
+                viewModel
+                PremiumScreen(size = size,
+                    theme = theme,
+                    listProduct = productList,
+                    onBack = { navController.popBackStack() },
+                    onClickBuy = {productId -> viewModel.buyProduct(productId)},
+                    innerPadding = innerPadding)
             } 
         } 
     } 

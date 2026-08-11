@@ -56,30 +56,37 @@ import presentation.theme.ThemeZabor
 import presentation.theme.SizeSmall
 import presentation.theme.SizeLarge
 import data.room.model.ItemWithSubItems
+import domain.model.ProductCommon
+import domain.repostirory.PaySdkRepository
 
 class MainViewModel(
     private val pref: SharedPrefRepository,
     private val db: CourseDao,
     private val settingsPref : SettingsAppRepository,
-
     private val permission: PermissionRepository,
     private val alarm: AlarmRepository,
     private val alarmRepeat: AlarmRepeadRepository,
     private val image: SaveDeleteImageRepositpry,
     private val platform : GetPlatrormRepository,
+    private val paySdk : PaySdkRepository
+
 ) : ViewModel() {
 
     private val _soundState = MutableStateFlow<Map<String, String>>(emptyMap())
     val soundState = _soundState.asStateFlow()
+
+    private val _productState = MutableStateFlow<List<ProductCommon>>(emptyList())
+    val productState = _productState.asStateFlow()
+
 
     var stateTextNotebook by mutableStateOf(pref.loadTextNoteBook())
     var showDialog by  mutableStateOf(DialogState())
     private var _toast = MutableSharedFlow<String>()
     var toast = _toast.asSharedFlow()
 
-    // private val _premiumState = MutableStateFlow(pref.getPremium())
+     private val _premiumState = MutableStateFlow(pref.getPremium())
 
-    private val _premiumState = MutableStateFlow(true)
+    //private val _premiumState = MutableStateFlow(true)
     val premiumState = _premiumState.asStateFlow()
 
     private val _updateState = MutableStateFlow(false)
@@ -91,12 +98,60 @@ class MainViewModel(
     init {
         loadSounds()
         isUpdateApp()
+        loadProduct()
+        isCheckPremiumWithBuy()
     }
 
      private fun loadSounds() {
         viewModelScope.launch(Dispatchers.IO) {
             val result = platform.getAllSound()
             _soundState.value = result // Обновляем состояние (это безопасно)
+        }
+    }
+
+    private fun loadProduct() {
+        viewModelScope.launch(Dispatchers.IO) {
+         paySdk.getAllProduct()
+             .onSuccess {listProduct ->
+                 _productState.value = listProduct
+             }
+            // .onFailure { sendMessage("Оплата временна недоступна")}
+             .onFailure { _productState.value = emptyList<ProductCommon>()}
+        }
+    }
+
+    fun buyProduct(productId : String) {
+        viewModelScope.launch {
+            paySdk.byProduct(productId)
+                .onSuccess { hasPremium ->
+                    if(hasPremium) {
+                        savePremium(true)
+                        sendMessage("Поздравляю! Теперь вам доступны PREMIUM функции")
+                    } else {
+                        sendMessage("Вы отменили покупку")
+                    }
+
+
+                }
+                .onFailure { sendMessage("Произошла ошибка оплаты") }
+        }
+
+    }
+
+    private fun isCheckPremiumWithBuy() {
+        viewModelScope.launch {
+            val isStorePremiumActive = paySdk.isChekedSubcrition()
+            val isLocalPremiumActive = getPremium()
+
+            if (isStorePremiumActive != isLocalPremiumActive) {
+                if (isStorePremiumActive) {
+                    sendMessage("PREMIUM версия была восстановлена")
+                } else {
+                    sendMessage("PREMIUM версия была отключена")
+                }
+            }
+
+            savePremium(isStorePremiumActive)
         }
     }
 

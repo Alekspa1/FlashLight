@@ -30,7 +30,8 @@ import javax.inject.Singleton
 class PaySDK @Inject constructor(
     private val pref: SharedPreferenceImpl) {
 
-     fun getAllListProducts(context: Context,resultPay: () -> Unit){
+    fun getAllListProducts(context: Context,resultPay: () -> Unit){
+
         RuStorePayClient.instance.getProductInteractor().getProducts(productsId = PURCHASE_LIST)
             .addOnSuccessListener { products: List<Product> ->
                 val list = arrayOfNulls<String>(4)
