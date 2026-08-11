@@ -7,4 +7,8 @@ class IosGetPlatformImpl : GetPlatrormRepository {
     override suspend fun getAllSound(): Map<String, String> {
         return mapOf("" to "")
     }
+
+    override fun updateApp(result: (Boolean) -> Unit) {
+        result(false)
+    }
 }

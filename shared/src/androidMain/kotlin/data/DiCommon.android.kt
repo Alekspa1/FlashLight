@@ -75,13 +75,13 @@ actual val moduleAnotherPlatform = module {
         NotificationBuilder(
             context = get(),
             image = get(),
-            settings = get() // Угловые скобки не нужны, Koin сам подставит класс
+            settings = get()
         )
     }
     factory<NotificationBuilderPassed> { NotificationBuilderPassed(get()) }
     factory<PathProviderRepostitory> { AndroidPathProviderImp(get()) }
     factory<SaveDeleteImageRepositpry> { AndroidSaveDeleteImpl(get()) }
-    factory<GetPlatrormRepository> { AndroidGetPlatrormImp(get()) }
+    factory<GetPlatrormRepository> { AndroidGetPlatrormImp(get(),get()) }
     factory<AndroidSoundPlayer> { AndroidSoundPlayer(get()) }
 
 }

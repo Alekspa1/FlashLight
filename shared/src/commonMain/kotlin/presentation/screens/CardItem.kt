@@ -404,7 +404,7 @@ fun CardItem(
 
         // ВЫЕЗЖАЮЩАЯ ОТДЕЛЬНАЯ КАРТОЧКА ПОДЗАДАЧ (Строго ПОД основной)
         AnimatedVisibility(
-            visible = isExpanded,
+            visible = isExpanded && (currentSnapshotList.isNotEmpty() || selectedFileUri.isNotEmpty()),
             enter = expandVertically() + fadeIn(),
             exit = shrinkVertically() + fadeOut()
         ) {
@@ -413,7 +413,6 @@ fun CardItem(
                     .fillMaxWidth()
                     .padding(start = 48.dp, end = 48.dp, bottom = 4.dp)
                     .clip(menuCardShape)
-                   // .clickable { onClick(item, CHANGE_ITEM) }
                     .borderThreeSidesRounded(
                         strokeWidth = 2.dp,
                         color = if (item.change) theme.cardItemBorderTrue else if (item.changeAlarm) theme.cardItemBorderAlarm else theme.cardItemBorderFalse,

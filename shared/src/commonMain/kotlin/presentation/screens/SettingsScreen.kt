@@ -44,6 +44,8 @@ import CommonConst.THEME_FUTURE
 import CommonConst.SIZE_SETTINGS
 import CommonConst.SORT_SETTINGS
 import CommonConst.ALARM_SETTINGS
+import CommonConst.APP_SETTINGS
+import CommonConst.BATTERY_OPTIMIZATION
 import CommonConst.DONATE
 
 import CommonConst.SIZE_SMALL
@@ -265,7 +267,7 @@ fun SettingsScreen(
                         theme.borderCardMenuItem
                     ) { uriHandler.openUri(DONATE) }
 
-                    if (viewModel.getPlatform != "Desktop") {
+                    if (viewModel.getPlatform == "Android") {
                         // --- СЕКЦИЯ 2: РАЗРЕШЕНИЯ (tv_settings_permissions) ---
                         Text(
                             text = "Разрешения",
@@ -281,14 +283,14 @@ fun SettingsScreen(
                             size,
                             theme.cardMenuItem,
                             theme.borderCardMenuItem
-                        ) { /* Настройки батареи */ }
+                        ) { viewModel.permission(BATTERY_OPTIMIZATION) }
                         SettingItem(
                             "Настройки приложения",
                             theme,
                             size,
                             theme.cardMenuItem,
                             theme.borderCardMenuItem
-                        ) { /* Системные настройки аппа */ }
+                        ) { viewModel.permission(APP_SETTINGS) }
                     }
 
                     // --- СЕКЦИЯ 3: РЕЗЕРВНОЕ КОПИРОВАНИЕ (tv_settings_backup) ---

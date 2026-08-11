@@ -47,6 +47,7 @@ import CommonConst.SIZE_STANDART
 import CommonConst.SIZE_LARGE
 
 import CommonConst.ALARM_SETTINGS
+import CommonConst.BATTERY_OPTIMIZATION
 import data.room.model.SubItem
 import domain.repostirory.GetPlatrormRepository
 import kotlinx.coroutines.flow.Flow
@@ -71,32 +72,43 @@ class MainViewModel(
     private val _soundState = MutableStateFlow<Map<String, String>>(emptyMap())
     val soundState = _soundState.asStateFlow()
 
+    var stateTextNotebook by mutableStateOf(pref.loadTextNoteBook())
+    var showDialog by  mutableStateOf(DialogState())
+    private var _toast = MutableSharedFlow<String>()
+    var toast = _toast.asSharedFlow()
+
+    // private val _premiumState = MutableStateFlow(pref.getPremium())
+
+    private val _premiumState = MutableStateFlow(true)
+    val premiumState = _premiumState.asStateFlow()
+
+    private val _updateState = MutableStateFlow(false)
+    val updateState = _updateState.asStateFlow()
+
+    private val _sortType = MutableStateFlow(settingsPref.getSort())
+    val sortType = _sortType.asStateFlow()
+
     init {
         loadSounds()
+        isUpdateApp()
     }
 
-     fun loadSounds() {
+     private fun loadSounds() {
         viewModelScope.launch(Dispatchers.IO) {
             val result = platform.getAllSound()
             _soundState.value = result // Обновляем состояние (это безопасно)
         }
     }
 
-    var stateTextNotebook by mutableStateOf(pref.loadTextNoteBook())
-    var showDialog by  mutableStateOf(DialogState())
-    private var _toast = MutableSharedFlow<String>()
-    var toast = _toast.asSharedFlow()
+    private fun isUpdateApp() {
+        viewModelScope.launch(Dispatchers.IO) {
+            platform.updateApp { result ->
+                _updateState.value = result
+            }
+        }
+    }
 
-  // private val _premiumState = MutableStateFlow(pref.getPremium())
 
-   private val _premiumState = MutableStateFlow(true)
-   var premiumState = _premiumState.asStateFlow()
-
-    private val _updateState = MutableStateFlow(false)
-    var updateState = _updateState.asStateFlow()
-
-    private val _sortType = MutableStateFlow(settingsPref.getSort())
-    val sortType = _sortType.asStateFlow()
     
     var themeState by mutableStateOf(
         when (settingsPref.getTheme()) {
@@ -415,19 +427,43 @@ class MainViewModel(
         viewModelScope.launch{
             val isChekedPermission = permission.isChekedPermission(permissionName)
 
-            if(isChekedPermission) {
-                val dialog = when(permissionName){
-                    NOTIFICATION -> if(calendar) TIME else NOTIFICATION
-                    ALARM_SETTINGS -> ALARM_SETTINGS
-                    else -> DEFAULT_DIALOG
+            if (isChekedPermission) {
+                println(isChekedPermission)
+
+                when (permissionName) {
+                    // Для батареи диалоги не нужны — просто уведомляем пользователя, что всё уже работает
+                    BATTERY_OPTIMIZATION -> {
+                        sendMessage("Разрешение уже выдано")
+                    }
+
+                    // Для уведомлений и будильников открываем соответствующие диалоги
+                    NOTIFICATION -> {
+                        showDialog = DialogState(if (calendar) TIME else NOTIFICATION, item)
+                    }
+                    ALARM_SETTINGS -> {
+                        showDialog = DialogState(ALARM_SETTINGS, item)
+                    }
+
+                    else -> {
+                        showDialog = DialogState(DEFAULT_DIALOG, item)
+                    }
                 }
-                showDialog = DialogState(dialog,item) }
+            }
             else {
                 val isGranted = permission.requestPermission(permissionName)
-                if(isGranted){
-                    showDialog = DialogState(permissionName,item)
+                if (isGranted) {
+                    // Если всё успешно
+                    when (permissionName) {
+                        "APP_SETTINGS" -> {  }
+                        else -> showDialog = DialogState(permissionName, item)
+                    }
+                } else {
+                    // Если произошла ошибка или отказ
+                    when (permissionName) {
+                        "APP_SETTINGS" -> sendMessage("Не удалось открыть настройки")
+                        else -> sendMessage("Для стабильной работы, необходимо дать разрешение")
+                    }
                 }
-                else {sendMessage("Для стабильной работы, необходимо дать разрешение")}
 
             }
         }

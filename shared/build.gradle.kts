@@ -72,7 +72,8 @@ kotlin {
             implementation("androidx.activity:activity-compose:1.13.0") // Для setContent и ComponentActivity
             implementation("androidx.appcompat:appcompat:1.7.1")
             implementation("org.jetbrains.compose.ui:ui-tooling-preview:1.10.0")
-            implementation("com.yandex.android:mobileads:8.2.0")
+            implementation("com.yandex.android:mobileads:8.3.0")
+            implementation("ru.rustore.sdk:appupdate:10.1.0")
         }
 
         val desktopMain by getting {

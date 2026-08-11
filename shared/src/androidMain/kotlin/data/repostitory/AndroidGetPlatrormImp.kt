@@ -2,6 +2,7 @@ package data.repostitory
 
 import android.content.ContentResolver
 import android.content.ContentUris
+import android.content.Context
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
@@ -9,9 +10,11 @@ import android.provider.Settings
 import android.util.Log
 import androidx.annotation.RequiresApi
 import domain.repostirory.GetPlatrormRepository
+import ru.rustore.sdk.appupdate.manager.factory.RuStoreAppUpdateManagerFactory
+import ru.rustore.sdk.appupdate.model.UpdateAvailability
 import kotlin.collections.set
 
-class AndroidGetPlatrormImp(private val contentResolver: ContentResolver) : GetPlatrormRepository {
+class AndroidGetPlatrormImp(private val contentResolver: ContentResolver,private val context: Context) : GetPlatrormRepository {
 
     override fun getPlatform(): String = "Android"
 
@@ -74,5 +77,15 @@ class AndroidGetPlatrormImp(private val contentResolver: ContentResolver) : GetP
         }
 
         return sounds
+    }
+
+    override fun updateApp(result: (Boolean) -> Unit) {
+        val updateManager = RuStoreAppUpdateManagerFactory.create(context)
+        updateManager.getAppUpdateInfo().addOnSuccessListener { appUpdateInfo ->
+            if (appUpdateInfo.updateAvailability == UpdateAvailability.UPDATE_AVAILABLE) {
+               result(true)
+            }
+        }
+
     }
 }
