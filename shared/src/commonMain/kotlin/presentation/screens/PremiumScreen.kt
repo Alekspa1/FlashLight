@@ -279,12 +279,12 @@ fun CardBuyPremium(
 
     val remoteDesc = productCommon.desc
     val calculation = when(productCommon.productId) {
-    SIX_MONTH -> ":${productCommon.price / 6} ₽/мес"
-    ONE_YEAR -> ":${productCommon.price / 12} ₽/мес"
+    SIX_MONTH -> ": ${productCommon.price / 6} ₽/мес"
+    ONE_YEAR -> ": ${productCommon.price / 12} ₽/мес"
     else -> ""
     }
 
-    val desc = "$remoteDesc $calculation"
+    val desc = "$remoteDesc$calculation"
     val price = "${productCommon.price} ₽"
 
     Box(modifier = Modifier.fillMaxWidth()) {
@@ -306,7 +306,7 @@ fun CardBuyPremium(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 8.dp, top = 8.dp, bottom = 8.dp, end = 8.dp),
+                    .padding(start = 12.dp, top = 12.dp, bottom = 12.dp, end = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 // Вместо IconButton используем обычный Icon.
