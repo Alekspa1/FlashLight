@@ -269,13 +269,13 @@ fun CardBuyPremium(
 ) {
     val currentSelected = isSelected == productCommon.productId
 
-    val desc = when(productCommon.productId){
-        ONE_MONTH -> "Неделя бесплатно"
-        SIX_MONTH -> "${productCommon.price/6} р/мес"
-        ONE_YEAR -> "\uD83D\uDD25 АКЦИЯ:${productCommon.price/12} р/мес"
-        FOREVER -> "Навсегда без подписок"
-        else -> ""
-    }
+    // val desc = when(productCommon.productId){
+    //     ONE_MONTH -> "Неделя бесплатно"
+    //     SIX_MONTH -> "${productCommon.price/6} р/мес"
+    //     ONE_YEAR -> "\uD83D\uDD25 АКЦИЯ:${productCommon.price/12} р/мес"
+    //     FOREVER -> "Навсегда без подписок"
+    //     else -> ""
+    // }
     val price = "${productCommon.price} р"
 
     Box(modifier = Modifier.fillMaxWidth()) {
@@ -324,7 +324,7 @@ fun CardBuyPremium(
 
                     Text(
                         modifier = Modifier.padding(top = 2.dp),
-                        text = desc,
+                        text = productCommon.desc,
                         color = if (currentSelected) theme.tintPremiumOn else theme.textDesc, // Текст описания года горит ярче
                         lineHeight = size.lineHeightDescAndAlarm,
                         fontSize = size.textItem
