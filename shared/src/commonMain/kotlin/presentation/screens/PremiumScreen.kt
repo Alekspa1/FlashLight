@@ -306,7 +306,7 @@ fun CardBuyPremium(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 12.dp, top = 12.dp, bottom = 12.dp, end = 16.dp),
+                    .padding(start = 8.dp, top = 8.dp, bottom = 8.dp, end = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 // Вместо IconButton используем обычный Icon.
@@ -321,7 +321,6 @@ fun CardBuyPremium(
                 Column(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(start = 12.dp, end = 12.dp),
                 ) {
                     Text(
                         text = productCommon.name,
@@ -333,7 +332,7 @@ fun CardBuyPremium(
 
                     Text(
                         modifier = Modifier.padding(top = 2.dp),
-                        text = productCommon.desc,
+                        text = desc,
                         color = if (currentSelected) theme.tintPremiumOn else theme.textDesc, // Текст описания года горит ярче
                         lineHeight = size.lineHeightDescAndAlarm,
                         fontSize = size.textDesc
