@@ -68,7 +68,8 @@ class MainViewModel(
     private val alarmRepeat: AlarmRepeadRepository,
     private val image: SaveDeleteImageRepositpry,
     private val platform : GetPlatrormRepository,
-    private val paySdk : PaySdkRepository
+    private val paySdk : PaySdkRepository,
+    private val telegramSync : TelegramSyncServiceRepository
 
 ) : ViewModel() {
 
@@ -100,6 +101,21 @@ class MainViewModel(
         isUpdateApp()
         loadProduct()
         isCheckPremiumWithBuy()
+        startTelegramRealtimeListener()
+    }
+
+    private fun startTelegramRealtimeListener() {
+    viewModelScope.launch(Dispatchers.IO) {
+        telegramSync.listenToTelegramRealtime()
+            .collect { taskText -> // Сюда задача прилетает мгновенно в момент отправки в ТГ
+                val newItem = Item(
+                    name = taskText,
+                    category = "Повседневные"
+                )
+                // Записываем в Room. База обновится, и Compose сам перерисует экран!
+                insertItem(newItem) 
+            }
+        }
     }
 
      private fun loadSounds() {
@@ -391,10 +407,9 @@ class MainViewModel(
         return db.getSubItemsForTask(taskId)
     }
 
-
-    fun insertItem(
+        fun insertItem(
         item: Item,
-        subItems: List<SubItem>,
+        subItems: List<SubItem> = emptyList(),
         alarm: Boolean = false,
         calendar: Boolean
     ) {
@@ -433,6 +448,49 @@ class MainViewModel(
             }
         }
     }
+
+
+    // fun insertItem(
+    //     item: Item,
+    //     subItems: List<SubItem>,
+    //     alarm: Boolean = false,
+    //     calendar: Boolean
+    // ) {
+    //     viewModelScope.launch(Dispatchers.IO) {
+    //         val finalItem = if (item.id == 0) {
+    //             val currentMinSort = db.getItemWithMinSort()?.sort ?: 0
+    //             item.copy(sort = currentMinSort - 1)
+    //         } else {
+    //             item
+    //         }
+
+    //         // 1. Сохраняем дело и получаем его реальный ID
+    //         val insertedId = db.insertItem(finalItem).toInt()
+
+    //         // 2. ЕСЛИ ЭТО РЕДАКТИРОВАНИЕ (item.id != 0), чистим старые подзадачи дела в БД
+    //         if (item.id != 0) {
+    //             db.deleteAllSubItemsForTask(item.id)
+    //         }
+
+    //         // 3. Перепривязываем подзадачи к ID дела (для новых дел это будет insertedId)
+    //         val updatedSubItems = subItems.map { subItem ->
+    //             // Важно: обнуляем id самой подзадачи, так как мы пишем их заново как новые строки
+    //             subItem.copy(id = 0, idTask = insertedId)
+    //         }
+
+    //         // 4. Записываем финальный список подзадач из диалога
+    //         db.insertSubItems(updatedSubItems)
+
+    //         withContext(Dispatchers.Main) {
+    //             if (alarm) {
+    //                 val savedItem = finalItem.copy(id = insertedId)
+    //                 permission(NOTIFICATION, savedItem, calendar)
+    //             } else {
+    //                 showDialog = DialogState()
+    //             }
+    //         }
+    //     }
+    // }
     fun deleteItem(item: Item){
         viewModelScope.launch(Dispatchers.IO) {
             db.delete(item)
