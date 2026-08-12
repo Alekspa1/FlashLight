@@ -37,7 +37,7 @@ import kotlinx.serialization.json.Json
 
 import io.ktor.client.network.sockets.SocketTimeoutException 
 import domain.repostirory.TelegramSyncServiceRepository
-import data.perository.domain.repostirory.TelegramSyncServiceImpl
+import domain.repostirory.TelegramSyncServiceImpl
 
 
 expect val moduleAnotherPlatform: Module
