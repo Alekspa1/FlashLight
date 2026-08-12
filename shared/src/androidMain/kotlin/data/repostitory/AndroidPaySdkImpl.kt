@@ -43,7 +43,7 @@ class AndroidPaySdkImpl(private val pref: SharedPrefRepository, private val cont
                 products.forEach { product ->
                     list.add(ProductCommon(
                         name = product.title.value,
-                        desc = product.description?.value? ?: "",
+                        desc = product.description?.value ?: "",
                         productId = product.productId.value,
                         price = (product.price?.value?.div(100)) ?: 0
                     ))
