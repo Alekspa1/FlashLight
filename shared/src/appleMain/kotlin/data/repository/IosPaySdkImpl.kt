@@ -12,8 +12,8 @@ class IosPaySdkImpl : PaySdkRepository {
         return Result.success(true)
     }
 
-    override suspend fun isChekedSubcrition(): Boolean {
-        return true
+    override suspend fun isChekedSubcrition(): Result<Boolean>{
+        return Result.success(true)
     }
 
 }

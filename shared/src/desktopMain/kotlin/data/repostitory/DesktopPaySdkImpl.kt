@@ -12,8 +12,8 @@ class DesktopPaySdkImpl : PaySdkRepository {
         TODO("Not yet implemented")
     }
 
-    override suspend fun isChekedSubcrition(): Boolean {
-        return false
+    override suspend fun isChekedSubcrition() : Result<Boolean> {
+        return Result.success(true)
     }
 
 }
