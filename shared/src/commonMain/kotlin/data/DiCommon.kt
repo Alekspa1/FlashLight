@@ -36,6 +36,9 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
 import io.ktor.client.network.sockets.SocketTimeoutException 
+import domain.repostirory.TelegramSyncServiceRepository
+import data.perository.domain.repostirory.TelegramSyncServiceImpl
+
 
 expect val moduleAnotherPlatform: Module
 
@@ -103,6 +106,7 @@ val appModule = module {
     
     single<AlarmRepeadRepository> { AlarmRepeadImp(get(),get()) }
     factory<SaveDeleteImageRepositpry> { SaveDeleteImageImpl(get()) }
+    single<TelegramSyncServiceRepository>{TelegramSyncServiceImpl(get()) } 
 
 
 }
