@@ -279,8 +279,8 @@ fun CardBuyPremium(
 
     val remoteDesc = productCommon.desc
     val calculation = when(productCommon.productId) {
-    SIX_MONTH -> "${productCommon.price / 6} ₽/мес"
-    ONE_YEAR -> "${productCommon.price / 12} ₽/мес"
+    SIX_MONTH -> ":${productCommon.price / 6} ₽/мес"
+    ONE_YEAR -> ":${productCommon.price / 12} ₽/мес"
     else -> ""
     }
 
