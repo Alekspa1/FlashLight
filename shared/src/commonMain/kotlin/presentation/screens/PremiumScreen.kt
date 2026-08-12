@@ -276,7 +276,16 @@ fun CardBuyPremium(
     //     FOREVER -> "Навсегда без подписок"
     //     else -> ""
     // }
-    val price = "${productCommon.price} р"
+
+    val remoteDesc = productCommon.description
+    val calculation = when(productCommon.productId) {
+    SIX_MONTH -> "${productCommon.price / 6} ₽/мес"
+    ONE_YEAR -> "${productCommon.price / 12} ₽/мес"
+    else -> ""
+    }
+
+    val desc = "$remoteDesc: $calculation"
+    val price = "${productCommon.price} ₽"
 
     Box(modifier = Modifier.fillMaxWidth()) {
         Card(
@@ -327,7 +336,7 @@ fun CardBuyPremium(
                         text = productCommon.desc,
                         color = if (currentSelected) theme.tintPremiumOn else theme.textDesc, // Текст описания года горит ярче
                         lineHeight = size.lineHeightDescAndAlarm,
-                        fontSize = size.textItem
+                        fontSize = size.textDesc
                     )
                 }
 
