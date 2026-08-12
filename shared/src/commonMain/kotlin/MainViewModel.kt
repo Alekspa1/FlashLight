@@ -412,7 +412,7 @@ class MainViewModel(
         item: Item,
         subItems: List<SubItem> = emptyList(),
         alarm: Boolean = false,
-        calendar: Boolean
+        calendar: Boolean = false
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             val finalItem = if (item.id == 0) {
