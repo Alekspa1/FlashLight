@@ -12,6 +12,8 @@ import domain.model.TelegramUpdate
 import domain.model.TelegramMessage
 import domain.model.TelegramUser
 
+import domain.repostirory.TelegramSyncServiceRepository
+
 class TelegramSyncServiceImpl(val ktor: HttpClient) : TelegramSyncServiceRepository {
 
     private val BOT_TOKEN = "8748492625:AAElYdrKsBjmgoDqZZyiTQqTkuHibLegR18"
