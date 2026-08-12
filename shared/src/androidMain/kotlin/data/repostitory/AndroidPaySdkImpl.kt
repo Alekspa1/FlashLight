@@ -25,6 +25,7 @@ import ru.rustore.sdk.pay.model.ProductPurchaseStatus
 import ru.rustore.sdk.pay.model.Purchase
 import ru.rustore.sdk.pay.model.SubscriptionPurchaseStatus
 import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 class AndroidPaySdkImpl(private val pref: SharedPrefRepository, private val context: Context) : PaySdkRepository {
 
