@@ -7,6 +7,6 @@ interface PaySdkRepository {
     suspend fun getAllProduct() : Result<List<ProductCommon>>
     suspend fun byProduct(productId: String) : Result<Boolean>
 
-    suspend fun isChekedSubcrition() : Boolean
+    suspend fun isChekedSubcrition() : Result<Boolean>
 
 }

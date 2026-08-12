@@ -74,8 +74,7 @@ class AndroidPermissionImpl(private val context: Context):PermissionRepository{
             }
         }
         BATTERY_OPTIMIZATION -> {
-            // ИСПРАВЛЕНО: Просто запускаем интент и сразу выходим из функции
-            println("BATTERY_OPTIMIZATION в requestPermission")
+
             val intent = getBatteryOptimizationIntent(context).apply {
                 // Этот флаг позволяет запускать Activity без ссылки на текущую активити
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

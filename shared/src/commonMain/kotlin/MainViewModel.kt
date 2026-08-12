@@ -140,18 +140,23 @@ class MainViewModel(
 
     private fun isCheckPremiumWithBuy() {
         viewModelScope.launch {
-            val isStorePremiumActive = paySdk.isChekedSubcrition()
-            val isLocalPremiumActive = getPremium()
+            paySdk.isChekedSubcrition()
+                .onSuccess { result->
+                    val isLocalPremiumActive = getPremium()
 
-            if (isStorePremiumActive != isLocalPremiumActive) {
-                if (isStorePremiumActive) {
-                    sendMessage("PREMIUM версия была восстановлена")
-                } else {
-                    sendMessage("PREMIUM версия была отключена")
+                    if (result != isLocalPremiumActive) {
+                        if (result) {
+                            sendMessage("PREMIUM версия была восстановлена")
+                        } else {
+                            sendMessage("PREMIUM версия была отключена")
+                        }
+                    }
+                    savePremium(result)
                 }
-            }
+                .onFailure {  }
 
-            savePremium(isStorePremiumActive)
+
+
         }
     }
 
