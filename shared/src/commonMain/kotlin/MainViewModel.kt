@@ -102,10 +102,15 @@ class MainViewModel(
         isUpdateApp()
         loadProduct()
         isCheckPremiumWithBuy()
-        startTelegramRealtimeListener()
+       // startTelegramRealtimeListener()
     }
 
-    private fun startTelegramRealtimeListener() {
+    val startTelegramRealtimeListener = telegramSync.listenToTelegramRealtime()
+
+
+
+
+    fun startTelegramRealtimeListener() {
     viewModelScope.launch(Dispatchers.IO) {
         telegramSync.listenToTelegramRealtime()
             .collect { taskText -> // Сюда задача прилетает мгновенно в момент отправки в ТГ
@@ -114,7 +119,7 @@ class MainViewModel(
                     category = "Повседневные"
                 )
                 // Записываем в Room. База обновится, и Compose сам перерисует экран!
-                insertItem(newItem) 
+                insertItem(newItem)
             }
         }
     }

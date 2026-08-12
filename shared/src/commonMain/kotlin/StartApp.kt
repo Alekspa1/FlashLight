@@ -60,13 +60,17 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
+import data.room.model.Item
 import data.room.model.ListCategory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
@@ -183,7 +187,22 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                 // Старый экран замирает на месте и не исчезает, пока новый заезжает поверх
                 exitTransition = { androidx.compose.animation.ExitTransition.None },
                 popEnterTransition = { androidx.compose.animation.EnterTransition.None }
-            ) { 
+            ) {
+
+                LaunchedEffect(Unit) {
+                    viewModel.startTelegramRealtimeListener
+                        .collect { taskText ->
+                            val newItem = Item(
+                                name = taskText,
+                                category = "Повседневные"
+                            )
+                            viewModel.insertItem(
+                                item = newItem,
+                                subItems = emptyList(), // Передаем пустой список подзадач
+                                calendar = false
+                            )
+                        }
+                }
                 StartAppContent( 
                     isCommonMode = isCommonMode, 
                     onToggleCommonMode = { isCommonMode = !isCommonMode }, 
