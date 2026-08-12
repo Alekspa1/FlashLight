@@ -25,6 +25,18 @@ import data.perository.MultiplatrormAppSettings
 import domain.repostirory.GetPlatrormRepository
 import org.koin.core.qualifier.named
 
+import io.ktor.client.HttpClient
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.HttpRequestRetry
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.logging.LogLevel
+import io.ktor.client.plugins.logging.Logger
+import io.ktor.client.plugins.logging.Logging
+import io.ktor.serialization.kotlinx.json.json
+import kotlinx.serialization.json.Json
+
+import io.ktor.client.network.sockets.SocketTimeoutException 
+
 expect val moduleAnotherPlatform: Module
 
 val appModule = module {
@@ -38,6 +50,50 @@ val appModule = module {
             .setDriver(BundledSQLiteDriver())
             .setQueryCoroutineContext(Dispatchers.IO)
             .build()
+    }
+
+     single<HttpClient> {
+        HttpClient {
+            // 💥 САМОЕ ГЛАВНОЕ ДОБАВЛЕНИЕ ДЛЯ РЕАЛТАЙМА:
+            install(HttpTimeout) {
+                // Время, в течение которого Ктор готов ждать ответ от сервера (45 секунд)
+                requestTimeoutMillis = 45_000 
+                connectTimeoutMillis = 15_000
+                socketTimeoutMillis = 45_000
+            }
+
+            install(HttpRequestRetry) {
+                maxRetries = 3
+                exponentialDelay()
+                
+                retryIf { request, response ->
+                    response.status.value in 500..599
+                }
+                
+                retryOnExceptionIf { request, cause ->
+                    // Таймауты сети пускай пробрасываются в catch, 
+                    // чтобы наш бесконечный цикл сам перезапускал Long Polling!
+                    cause is SocketTimeoutException || cause.cause is SocketTimeoutException
+                }
+            }
+
+            install(Logging) {
+                logger = object : Logger {
+                    override fun log(message: String) {
+                        println("Logger in DiCommon: $message")
+                    }
+                }
+                level = LogLevel.BODY // На этапе теста BODY — супер, в логах будет виден весь JSON от ТГ
+            }
+
+            install(ContentNegotiation) {
+                json(Json {
+                    prettyPrint = true
+                    isLenient = true
+                    ignoreUnknownKeys = true // Это спасет от крашей при обновлении API ТГ!
+                })
+            }
+        }
     }
 
     single { get<myDataBase>().CourseDao() }
