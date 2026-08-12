@@ -277,14 +277,14 @@ fun CardBuyPremium(
     //     else -> ""
     // }
 
-    val remoteDesc = productCommon.description
+    val remoteDesc = productCommon.desc
     val calculation = when(productCommon.productId) {
     SIX_MONTH -> "${productCommon.price / 6} ₽/мес"
     ONE_YEAR -> "${productCommon.price / 12} ₽/мес"
     else -> ""
     }
 
-    val desc = "$remoteDesc: $calculation"
+    val desc = "$remoteDesc $calculation"
     val price = "${productCommon.price} ₽"
 
     Box(modifier = Modifier.fillMaxWidth()) {
