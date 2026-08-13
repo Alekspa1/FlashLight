@@ -82,6 +82,7 @@ object CommonConst {
     const val URI_OLD = "URI_OLD"
     const val BATTERY_OPTIMIZATION = "BATTERY_OPTIMIZATION"
     const val APP_SETTINGS = "APP_SETTINGS"
+    const val TASK_ID = "TASK_ID"
 
 
 
