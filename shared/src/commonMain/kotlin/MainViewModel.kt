@@ -63,6 +63,9 @@ import domain.repostirory.PaySdkRepository
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
 
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
+
 class MainViewModel(
     private val pref: SharedPrefRepository,
     private val db: CourseDao,
@@ -108,20 +111,17 @@ class MainViewModel(
        // startTelegramRealtimeListener()
     }
 
-    fun openDialogWithSharedData(text: String?, imageUri: String?) {
-    // Меняем стейт диалога, чтобы MainPager среагировал и открыл окно
-    showDialog = DialogState(
-        isWho = INSERT_DIALOG_ITEM,
-        calendar = false,
-        date = 0L,
-        // Создаем новый Item с id = 0, но заполняем поля из интента
-        item = Item(
-            id = 0, // Укажите 0 или оставьте дефолтным, если у вас автогенерация ID
-            name = text ?: "", 
-            uri = imageUri ?: "" // Передаем системный Uri картинки (content://...)
-        )
-        )
+private val _sharedIntentEvent = Channel<Pair<String?, String?>>(Channel.BUFFERED)
+// 2. Публичный Flow, который Compose будет безопасно слушать на UI-слое
+val sharedIntentEvent = _sharedIntentEvent.receiveAsFlow()
+
+// 3. Этот метод вызывается из MainActivity. Он просто складывает данные в очередь,
+// не трогая изменчивый стейт диалога раньше времени!
+fun openDialogWithSharedData(text: String?, imageUri: String?) {
+    viewModelScope.launch {
+        _sharedIntentEvent.send(Pair(text, imageUri))
     }
+}
 
     val startTelegramRealtimeListener = telegramSync.listenToTelegramRealtime()
 
