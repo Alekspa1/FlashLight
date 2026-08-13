@@ -13,14 +13,15 @@ import domain.model.TelegramMessage
 import domain.model.TelegramUser
 
 import domain.repostirory.TelegramSyncServiceRepository
+import kotlin.coroutines.cancellation.CancellationException
 
 class TelegramSyncServiceImpl(val ktor: HttpClient) : TelegramSyncServiceRepository {
 
     private val BOT_TOKEN = "8748492625:AAElYdrKsBjmgoDqZZyiTQqTkuHibLegR18"
     private val MY_CHAT_ID = 706399730L // Ваш личный ID
     private var lastUpdateId = 0L
-
-  override  fun listenToTelegramRealtime(): Flow<String> = flow {
+    var errorDelay = 5000L
+  override  fun  listenToTelegramRealtime(): Flow<String> = flow {
         while (true) {
             try {
                 val url = "https://api.telegram.org/bot$BOT_TOKEN/getUpdates"
@@ -53,9 +54,15 @@ class TelegramSyncServiceImpl(val ktor: HttpClient) : TelegramSyncServiceReposit
                         }
                     }
                 }
+                errorDelay = 5000L
+            } catch (e: CancellationException) {
+                throw e // Мгновенный выход при сворачивании, батарея спасена!
             } catch (e: Exception) {
                 e.printStackTrace()
-                delay(5000) // Защита от бесконечного цикла при сбое сети
+                delay(errorDelay)
+
+                // Удваиваем ожидание при следующей ошибке, но не дольше 1 минуты
+                errorDelay = (errorDelay * 2).coerceAtMost(60000L)
             }
         }
     }

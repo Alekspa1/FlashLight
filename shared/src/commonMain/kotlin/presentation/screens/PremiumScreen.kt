@@ -176,7 +176,7 @@ fun PremiumScreen(
 
             // 3. НИЖНЯЯ КНОПКА (Вынесена за пределы скролла, всегда на экране)
             Button(
-                onClick = { onClickBuy(isSelected) },
+                onClick = { if(listProduct.isNotEmpty()) onClickBuy(isSelected) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 10.dp, horizontal = 16.dp)
