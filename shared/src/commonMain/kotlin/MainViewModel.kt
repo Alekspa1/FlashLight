@@ -123,6 +123,23 @@ fun openDialogWithSharedData(text: String?, imageUri: String?) {
     }
 }
 
+fun openDialogByTaskId(taskId: Int) {
+    viewModelScope.launch {
+        // 1. Берем задачу из базы (у тебя это CourseDao через db)
+        // Если у тебя в DAO есть метод getById, используем его
+        val task = db.getItemById(taskId) // Реализуй этот метод в Room, если его нет
+        
+        if (task != null) {
+            // 2. Просто выставляем стейт диалога напрямую (так как вьюмодель общая)
+            showDialog = DialogState(
+                isWho = INSERT_DIALOG_ITEM,
+                item = task,
+                calendar = false // или true, если задача из календаря
+            )
+        }
+    }
+}
+
     val startTelegramRealtimeListener = telegramSync.listenToTelegramRealtime()
 
     val telegramTasksFlow = telegramSync.listenToTelegramRealtime()
