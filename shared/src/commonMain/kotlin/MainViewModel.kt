@@ -107,6 +107,21 @@ class MainViewModel(
        // startTelegramRealtimeListener()
     }
 
+    fun openDialogWithSharedData(text: String?, imageUri: String?) {
+    // Меняем стейт диалога, чтобы MainPager среагировал и открыл окно
+    showDialog = DialogState(
+        isWho = INSERT_DIALOG_ITEM,
+        calendar = false,
+        date = 0L,
+        // Создаем новый Item с id = 0, но заполняем поля из интента
+        item = Item(
+            id = 0, // Укажите 0 или оставьте дефолтным, если у вас автогенерация ID
+            name = text ?: "", 
+            uri = imageUri ?: "" // Передаем системный Uri картинки (content://...)
+        )
+        )
+    }
+
     val startTelegramRealtimeListener = telegramSync.listenToTelegramRealtime()
 
     val telegramTasksFlow = telegramSync.listenToTelegramRealtime()
