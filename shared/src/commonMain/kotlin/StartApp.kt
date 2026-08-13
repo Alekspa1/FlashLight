@@ -125,6 +125,24 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                 snackbarHostState.showSnackbar(message)
             }
         }
+
+                LaunchedEffect(Unit) {
+            viewModel.sharedIntentEvent.collect { (text, imageUri) ->
+                // Событие вычитывается из буфера строго тогда, когда UI готов.
+                // Выставляем нужный статус диалога — теперь Compose его не сотрет!
+                viewModel.showDialog = DialogState(
+                    isWho = INSERT_DIALOG_ITEM,
+                    calendar = false,
+                    date = 0L,
+                    item = Item(
+                        id = 0, // Указываем 0, чтобы сработал ваш сценарий создания
+                        name = text ?: "",
+                        uri = imageUri ?: "",
+                        category = "Повседневные"
+                    )
+                )
+            }
+        }
         when (viewModel.showDialog.isWho) {
             DELETE_DIALOG_CATEGORY -> {
                 DeleteDialog(theme = theme) { result ->
