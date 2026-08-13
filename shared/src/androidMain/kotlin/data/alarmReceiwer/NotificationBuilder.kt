@@ -102,7 +102,11 @@ class NotificationBuilder(
             )
 
 
-        val intentPush = Intent(context, MainActivity::class.java)
+        val intentPush = Intent(context, MainActivity::class.java).apply {
+            // Добавляем флаги, чтобы не плодить окна и передать данные
+            action = Intent.ACTION_VIEW 
+            putExtra("TASK_ID", item.id) // Ключ для извлечения
+            }
 
         val contentIntent =
             PendingIntent.getActivity(
