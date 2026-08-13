@@ -6,7 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import data.repostitory.AndroidPermissionImpl
 import org.koin.android.ext.android.inject
-
+import MainViewModel
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
