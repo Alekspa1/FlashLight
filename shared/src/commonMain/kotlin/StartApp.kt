@@ -73,6 +73,7 @@ import androidx.navigationevent.compose.rememberNavigationEventState
 import data.room.model.Item
 import data.room.model.ListCategory
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
@@ -188,21 +189,30 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                 exitTransition = { androidx.compose.animation.ExitTransition.None },
                 popEnterTransition = { androidx.compose.animation.EnterTransition.None }
             ) {
+                val lifecycleOwner = LocalLifecycleOwner.current
 
-                LaunchedEffect(Unit) {
-                    viewModel.startTelegramRealtimeListener
-                        .collect { taskText ->
-                            val newItem = Item(
-                                name = taskText,
-                                category = "Повседневные"
-                            )
-                            viewModel.insertItem(
-                                item = newItem,
-                                subItems = emptyList(), // Передаем пустой список подзадач
-                                calendar = false
-                            )
-                        }
+                LaunchedEffect(lifecycleOwner.lifecycle) {
+                    // repeatOnLifecycle автоматически отменит корутину (и Ktor-запрос),
+                    // когда приложение свернется, и перезапустит её, когда оно откроется.
+                    lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                        viewModel.telegramTasksFlow.collect() // Просто триггерим сбор данных
+                    }
                 }
+
+//                LaunchedEffect(Unit) {
+//                    viewModel.startTelegramRealtimeListener
+//                        .collect { taskText ->
+//                            val newItem = Item(
+//                                name = taskText,
+//                                category = "Повседневные"
+//                            )
+//                            viewModel.insertItem(
+//                                item = newItem,
+//                                subItems = emptyList(), // Передаем пустой список подзадач
+//                                calendar = false
+//                            )
+//                        }
+//                }
                 StartAppContent( 
                     isCommonMode = isCommonMode, 
                     onToggleCommonMode = { isCommonMode = !isCommonMode }, 

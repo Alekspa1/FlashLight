@@ -59,6 +59,8 @@ import presentation.theme.SizeLarge
 import data.room.model.ItemWithSubItems
 import domain.model.ProductCommon
 import domain.repostirory.PaySdkRepository
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.shareIn
 
 class MainViewModel(
     private val pref: SharedPrefRepository,
@@ -106,6 +108,27 @@ class MainViewModel(
     }
 
     val startTelegramRealtimeListener = telegramSync.listenToTelegramRealtime()
+
+    val telegramTasksFlow = telegramSync.listenToTelegramRealtime()
+        .onEach { taskText ->
+            // Логика добавления в базу теперь живет здесь
+            val newItem = Item(
+                name = taskText,
+                category = "Повседневные"
+            )
+            insertItem(
+                item = newItem,
+                subItems = emptyList(),
+                calendar = false
+            )
+        }
+        // Превращаем Flow в разделяемый поток, который засыпает через 5 секунд после того,=
+        // как UI перестал его слушать (например, при сворачивании приложения)
+        .shareIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000),
+            replay = 0
+        )
 
 
 
