@@ -120,7 +120,7 @@ fun MainPager(paddingValues: PaddingValues = PaddingValues(),
                         val finalItem = item?.copy(name = name, desc = desc, category = category)
                             ?: Item(name = name, desc = desc, category = category, alarmTime = date)
 
-                        if(item == null) { // новый item
+                        if(item == null || item.id == 0) { // новый item
                             if (originalFileName != "") viewModel.saveImage(uri, originalFileName)
                             viewModel.insertItem(finalItem.copy(uri = originalFileName), alarm = alarm,calendar = calendar, subItems = listSubitem)
                         }
