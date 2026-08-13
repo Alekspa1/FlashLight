@@ -7,6 +7,10 @@ import androidx.activity.compose.setContent
 import data.repostitory.AndroidPermissionImpl
 import org.koin.android.ext.android.inject
 
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
+
 
 class MainActivity : ComponentActivity() {
 
