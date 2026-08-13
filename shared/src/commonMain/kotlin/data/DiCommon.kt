@@ -38,12 +38,13 @@ import kotlinx.serialization.json.Json
 import io.ktor.client.network.sockets.SocketTimeoutException 
 import domain.repostirory.TelegramSyncServiceRepository
 import data.perository.TelegramSyncServiceImpl
-
+import org.koin.core.module.dsl.singleOf
 
 expect val moduleAnotherPlatform: Module
 
 val appModule = module {
-    viewModelOf(::MainViewModel)
+    //viewModelOf(::MainViewModel)
+     singleOf(::MainViewModel)
 
     single<myDataBase> {
 
