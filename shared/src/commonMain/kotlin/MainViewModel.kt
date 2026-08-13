@@ -127,7 +127,7 @@ fun openDialogByTaskId(taskId: Int) {
     viewModelScope.launch {
         // 1. Берем задачу из базы (у тебя это CourseDao через db)
         // Если у тебя в DAO есть метод getById, используем его
-        val task = db.getItemById(taskId) // Реализуй этот метод в Room, если его нет
+        val task = db.getItemFromId(taskId) // Реализуй этот метод в Room, если его нет
         
         if (task != null) {
             // 2. Просто выставляем стейт диалога напрямую (так как вьюмодель общая)
