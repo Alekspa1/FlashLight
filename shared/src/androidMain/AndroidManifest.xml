@@ -56,6 +56,35 @@
         </receiver>
 
         <activity
+    android:launchMode="singleTask"
+    android:name="presentation.MainActivity"
+    android:exported="true"
+    android:screenOrientation="portrait">
+
+    <!-- ФИЛЬТР №1: Только для обычного запуска приложения с иконки смартфона -->
+    <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
+    </intent-filter>
+
+    <!-- ФИЛЬТР №2: Изолированный блок для приема текста и картинок извне -->
+    <intent-filter>
+        <action android:name="android.intent.action.SEND" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <data android:mimeType="text/plain" />
+        <data android:mimeType="image/*" />
+    </intent-filter>
+
+    <!-- ФИЛЬТР №3: Для оплаты RuStore Pay -->
+    <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:scheme="rustorepayflashlight" />
+    </intent-filter>
+</activity>
+
+        <!-- <activity
             android:launchMode="singleTask"
             android:name="presentation.MainActivity"
             android:exported="true"
@@ -81,7 +110,8 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="rustorepayflashlight" />
             </intent-filter>
-        </activity>
+        </activity> -->
+        
     </application>
 
 </manifest>
