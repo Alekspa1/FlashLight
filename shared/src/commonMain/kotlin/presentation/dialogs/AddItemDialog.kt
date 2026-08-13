@@ -112,6 +112,12 @@ fun AddOrChangeItemDialog(
     val listSubTask = remember { mutableStateListOf<SubItem>() }
     var editingSubTaskId by remember { mutableIntStateOf(-1) }
     var errorMessage by remember {mutableStateOf(false)}
+    
+    LaunchedEffect(item) {
+    if (item != null && item.id == 0 && item.uri.isNotEmpty() && originalFileName.isEmpty()) {
+        originalFileName = "img_shared_${Clock.System.now().toEpochMilliseconds()}.jpg"
+        }
+    }
     LaunchedEffect(listSubItems) {
         listSubTask.clear()
         listSubTask.addAll(listSubItems)
