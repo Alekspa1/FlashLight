@@ -192,36 +192,75 @@ fun PremiumScreen(
 
             // 3. НИЖНЯЯ КНОПКА (Вынесена за пределы скролла, всегда на экране)
             Button(
-                onClick = { if(listProduct.isNotEmpty()) onClickBuy(isSelected) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 10.dp, horizontal = 16.dp)
-                    .border(
-                        width = 2.dp,
-                        color = theme.tintPremiumOn,
-                        shape = RoundedCornerShape(12.dp)
-                    ),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = theme.cardMenuItem,
-                    contentColor = theme.tintPremiumOn
-                ),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
-            ) {
-                Text(
-                    text = if(listProduct.isNotEmpty())"Оформить PREMIUM"
-                    else "Оплата временно недоступна",
-                    fontSize = size.textMenu,
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.ExtraBold,
-                    style = LocalTextStyle.current.copy(
-                        shadow = Shadow(
-                            color = theme.tintPremiumOn.copy(alpha = 0.5f),
-                            blurRadius = 8f
-                        )
-                    )
+    // Напрямую проверяем список на пустоту
+    enabled = listProduct.isNotEmpty(), 
+    onClick = { onClickBuy(isSelected) }, 
+    modifier = Modifier
+        .fillMaxWidth()
+        .padding(vertical = 10.dp, horizontal = 16.dp)
+        .border(
+            width = 2.dp,
+            // Красим рамку в зависимости от состояния списка
+            color = if (listProduct.isNotEmpty()) theme.tintPremiumOn else theme.tintPremiumOff.copy(alpha = 0.3f),
+            shape = RoundedCornerShape(12.dp)
+        ),
+    shape = RoundedCornerShape(12.dp),
+    colors = ButtonDefaults.buttonColors(
+        containerColor = theme.cardMenuItem,
+        contentColor = theme.tintPremiumOn,
+        // Задаем гаснущие неоновые цвета для disabled-состояния
+        disabledContainerColor = theme.cardMenuItem.copy(alpha = 0.2f), 
+        disabledContentColor = theme.textDesc 
+    ),
+    elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+) {
+    Text(
+        text = if (listProduct.isNotEmpty()) "Оформить PREMIUM" else "Оплата временно недоступна",
+        fontSize = size.textMenu,
+        textAlign = TextAlign.Center,
+        fontWeight = FontWeight.ExtraBold,
+        style = LocalTextStyle.current.copy(
+            // Неоновая тень гаснет, если список пуст
+            shadow = if (listProduct.isNotEmpty()) {
+                Shadow(
+                    color = theme.tintPremiumOn.copy(alpha = 0.5f),
+                    blurRadius = 8f
                 )
-            }
+            } else null
+        )
+    )
+}
+            // Button(
+            //     onClick = { if(listProduct.isNotEmpty()) onClickBuy(isSelected) },
+            //     modifier = Modifier
+            //         .fillMaxWidth()
+            //         .padding(vertical = 10.dp, horizontal = 16.dp)
+            //         .border(
+            //             width = 2.dp,
+            //             color = theme.tintPremiumOn,
+            //             shape = RoundedCornerShape(12.dp)
+            //         ),
+            //     shape = RoundedCornerShape(12.dp),
+            //     colors = ButtonDefaults.buttonColors(
+            //         containerColor = theme.cardMenuItem,
+            //         contentColor = theme.tintPremiumOn
+            //     ),
+            //     elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+            // ) {
+            //     Text(
+            //         text = if(listProduct.isNotEmpty())"Оформить PREMIUM"
+            //         else "Оплата временно недоступна",
+            //         fontSize = size.textMenu,
+            //         textAlign = TextAlign.Center,
+            //         fontWeight = FontWeight.ExtraBold,
+            //         style = LocalTextStyle.current.copy(
+            //             shadow = Shadow(
+            //                 color = theme.tintPremiumOn.copy(alpha = 0.5f),
+            //                 blurRadius = 8f
+            //             )
+            //         )
+            //     )
+            // }
         }
     }
 
