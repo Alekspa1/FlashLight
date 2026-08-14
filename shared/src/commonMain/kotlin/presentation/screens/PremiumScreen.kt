@@ -54,7 +54,8 @@ import presentation.theme.Size
 import presentation.theme.SizeNormal
 import presentation.theme.Theme
 import presentation.theme.ThemeNeon
-
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.LocalTextStyle
 @Composable
 fun PremiumScreen(
     size: Size = SizeNormal(),
