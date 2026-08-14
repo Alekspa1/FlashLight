@@ -3,6 +3,7 @@ package data
 import MainViewModel
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import data.perository.AlarmRepeadImp
+import data.perository.KmpBackupManager
 import data.perository.SaveDeleteImageImpl
 import data.room.myDataBase
 import domain.repostirory.AlarmRepeadRepository
@@ -108,7 +109,7 @@ val appModule = module {
     single<AlarmRepeadRepository> { AlarmRepeadImp(get(),get()) }
     factory<SaveDeleteImageRepositpry> { SaveDeleteImageImpl(get()) }
     single<TelegramSyncServiceRepository>{TelegramSyncServiceImpl(get()) } 
-
+    single { KmpBackupManager(get(), get(), get(), get()) }
 
 }
 
