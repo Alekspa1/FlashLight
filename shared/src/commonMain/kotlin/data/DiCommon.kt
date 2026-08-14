@@ -112,7 +112,7 @@ val appModule = module {
     single { 
     KmpBackupManager(
         db = get(), 
-        settings = get(named("settings")), // Явно указываем имя ваших настроек!
+        settings = get(named("noteBook")), // Явно указываем имя ваших настроек!
         pathProvider = get(), 
         backupContext = get()
     ) 
