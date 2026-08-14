@@ -92,6 +92,24 @@ fun SettingsScreen(
     val listSound by viewModel.soundState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
+     val isLoading by viewModel.isLoading.collectAsState()
+
+    // 1. ЛАУНЧЕР ДЛЯ ЭКСПОРТА (вызывает окно "Сохранить как...")
+    val exportLauncher = rememberFileSaverLauncher { platformFile ->
+        platformFile?.let {
+            viewModel.doExport(it)
+        }
+    }
+
+    // 2. ЛАУНЧЕР ДЛЯ ИМПОРТА (вызывает окно "Выберите ZIP-файл...")
+    val importLauncher = rememberFilePickerLauncher(
+        type = PickerType.File(extensions = listOf("zip"))
+    ) { platformFile ->
+        platformFile?.let {
+            viewModel.doImport(it)
+        }
+    }
+
     LaunchedEffect(Unit) {
         viewModel.toast.collect { message ->
             snackbarHostState.showSnackbar(message)
@@ -309,7 +327,10 @@ fun SettingsScreen(
                         theme.cardMenuItem,
                         theme.borderCardMenuItem
                     ) {
-                        //viewModel.saveDatabase() // Пример вызова во ViewModel
+                     exportLauncher.launch(
+                    baseName = "backup_data", // Имя файла по умолчанию
+                    extension = "zip"         // Расширение
+                )
                     }
                     SettingItem(
                         "Загрузить базу данных",
@@ -318,7 +339,7 @@ fun SettingsScreen(
                         theme.cardMenuItem,
                         theme.borderCardMenuItem
                     ) {
-                        // viewModel.loadDatabase()
+                        importLauncher.launch()
                     }
 
                     Spacer(modifier = Modifier.height(24.dp))
