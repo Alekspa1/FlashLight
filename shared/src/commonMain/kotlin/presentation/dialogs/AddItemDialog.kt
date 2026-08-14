@@ -111,7 +111,8 @@ fun AddOrChangeItemDialog(
     var originalFileName by remember { mutableStateOf("") }
     var categorySelected by remember { mutableStateOf(item?.category ?: if(calendar) "Повседневные" else category) }
     val listSubTask = remember { mutableStateListOf<SubItem>() }
-    var editingSubTaskId by remember { mutableIntStateOf(-1) }
+  // var editingSubTaskId by remember { mutableIntStateOf(-1) }
+    var editingSubTaskId by remember { mutableStateOf<Int?>(null) } 
     var errorMessage by remember {mutableStateOf(false)}
     
     LaunchedEffect(item) {
@@ -294,10 +295,10 @@ fun AddOrChangeItemDialog(
         // 2. Список подзадач с разделителями
         Column(modifier = Modifier.fillMaxWidth()) {
             listSubTask.forEachIndexed { index, subTask ->
-                val isEditing = if (subTask.id != 0) {
-                    editingSubTaskId == subTask.id
-                } else {
-                editingSubTaskId == -(index + 1)
+            val isEditing = when {
+                editingSubTaskId == null -> false // Если null — никто не редактируется
+            subTask.id != 0 -> editingSubTaskId == subTask.id
+            else -> editingSubTaskId == -(index + 1)
                 }
 
                 Row(
@@ -313,10 +314,11 @@ fun AddOrChangeItemDialog(
                             textStyle = LocalTextStyle.current.copy(color = theme.textColor, fontSize = 15.sp),
                             modifier = Modifier
                                 .weight(1f)
-                                 .border(1.dp, theme.borderCardMenuItem, RoundedCornerShape(4.dp))
                                 .padding(8.dp)
+                                .border(1.dp, theme.textColor.copy(alpha = 0.15f), RoundedCornerShape(4.dp))
+                                
                         )
-                        IconButton(onClick = { editingSubTaskId = -1 }, modifier = Modifier.size(24.dp)) {
+                        IconButton(onClick = { editingSubTaskId = null }, modifier = Modifier.size(24.dp)) {
                             Icon(Icons.Default.Check, contentDescription = "ОК", tint = theme.cardItemBorderTrue)
                         }
                     } else {
