@@ -111,7 +111,7 @@ class MainViewModel(
         isUpdateApp()
         loadProduct()
         isCheckPremiumWithBuy()
-       // startTelegramRealtimeListener()
+        startTelegramRealtimeListener()
     }
 
 private val _sharedIntentEvent = Channel<Pair<String?, String?>>(Channel.BUFFERED)
