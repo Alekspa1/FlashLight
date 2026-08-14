@@ -40,6 +40,7 @@ import io.ktor.client.network.sockets.SocketTimeoutException
 import domain.repostirory.TelegramSyncServiceRepository
 import data.perository.TelegramSyncServiceImpl
 import org.koin.core.module.dsl.singleOf
+import domain.repostirory.PlatformBackupContextRepository
 
 expect val moduleAnotherPlatform: Module
 
@@ -110,12 +111,14 @@ val appModule = module {
     factory<SaveDeleteImageRepositpry> { SaveDeleteImageImpl(get()) }
     single<TelegramSyncServiceRepository>{TelegramSyncServiceImpl(get()) } 
     single { 
+single { 
     KmpBackupManager(
         db = get(), 
-        settings = get(named("noteBook")), // Явно указываем имя ваших настроек!
+        settings = get(named("noteBook")), 
         pathProvider = get(), 
-        backupContext = get()
+        backupContext = get<PlatformBackupContextRepository>() // ЯВНО УКАЗАЛИ ТИП В ТРЕУГОЛЬНЫХ СКОБКАХ!
     ) 
+} 
     }
 
 }
