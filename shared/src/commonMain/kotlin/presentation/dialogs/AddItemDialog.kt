@@ -316,6 +316,7 @@ fun AddOrChangeItemDialog(
                                 .weight(1f)
                                 .padding(8.dp)
                                 .border(1.dp, theme.textColor.copy(alpha = 0.15f), RoundedCornerShape(4.dp))
+                                .padding(8.dp)
                                 
                         )
                         IconButton(onClick = { editingSubTaskId = null }, modifier = Modifier.size(24.dp)) {
