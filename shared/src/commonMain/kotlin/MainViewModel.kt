@@ -65,6 +65,8 @@ import kotlinx.coroutines.flow.shareIn
 
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
+import data.perository.KmpBackupManager
+import io.github.vinceglb.filekit.core.PlatformFile
 
 class MainViewModel(
     private val pref: SharedPrefRepository,
@@ -76,7 +78,8 @@ class MainViewModel(
     private val image: SaveDeleteImageRepositpry,
     private val platform : GetPlatrormRepository,
     private val paySdk : PaySdkRepository,
-    private val telegramSync : TelegramSyncServiceRepository
+    private val telegramSync : TelegramSyncServiceRepository,
+    private val backUpManager : KmpBackupManager,
 
 ) : ViewModel() {
 
@@ -179,6 +182,47 @@ fun openDialogByTaskId(taskId: Int) {
             }
         }
     }
+
+      // Состояние для отображения ProgressBar (true — показываем, false — скрываем)
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    // Метод для запуска ЭКСПОРТА
+    fun doExport(platformFile: PlatformFile) {
+        viewModelScope.launch(Dispatchers.Default) {
+            _isLoading.value = true
+            
+            val isSuccess = backUpManager.exportDatabase(platformFile)
+            
+            _isLoading.value = false
+            
+            if (isSuccess) {
+                // Здесь можно отправить событие в UI (например, показать Toast "Успешно экспортировано")
+            } else {
+                // Показать ошибку "Не удалось сохранить бэкап"
+            }
+        }
+    }
+
+    // Метод для запуска ИМПОРТА
+    fun doImport(platformFile: PlatformFile) {
+        viewModelScope.launch(Dispatchers.Default) {
+            _isLoading.value = true
+            
+            val isSuccess = backUpManager.importDatabase(platformFile)
+            
+            _isLoading.value = false
+            
+            if (isSuccess) {
+                // ДАННЫЕ УСПЕШНО ВОССТАНОВЛЕНЫ!
+                // Чтобы UI мгновенно подтянул новые картинки и настройки,
+                // рекомендуется сделать сброс стейта или перезапустить текущий экран (сбросить навигацию).
+            } else {
+                // Показать ошибку "Не удалось прочитать файл"
+            }
+        }
+    }
+}
 
      private fun loadSounds() {
         viewModelScope.launch(Dispatchers.IO) {
