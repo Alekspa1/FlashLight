@@ -70,6 +70,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.material3.HorizontalDivider
 
 // Для инлайнового текстового поля и стилей (BasicTextField, LocalTextStyle)
 import androidx.compose.foundation.text.BasicTextField
@@ -176,6 +177,11 @@ fun AddOrChangeItemDialog(
                     shape = RoundedCornerShape(10.dp),
                     label = { Text("Описание") },
                 )
+                    HorizontalDivider(
+                    thickness = 1.dp,
+                    color = theme.textColor.copy(alpha = 0.15f),
+                    modifier = Modifier.padding(top = 6.dp)
+                        )
 
                Column(
     modifier = Modifier
@@ -345,6 +351,11 @@ fun AddOrChangeItemDialog(
 }
     }
 }
+                                       HorizontalDivider(
+                            thickness = 1.dp,
+                        color = theme.textColor.copy(alpha = 0.15f),
+                        modifier = Modifier.padding(top = 6.dp)
+                        )
 
 
                 KmpSpinnerInput(
@@ -401,6 +412,11 @@ fun AddOrChangeItemDialog(
                         }
                     }
                 }
+                                        HorizontalDivider(
+                            thickness = 1.dp,
+                        color = theme.textColor.copy(alpha = 0.15f),
+                        modifier = Modifier.padding(top = 6.dp)
+                        )
                 
             }
         },
@@ -462,26 +478,56 @@ fun KmpSpinnerInput(
         ) {
 
             TextButton(
-                onClick = {expanded = !expanded },
+    onClick = { expanded = !expanded },
+) {
+    Row(
+        modifier = Modifier
+            .menuAnchor(MenuAnchorType.PrimaryNotEditable, true)
+            .padding(start = 16.dp), 
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.End
+    ) {
+        // Добавляем приглушенное пояснение
+        Text(
+            text = "Категория: ",
+            fontSize = 15.sp,
+            color = theme.textDesc // Твой серый цвет из темы
+        )
+        
+        // Само название категории остается ярким
+        Text(
+            text = selectedCategory,
+            fontSize = 15.sp,
+            color = theme.textColor, // Твой белый/основной цвет
+            fontWeight = FontWeight.Bold, // Сделаем чуть жирнее для акцента
+            modifier = Modifier.padding(end = 8.dp)
+        )
+        
+        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+    }
+}
 
-                ) {
-                Row(
-                    modifier = Modifier
-                        .menuAnchor(MenuAnchorType.PrimaryNotEditable, true)
-                        .padding(start = 16.dp), // Отступ только слева, чтобы не зажимать клик
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    Text(
-                        text = selectedCategory,
+            // TextButton(
+            //     onClick = {expanded = !expanded },
 
-                        fontSize = 15.sp,
-                        modifier = Modifier.padding(end = 8.dp)
-                    )
-                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-                }
+            //     ) {
+            //     Row(
+            //         modifier = Modifier
+            //             .menuAnchor(MenuAnchorType.PrimaryNotEditable, true)
+            //             .padding(start = 16.dp), // Отступ только слева, чтобы не зажимать клик
+            //         verticalAlignment = Alignment.CenterVertically,
+            //         horizontalArrangement = Arrangement.End
+            //     ) {
+            //         Text(
+            //             text = selectedCategory,
 
-            }
+            //             fontSize = 15.sp,
+            //             modifier = Modifier.padding(end = 8.dp)
+            //         )
+            //         ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+            //     }
+
+            // }
 
 
             ExposedDropdownMenu(
