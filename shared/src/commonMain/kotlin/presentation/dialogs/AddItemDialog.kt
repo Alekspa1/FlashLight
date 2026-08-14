@@ -341,7 +341,7 @@ fun AddOrChangeItemDialog(
                 if (index < listSubTask.lastIndex) {
                     HorizontalDivider(
                         thickness = 0.5.dp,
-                        color = theme.borderCardMenuItem.copy(alpha = 0.3f) // Полупрозрачная линия
+                        theme.textColor.copy(alpha = 0.15f),
                     )
                 }
             }
@@ -350,11 +350,11 @@ fun AddOrChangeItemDialog(
 }
     }
 }
-                                       HorizontalDivider(
-                            thickness = 1.dp,
-                        color = theme.textColor.copy(alpha = 0.15f),
-                        modifier = Modifier.padding(top = 6.dp)
-                        )
+HorizontalDivider(
+    thickness = 1.dp,
+    color = theme.textColor.copy(alpha = 0.15f),
+    modifier = Modifier.padding(horizontal = 16.dp) // Исправили 's' на 'z'
+)
 
 
                 KmpSpinnerInput(
@@ -364,11 +364,11 @@ fun AddOrChangeItemDialog(
                     onCategorySelected = { categorySelected = it }
                 )
                 
-                                    HorizontalDivider(
-                    thickness = 1.dp,
-                    color = theme.textColor.copy(alpha = 0.15f),
-                    modifier = Modifier.padding(top = 6.dp)
-                        )
+HorizontalDivider(
+    thickness = 1.dp,
+    color = theme.textColor.copy(alpha = 0.15f),
+    modifier = Modifier.padding(horizontal = 16.dp) // Исправили 's' на 'z'
+)
 
                 // Блок работы с фото
                 Row(
@@ -417,11 +417,11 @@ fun AddOrChangeItemDialog(
                         }
                     }
                 }
-                                        HorizontalDivider(
-                            thickness = 1.dp,
-                        color = theme.textColor.copy(alpha = 0.15f),
-                        modifier = Modifier.padding(top = 6.dp)
-                        )
+HorizontalDivider(
+    thickness = 1.dp,
+    color = theme.textColor.copy(alpha = 0.15f),
+    modifier = Modifier.padding(horizontal = 16.dp) // Исправили 's' на 'z'
+)
                 
             }
         },
