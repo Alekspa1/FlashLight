@@ -231,7 +231,7 @@ fun AddOrChangeItemDialog(
        Column(
     modifier = Modifier
         .fillMaxWidth()
-        .padding(start = 16.dp, end = 16.dp, bottom = 16.dp) // Даем отступы от внешних краев
+        .padding(start = 16.dp, end = 16.dp) // Даем отступы от внешних краев
 ) {
            if(errorMessage){
                Text(
@@ -321,7 +321,7 @@ fun AddOrChangeItemDialog(
                             textStyle = LocalTextStyle.current.copy(color = theme.textColor, fontSize = 15.sp),
                             modifier = Modifier
                                 .weight(1f)
-                                .padding(8.dp)
+                               // .padding(8.dp)
                                 .border(1.dp, theme.textColor.copy(alpha = 0.15f), RoundedCornerShape(4.dp))
                                 .padding(horizontal = 8.dp)
                                 
