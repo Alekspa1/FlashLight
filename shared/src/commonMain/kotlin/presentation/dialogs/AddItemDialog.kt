@@ -507,7 +507,6 @@ fun KmpSpinnerInput(
             text = selectedCategory,
             fontSize = 15.sp,
             color = theme.textColor, // Твой белый/основной цвет
-            fontWeight = FontWeight.Bold, // Сделаем чуть жирнее для акцента
             modifier = Modifier.padding(end = 8.dp)
         )
         
