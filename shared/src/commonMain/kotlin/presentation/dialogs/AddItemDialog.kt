@@ -207,13 +207,13 @@ fun AddOrChangeItemDialog(
         ) {
 
                     Text(
-            text = if(!isExpanded)"Раскрыть " else "Скрыть",
+            text = if(!isExpanded)"Раскрыть " else "Скрыть ",
             fontSize = 15.sp,
             color = theme.textDesc // Твой серый цвет из темы
         )
                     
                 Text(
-                    text = "Подзадачи",
+                    text = "подзадачи",
                     fontSize = 15.sp,
                     color = theme.textColor,
                     modifier = Modifier.padding(end = 8.dp)
