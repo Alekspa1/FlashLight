@@ -65,6 +65,17 @@ fun PremiumScreen(
     innerPadding : PaddingValues = PaddingValues()
     ){
     var isSelected by remember { mutableStateOf(ONE_YEAR) }
+    val premiumFeatures = remember {
+    listOf(
+        "Отключение рекламы",
+        "Пользовательская сортировка",
+        "Отображение дел в календаре",
+        "Повторяющиеся напоминания",
+        "Создание своих списков дел",
+        "Поддержка разработчика",
+        "Создание подзадач"
+    )
+    }
 
 
 
@@ -132,13 +143,18 @@ fun PremiumScreen(
                             .padding(8.dp),
                         verticalArrangement = Arrangement.spacedBy(5.dp)
                     ) {
-                        PremiumItem(text = "Отключение рекламы", theme = theme, size = size)
-                        PremiumItem("Пользовательская сортировка", theme, size)
-                        PremiumItem("Отображение дел в календаре", theme, size)
-                        PremiumItem("Повторяющиеся напоминания", theme, size)
-                        PremiumItem("Создание своих списков дел", theme, size)
-                        PremiumItem("Поддержка разработчика", theme, size)
-                        PremiumItem("Создание подзадач", theme, size)
+                        premiumFeatures.forEachIndexed { index, feature ->
+                        PremiumItem(text = feature, theme = theme, size = size)
+    
+                    // Рисуем разделитель для всех элементов, кроме самого последнего
+                        if (index < premiumFeatures.lastIndex) {
+                        HorizontalDivider(
+                            thickness = 1.dp,
+                        color = theme.textColor.copy(alpha = 0.15f),
+                        modifier = Modifier.padding(top = 6.dp)
+                        )
+                        }
+                        }
                     }
                 }
 
