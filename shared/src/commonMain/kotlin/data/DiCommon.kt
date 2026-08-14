@@ -109,7 +109,14 @@ val appModule = module {
     single<AlarmRepeadRepository> { AlarmRepeadImp(get(),get()) }
     factory<SaveDeleteImageRepositpry> { SaveDeleteImageImpl(get()) }
     single<TelegramSyncServiceRepository>{TelegramSyncServiceImpl(get()) } 
-    single { KmpBackupManager(get(), get(), get(), get()) }
+    single { 
+    KmpBackupManager(
+        db = get(), 
+        settings = get(named("settings")), // Явно указываем имя ваших настроек!
+        pathProvider = get(), 
+        backupContext = get()
+    ) 
+    }
 
 }
 
