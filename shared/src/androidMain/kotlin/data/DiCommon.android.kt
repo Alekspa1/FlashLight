@@ -15,6 +15,7 @@ import data.repostitory.AndroidPathProviderImp
 import data.repostitory.AndroidPaySdkImpl
 import data.repostitory.AndroidPermissionImpl
 import data.repostitory.AndroidSaveDeleteImpl
+import data.repostitory.AndroidBackupContextImpl
 import data.repostitory.AndroidSoundPlayer
 import data.room.myDataBase
 import domain.repostirory.AlarmRepository
@@ -24,6 +25,7 @@ import domain.repostirory.PaySdkRepository
 import domain.repostirory.PermissionRepository
 import domain.repostirory.SaveDeleteImageRepositpry
 import domain.repostirory.SettingsAppRepository
+import domain.repostirory.PlatformBackupContextRepository
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.qualifier.named
 import org.koin.dsl.bind
@@ -86,5 +88,5 @@ actual val moduleAnotherPlatform = module {
     factory<GetPlatrormRepository> { AndroidGetPlatrormImp(get(),get()) }
     factory<AndroidSoundPlayer> { AndroidSoundPlayer(get()) }
     factory<PaySdkRepository> { AndroidPaySdkImpl (get(),get()) }
-
+    single<PlatformBackupContextRepository> { AndroidBackupContextImpl(get()) }
 }
