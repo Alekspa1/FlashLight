@@ -79,7 +79,7 @@ class MainViewModel(
     private val platform : GetPlatrormRepository,
     private val paySdk : PaySdkRepository,
     private val telegramSync : TelegramSyncServiceRepository,
-   // private val backUpManager : KmpBackupManager,
+   private val backUpManager : KmpBackupManager,
 
 ) : ViewModel() {
 
