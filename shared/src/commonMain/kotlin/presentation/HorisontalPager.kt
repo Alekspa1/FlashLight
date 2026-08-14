@@ -331,69 +331,63 @@ fun MainPager(paddingValues: PaddingValues = PaddingValues(),
                         onAddItem = {viewModel.showDialog = DialogState(INSERT_DIALOG_ITEM)})
                 }
                 2 -> {
-                    if (premium.value) {
-                        Calendar(
-                            viewModel,
-                            onClick = { item, action ->
-                                when (action) {
-                                    ALARM -> {
-                                        viewModel.permission(NOTIFICATION, item)
-                                    }
-
-                                    ALARM_LONG -> {
-                                        viewModel.insertAlarmRepeat(item)
-                                    }
-
-                                    IMAGE -> {
-                                        openImageState = true
-                                        selectedFileUri = viewModel.getUri(item.uri)
-                                    }
-
-                                    CHANGE_ITEM -> {
-                                        viewModel.showDialog = DialogState(INSERT_DIALOG_ITEM, item)
-                                    }
-
-                                    CHANGE -> {
-                                        val newItem = item.copy(
-                                            change = !item.change,
-                                            changeAlarm = false
-                                        )
-                                        viewModel.updateItem(newItem, calendar = true)
-                                        if (item.changeAlarm) {
-                                            viewModel.deleteAlarm(item.id)
-                                            viewModel.deleteAlarm(item.id * -1)
-                                        }
-                                    }
-
-                                    DELETE -> {
-                                        if (item.change) viewModel.deleteItem(item)
-                                        else viewModel.showDialog =
-                                            DialogState(DELETE_DIALOG_ITEM, item)
-
-                                    }
-
-                                }
-                            },
-                              onClickSubItem = { subItem,action ->
-                               when(action){
-                                   CHANGE_ITEM->{viewModel.updateSubItem(subItem.copy(change = !subItem.change)) }
-                                  DELETE->{ viewModel.deleteSubItem(subItem)}
-                                   
-                                 
-                               }
-                              
-                           },
-                              onSubDragDropped ={updatedList->
-    viewModel.updateSubItemsOrder(updatedList) 
-    
-                            onAddItem = { date ->
-                                viewModel.showDialog = DialogState(
-                                    INSERT_DIALOG_ITEM,
-                                    calendar = true,
-                                    date = date
-                                )
-                            }),
-                    }  else {
+if (premium.value) {
+    Calendar(
+        viewModel = viewModel,
+        onClick = { item, action ->
+            when (action) {
+                ALARM -> {
+                    viewModel.permission(NOTIFICATION, item)
+                }
+                ALARM_LONG -> {
+                    viewModel.insertAlarmRepeat(item)
+                }
+                IMAGE -> {
+                    openImageState = true
+                    selectedFileUri = viewModel.getUri(item.uri)
+                }
+                CHANGE_ITEM -> {
+                    viewModel.showDialog = DialogState(INSERT_DIALOG_ITEM, item)
+                }
+                CHANGE -> {
+                    val newItem = item.copy(
+                        change = !item.change,
+                        changeAlarm = false
+                    )
+                    viewModel.updateItem(newItem, calendar = true)
+                    if (item.changeAlarm) {
+                        viewModel.deleteAlarm(item.id)
+                        viewModel.deleteAlarm(item.id * -1)
+                    }
+                }
+                DELETE -> {
+                    if (item.change) viewModel.deleteItem(item)
+                    else viewModel.showDialog = DialogState(DELETE_DIALOG_ITEM, item)
+                }
+            }
+        },
+        onClickSubItem = { subItem, action ->
+            when (action) {
+                CHANGE_ITEM -> {
+                    viewModel.updateSubItem(subItem.copy(change = !subItem.change))
+                }
+                DELETE -> {
+                    viewModel.deleteSubItem(subItem)
+                }
+            }
+        },
+        onSubDragDropped = { updatedList ->
+            viewModel.updateSubItemsOrder(updatedList)
+        }, // Тут закрыли фигурную скобку лямбды и поставили запятую
+        onAddItem = { date ->
+            viewModel.showDialog = DialogState(
+                INSERT_DIALOG_ITEM,
+                calendar = true,
+                date = date
+            )
+        }
+    ) // Тут закрыли круглую скобку вызова Calendar
+}  else {
                         // Проверяем, что pagerState совпадает с текущим индексом страницы
                         val isVisible = pagerState.currentPage == pageIndex
 
