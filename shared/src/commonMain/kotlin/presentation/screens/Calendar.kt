@@ -69,20 +69,33 @@ import kotlin.time.Instant
 @Composable
 fun Calendar(
     viewModel: MainViewModel,
+    onClickSubItem: (SubItem, Int) -> Unit = { _, _ -> },
+    onSubDragDropped: (List<SubItem>) -> Unit = {},
     onClick : (Item, Int) -> Unit = {_,_->},
     onAddItem : (Long) -> Unit = {}){
 
 
     val listItems by viewModel.getCalendarWithSubItemsCombine.collectAsStateWithLifecycle(emptyList())
-    
-    CalendarContent(
+
+        CalendarContent(
         listItems = listItems,
         selectedFileUri = {uri-> viewModel.getUri(uri)},
         theme = viewModel.themeState,
         size = viewModel.sizeState,
-        onClick = onClick,
+        onSubDragDropped = {listSubItems->onSubDragDropped(listSubItems) },
+        onClick = {item, action -> onClick(item, action)},
+        onClickSubItem = {subItem,action -> onClickSubItem(subItem,action)}
         onAddItem = onAddItem,
         message = {message-> viewModel.sendMessage(message) })
+    
+    // CalendarContent(
+    //     listItems = listItems,
+    //     selectedFileUri = {uri-> viewModel.getUri(uri)},
+    //     theme = viewModel.themeState,
+    //     size = viewModel.sizeState,
+    //     onClick = onClick,
+    //     onAddItem = onAddItem,
+    //     message = {message-> viewModel.sendMessage(message) })
 
 }
 
@@ -94,6 +107,8 @@ fun CalendarContent(
     theme: Theme = ThemeNeon(),
     size : Size = SizeNormal(),
     onClick : (Item, Int) -> Unit = {_,_->},
+    onClickSubItem: (SubItem, Int) -> Unit = { _, _ -> },
+    onSubDragDropped: (List<SubItem>) -> Unit = {},
     onAddItem : (Long) -> Unit = {},
     message : (String) -> Unit = {} ) {
 
@@ -238,14 +253,30 @@ fun CalendarContent(
                 }
             } else items(selectedDateTasks) { item ->
 
-
+                
                     CardItem(
                         item = item.item,
                         listSubItems = item.subItems,
                         selectedFileUri = selectedFileUri(item.item.uri),
                         theme = theme, 
-                        size = size, 
-                        onClick = onClick)
+                        size = size,
+                        onSubDragDropped = {listSubItems->onSubDragDropped(listSubItems) },
+                        onClick = {item, action -> onClick(item, action)},
+                        onClickSubItem = {subItem,action -> onClickSubItem(subItem,action)}
+                    )
+
+
+                    // CardItem(
+                    //     item = item.item,
+                    //     listSubItems = item.subItems,
+                    //     selectedFileUri = selectedFileUri(item.item.uri),
+                    //     theme = theme, 
+                    //     size = size,
+                    //     onSubDragDropped = {listSubItems->onSubDragDropped(listSubItems) },
+                    //     onClick = onClick,
+                    //     onClickSubItem = onClickSubItem
+                    // )
+                         
             }
 
 
