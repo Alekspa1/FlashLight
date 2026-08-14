@@ -373,13 +373,25 @@ fun MainPager(paddingValues: PaddingValues = PaddingValues(),
 
                                 }
                             },
+                              onClickSubItem = { subItem,action ->
+                               when(action){
+                                   CHANGE_ITEM->{viewModel.updateSubItem(subItem.copy(change = !subItem.change)) }
+                                  DELETE->{ viewModel.deleteSubItem(subItem)}
+                                   
+                                 
+                               }
+                              
+                           },
+                              onSubDragDropped ={updatedList->
+    viewModel.updateSubItemsOrder(updatedList) 
+    
                             onAddItem = { date ->
                                 viewModel.showDialog = DialogState(
                                     INSERT_DIALOG_ITEM,
                                     calendar = true,
                                     date = date
                                 )
-                            })
+                            }),
                     }  else {
                         // Проверяем, что pagerState совпадает с текущим индексом страницы
                         val isVisible = pagerState.currentPage == pageIndex
