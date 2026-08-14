@@ -16,7 +16,7 @@ class KmpBackupManager(
     private val db: RoomDatabase,
     private val settings: Settings, // Сюда мы передадим именно те настройки, которые "TABLE"
     private val pathProvider: PathProviderRepostitory,
-    private val backupContext: PlatformBackupContext,
+    private val backupContext: PlatformBackupContextRepository,
     private val fileSystem: FileSystem = FileSystem.SYSTEM
 ) {
     private val databaseName = "db"
