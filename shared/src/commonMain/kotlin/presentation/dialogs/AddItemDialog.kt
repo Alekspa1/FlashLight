@@ -341,7 +341,7 @@ fun AddOrChangeItemDialog(
                 if (index < listSubTask.lastIndex) {
                     HorizontalDivider(
                         thickness = 0.5.dp,
-                        theme.textColor.copy(alpha = 0.15f),
+                        color = theme.textColor.copy(alpha = 0.15f),
                     )
                 }
             }
