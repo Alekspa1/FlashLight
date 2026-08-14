@@ -79,7 +79,7 @@ class MainViewModel(
     private val platform : GetPlatrormRepository,
     private val paySdk : PaySdkRepository,
     private val telegramSync : TelegramSyncServiceRepository,
-    private val backUpManager : KmpBackupManager,
+   // private val backUpManager : KmpBackupManager,
 
 ) : ViewModel() {
 
@@ -189,38 +189,38 @@ fun openDialogByTaskId(taskId: Int) {
 
     // Метод для запуска ЭКСПОРТА
     fun doExport(platformFile: PlatformFile) {
-        viewModelScope.launch(Dispatchers.Default) {
-            _isLoading.value = true
+        // viewModelScope.launch(Dispatchers.Default) {
+        //     _isLoading.value = true
             
-            val isSuccess = backUpManager.exportDatabase(platformFile)
+        //     val isSuccess = backUpManager.exportDatabase(platformFile)
             
-            _isLoading.value = false
+        //     _isLoading.value = false
             
-            if (isSuccess) {
-                // Здесь можно отправить событие в UI (например, показать Toast "Успешно экспортировано")
-            } else {
-                // Показать ошибку "Не удалось сохранить бэкап"
-            }
-        }
+        //     if (isSuccess) {
+        //         // Здесь можно отправить событие в UI (например, показать Toast "Успешно экспортировано")
+        //     } else {
+        //         // Показать ошибку "Не удалось сохранить бэкап"
+        //     }
+        // }
     }
 
     // Метод для запуска ИМПОРТА
     fun doImport(platformFile: PlatformFile) {
-        viewModelScope.launch(Dispatchers.Default) {
-            _isLoading.value = true
+        // viewModelScope.launch(Dispatchers.Default) {
+        //     _isLoading.value = true
             
-            val isSuccess = backUpManager.importDatabase(platformFile)
+        //     val isSuccess = backUpManager.importDatabase(platformFile)
             
-            _isLoading.value = false
+        //     _isLoading.value = false
             
-            if (isSuccess) {
-                // ДАННЫЕ УСПЕШНО ВОССТАНОВЛЕНЫ!
-                // Чтобы UI мгновенно подтянул новые картинки и настройки,
-                // рекомендуется сделать сброс стейта или перезапустить текущий экран (сбросить навигацию).
-            } else {
-                // Показать ошибку "Не удалось прочитать файл"
-            }
-        }
+        //     if (isSuccess) {
+        //         // ДАННЫЕ УСПЕШНО ВОССТАНОВЛЕНЫ!
+        //         // Чтобы UI мгновенно подтянул новые картинки и настройки,
+        //         // рекомендуется сделать сброс стейта или перезапустить текущий экран (сбросить навигацию).
+        //     } else {
+        //         // Показать ошибку "Не удалось прочитать файл"
+        //     }
+        // }
     }
 
 
