@@ -177,11 +177,7 @@ fun AddOrChangeItemDialog(
                     shape = RoundedCornerShape(10.dp),
                     label = { Text("Описание") },
                 )
-                    HorizontalDivider(
-                    thickness = 1.dp,
-                    color = theme.textColor.copy(alpha = 0.15f),
-                    modifier = Modifier.padding(top = 6.dp)
-                        )
+
 
                Column(
     modifier = Modifier
@@ -298,8 +294,11 @@ fun AddOrChangeItemDialog(
         // 2. Список подзадач с разделителями
         Column(modifier = Modifier.fillMaxWidth()) {
             listSubTask.forEachIndexed { index, subTask ->
-                val isEditing = editingSubTaskId == subTask.id && subTask.id != 0 
-                        || (subTask.id == 0 && editingSubTaskId == index + 100000)
+                val isEditing = if (subTask.id != 0) {
+                    editingSubTaskId == subTask.id
+                } else {
+                editingSubTaskId == -(index + 1)
+                }
 
                 Row(
                     modifier = Modifier
@@ -314,11 +313,11 @@ fun AddOrChangeItemDialog(
                             textStyle = LocalTextStyle.current.copy(color = theme.textColor, fontSize = 15.sp),
                             modifier = Modifier
                                 .weight(1f)
-                                .border(1.dp, theme.tintPremiumOn, RoundedCornerShape(4.dp))
+                                 .border(1.dp, theme.borderCardMenuItem, RoundedCornerShape(4.dp))
                                 .padding(8.dp)
                         )
                         IconButton(onClick = { editingSubTaskId = -1 }, modifier = Modifier.size(24.dp)) {
-                            Icon(Icons.Default.Check, contentDescription = "ОК", tint = theme.tintPremiumOn)
+                            Icon(Icons.Default.Check, contentDescription = "ОК", tint = theme.cardItemBorderTrue)
                         }
                     } else {
                         Text(
@@ -327,7 +326,7 @@ fun AddOrChangeItemDialog(
                             fontSize = 15.sp,
                             modifier = Modifier
                                         .weight(1f)
-                                        .clickable { editingSubTaskId = if (subTask.id != 0) subTask.id else index + 100000 }
+                                        .clickable { editingSubTaskId = if (subTask.id != 0) subTask.id else -(index + 1) }
                         )
                         IconButton(onClick = {
                             listSubTask.remove(subTask)
@@ -364,6 +363,12 @@ fun AddOrChangeItemDialog(
                     theme = theme, // Передаем абстрактную тему дальше
                     onCategorySelected = { categorySelected = it }
                 )
+                
+                                    HorizontalDivider(
+                    thickness = 1.dp,
+                    color = theme.textColor.copy(alpha = 0.15f),
+                    modifier = Modifier.padding(top = 6.dp)
+                        )
 
                 // Блок работы с фото
                 Row(
