@@ -290,7 +290,7 @@ fun AddOrChangeItemDialog(
 
 
     if (listSubTask.isNotEmpty()) {
-        Spacer(modifier = Modifier.height(12.dp))
+        //Spacer(modifier = Modifier.height(12.dp))
 
         // 2. Список подзадач с разделителями
         Column(modifier = Modifier.fillMaxWidth()) {
@@ -316,7 +316,7 @@ fun AddOrChangeItemDialog(
                                 .weight(1f)
                                 .padding(8.dp)
                                 .border(1.dp, theme.textColor.copy(alpha = 0.15f), RoundedCornerShape(4.dp))
-                                .padding(8.dp)
+                                .padding(horizontal = 8.dp)
                                 
                         )
                         IconButton(onClick = { editingSubTaskId = null }, modifier = Modifier.size(24.dp)) {
