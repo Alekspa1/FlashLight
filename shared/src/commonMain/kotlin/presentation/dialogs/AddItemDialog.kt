@@ -205,6 +205,13 @@ fun AddOrChangeItemDialog(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.End
         ) {
+
+                    Text(
+            text = if(expanded)"Раскрыть " else "Скрыть",
+            fontSize = 15.sp,
+            color = theme.textDesc // Твой серый цвет из темы
+        )
+                    
                 Text(
                     text = "Подзадачи",
                     fontSize = 15.sp,
