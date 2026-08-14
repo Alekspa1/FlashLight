@@ -110,7 +110,7 @@ val appModule = module {
     single<AlarmRepeadRepository> { AlarmRepeadImp(get(),get()) }
     factory<SaveDeleteImageRepositpry> { SaveDeleteImageImpl(get()) }
     single<TelegramSyncServiceRepository>{TelegramSyncServiceImpl(get()) } 
-    single { 
+    
 single { 
     KmpBackupManager(
         db = get(), 
@@ -119,7 +119,7 @@ single {
         backupContext = get<PlatformBackupContextRepository>() // ЯВНО УКАЗАЛИ ТИП В ТРЕУГОЛЬНЫХ СКОБКАХ!
     ) 
 } 
-    }
+    
 
 }
 
