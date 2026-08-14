@@ -82,9 +82,9 @@ fun Calendar(
         selectedFileUri = {uri-> viewModel.getUri(uri)},
         theme = viewModel.themeState,
         size = viewModel.sizeState,
-        onSubDragDropped = {listSubItems->onSubDragDropped(listSubItems) },
-        onClick = {item, action -> onClick(item, action)},
-        onClickSubItem = {subItem,action -> onClickSubItem(subItem,action)}
+        onSubDragDropped = onSubDragDropped,
+        onClick = onClick,
+        onClickSubItem = onClickSubItem,
         onAddItem = onAddItem,
         message = {message-> viewModel.sendMessage(message) })
     
@@ -260,9 +260,9 @@ fun CalendarContent(
                         selectedFileUri = selectedFileUri(item.item.uri),
                         theme = theme, 
                         size = size,
-                        onSubDragDropped = {listSubItems->onSubDragDropped(listSubItems) },
-                        onClick = {item, action -> onClick(item, action)},
-                        onClickSubItem = {subItem,action -> onClickSubItem(subItem,action)}
+                        onSubDragDropped = onSubDragDropped,
+                        onClick = onClick,
+                        onClickSubItem = onClickSubItem,
                     )
 
 
