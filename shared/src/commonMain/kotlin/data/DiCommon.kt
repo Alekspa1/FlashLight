@@ -1,9 +1,12 @@
 package data
 
 import MainViewModel
+import androidx.room.Room
+import androidx.room.RoomDatabase
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import data.perository.AlarmRepeadImp
-import data.perository.KmpBackupManager
+import data.perository.DatabaseHolder
+
 import data.perository.SaveDeleteImageImpl
 import data.room.myDataBase
 import domain.repostirory.AlarmRepeadRepository
@@ -41,6 +44,7 @@ import domain.repostirory.TelegramSyncServiceRepository
 import data.perository.TelegramSyncServiceImpl
 import org.koin.core.module.dsl.singleOf
 import domain.repostirory.PlatformBackupContextRepository
+import org.koin.dsl.bind
 
 expect val moduleAnotherPlatform: Module
 
@@ -102,24 +106,24 @@ val appModule = module {
         }
     }
 
-    single { get<myDataBase>().CourseDao() }
-    
+    //single { get<myDataBase>().CourseDao() }
+
+    single<DatabaseHolder> {
+        DatabaseHolder(databaseBuilder = get<() -> myDataBase>())
+    }
+
+// 2. ИСПРАВЛЕНО: Базу запрашиваем через factory, чтобы Koin каждый раз брал её из холдера заново!
+    factory<myDataBase> { get<DatabaseHolder>().db } bind RoomDatabase::class
+
+// 3. ОБЯЗАТЕЛЬНО: Все ваши DAO тоже регистрируем как factory
+    factory { get<myDataBase>().CourseDao() } // Замените courseDao() на имя вашего метода DAO
+
     single<SharedPrefRepository> { MultiplatrormSettings(settings = get(named("noteBook")), platform = get()) }
     single<SettingsAppRepository > { MultiplatrormAppSettings(settings = get(named("settings"))) }
     
     single<AlarmRepeadRepository> { AlarmRepeadImp(get(),get()) }
     factory<SaveDeleteImageRepositpry> { SaveDeleteImageImpl(get()) }
-    single<TelegramSyncServiceRepository>{TelegramSyncServiceImpl(get()) } 
-    
-single { 
-    KmpBackupManager(
-        db = get(), 
-        settings = get(named("noteBook")), 
-        pathProvider = get(), 
-        backupContext = get<PlatformBackupContextRepository>() // ЯВНО УКАЗАЛИ ТИП В ТРЕУГОЛЬНЫХ СКОБКАХ!
-    ) 
-} 
-    
+    single<TelegramSyncServiceRepository>{TelegramSyncServiceImpl(get()) }
 
 }
 

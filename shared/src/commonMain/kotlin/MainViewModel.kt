@@ -1,9 +1,18 @@
 
+//import data.room.model.SubItem
+
 import CommonConst.ALARM_ONE
+import CommonConst.ALARM_SETTINGS
+import CommonConst.BATTERY_OPTIMIZATION
 import CommonConst.DEFAULT_DIALOG
 import CommonConst.INSERT_DIALOG_ITEM
 import CommonConst.NOTIFICATION
+import CommonConst.SIZE_LARGE
+import CommonConst.SIZE_SMALL
+import CommonConst.SIZE_STANDART
 import CommonConst.SORT_STANDART
+import CommonConst.THEME_FUTURE
+import CommonConst.THEME_ZABOR
 import CommonConst.TIME
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -12,61 +21,48 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import data.room.CourseDao
 import data.room.model.Item
-//import data.room.model.SubItem
+import data.room.model.ItemWithSubItems
 import data.room.model.ListCategory
+import data.room.model.SubItem
+import domain.model.ProductCommon
 import domain.repostirory.AlarmRepeadRepository
 import domain.repostirory.AlarmRepository
-
+import domain.repostirory.GetPlatrormRepository
+import domain.repostirory.PaySdkRepository
 import domain.repostirory.PermissionRepository
+import domain.repostirory.PlatformBackupContextRepository
 import domain.repostirory.SaveDeleteImageRepositpry
+import domain.repostirory.SettingsAppRepository
 import domain.repostirory.SharedPrefRepository
+import domain.repostirory.TelegramSyncServiceRepository
+import io.github.vinceglb.filekit.core.PlatformFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import presentation.dialogs.DialogState
-import kotlin.time.Clock
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import presentation.theme.SizeNormal
-import presentation.theme.ThemeNeon
-import domain.repostirory.SettingsAppRepository
-import domain.repostirory.TelegramSyncServiceRepository
-
-import CommonConst.THEME_FUTURE
-import CommonConst.THEME_ZABOR
-
-import CommonConst.SIZE_SMALL
-import CommonConst.SIZE_STANDART
-import CommonConst.SIZE_LARGE
-
-import CommonConst.ALARM_SETTINGS
-import CommonConst.BATTERY_OPTIMIZATION
-import data.room.model.SubItem
-import domain.repostirory.GetPlatrormRepository
-import kotlinx.coroutines.flow.Flow
-
-import presentation.theme.ThemeZabor
-import presentation.theme.SizeSmall
 import presentation.theme.SizeLarge
-import data.room.model.ItemWithSubItems
-import domain.model.ProductCommon
-import domain.repostirory.PaySdkRepository
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.shareIn
-
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.receiveAsFlow
-import data.perository.KmpBackupManager
-import io.github.vinceglb.filekit.core.PlatformFile
+import presentation.theme.SizeNormal
+import presentation.theme.SizeSmall
+import presentation.theme.ThemeNeon
+import presentation.theme.ThemeZabor
+import kotlin.time.Clock
 
 class MainViewModel(
     private val pref: SharedPrefRepository,
@@ -79,9 +75,9 @@ class MainViewModel(
     private val platform : GetPlatrormRepository,
     private val paySdk : PaySdkRepository,
     private val telegramSync : TelegramSyncServiceRepository,
-   private val backUpManager : KmpBackupManager,
+   // private val backUpManager : PlatformBackupContextRepository,
 
-) : ViewModel() {
+    ) : ViewModel() {
 
     private val _soundState = MutableStateFlow<Map<String, String>>(emptyMap())
     val soundState = _soundState.asStateFlow()
@@ -187,40 +183,50 @@ fun openDialogByTaskId(taskId: Int) {
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    // Метод для запуска ЭКСПОРТА
     fun doExport(platformFile: PlatformFile) {
-        // viewModelScope.launch(Dispatchers.Default) {
-        //     _isLoading.value = true
-            
-        //     val isSuccess = backUpManager.exportDatabase(platformFile)
-            
-        //     _isLoading.value = false
-            
-        //     if (isSuccess) {
-        //         // Здесь можно отправить событие в UI (например, показать Toast "Успешно экспортировано")
-        //     } else {
-        //         // Показать ошибку "Не удалось сохранить бэкап"
-        //     }
-        // }
+//        viewModelScope.launch(Dispatchers.Main) { // Начинаем на Главном потоке для плавной анимации лоадера
+//            _isLoading.value = true
+//
+//            // КЛЮЧЕВОЙ МОМЕНТ: NonCancellable гарантирует, что даже если UI начнет перерисовываться,
+//            // этот блок кода выполнится до самого конца с первого раза!
+//            val isSuccess = withContext(NonCancellable + Dispatchers.IO) {
+//                backUpManager.exportDatabase(platformFile)
+//            }
+//
+//            _isLoading.value = false
+//            if (isSuccess) {
+//                // Показать тост "Успешно сохранено"
+//            } else {
+//                // Показать ошибку
+//            }
+//        }
     }
 
-    // Метод для запуска ИМПОРТА
     fun doImport(platformFile: PlatformFile) {
-        // viewModelScope.launch(Dispatchers.Default) {
-        //     _isLoading.value = true
-            
-        //     val isSuccess = backUpManager.importDatabase(platformFile)
-            
-        //     _isLoading.value = false
-            
-        //     if (isSuccess) {
-        //         // ДАННЫЕ УСПЕШНО ВОССТАНОВЛЕНЫ!
-        //         // Чтобы UI мгновенно подтянул новые картинки и настройки,
-        //         // рекомендуется сделать сброс стейта или перезапустить текущий экран (сбросить навигацию).
-        //     } else {
-        //         // Показать ошибку "Не удалось прочитать файл"
-        //     }
-        // }
+//        viewModelScope.launch(Dispatchers.Main) {
+//            _isLoading.value = true
+//
+//            // Полностью останавливаем наблюдение за базой во ViewModel перед импортом
+//            observationJob?.cancel()
+//
+//            // Запускаем импорт в защищенном от отмены контексте
+//            val isSuccess = withContext(NonCancellable + Dispatchers.IO) {
+//                backUpManager.importDatabase(platformFile)
+//            }
+//
+//            _isLoading.value = false
+//
+//            if (isSuccess) {
+//                val newNotebookText = sharedPrefRepository.loadTextNoteBook()
+//                // _notebookState.value = newNotebookText
+//
+//                // Возобновляем чтение новой базы данных
+//                startDataObservation()
+//            } else {
+//                startDataObservation()
+//                // Показать ошибку "Не удалось прочитать файл"
+//            }
+//        }
     }
 
 

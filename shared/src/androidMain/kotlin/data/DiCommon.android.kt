@@ -3,6 +3,7 @@ package data
 import android.app.AlarmManager
 import android.content.Context
 import androidx.room.Room
+import androidx.room.RoomDatabase
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.SharedPreferencesSettings
@@ -48,9 +49,20 @@ actual val moduleAnotherPlatform = module {
           SharedPreferencesSettings(prefsSettings)
           
       }
+
+//    single<myDataBase> {
+//        val dbFile = androidContext().getDatabasePath("db")
+//        val builder = Room.databaseBuilder<myDataBase>(
+//            context = androidContext(),
+//            name = dbFile.absolutePath
+//        )
+//        builder
+//            .setDriver(BundledSQLiteDriver())
+//            .build()
+//    } bind RoomDatabase::class
    
     single<myDataBase> {
-        
+
 
         val dbFile = androidContext().getDatabasePath("db")
 
@@ -88,5 +100,5 @@ actual val moduleAnotherPlatform = module {
     factory<GetPlatrormRepository> { AndroidGetPlatrormImp(get(),get()) }
     factory<AndroidSoundPlayer> { AndroidSoundPlayer(get()) }
     factory<PaySdkRepository> { AndroidPaySdkImpl (get(),get()) }
-    single<PlatformBackupContextRepository> { AndroidBackupContextImpl(get()) }
+    //single<PlatformBackupContextRepository> { AndroidBackupContextImpl(androidContext(), get()) }
 }
