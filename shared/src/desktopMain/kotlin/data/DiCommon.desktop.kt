@@ -11,6 +11,7 @@ import com.dragon.shared.data.repostitory.DesktopGetPlatformImpl
 import com.dragon.shared.data.repostitory.DesktopPathProviderImpl
 import com.dragon.shared.data.repostitory.DesktopPaySdkImpl
 import com.dragon.shared.data.repostitory.DesktopPermissonImp
+import com.dragon.shared.data.repostitory.DesktopPickerImpl
 import data.perository.AlarmRepeadImp
 import java.io.File
 import data.room.myDataBase
@@ -21,8 +22,10 @@ import domain.repostirory.PermissionRepository
 
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.PreferencesSettings
+import domain.repostirory.BackupManagerRepository
 import domain.repostirory.GetPlatrormRepository
 import domain.repostirory.PaySdkRepository
+import domain.repostirory.PickerRepository
 import java.util.prefs.Preferences
 import org.koin.core.qualifier.named
 actual val moduleAnotherPlatform: Module = module {
@@ -46,4 +49,5 @@ actual val moduleAnotherPlatform: Module = module {
     factory<PathProviderRepostitory> { DesktopPathProviderImpl() }
     factory<GetPlatrormRepository> { DesktopGetPlatformImpl() }
     factory<PaySdkRepository> { DesktopPaySdkImpl() }
+    single<PickerRepository> { DesktopPickerImpl(windowFrame = null) }
 }

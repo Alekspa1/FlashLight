@@ -3,7 +3,6 @@ package data
 import android.app.AlarmManager
 import android.content.Context
 import androidx.room.Room
-import androidx.room.RoomDatabase
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.SharedPreferencesSettings
@@ -16,7 +15,7 @@ import data.repostitory.AndroidPathProviderImp
 import data.repostitory.AndroidPaySdkImpl
 import data.repostitory.AndroidPermissionImpl
 import data.repostitory.AndroidSaveDeleteImpl
-import data.repostitory.AndroidBackupContextImpl
+import data.repostitory.AndroidPlatformFilePickerImpl
 import data.repostitory.AndroidSoundPlayer
 import data.room.myDataBase
 import domain.repostirory.AlarmRepository
@@ -25,8 +24,7 @@ import domain.repostirory.PathProviderRepostitory
 import domain.repostirory.PaySdkRepository
 import domain.repostirory.PermissionRepository
 import domain.repostirory.SaveDeleteImageRepositpry
-import domain.repostirory.SettingsAppRepository
-import domain.repostirory.PlatformBackupContextRepository
+import domain.repostirory.PickerRepository
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.qualifier.named
 import org.koin.dsl.bind
@@ -50,16 +48,6 @@ actual val moduleAnotherPlatform = module {
           
       }
 
-//    single<myDataBase> {
-//        val dbFile = androidContext().getDatabasePath("db")
-//        val builder = Room.databaseBuilder<myDataBase>(
-//            context = androidContext(),
-//            name = dbFile.absolutePath
-//        )
-//        builder
-//            .setDriver(BundledSQLiteDriver())
-//            .build()
-//    } bind RoomDatabase::class
    
     single<myDataBase> {
 
@@ -100,5 +88,5 @@ actual val moduleAnotherPlatform = module {
     factory<GetPlatrormRepository> { AndroidGetPlatrormImp(get(),get()) }
     factory<AndroidSoundPlayer> { AndroidSoundPlayer(get()) }
     factory<PaySdkRepository> { AndroidPaySdkImpl (get(),get()) }
-    //single<PlatformBackupContextRepository> { AndroidBackupContextImpl(androidContext(), get()) }
+    single { AndroidPlatformFilePickerImpl() } bind PickerRepository::class
 }

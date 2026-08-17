@@ -56,6 +56,11 @@ import presentation.theme.Theme
 import presentation.theme.ThemeNeon
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LocalTextStyle
+import io.github.vinceglb.filekit.compose.rememberFilePickerLauncher
+import io.github.vinceglb.filekit.core.PickerType
+import presentation.dialogs.parsePlatformUri
+import kotlin.time.Clock
+
 @Composable
 fun PremiumScreen(
     size: Size = SizeNormal(),
@@ -65,6 +70,7 @@ fun PremiumScreen(
     onClickBuy: (String) -> Unit = {},
     innerPadding : PaddingValues = PaddingValues()
     ){
+
     var isSelected by remember { mutableStateOf(ONE_YEAR) }
     val premiumFeatures = remember {
     listOf(
@@ -134,7 +140,8 @@ fun PremiumScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 3.dp)
                         .border(3.dp, theme.borderCardMenuItem, RoundedCornerShape(10.dp))
-                        .clip(RoundedCornerShape(10.dp)),
+                        .clip(RoundedCornerShape(10.dp))
+                        ,
                     shape = RoundedCornerShape(10.dp),
                     colors = CardDefaults.cardColors(containerColor = theme.cardMenuItem)
                 ) {

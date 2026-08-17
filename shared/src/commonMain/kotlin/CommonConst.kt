@@ -15,6 +15,8 @@ object CommonConst {
     const val SETTINGS_CLICK = "SETTINGS_CLICK"
     const val SHARED_ClICK = "SHARED_ClICK"
     const val ADD_CATEGORY = "ADD_CATEGORY"
+    const val ZIP_PICKER = "ZIP_PICKER"
+    const val IMAGE_PICKER = "IMAGE_PICKER"
 
 
 

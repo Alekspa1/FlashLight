@@ -73,6 +73,9 @@ import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import data.room.model.Item
 import data.room.model.ListCategory
+import io.github.vinceglb.filekit.compose.rememberFilePickerLauncher
+import io.github.vinceglb.filekit.core.PickerType
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.emptyFlow
@@ -83,6 +86,7 @@ import presentation.MainPager
 import presentation.dialogs.AddOrChangeCategoryDialog
 import presentation.dialogs.DeleteDialog
 import presentation.dialogs.DialogState
+import presentation.dialogs.parsePlatformUri
 import presentation.screens.Faq
 import presentation.screens.PremiumScreen
 import presentation.screens.SettingsScreen
@@ -91,6 +95,7 @@ import presentation.theme.SizeNormal
 import presentation.theme.Theme
 import presentation.theme.ThemeNeon
 import presentation.theme.ThemeZabor
+import kotlin.time.Clock
 
 @Composable
 fun StartApp(viewModel: MainViewModel = koinViewModel()) {
@@ -98,6 +103,16 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
     val size = viewModel.sizeState
     val premiumState by viewModel.premiumState.collectAsStateWithLifecycle()
     val navController = rememberNavController()
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    LaunchedEffect(lifecycleOwner.lifecycle) {
+        // repeatOnLifecycle автоматически отменит корутину (и Ktor-запрос),
+        // когда приложение свернется, и перезапустит её, когда оно откроется.
+        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewModel.telegramTasksFlow.collect() // Просто триггерим сбор данных
+        }
+    }
+
 
 
     MaterialTheme(
@@ -121,6 +136,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
         val category = viewModel.showDialog.category
         val snackbarHostState = remember { SnackbarHostState() }
         val productList by viewModel.productState.collectAsStateWithLifecycle()
+
         LaunchedEffect(Unit) {
             viewModel.toast.collect { message ->
                 snackbarHostState.showSnackbar(message)
@@ -136,7 +152,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                     calendar = false,
                     date = 0L,
                     item = Item(
-                        id = 0, // Указываем 0, чтобы сработал ваш сценарий создания
+                        id = 0,
                         name = text ?: "",
                         uri = imageUri ?: "",
                         category = "Повседневные"
@@ -200,7 +216,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
         NavHost( 
             navController = navController, 
             startDestination = "main_screen"
-        ) { 
+        ) {
             // ЭКРАН №1: Главный экран
             composable( 
                 route = "main_screen", 
@@ -208,6 +224,8 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                 exitTransition = { androidx.compose.animation.ExitTransition.None },
                 popEnterTransition = { androidx.compose.animation.EnterTransition.None }
             ) {
+                println("main")
+
                 val lifecycleOwner = LocalLifecycleOwner.current
 
                 LaunchedEffect(lifecycleOwner.lifecycle) {
@@ -217,21 +235,6 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                         viewModel.telegramTasksFlow.collect() // Просто триггерим сбор данных
                     }
                 }
-
-//                LaunchedEffect(Unit) {
-//                    viewModel.startTelegramRealtimeListener
-//                        .collect { taskText ->
-//                            val newItem = Item(
-//                                name = taskText,
-//                                category = "Повседневные"
-//                            )
-//                            viewModel.insertItem(
-//                                item = newItem,
-//                                subItems = emptyList(), // Передаем пустой список подзадач
-//                                calendar = false
-//                            )
-//                        }
-//                }
                 StartAppContent( 
                     isCommonMode = isCommonMode, 
                     onToggleCommonMode = { isCommonMode = !isCommonMode }, 
@@ -248,7 +251,10 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                         when (click) { 
                             PREMIUM_CLICK -> { navController.navigate("premium_screen") } 
                             UPGRATE_CLICK -> {} 
-                            SETTINGS_CLICK -> { navController.navigate("settings_screen") } 
+                            SETTINGS_CLICK -> {
+                                navController.navigate("settings_screen")
+
+                            }
                             SHARED_ClICK -> { viewModel.sendMessage("Общие дела появяться в следующих обновлениях") } 
                         } 
                     }, 
@@ -264,28 +270,29 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                             } 
                         } 
                     } 
-                ) 
+                )
             } 
 
             // ЭКРАН №2: Настройки
             composable( 
-                route = "settings_screen", 
-                enterTransition = { slideInHorizontally(animationSpec = tween(300), initialOffsetX = { -it }) }, 
+                route = "settings_screen",
+
+                enterTransition = { slideInHorizontally(animationSpec = tween(300), initialOffsetX = { -it }) },
                 popExitTransition = { slideOutHorizontally(animationSpec = tween(300), targetOffsetX = { -it }) },
-                // Настройки тоже должны замереть, когда поверх них открывается FAQ
                 exitTransition = { androidx.compose.animation.ExitTransition.None },
                 popEnterTransition = { androidx.compose.animation.EnterTransition.None }
-            ) { 
-                SettingsScreen( 
-                    theme = theme, 
-                    size = size, 
-                    onBack = { navController.popBackStack() }, 
-                    onClick = { click -> 
-                        when (click) { "FAQ" -> navController.navigate("faq_screen") } 
-                    }, 
-                    viewModel = viewModel, 
-                    innerPadding = innerPadding 
-                ) 
+            ) {
+                    println("settings")
+                    SettingsScreen(
+                        theme = viewModel.themeState,
+                        size = viewModel.sizeState,
+                        onBack = { navController.popBackStack()},
+                        onClick = { click ->
+                            when (click) { "FAQ" -> navController.navigate("faq_screen") }
+                        },
+                        viewModel = viewModel,
+                        innerPadding = innerPadding
+                    )
             } 
 
             // ЭКРАН №3: FAQ
@@ -312,7 +319,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                 exitTransition = { androidx.compose.animation.ExitTransition.None },
                 popEnterTransition = { androidx.compose.animation.EnterTransition.None }
             ) {
-                viewModel
+
                 PremiumScreen(size = size,
                     theme = theme,
                     listProduct = productList,

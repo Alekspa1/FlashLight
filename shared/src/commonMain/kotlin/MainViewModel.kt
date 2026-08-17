@@ -27,18 +27,20 @@ import data.room.model.SubItem
 import domain.model.ProductCommon
 import domain.repostirory.AlarmRepeadRepository
 import domain.repostirory.AlarmRepository
+import domain.repostirory.BackupManagerRepository
 import domain.repostirory.GetPlatrormRepository
 import domain.repostirory.PaySdkRepository
 import domain.repostirory.PermissionRepository
-import domain.repostirory.PlatformBackupContextRepository
+import domain.repostirory.PickerRepository
 import domain.repostirory.SaveDeleteImageRepositpry
 import domain.repostirory.SettingsAppRepository
 import domain.repostirory.SharedPrefRepository
 import domain.repostirory.TelegramSyncServiceRepository
-import io.github.vinceglb.filekit.core.PlatformFile
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -75,9 +77,11 @@ class MainViewModel(
     private val platform : GetPlatrormRepository,
     private val paySdk : PaySdkRepository,
     private val telegramSync : TelegramSyncServiceRepository,
-   // private val backUpManager : PlatformBackupContextRepository,
+    private val backUpManager : BackupManagerRepository,
+    private val picker: PickerRepository
 
     ) : ViewModel() {
+
 
     private val _soundState = MutableStateFlow<Map<String, String>>(emptyMap())
     val soundState = _soundState.asStateFlow()
@@ -90,6 +94,9 @@ class MainViewModel(
     var showDialog by  mutableStateOf(DialogState())
     private var _toast = MutableSharedFlow<String>()
     var toast = _toast.asSharedFlow()
+
+    private val _isBackupLoading = MutableStateFlow(false)
+    val isBackupLoading: StateFlow<Boolean> = _isBackupLoading.asStateFlow()
 
      private val _premiumState = MutableStateFlow(pref.getPremium())
 
@@ -179,54 +186,41 @@ fun openDialogByTaskId(taskId: Int) {
         }
     }
 
-      // Состояние для отображения ProgressBar (true — показываем, false — скрываем)
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    fun doExport(platformFile: PlatformFile) {
-//        viewModelScope.launch(Dispatchers.Main) { // Начинаем на Главном потоке для плавной анимации лоадера
-//            _isLoading.value = true
-//
-//            // КЛЮЧЕВОЙ МОМЕНТ: NonCancellable гарантирует, что даже если UI начнет перерисовываться,
-//            // этот блок кода выполнится до самого конца с первого раза!
-//            val isSuccess = withContext(NonCancellable + Dispatchers.IO) {
-//                backUpManager.exportDatabase(platformFile)
-//            }
-//
-//            _isLoading.value = false
-//            if (isSuccess) {
-//                // Показать тост "Успешно сохранено"
-//            } else {
-//                // Показать ошибку
-//            }
-//        }
+    fun doImport() {
+        viewModelScope.launch(Dispatchers.IO) {
+            _isBackupLoading.value = true // Включаем незакрываемый лоадер
+            val file = picker.openZipPicker()
+            if(file != null) {
+                if (backUpManager.loadDb(file)) {
+                    // Шлем успех в ваш собственный SharedFlow для тостов
+                    sendMessage("Восстановление прошло успешно!")
+                    stateTextNotebook = pref.loadTextNoteBook()
+                } else {
+                    sendMessage("Не удалось прочитать или записать файл бэкапа.")
+                }
+            }
+
+            _isBackupLoading.value = false
+        }
     }
 
-    fun doImport(platformFile: PlatformFile) {
-//        viewModelScope.launch(Dispatchers.Main) {
-//            _isLoading.value = true
-//
-//            // Полностью останавливаем наблюдение за базой во ViewModel перед импортом
-//            observationJob?.cancel()
-//
-//            // Запускаем импорт в защищенном от отмены контексте
-//            val isSuccess = withContext(NonCancellable + Dispatchers.IO) {
-//                backUpManager.importDatabase(platformFile)
-//            }
-//
-//            _isLoading.value = false
-//
-//            if (isSuccess) {
-//                val newNotebookText = sharedPrefRepository.loadTextNoteBook()
-//                // _notebookState.value = newNotebookText
-//
-//                // Возобновляем чтение новой базы данных
-//                startDataObservation()
-//            } else {
-//                startDataObservation()
-//                // Показать ошибку "Не удалось прочитать файл"
-//            }
-//        }
+
+
+
+    fun doExport() {
+        viewModelScope.launch {
+            _isBackupLoading.value = true
+
+                val file = picker.createZipPicker("Focus_Backup.zip")
+                if (file != null) {
+                    backUpManager.saveDb(file)
+                    sendMessage("Резервная копия создана!")
+                }
+
+
+            _isBackupLoading.value = false
+        }
     }
 
 

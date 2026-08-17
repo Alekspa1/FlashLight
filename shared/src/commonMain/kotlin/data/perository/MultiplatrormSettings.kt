@@ -31,7 +31,6 @@ class MultiplatrormSettings(private val settings: Settings, private val platform
   
 
     override fun saveTextNoteBook(value: String) {
-
         settings.putString(KEY_NOTE_BOOK, value)
 
         

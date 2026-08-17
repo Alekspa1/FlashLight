@@ -1,5 +1,19 @@
 package presentation.screens
 
+import CommonConst.ALARM_SETTINGS
+import CommonConst.APP_SETTINGS
+import CommonConst.BATTERY_OPTIMIZATION
+import CommonConst.DONATE
+import CommonConst.SIZE_LARGE
+import CommonConst.SIZE_SETTINGS
+import CommonConst.SIZE_SMALL
+import CommonConst.SIZE_STANDART
+import CommonConst.SORT_SETTINGS
+import CommonConst.SORT_STANDART
+import CommonConst.SORT_USER
+import CommonConst.THEME_FUTURE
+import CommonConst.THEME_SETTINGS
+import CommonConst.THEME_ZABOR
 import MainViewModel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -7,6 +21,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,65 +34,38 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import org.jetbrains.compose.resources.painterResource
-import presentation.theme.Size
-import presentation.theme.SizeNormal
-import presentation.theme.Theme
-import presentation.theme.ThemeNeon
-import CommonConst.THEME_SETTINGS
-import CommonConst.THEME_ZABOR
-import presentation.dialogs.SettingsDialog
-import CommonConst.THEME_FUTURE
-
-import CommonConst.SIZE_SETTINGS
-import CommonConst.SORT_SETTINGS
-import CommonConst.ALARM_SETTINGS
-import CommonConst.APP_SETTINGS
-import CommonConst.BATTERY_OPTIMIZATION
-import CommonConst.DONATE
-
-import CommonConst.SIZE_SMALL
-import CommonConst.SIZE_STANDART
-import CommonConst.SIZE_LARGE
-
-import CommonConst.SORT_STANDART
-import CommonConst.SORT_USER
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.material.icons.automirrored.filled.StarHalf
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
-import presentation.DialogSoundAndroid
-import androidx.compose.foundation.Image
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.painterResource
-
+import presentation.DialogSoundAndroid
 import presentation.dialogs.DialogState
-import io.github.vinceglb.filekit.compose.rememberFilePickerLauncher
-import io.github.vinceglb.filekit.compose.rememberFileSaverLauncher
-import io.github.vinceglb.filekit.core.PickerType
+import presentation.dialogs.SettingsDialog
+import presentation.theme.Size
+import presentation.theme.SizeNormal
+import presentation.theme.Theme
+import presentation.theme.ThemeNeon
 
 
 @Composable
@@ -95,23 +84,24 @@ fun SettingsScreen(
     val listSound by viewModel.soundState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
-     val isLoading by viewModel.isLoading.collectAsState()
 
-    // 1. ЛАУНЧЕР ДЛЯ ЭКСПОРТА (вызывает окно "Сохранить как...")
-    val exportLauncher = rememberFileSaverLauncher { platformFile ->
-        platformFile?.let {
-            viewModel.doExport(it)
+
+
+    val isLoading by viewModel.isBackupLoading.collectAsStateWithLifecycle()
+
+
+    if (isLoading) {
+        Dialog(onDismissRequest = { /* Заблокировано */ }) {
+            Card {
+                Column(modifier = Modifier.padding(24.dp)) {
+                    CircularProgressIndicator()
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("Обработка данных, пожалуйста, не закрывайте приложение...")
+                }
+            }
         }
     }
 
-    // 2. ЛАУНЧЕР ДЛЯ ИМПОРТА (вызывает окно "Выберите ZIP-файл...")
-    val importLauncher = rememberFilePickerLauncher(
-        type = PickerType.File(extensions = listOf("zip"))
-    ) { platformFile ->
-        platformFile?.let {
-            viewModel.doImport(it)
-        }
-    }
 
     LaunchedEffect(Unit) {
         viewModel.toast.collect { message ->
@@ -330,10 +320,7 @@ fun SettingsScreen(
                         theme.cardMenuItem,
                         theme.borderCardMenuItem
                     ) {
-                     exportLauncher.launch(
-                    baseName = "backup_data", // Имя файла по умолчанию
-                    extension = "zip"         // Расширение
-                )
+                viewModel.doExport()
                     }
                     SettingItem(
                         "Загрузить базу данных",
@@ -342,7 +329,7 @@ fun SettingsScreen(
                         theme.cardMenuItem,
                         theme.borderCardMenuItem
                     ) {
-                        importLauncher.launch()
+                       viewModel.doImport()
                     }
 
                     Spacer(modifier = Modifier.height(24.dp))

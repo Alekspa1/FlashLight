@@ -80,58 +80,63 @@ import androidx.compose.material3.LocalTextStyle
 @Composable
 fun AddOrChangeItemDialog(
     item: Item? = null,
-    premium : Boolean = false,
-    onCancel : ()-> Unit = {},
-    listCategory : List<String> = emptyList(),
-    listSubItems : List<SubItem> = emptyList(),
-    calendar : Boolean = false,
+    premium: Boolean = false,
+    onCancel: () -> Unit = {},
+    listCategory: List<String> = emptyList(),
+    listSubItems: List<SubItem> = emptyList(),
+    calendar: Boolean = false,
     date: Long = 0L,
     category: String = "Повседневные",
     theme: Theme = ThemeNeon(), // Используйте имя вашего БАЗОВОГО класса/интерфейса тем!
-    onSave :(
+    onSave: (
         item: Item?,
         name: String,
         desc: String,
         uri: String,
         category: String,
-        calendar : Boolean,
-        alarlm : Boolean, // Оставил старое имя, чтобы не ломать лямбду в INSERT_DIALOG_ITEM
-        originalNameImage : String,
+        calendar: Boolean,
+        alarlm: Boolean, // Оставил старое имя, чтобы не ломать лямбду в INSERT_DIALOG_ITEM
+        originalNameImage: String,
         date: Long,
         newListSubItems: List<SubItem>
-    ) -> Unit ={_,_,_,_,_,_,_,_,_,_->},
-    getUri : (String) -> String = {""},
+    ) -> Unit = { _, _, _, _, _, _, _, _, _, _ -> },
+    getUri: (String) -> String = { "" },
 ) {
     var stateTextName by remember { mutableStateOf(item?.name ?: "") }
     var stateTextDecs by remember { mutableStateOf(item?.desc ?: "") }
-    var stateTextSubTask by remember {mutableStateOf("")}
+    var stateTextSubTask by remember { mutableStateOf("") }
     var isExpanded by remember { mutableStateOf(false) }
     var openImageState by remember { mutableStateOf(false) }
     var selectedFileUri: String by remember { mutableStateOf(getUri(item?.uri ?: "")) }
     var originalFileName by remember { mutableStateOf("") }
-    var categorySelected by remember { mutableStateOf(item?.category ?: if(calendar) "Повседневные" else category) }
+
+    var categorySelected by remember {
+        mutableStateOf(
+            item?.category ?: if (calendar) "Повседневные" else category
+        )
+    }
     val listSubTask = remember { mutableStateListOf<SubItem>() }
-  // var editingSubTaskId by remember { mutableIntStateOf(-1) }
-    var editingSubTaskId by remember { mutableStateOf<Int?>(null) } 
-    var errorMessage by remember {mutableStateOf(false)}
-    
+    var editingSubTaskId by remember { mutableStateOf<Int?>(null) }
+    var errorMessage by remember { mutableStateOf(false) }
+
     LaunchedEffect(item) {
-    if (item != null && item.id == 0 && item.uri.isNotEmpty() && originalFileName.isEmpty()) {
-        originalFileName = "img_shared_${Clock.System.now().toEpochMilliseconds()}.jpg"
+        if (item != null && item.id == 0 && item.uri.isNotEmpty() && originalFileName.isEmpty()) {
+            originalFileName = "img_shared_${Clock.System.now().toEpochMilliseconds()}.jpg"
         }
     }
     LaunchedEffect(listSubItems) {
         listSubTask.clear()
         listSubTask.addAll(listSubItems)
-        if(listSubTask.size >= 2 && !premium ) errorMessage = true
+        if (listSubTask.size >= 2 && !premium) errorMessage = true
     }
-
     val fileLauncher = rememberFilePickerLauncher(type = PickerType.Image) { file ->
-         if (file != null) {
-             selectedFileUri = parsePlatformUri(file)
-             originalFileName = "img_${Clock.System.now().toEpochMilliseconds()}.jpg"
+        if (file != null) {
+            selectedFileUri = parsePlatformUri(file)
+            originalFileName = "img_${Clock.System.now().toEpochMilliseconds()}.jpg"
         }
     }
+
+
 
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -142,7 +147,7 @@ fun AddOrChangeItemDialog(
     }
 
     if (openImageState) {
-        OpenImage(selectedFileUri){ openImageState = false }
+        OpenImage(selectedFileUri) { openImageState = false }
     }
 
     AlertDialog(
@@ -154,9 +159,9 @@ fun AddOrChangeItemDialog(
 
             Column(
                 modifier = Modifier.fillMaxWidth()
-                .verticalScroll(rememberScrollState()),
-               
-            ) {
+                    .verticalScroll(rememberScrollState()),
+
+                ) {
 
 
                 // Поле Название
@@ -180,192 +185,241 @@ fun AddOrChangeItemDialog(
                 )
 
 
-               Column(
-    modifier = Modifier
-        .fillMaxWidth()
-        .padding(vertical = 8.dp)
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
 //        .border(
 //            width = 1.dp,
 //            color = theme.cardItemBorderFalse,
 //            shape = RoundedCornerShape(10.dp)
 //        )
-) {
-    // Внешний Box занимает всю ширину, чтобы прижать кнопку вправо
-    Box(
-        modifier = Modifier
-            .fillMaxWidth(),
-        contentAlignment = Alignment.CenterEnd
-    ) {
-        // Row теперь кликабелен сам по себе и сжимается под контент
-        Row(
-            modifier = Modifier
-                .clip(RoundedCornerShape(8.dp)) // Чтобы эффект нажатия не вылезал за границы
-                .clickable { isExpanded = !isExpanded}
-                .padding(horizontal = 12.dp, vertical = 8.dp), // Внутренние отступы самой кнопки
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.End
-        ) {
-
-                    Text(
-            text = if(!isExpanded)"Раскрыть " else "Скрыть ",
-            fontSize = 15.sp,
-            color = theme.textDesc // Твой серый цвет из темы
-        )
-                    
-                Text(
-                    text = "подзадачи",
-                    fontSize = 15.sp,
-                    color = theme.textColor,
-                    modifier = Modifier.padding(end = 8.dp)
-                )
-            ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
-        }
-    }
-
-    // Выпадающее содержимое (остается без изменений)
-    AnimatedVisibility(
-        visible = isExpanded,
-        enter = expandVertically() + fadeIn(),
-        exit = shrinkVertically() + fadeOut()
-    ) {
-       Column(
-    modifier = Modifier
-        .fillMaxWidth()
-        .padding(start = 16.dp, end = 16.dp) // Даем отступы от внешних краев
-) {
-           if(errorMessage){
-               Text(
-                   text = "Больше подзадач доступно в PREMIUM версии",
-                   color = MaterialTheme.colorScheme.error,
-                   style = MaterialTheme.typography.bodyMedium,
-                   modifier = Modifier.padding(start = 24.dp, top = 16.dp)
-               )
-           } else {
-               BasicTextField(
-                   value = stateTextSubTask,
-                   onValueChange = { stateTextSubTask = it },
-                   textStyle = LocalTextStyle.current.copy(color = theme.textColor, fontSize = 15.sp),
-                   modifier = Modifier
-                       .fillMaxWidth()
-                       .padding(vertical = 8.dp),
-                   decorationBox = { innerTextField ->
-                       Row(
-                           modifier = Modifier
-                               .fillMaxWidth()
-                               .border(1.dp, theme.textColor, RoundedCornerShape(8.dp))
-                               .padding(horizontal = 12.dp, vertical = 10.dp),
-                           verticalAlignment = Alignment.CenterVertically,
-                           horizontalArrangement = Arrangement.SpaceBetween
-                       ) {
-                           Box(modifier = Modifier.weight(1f)) {
-                               if (stateTextSubTask.isEmpty()) {
-                                   Text("Добавить подзадачу...", color = theme.textDesc, fontSize = 15.sp)
-                               }
-                               innerTextField()
-
-
-
-                           }
-                           IconButton(
-                               onClick = {
-                                   val textSubItem =  if(stateTextSubTask.trim().isNotEmpty()) stateTextSubTask.trim() else "Без названия"
-                                   //if (stateTextSubTask.isNotBlank()) {
-                                       val maxSort = listSubTask.maxOfOrNull { it.sort } ?: -1
-                                           listSubTask.add(
-                                               SubItem(
-                                                   idTask = item?.id ?: 0,
-                                                   name = textSubItem,
-                                                   change = false,
-                                                   sort = maxSort + 1
-                                               )
-                                           )
-                                           if(listSubTask.size >= 2 && !premium ) errorMessage = true
-
-
-                                       stateTextSubTask = ""
-                                  // }
-                               },
-                               modifier = Modifier.size(20.dp)
-                           ) {
-                               Icon(Icons.Default.Add, contentDescription = "Добавить", tint = theme.iconTint)
-                           }
-                       }
-                   }
-               )
-           }
-
-
-
-    if (listSubTask.isNotEmpty()) {
-        //Spacer(modifier = Modifier.height(12.dp))
-
-        // 2. Список подзадач с разделителями
-        Column(modifier = Modifier.fillMaxWidth()) {
-            listSubTask.forEachIndexed { index, subTask ->
-            val isEditing = when {
-                editingSubTaskId == null -> false // Если null — никто не редактируется
-            subTask.id != 0 -> editingSubTaskId == subTask.id
-            else -> editingSubTaskId == -(index + 1)
-                }
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 10.dp), // Увеличили кликабельную высоту строки
-                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    if (isEditing) {
-                        BasicTextField(
-                            value = subTask.name,
-                            onValueChange = { newText -> listSubTask[index] = subTask.copy(name = newText) },
-                            textStyle = LocalTextStyle.current.copy(color = theme.textColor, fontSize = 15.sp),
+                    // Внешний Box занимает всю ширину, чтобы прижать кнопку вправо
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        contentAlignment = Alignment.CenterEnd
+                    ) {
+                        // Row теперь кликабелен сам по себе и сжимается под контент
+                        Row(
                             modifier = Modifier
-                                .weight(1f)
-                               // .padding(8.dp)
-                                .border(1.dp, theme.textColor.copy(alpha = 0.15f), RoundedCornerShape(4.dp))
-                                .padding(8.dp)
-                               // .padding(horizontal = 8.dp)
-                                
-                        )
-                        IconButton(onClick = { editingSubTaskId = null }, modifier = Modifier.size(24.dp)) {
-                            Icon(Icons.Default.Check, contentDescription = "ОК", tint = theme.cardItemBorderTrue)
+                                .clip(RoundedCornerShape(8.dp)) // Чтобы эффект нажатия не вылезал за границы
+                                .clickable { isExpanded = !isExpanded }
+                                .padding(
+                                    horizontal = 12.dp,
+                                    vertical = 8.dp
+                                ), // Внутренние отступы самой кнопки
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.End
+                        ) {
+
+                            Text(
+                                text = if (!isExpanded) "Раскрыть " else "Скрыть ",
+                                fontSize = 15.sp,
+                                color = theme.textDesc // Твой серый цвет из темы
+                            )
+
+                            Text(
+                                text = "подзадачи",
+                                fontSize = 15.sp,
+                                color = theme.textColor,
+                                modifier = Modifier.padding(end = 8.dp)
+                            )
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
                         }
-                    } else {
-                        Text(
-                            text = subTask.name,
-                            color = theme.textColor,
-                            fontSize = 15.sp,
+                    }
+
+                    // Выпадающее содержимое (остается без изменений)
+                    AnimatedVisibility(
+                        visible = isExpanded,
+                        enter = expandVertically() + fadeIn(),
+                        exit = shrinkVertically() + fadeOut()
+                    ) {
+                        Column(
                             modifier = Modifier
-                                        .weight(1f)
-                                        .clickable { editingSubTaskId = if (subTask.id != 0) subTask.id else -(index + 1) }
-                        )
-                        IconButton(onClick = {
-                            listSubTask.remove(subTask)
-                            if(listSubTask.size < 2 && !premium ) errorMessage = false
-                                             }, modifier = Modifier.size(24.dp)) {
-                            Icon(Icons.Default.Close, contentDescription = "Удалить", tint = theme.cardItemBorderFalse)
+                                .fillMaxWidth()
+                                .padding(
+                                    start = 16.dp,
+                                    end = 16.dp
+                                ) // Даем отступы от внешних краев
+                        ) {
+                            if (errorMessage) {
+                                Text(
+                                    text = "Больше подзадач доступно в PREMIUM версии",
+                                    color = MaterialTheme.colorScheme.error,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    modifier = Modifier.padding(start = 24.dp, top = 16.dp)
+                                )
+                            } else {
+                                BasicTextField(
+                                    value = stateTextSubTask,
+                                    onValueChange = { stateTextSubTask = it },
+                                    textStyle = LocalTextStyle.current.copy(
+                                        color = theme.textColor,
+                                        fontSize = 15.sp
+                                    ),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp),
+                                    decorationBox = { innerTextField ->
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .border(
+                                                    1.dp,
+                                                    theme.textColor,
+                                                    RoundedCornerShape(8.dp)
+                                                )
+                                                .padding(horizontal = 12.dp, vertical = 10.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Box(modifier = Modifier.weight(1f)) {
+                                                if (stateTextSubTask.isEmpty()) {
+                                                    Text(
+                                                        "Добавить подзадачу...",
+                                                        color = theme.textDesc,
+                                                        fontSize = 15.sp
+                                                    )
+                                                }
+                                                innerTextField()
+
+
+                                            }
+                                            IconButton(
+                                                onClick = {
+                                                    val textSubItem = if (stateTextSubTask.trim()
+                                                            .isNotEmpty()
+                                                    ) stateTextSubTask.trim() else "Без названия"
+                                                    //if (stateTextSubTask.isNotBlank()) {
+                                                    val maxSort =
+                                                        listSubTask.maxOfOrNull { it.sort } ?: -1
+                                                    listSubTask.add(
+                                                        SubItem(
+                                                            idTask = item?.id ?: 0,
+                                                            name = textSubItem,
+                                                            change = false,
+                                                            sort = maxSort + 1
+                                                        )
+                                                    )
+                                                    if (listSubTask.size >= 2 && !premium) errorMessage =
+                                                        true
+
+
+                                                    stateTextSubTask = ""
+                                                    // }
+                                                },
+                                                modifier = Modifier.size(20.dp)
+                                            ) {
+                                                Icon(
+                                                    Icons.Default.Add,
+                                                    contentDescription = "Добавить",
+                                                    tint = theme.iconTint
+                                                )
+                                            }
+                                        }
+                                    }
+                                )
+                            }
+
+
+
+                            if (listSubTask.isNotEmpty()) {
+                                //Spacer(modifier = Modifier.height(12.dp))
+
+                                // 2. Список подзадач с разделителями
+                                Column(modifier = Modifier.fillMaxWidth()) {
+                                    listSubTask.forEachIndexed { index, subTask ->
+                                        val isEditing = when {
+                                            editingSubTaskId == null -> false // Если null — никто не редактируется
+                                            subTask.id != 0 -> editingSubTaskId == subTask.id
+                                            else -> editingSubTaskId == -(index + 1)
+                                        }
+
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = 10.dp), // Увеличили кликабельную высоту строки
+                                            verticalAlignment = Alignment.CenterVertically,
+                                        ) {
+                                            if (isEditing) {
+                                                BasicTextField(
+                                                    value = subTask.name,
+                                                    onValueChange = { newText ->
+                                                        listSubTask[index] =
+                                                            subTask.copy(name = newText)
+                                                    },
+                                                    textStyle = LocalTextStyle.current.copy(
+                                                        color = theme.textColor,
+                                                        fontSize = 15.sp
+                                                    ),
+                                                    modifier = Modifier
+                                                        .weight(1f)
+                                                        // .padding(8.dp)
+                                                        .border(
+                                                            1.dp,
+                                                            theme.textColor.copy(alpha = 0.15f),
+                                                            RoundedCornerShape(4.dp)
+                                                        )
+                                                        .padding(8.dp)
+                                                    // .padding(horizontal = 8.dp)
+
+                                                )
+                                                IconButton(
+                                                    onClick = { editingSubTaskId = null },
+                                                    modifier = Modifier.size(24.dp)
+                                                ) {
+                                                    Icon(
+                                                        Icons.Default.Check,
+                                                        contentDescription = "ОК",
+                                                        tint = theme.cardItemBorderTrue
+                                                    )
+                                                }
+                                            } else {
+                                                Text(
+                                                    text = subTask.name,
+                                                    color = theme.textColor,
+                                                    fontSize = 15.sp,
+                                                    modifier = Modifier
+                                                        .weight(1f)
+                                                        .clickable {
+                                                            editingSubTaskId =
+                                                                if (subTask.id != 0) subTask.id else -(index + 1)
+                                                        }
+                                                )
+                                                IconButton(onClick = {
+                                                    listSubTask.remove(subTask)
+                                                    if (listSubTask.size < 2 && !premium) errorMessage =
+                                                        false
+                                                }, modifier = Modifier.size(24.dp)) {
+                                                    Icon(
+                                                        Icons.Default.Close,
+                                                        contentDescription = "Удалить",
+                                                        tint = theme.cardItemBorderFalse
+                                                    )
+                                                }
+                                            }
+                                        }
+
+                                        // 3. Тонкая разделительная линия между пунктами (кроме последнего элемента)
+                                        if (index < listSubTask.lastIndex) {
+                                            HorizontalDivider(
+                                                thickness = 0.5.dp,
+                                                color = theme.textColor.copy(alpha = 0.15f),
+                                            )
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
-
-                // 3. Тонкая разделительная линия между пунктами (кроме последнего элемента)
-                if (index < listSubTask.lastIndex) {
-                    HorizontalDivider(
-                        thickness = 0.5.dp,
-                        color = theme.textColor.copy(alpha = 0.15f),
-                    )
-                }
-            }
-        }
-    }
-}
-    }
-}
-HorizontalDivider(
-    thickness = 1.dp,
-    color = theme.textColor.copy(alpha = 0.15f),
-    modifier = Modifier.padding(horizontal = 16.dp) // Исправили 's' на 'z'
-)
+                HorizontalDivider(
+                    thickness = 1.dp,
+                    color = theme.textColor.copy(alpha = 0.15f),
+                    modifier = Modifier.padding(horizontal = 16.dp) // Исправили 's' на 'z'
+                )
 
 
                 KmpSpinnerInput(
@@ -374,12 +428,12 @@ HorizontalDivider(
                     theme = theme, // Передаем абстрактную тему дальше
                     onCategorySelected = { categorySelected = it }
                 )
-                
-HorizontalDivider(
-    thickness = 1.dp,
-    color = theme.textColor.copy(alpha = 0.15f),
-    modifier = Modifier.padding(horizontal = 16.dp) // Исправили 's' на 'z'
-)
+
+                HorizontalDivider(
+                    thickness = 1.dp,
+                    color = theme.textColor.copy(alpha = 0.15f),
+                    modifier = Modifier.padding(horizontal = 16.dp) // Исправили 's' на 'z'
+                )
 
                 // Блок работы с фото
                 Row(
@@ -403,15 +457,18 @@ HorizontalDivider(
                             verticalArrangement = Arrangement.SpaceBetween
                         ) {
                             TextButton(
-                                onClick = { fileLauncher.launch() },
-                               // colors = ButtonDefaults.textButtonColors(contentColor = theme.textColor)
+                                onClick = {
+
+                                    fileLauncher.launch()
+                                          },
                             ) {
                                 Text(text = "Изменить фото")
                             }
                             TextButton(
-                                onClick = { 
+                                onClick = {
                                     selectedFileUri = ""
-                                    originalFileName = ""},
+                                    originalFileName = ""
+                                },
                                 colors = ButtonDefaults.textButtonColors(contentColor = theme.cardItemBorderFalse)
                             ) {
                                 Text(text = "Удалить фото")
@@ -419,21 +476,24 @@ HorizontalDivider(
                         }
                     } else {
                         // Пружина: забирает всё пространство слева и толкает кнопку вправо
-                        Spacer(modifier = Modifier.weight(1f)) 
-                        
+                        Spacer(modifier = Modifier.weight(1f))
+
                         TextButton(
-                            onClick = { fileLauncher.launch() })
+                            onClick = {
+
+                                fileLauncher.launch()
+                            })
                         {
                             Text(text = "Добавить фото")
                         }
                     }
                 }
-HorizontalDivider(
-    thickness = 1.dp,
-    color = theme.textColor.copy(alpha = 0.15f),
-    modifier = Modifier.padding(horizontal = 16.dp) // Исправили 's' на 'z'
-)
-                
+                HorizontalDivider(
+                    thickness = 1.dp,
+                    color = theme.textColor.copy(alpha = 0.15f),
+                    modifier = Modifier.padding(horizontal = 16.dp) // Исправили 's' на 'z'
+                )
+
             }
         },
 
@@ -442,7 +502,18 @@ HorizontalDivider(
                 onClick = {
                     val text = stateTextName.trim().ifEmpty { "Без названия" }
 
-                    onSave(item,text,stateTextDecs.trim(),selectedFileUri,categorySelected,calendar,false,originalFileName,date,listSubTask)
+                    onSave(
+                        item,
+                        text,
+                        stateTextDecs.trim(),
+                        selectedFileUri,
+                        categorySelected,
+                        calendar,
+                        false,
+                        originalFileName,
+                        date,
+                        listSubTask
+                    )
                 },
             ) {
                 Text("Ок", fontWeight = FontWeight.Bold)
@@ -456,16 +527,27 @@ HorizontalDivider(
                 TextButton(
                     onClick = {
                         val text = stateTextName.trim().ifEmpty { "Без названия" }
-                        onSave(item,text,stateTextDecs.trim(),selectedFileUri,categorySelected,calendar,true,originalFileName,date,listSubTask)
+                        onSave(
+                            item,
+                            text,
+                            stateTextDecs.trim(),
+                            selectedFileUri,
+                            categorySelected,
+                            calendar,
+                            true,
+                            originalFileName,
+                            date,
+                            listSubTask
+                        )
                     },
 
-                ) {
+                    ) {
                     Text("Установка будильника")
                 }
                 TextButton(
                     onClick = { onCancel() },
 
-                ) {
+                    ) {
                     Text("Отмена")
                 }
             }
@@ -476,10 +558,10 @@ HorizontalDivider(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun KmpSpinnerInput(
-    selectedCategory: String,            
-    list: List<String>,                  
-    theme: Theme = ThemeNeon(), 
-    onCategorySelected: (String) -> Unit 
+    selectedCategory: String,
+    list: List<String>,
+    theme: Theme = ThemeNeon(),
+    onCategorySelected: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -490,37 +572,37 @@ fun KmpSpinnerInput(
     ) {
         ExposedDropdownMenuBox(
             expanded = expanded,
-            onExpandedChange = {  },
+            onExpandedChange = { },
         ) {
 
             TextButton(
-    onClick = { expanded = !expanded },
-) {
-    Row(
-        modifier = Modifier
-            .menuAnchor(MenuAnchorType.PrimaryNotEditable, true)
-            .padding(start = 16.dp), 
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.End
-    ) {
-        // Добавляем приглушенное пояснение
-        Text(
-            text = "Категория: ",
-            fontSize = 15.sp,
-            color = theme.textDesc // Твой серый цвет из темы
-        )
-        
-        // Само название категории остается ярким
-        Text(
-            text = selectedCategory,
-            fontSize = 15.sp,
-            color = theme.textColor, // Твой белый/основной цвет
-            modifier = Modifier.padding(end = 8.dp)
-        )
-        
-        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-    }
-}
+                onClick = { expanded = !expanded },
+            ) {
+                Row(
+                    modifier = Modifier
+                        .menuAnchor(MenuAnchorType.PrimaryNotEditable, true)
+                        .padding(start = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    // Добавляем приглушенное пояснение
+                    Text(
+                        text = "Категория: ",
+                        fontSize = 15.sp,
+                        color = theme.textDesc // Твой серый цвет из темы
+                    )
+
+                    // Само название категории остается ярким
+                    Text(
+                        text = selectedCategory,
+                        fontSize = 15.sp,
+                        color = theme.textColor, // Твой белый/основной цвет
+                        modifier = Modifier.padding(end = 8.dp)
+                    )
+
+                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                }
+            }
 
             // TextButton(
             //     onClick = {expanded = !expanded },
@@ -580,18 +662,18 @@ fun KmpSpinnerInput(
                     }
                 }
             }
-           }
-
-            // 3. ВЫПАДАЮЩИЙ СПИСОК (Появляется только при клике)
-
         }
+
+        // 3. ВЫПАДАЮЩИЙ СПИСОК (Появляется только при клике)
+
     }
+}
 
 expect fun parsePlatformUri(uri: PlatformFile): String
 
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewAddItemDialog(){
-    AddOrChangeItemDialog(listCategory = listOf("хер","тыква"))
+fun PreviewAddItemDialog() {
+    AddOrChangeItemDialog(listCategory = listOf("хер", "тыква"))
 }

@@ -96,6 +96,7 @@ fun MainPager(paddingValues: PaddingValues = PaddingValues(),
         val subItemsForDialog by remember(currentDialogTaskId) {
         viewModel.getSubItemsForTask(currentDialogTaskId)
         }.collectAsStateWithLifecycle(initialValue = emptyList())
+
         when(viewModel.showDialog.isWho){
 
             DELETE_DIALOG_ITEM->{

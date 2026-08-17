@@ -37,6 +37,9 @@ import presentation.theme.SizeNormal
 import presentation.theme.Theme
 import presentation.theme.ThemeNeon
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import io.github.vinceglb.filekit.compose.rememberFilePickerLauncher
+import io.github.vinceglb.filekit.core.PickerType
 import org.jetbrains.compose.resources.painterResource
 
 
@@ -47,8 +50,6 @@ fun Faq(
     onBack: () -> Unit = {},
     innerPadding : PaddingValues = PaddingValues())
 {
-
-
         Box(modifier = Modifier.fillMaxSize()) { 
         Image( 
             painter = painterResource(theme.backgroundStart), 

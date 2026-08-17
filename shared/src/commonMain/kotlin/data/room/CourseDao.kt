@@ -17,10 +17,10 @@ interface CourseDao {
 
     //ITEM
     @Query("SELECT * FROM Item")
-    fun getAll(): Flow<List<Item>>
+     fun getAll(): Flow<List<Item>>
 
     @Query("SELECT * FROM Item")
-    fun getAllItemsFlow(): Flow<List<Item>>
+    suspend  fun getAllItemsNotFlow(): List<Item>
     
     @Query("SELECT * FROM Item ORDER BY sort ASC LIMIT 1")
     suspend fun getItemWithMinSort(): Item?
@@ -58,11 +58,20 @@ interface CourseDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertItem(item: Item) : Long
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertItems(item: List<Item>)
+
     @Update
     suspend fun updateItems(items: List<Item>)
 
     @Query("SELECT * FROM Item WHERE changeAlarm = true")
     suspend fun getActiveAlarms(): List<Item>
+
+    @Delete
+    suspend fun delete(item: Item)
+
+    @Query("DELETE FROM Item")
+    suspend fun deleteAllItems()
 
 
     //MENU
@@ -74,11 +83,19 @@ interface CourseDao {
     @Query("SELECT * FROM ListCategory")
     fun getAllListCategory(): Flow<List<ListCategory>>
 
+    @Query("SELECT * FROM ListCategory")
+  suspend  fun getAllListCategoryNotFlow(): List<ListCategory>
+
     @Insert
    suspend fun insertCategory(Courses: ListCategory)
 
-    @Delete
-   suspend fun delete(Course: Item)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertCategorys(categorys: List<ListCategory>)
+
+
+
+    @Query("DELETE FROM ListCategory")
+    suspend fun deleteAllCategorys()
 
     @Delete
     suspend fun deleteCategoryMenu(Course: ListCategory)
@@ -91,6 +108,9 @@ interface CourseDao {
     @Query("SELECT * FROM sub_items")
     fun getAllSubItems(): Flow<List<SubItem>>
 
+    @Query("SELECT * FROM sub_items")
+    suspend fun getAllSubItemsNotFlow(): List<SubItem>
+
     @Query("SELECT * FROM sub_items WHERE idTask = :taskId ORDER BY sort ASC")
     fun getSubItemsForTask(taskId: Int): Flow<List<SubItem>>
 
@@ -102,6 +122,9 @@ interface CourseDao {
 
     @Delete
     suspend fun deleteSubItem(subItem: SubItem)
+
+    @Query("DELETE FROM sub_items")
+    suspend fun deleteAllSubItems()
 
     @Query("DELETE FROM sub_items WHERE idTask = :taskId")
     suspend fun deleteAllSubItemsForTask(taskId: Int)

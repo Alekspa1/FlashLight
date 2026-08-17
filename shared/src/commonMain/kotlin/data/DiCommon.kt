@@ -5,7 +5,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import data.perository.AlarmRepeadImp
-import data.perository.DatabaseHolder
+import data.perository.BackupManagerImpl
 
 import data.perository.SaveDeleteImageImpl
 import data.room.myDataBase
@@ -42,8 +42,8 @@ import kotlinx.serialization.json.Json
 import io.ktor.client.network.sockets.SocketTimeoutException 
 import domain.repostirory.TelegramSyncServiceRepository
 import data.perository.TelegramSyncServiceImpl
+import domain.repostirory.BackupManagerRepository
 import org.koin.core.module.dsl.singleOf
-import domain.repostirory.PlatformBackupContextRepository
 import org.koin.dsl.bind
 
 expect val moduleAnotherPlatform: Module
@@ -105,18 +105,7 @@ val appModule = module {
             }
         }
     }
-
-    //single { get<myDataBase>().CourseDao() }
-
-    single<DatabaseHolder> {
-        DatabaseHolder(databaseBuilder = get<() -> myDataBase>())
-    }
-
-// 2. ИСПРАВЛЕНО: Базу запрашиваем через factory, чтобы Koin каждый раз брал её из холдера заново!
-    factory<myDataBase> { get<DatabaseHolder>().db } bind RoomDatabase::class
-
-// 3. ОБЯЗАТЕЛЬНО: Все ваши DAO тоже регистрируем как factory
-    factory { get<myDataBase>().CourseDao() } // Замените courseDao() на имя вашего метода DAO
+    single { get<myDataBase>().CourseDao() }
 
     single<SharedPrefRepository> { MultiplatrormSettings(settings = get(named("noteBook")), platform = get()) }
     single<SettingsAppRepository > { MultiplatrormAppSettings(settings = get(named("settings"))) }
@@ -124,6 +113,13 @@ val appModule = module {
     single<AlarmRepeadRepository> { AlarmRepeadImp(get(),get()) }
     factory<SaveDeleteImageRepositpry> { SaveDeleteImageImpl(get()) }
     single<TelegramSyncServiceRepository>{TelegramSyncServiceImpl(get()) }
+
+    single<BackupManagerRepository> { BackupManagerImpl(
+        get(),
+       //sharedPrefRepository = get(),
+        get(),
+        get(),
+        get()) }
 
 }
 
