@@ -8,10 +8,15 @@ import okio.Path.Companion.toPath
 import okio.SYSTEM
 
 class SaveDeleteImageImpl(val pathProvider : PathProviderRepostitory) : SaveDeleteImageRepositpry {
-    override fun save(temporaryPathString: String, fileName: String) {
 
+    override fun save(temporaryPathString: String, fileName: String) {
         val sourcePath = temporaryPathString.toPath()
         val targetFullPath = getUri(fileName).toPath()
+
+        // На всякий случай создаем папку /images на ПК, если её ещё нет
+        targetFullPath.parent?.let { parentPath ->
+            FileSystem.SYSTEM.createDirectories(parentPath)
+        }
 
         FileSystem.SYSTEM.copy(sourcePath, targetFullPath)
     }
@@ -28,6 +33,6 @@ class SaveDeleteImageImpl(val pathProvider : PathProviderRepostitory) : SaveDele
 
     override fun getUri(fileName: String): String {
         if (fileName.isEmpty()) return ""
-        return "${pathProvider.getInternalAppPath()}/$fileName"
+        return "${pathProvider.getInternalAppPath()}/images//$fileName"
     }
 }

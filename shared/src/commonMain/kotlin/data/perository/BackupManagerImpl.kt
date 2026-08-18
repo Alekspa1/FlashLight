@@ -60,12 +60,40 @@ class BackupManagerImpl(
                 fileSystem.write(backupDir / "backup_data.json") { writeUtf8(jsonString) }
 
                 // 3. Копируем картинки во временную папку
+//                val imagesSrcDir = "$internalPath/images".toPath()
+//                if (fileSystem.exists(imagesSrcDir)) {
+//                    val imagesDestDir = backupDir / "images"
+//                    fileSystem.createDirectories(imagesDestDir)
+//                    fileSystem.list(imagesSrcDir).forEach { file ->
+//                        fileSystem.copy(file, imagesDestDir / file.name)
+//                    }
+//                }
+
+                val activeImageNames = mutableSetOf<String>()
+
+// Пробегаем по списку дел и вытаскиваем имя файла из uri
+                list2.forEach { item ->
+                    if (item.uri.isNotEmpty()) {
+                        // Вытаскиваем чистое имя файла (например, "img_123.jpg")
+                        val fileName = item.uri.substringAfterLast("/").substringAfterLast("\\")
+                        if (fileName.isNotEmpty()) {
+                            activeImageNames.add(fileName)
+                        }
+                    }
+                }
+
+// 2. Копируем во временный бэкап ТОЛЬКО те файлы, которые есть в нашем списке activeImageNames
                 val imagesSrcDir = "$internalPath/images".toPath()
                 if (fileSystem.exists(imagesSrcDir)) {
                     val imagesDestDir = backupDir / "images"
                     fileSystem.createDirectories(imagesDestDir)
+
+                    // Проверяем файлы на диске
                     fileSystem.list(imagesSrcDir).forEach { file ->
-                        fileSystem.copy(file, imagesDestDir / file.name)
+                        // Если этот файл реально привязан к делу — только тогда копируем его в ZIP!
+                        if (activeImageNames.contains(file.name)) {
+                            fileSystem.copy(file, imagesDestDir / file.name)
+                        }
                     }
                 }
 
