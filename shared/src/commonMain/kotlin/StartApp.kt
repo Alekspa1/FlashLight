@@ -105,16 +105,6 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
     val navController = rememberNavController()
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    LaunchedEffect(lifecycleOwner.lifecycle) {
-        // repeatOnLifecycle автоматически отменит корутину (и Ktor-запрос),
-        // когда приложение свернется, и перезапустит её, когда оно откроется.
-        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-            viewModel.telegramTasksFlow.collect() // Просто триггерим сбор данных
-        }
-    }
-
-
-
     MaterialTheme(
         colorScheme = if (viewModel.themeState == ThemeNeon()) darkColorScheme(
             primary = theme.textColor,
