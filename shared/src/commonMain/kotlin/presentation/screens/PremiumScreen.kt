@@ -4,6 +4,17 @@ import CommonConst.FOREVER
 import CommonConst.ONE_MONTH
 import CommonConst.ONE_YEAR
 import CommonConst.SIX_MONTH
+
+import CommonConst.ADVERTISING_TURN_OFF
+import CommonConst.SORT_USER
+import CommonConst.CALENDAR_TURN_ON
+import CommonConst.REPEAT_ALARM_ON
+import CommonConst.CREATE_MY_LIST_CATEGORY
+import CommonConst.DONATE
+import CommonConst.CREATE_SUB_ITEMS
+
+
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -60,6 +71,7 @@ import io.github.vinceglb.filekit.compose.rememberFilePickerLauncher
 import io.github.vinceglb.filekit.core.PickerType
 import presentation.dialogs.parsePlatformUri
 import kotlin.time.Clock
+import presentation.dialogs.FaqPremiumDialog
 
 @Composable
 fun PremiumScreen(
@@ -72,6 +84,8 @@ fun PremiumScreen(
     ){
 
     var isSelected by remember { mutableStateOf(ONE_YEAR) }
+    var isOpenDialogPremiumInfo by remember {mutableStateOf("")}
+    
     val premiumFeatures = remember {
     listOf(
         "Отключение рекламы",
@@ -82,6 +96,17 @@ fun PremiumScreen(
         "Поддержка разработчика",
         "Создание подзадач"
     )
+    }
+
+    when(isOpenDialogPremiumInfo){
+    ADVERTISING_TURN_OFF-> { FaqPremiumDialog("Полностью убирает рекламу из приложения"){isOpenDialogPremiumInfo = ""} }
+    SORT_USER -> { FaqPremiumDialog("Позволяет сортировать дела как вы этого захотите(добавить картинку)"){isOpenDialogPremiumInfo = ""} }
+    CALENDAR_TURN_ON -> { FaqPremiumDialog("Позволяет видеть ваши дела с утановленным временем в календаре(добавить картинку)"){isOpenDialogPremiumInfo = ""} }
+    REPEAT_ALARM_ON -> { FaqPremiumDialog("Позволяет создавать напоминания каждый день/неделю/месяц/год"){isOpenDialogPremiumInfo = ""} }
+    CREATE_MY_LIST_CATEGORY -> { FaqPremiumDialog("Позволяет создавать свои собственные списки дел"){isOpenDialogPremiumInfo = ""} }
+    DONATE -> { FaqPremiumDialog("Вы поддержите разработчика материально:)"){isOpenDialogPremiumInfo = ""} }
+    CREATE_SUB_ITEMS -> { FaqPremiumDialog("Позволяет создавать подзадачи"){isOpenDialogPremiumInfo = ""} }
+    else -> {}   
     }
 
 
@@ -278,8 +303,21 @@ fun PremiumScreen(
 @Composable
 fun PremiumItem(text: String,
                 theme: Theme = ThemeNeon(),
-                size: Size = SizeNormal()
+                size: Size = SizeNormal(),
 ){
+    
+val nameDialog = when(text){
+ "Отключение рекламы" -> ADVERTISING_TURN_OFF
+ "Пользовательская сортировка" -> SORT_USER
+ "Отображение дел в календаре" -> CALENDAR_TURN_ON
+ "Повторяющиеся напоминания" -> REPEAT_ALARM_ON
+ "Создание своих списков дел" -> CREATE_MY_LIST_CATEGORY
+ "Поддержка разработчика" -> DONATE
+ "Создание подзадач" -> CREATE_SUB_ITEMS
+  else -> ""  
+}
+
+    
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -306,7 +344,7 @@ fun PremiumItem(text: String,
             )
 
             IconButton(
-                onClick = { },
+                onClick = {isOpenDialogPremiumInfo = nameDialog },
                 modifier = Modifier.padding(end = 8.dp).size(24.dp)
             ) {
 
