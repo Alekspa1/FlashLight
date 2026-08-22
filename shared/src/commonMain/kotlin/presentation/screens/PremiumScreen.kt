@@ -178,7 +178,7 @@ fun PremiumScreen(
                         verticalArrangement = Arrangement.spacedBy(5.dp)
                     ) {
                         premiumFeatures.forEachIndexed { index, feature ->
-                        PremiumItem(text = feature, theme = theme, size = size)
+                        PremiumItem(text = feature, theme = theme, size = size){name-> isOpenDialogPremiumInfo = name }
     
                     // Рисуем разделитель для всех элементов, кроме самого последнего
                         if (index < premiumFeatures.lastIndex) {
@@ -305,6 +305,7 @@ fun PremiumScreen(
 fun PremiumItem(text: String,
                 theme: Theme = ThemeNeon(),
                 size: Size = SizeNormal(),
+                isOpenDialogName : (String) -> Unit
 ){
     
 val nameDialog = when(text){
@@ -345,7 +346,7 @@ val nameDialog = when(text){
             )
 
             IconButton(
-                onClick = {isOpenDialogPremiumInfo = nameDialog },
+                onClick = { isOpenDialogName(nameDialog) },
                 modifier = Modifier.padding(end = 8.dp).size(24.dp)
             ) {
 
