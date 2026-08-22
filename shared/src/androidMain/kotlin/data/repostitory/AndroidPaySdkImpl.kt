@@ -27,8 +27,8 @@ import ru.rustore.sdk.pay.model.SubscriptionPurchaseStatus
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import ru.rustore.sdk.pay.model.UserAuthorizationStatus
-import ru.rustore.sdk.core.tasks.addOnSuccessListener
 import ru.rustore.sdk.core.tasks.addOnFailureListener
+import ru.rustore.sdk.core.tasks.addOnSuccessListener
 
 
 class AndroidPaySdkImpl(private val pref: SharedPrefRepository, private val context: Context) : PaySdkRepository {
@@ -129,7 +129,7 @@ class AndroidPaySdkImpl(private val pref: SharedPrefRepository, private val cont
     }
 
     override suspend fun isChekedSubcrition(): Result<Boolean> {
-        if(isAuthorizationInRustore){
+        if(isAuthorizationInRustore()){
     return try {
         val billingClient = RuStoreBillingClientFactory.create(
             context = context,
@@ -182,7 +182,7 @@ class AndroidPaySdkImpl(private val pref: SharedPrefRepository, private val cont
     } else return Result.failure(Exception("Не авторизован"))
 }
 
-   suspend fun isAuthorizationInRustore : Boolean = suspendCancellableCoroutine { continuation ->
+   suspend fun isAuthorizationInRustore() : Boolean = suspendCancellableCoroutine { continuation ->
     RuStorePayClient.instance.getUserInteractor().getUserAuthorizationStatus()
     .addOnSuccessListener { result ->
         when (result) {
