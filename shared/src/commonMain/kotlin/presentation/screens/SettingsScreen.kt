@@ -200,7 +200,7 @@ fun SettingsScreen(
                         color = theme.textColor,
                         fontSize = size.textMenu,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().clicable(viewModel.testPremium()),
                         textAlign = TextAlign.Center
                     )
                 }
