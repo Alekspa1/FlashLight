@@ -26,6 +26,10 @@ import ru.rustore.sdk.pay.model.Purchase
 import ru.rustore.sdk.pay.model.SubscriptionPurchaseStatus
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+import ru.rustore.sdk.pay.model.UserAuthorizationStatus
+import ru.rustore.sdk.core.tasks.addOnSuccessListener
+import ru.rustore.sdk.core.tasks.addOnFailureListener
+
 
 class AndroidPaySdkImpl(private val pref: SharedPrefRepository, private val context: Context) : PaySdkRepository {
 
@@ -125,6 +129,7 @@ class AndroidPaySdkImpl(private val pref: SharedPrefRepository, private val cont
     }
 
     override suspend fun isChekedSubcrition(): Result<Boolean> {
+        if(isAuthorizationInRustore){
     return try {
         val billingClient = RuStoreBillingClientFactory.create(
             context = context,
@@ -168,13 +173,33 @@ class AndroidPaySdkImpl(private val pref: SharedPrefRepository, private val cont
         }
 
         // Финальный дефолтный кейс
-        Result.success(hasActivePremiumInStore)
+       return Result.success(hasActivePremiumInStore)
 
     } catch (throwable: Throwable) {
         // Сюда прилетит ошибка, ТОЛЬКО если упал новый актуальный Pay SDK или вообще нет интернета
         Result.failure(throwable)
     }
+    } else return Result.failure(Exception("Не авторизован"))
 }
+
+    fun isAuthorizationInRustore : Boolean = suspendCancellableCoroutine { continuation ->
+    RuStorePayClient.instance.getUserInteractor().getUserAuthorizationStatus()
+    .addOnSuccessListener { result ->
+        when (result) {
+            UserAuthorizationStatus.AUTHORIZED -> {
+                 continuation.resume(true)
+            }
+ 
+            UserAuthorizationStatus.UNAUTHORIZED -> {
+                continuation.resume(false)
+            }
+        }
+    }.addOnFailureListener { throwable ->
+       continuation.resumeWithException(throwable)
+    }
+
+       
+    }
 
     private suspend fun getNewPurchases(): List<Purchase> = suspendCancellableCoroutine { continuation ->
     RuStorePayClient.instance.getPurchaseInteractor().getPurchases()
