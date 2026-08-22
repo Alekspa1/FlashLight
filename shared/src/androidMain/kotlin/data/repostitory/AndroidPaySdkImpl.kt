@@ -27,8 +27,8 @@ import ru.rustore.sdk.pay.model.SubscriptionPurchaseStatus
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import ru.rustore.sdk.pay.model.UserAuthorizationStatus
-import ru.rustore.sdk.core.tasks.addOnFailureListener
-import ru.rustore.sdk.core.tasks.addOnSuccessListener
+import ru.rustore.sdk.pay.model.addOnFailureListener
+import ru.rustore.sdk.pay.model.addOnSuccessListener
 
 
 class AndroidPaySdkImpl(private val pref: SharedPrefRepository, private val context: Context) : PaySdkRepository {
