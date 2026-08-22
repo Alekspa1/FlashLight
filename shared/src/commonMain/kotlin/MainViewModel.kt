@@ -82,7 +82,9 @@ class MainViewModel(
 
     ) : ViewModel() {
 
-
+    fun testPremium(){
+    savePremium(!pref.getPremium())    
+    }
     private val _soundState = MutableStateFlow<Map<String, String>>(emptyMap())
     val soundState = _soundState.asStateFlow()
 
