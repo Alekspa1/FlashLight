@@ -26,31 +26,45 @@ import org.jetbrains.compose.resources.painterResource
 
 
 @Composable
-fun FaqPremiumDialog(text: String = "Тест",
-                     image: DrawableResource? = Res.drawable.background_dialog_neon,
-                     onClick : () -> Unit = {}){
-
-    AlertDialog(onDismissRequest = { onClick() },
-        confirmButton = {},
-        dismissButton = {},
-        text = {
-            Column(verticalArrangement = Arrangement.Center) {
-                Text( text = text, fontSize = 16.sp)
-                if(image != null){
+fun FaqPremiumDialog(
+    text: String = "Тест",
+    image: DrawableResource? = null, // Поставил null по умолчанию для безопасности, замени на свой Res
+    onClick: () -> Unit = {}
+) {
+    Dialog(onDismissRequest = { onClick() }) {
+        // Card задает форму и белый (или кастомный) фон нашему окошку
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp), // Отступ самого диалога от краев экрана
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White) 
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Отступы для текста, чтобы он не прижимался к краям карточки
+                Text(
+                    text = text, 
+                    fontSize = 16.sp,
+                    modifier = Modifier.padding(top = 24.dp, bottom = 16.dp, start = 16.dp, end = 16.dp)
+                )
+                
+                if (image != null) {
                     Image(
                         painter = painterResource(image),
                         contentDescription = null,
                         modifier = Modifier.fillMaxWidth(),
-                        contentScale = ContentScale.FillWidth
+                        contentScale = ContentScale.FillWidth // Картинка займет всю ширину карточки «в край»
                     )
                 }
-
-
             }
         }
-        )
-
+    }
 }
+
+
 @Preview
 @Composable
 fun FaqPremiumDialogPrev(){
