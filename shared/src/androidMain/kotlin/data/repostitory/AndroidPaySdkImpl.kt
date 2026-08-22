@@ -182,7 +182,7 @@ class AndroidPaySdkImpl(private val pref: SharedPrefRepository, private val cont
     } else return Result.failure(Exception("Не авторизован"))
 }
 
-    fun isAuthorizationInRustore : Boolean = suspendCancellableCoroutine { continuation ->
+   suspend fun isAuthorizationInRustore : Boolean = suspendCancellableCoroutine { continuation ->
     RuStorePayClient.instance.getUserInteractor().getUserAuthorizationStatus()
     .addOnSuccessListener { result ->
         when (result) {
