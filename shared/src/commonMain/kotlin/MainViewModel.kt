@@ -114,7 +114,7 @@ class MainViewModel(
         isUpdateApp()
         loadProduct()
         isCheckPremiumWithBuy()
-        startTelegramRealtimeListener()
+       // startTelegramRealtimeListener()
     }
 
 private val _sharedIntentEvent = Channel<Pair<String?, String?>>(Channel.BUFFERED)
@@ -146,8 +146,6 @@ fun openDialogByTaskId(taskId: Int) {
     }
 }
 
-    val startTelegramRealtimeListener = telegramSync.listenToTelegramRealtime()
-
     val telegramTasksFlow = telegramSync.listenToTelegramRealtime()
         .onEach { taskText ->
             // Логика добавления в базу теперь живет здесь
@@ -172,19 +170,19 @@ fun openDialogByTaskId(taskId: Int) {
 
 
 
-    fun startTelegramRealtimeListener() {
-    viewModelScope.launch(Dispatchers.IO) {
-        telegramSync.listenToTelegramRealtime()
-            .collect { taskText -> // Сюда задача прилетает мгновенно в момент отправки в ТГ
-                val newItem = Item(
-                    name = taskText,
-                    category = "Повседневные"
-                )
-                // Записываем в Room. База обновится, и Compose сам перерисует экран!
-                insertItem(newItem)
-            }
-        }
-    }
+//    fun startTelegramRealtimeListener() {
+//    viewModelScope.launch(Dispatchers.IO) {
+//        telegramSync.listenToTelegramRealtime()
+//            .collect { taskText -> // Сюда задача прилетает мгновенно в момент отправки в ТГ
+//                val newItem = Item(
+//                    name = taskText,
+//                    category = "Повседневные"
+//                )
+//                // Записываем в Room. База обновится, и Compose сам перерисует экран!
+//                insertItem(newItem)
+//            }
+//        }
+//    }
 
 
     fun doImport() {
