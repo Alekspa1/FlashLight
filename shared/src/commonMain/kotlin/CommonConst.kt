@@ -86,6 +86,14 @@ object CommonConst {
     const val APP_SETTINGS = "APP_SETTINGS"
     const val TASK_ID = "TASK_ID"
 
+    const val ADVERTISING_TURN_OFF = "ADVERTISING_TURN_OFF"
+    const val CALENDAR_TURN_ON = "CALENDAR_TURN_ON"
+    const val REPEAT_ALARM_ON = "REPEAT_ALARM_ON"
+    const val TASK_ID = "CREATE_MY_LIST_CATEGORY"
+    const val TASK_ID = "CREATE_SUB_ITEMS"
+
+    
+
 
 
 
