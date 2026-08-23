@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import flashlight.shared.generated.resources.Res
 import flashlight.shared.generated.resources.background_drawer_neon
 import flashlight.shared.generated.resources.background_neon
+import flashlight.shared.generated.resources.background_poison
 import flashlight.shared.generated.resources.background_zabor
 import flashlight.shared.generated.resources.ic_del_notebook_neon
 import flashlight.shared.generated.resources.ic_micro_neon
@@ -358,7 +359,7 @@ data class ThemePoison (
     override val iconDrawerUpdateOn: ImageVector = Icons.Default.Upgrade,
     override val iconDrawerSettigs: ImageVector = Icons.Default.Settings,
     override val backgroundDialog: Color = Color(0xFF1A231F),    // Очень темный графитово-зеленый цвет для окон
-    override val backgroundStart: DrawableResource = Res.drawable.background_neon, // Оставлено как есть
+    override val backgroundStart: DrawableResource = Res.drawable.background_poison, // Оставлено как есть
     override val backgroundDrawer: DrawableResource = Res.drawable.background_drawer_neon, // Оставлено как есть
     override val borderCardMenuItem: Color = Color(0x9900FF87),  // Рамка меню светится зеленым
     override val cardMenuItem: Color = Color(0x65213229),        // Фон меню цвета старого темного чугуна
