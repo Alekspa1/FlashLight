@@ -13,6 +13,8 @@ import CommonConst.SIZE_STANDART
 import CommonConst.SORT_STANDART
 import CommonConst.THEME_FUTURE
 import CommonConst.THEME_ZABOR
+import CommonConst.THEME_MRAMOR
+import CommonConst.THEME_GROZA
 import CommonConst.TIME
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
