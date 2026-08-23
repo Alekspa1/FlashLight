@@ -16,6 +16,7 @@ import CommonConst.THEME_SETTINGS
 import CommonConst.THEME_ZABOR
 import CommonConst.THEME_MRAMOR
 import CommonConst.THEME_GROZA
+import CommonConst.THEME_POISON
 import MainViewModel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -80,7 +81,7 @@ fun SettingsScreen(
     innerPadding: PaddingValues
 ) {
 
-    val listTheme = listOf(THEME_FUTURE, THEME_ZABOR,THEME_MRAMOR,THEME_GROZA)
+    val listTheme = listOf(THEME_FUTURE, THEME_ZABOR,THEME_MRAMOR,THEME_GROZA,THEME_POISON)
     val listSize = listOf(SIZE_SMALL, SIZE_STANDART, SIZE_LARGE)
     val listSort = listOf(SORT_STANDART, SORT_USER)
     val listSound by viewModel.soundState.collectAsState()
