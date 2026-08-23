@@ -72,9 +72,13 @@ object CommonConst {
     const val SORT_SETTINGS = "SORT_SETTINGS"
     const val SORT_STANDART = "Стандартная"
     const val SORT_USER = "Пользовательская"
+    
     const val THEME_SETTINGS = "THEME_SETTINGS"
     const val THEME_FUTURE = "Неоновая"
     const val THEME_ZABOR = "Деревянная"
+    const val THEME_MRAMOR = "Мраморная"
+    const val THEME_GROZA = "Грозовая"
+    
     const val SIZE_SETTINGS = "SIZE_SETTINGS"
     const val SIZE_SMALL = "Малый"
     const val SIZE_STANDART = "Стандартный"
