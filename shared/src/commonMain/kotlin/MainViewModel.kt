@@ -64,6 +64,9 @@ import presentation.theme.SizeNormal
 import presentation.theme.SizeSmall
 import presentation.theme.ThemeNeon
 import presentation.theme.ThemeZabor
+import presentation.theme.ThemeStorm
+import presentation.theme.ThemeMarble
+
 import kotlin.time.Clock
 
 class MainViewModel(
@@ -296,6 +299,8 @@ fun openDialogByTaskId(taskId: Int) {
         when (settingsPref.getTheme()) {
             THEME_FUTURE -> ThemeNeon()
             THEME_ZABOR -> ThemeZabor()
+            THEME_MRAMOR -> ThemeMarble()
+            THEME_GROZA -> ThemeStorm()
             else -> ThemeNeon()
         }
     )
