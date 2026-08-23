@@ -100,13 +100,13 @@ fun PremiumScreen(
     }
 
     when(isOpenDialogPremiumInfo){
-    ADVERTISING_TURN_OFF-> { FaqPremiumDialog("Полностью убирает рекламу из приложения"){isOpenDialogPremiumInfo = ""} }
-    SORT_USER -> { FaqPremiumDialog("Позволяет сортировать дела как вы этого захотите(добавить картинку)"){isOpenDialogPremiumInfo = ""} }
-    CALENDAR_TURN_ON -> { FaqPremiumDialog("Позволяет видеть ваши дела с утановленным временем в календаре(добавить картинку)"){isOpenDialogPremiumInfo = ""} }
-    REPEAT_ALARM_ON -> { FaqPremiumDialog("Позволяет создавать напоминания каждый день/неделю/месяц/год"){isOpenDialogPremiumInfo = ""} }
-    CREATE_MY_LIST_CATEGORY -> { FaqPremiumDialog("Позволяет создавать свои собственные списки дел"){isOpenDialogPremiumInfo = ""} }
-    DONATE -> { FaqPremiumDialog("Вы поддержите разработчика материально:)"){isOpenDialogPremiumInfo = ""} }
-    CREATE_SUB_ITEMS -> { FaqPremiumDialog("Позволяет создавать подзадачи"){isOpenDialogPremiumInfo = ""} }
+    ADVERTISING_TURN_OFF-> { FaqPremiumDialog(text = "Полностью убирает рекламу из приложения" ,theme = theme){isOpenDialogPremiumInfo = ""} }
+    SORT_USER -> { FaqPremiumDialog(text = "Позволяет сортировать дела как вы этого захотите(добавить картинку)" ,theme = theme){isOpenDialogPremiumInfo = ""} }
+    CALENDAR_TURN_ON -> { FaqPremiumDialog(text = "Позволяет видеть ваши дела с утановленным временем в календаре(добавить картинку)" ,theme = theme){isOpenDialogPremiumInfo = ""} }
+    REPEAT_ALARM_ON -> { FaqPremiumDialog(text = "Позволяет создавать напоминания каждый день/неделю/месяц/год" ,theme = theme){isOpenDialogPremiumInfo = ""} }
+    CREATE_MY_LIST_CATEGORY -> { FaqPremiumDialog(text = "Позволяет создавать свои собственные списки дел" ,theme = theme){isOpenDialogPremiumInfo = ""} }
+    DONATE -> { FaqPremiumDialog(text = "Вы поддержите разработчика материально:)" ,theme = theme){isOpenDialogPremiumInfo = ""} }
+    CREATE_SUB_ITEMS -> { FaqPremiumDialog(text = "Позволяет создавать подзадачи" ,theme = theme){isOpenDialogPremiumInfo = ""} }
     else -> {}   
     }
 
