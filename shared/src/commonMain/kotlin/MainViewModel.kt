@@ -322,8 +322,11 @@ fun openDialogByTaskId(taskId: Int) {
     settingsPref.saveTheme(value)
     
     when(value){
-    THEME_FUTURE ->{themeState = ThemeNeon()}
-    THEME_ZABOR -> {themeState = ThemeZabor()}   
+    THEME_FUTURE -> themeState = ThemeNeon()
+    THEME_ZABOR ->  themeState = ThemeZabor() 
+    THEME_MRAMOR -> themeState = ThemeMarble()
+    THEME_GROZA -> themeState = ThemeStorm()
+    
     }
     }
     fun getTheme() = settingsPref.getTheme()
