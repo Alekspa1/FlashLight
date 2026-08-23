@@ -33,40 +33,53 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
+import presentation.theme.Theme
+import presentation.theme.ThemeNeon
 
 
 @Composable
 fun FaqPremiumDialog(
     text: String = "Тест",
-    image: DrawableResource? = null, // Поставил null по умолчанию для безопасности, замени на свой Res
-    onClick: () -> Unit = {}
+    image: DrawableResource? = null,
+    theme: Theme = ThemeNeon(),
+    onDismiss: () -> Unit = {}
 ) {
-    Dialog(onDismissRequest = { onClick() }) {
-        // Card задает форму и белый (или кастомный) фон нашему окошку
-        Card(
+    Dialog(onDismissRequest = { onDismiss() }) {
+        // Surface выступает контейнером и автоматически применяет цвет фона темы
+        Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp), // Отступ самого диалога от краев экрана
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White) 
+                .padding(horizontal = 16.dp), // Отступ самого окна от краев экрана
+            shape = RoundedCornerShape(28.dp), // Стандартное скругление диалогов Material 3
+            color = theme.backgroundColor      // Фон из вашей кастомной темы
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Отступы для текста, чтобы он не прижимался к краям карточки
+                // Текст сообщения с правильными отступами
                 Text(
                     text = text, 
-                    fontSize = 16.sp,
-                    modifier = Modifier.padding(top = 24.dp, bottom = 16.dp, start = 16.dp, end = 16.dp)
+                    color = theme.textColor,
+                    fontSize = 18.sp,
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(
+                        top = 24.dp, 
+                        bottom = if (image != null) 16.dp else 24.dp, 
+                        start = 24.dp, 
+                        end = 24.dp
+                    )
                 )
                 
+                // Если картинка передана, она аккуратно встает в край нижней части
                 if (image != null) {
                     Image(
                         painter = painterResource(image),
                         contentDescription = null,
-                        modifier = Modifier.fillMaxWidth(),
-                        contentScale = ContentScale.FillWidth // Картинка займет всю ширину карточки «в край»
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp)), // Скругляем низ картинки по форме Surface
+                        contentScale = ContentScale.FillWidth
                     )
                 }
             }
