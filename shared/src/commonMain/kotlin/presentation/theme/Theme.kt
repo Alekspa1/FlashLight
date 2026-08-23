@@ -320,8 +320,8 @@ data class ThemePoison (
     override val textColor: Color = Color(0xFFE0F7FA),           // Очень светлый, почти белый мятный оттенок для максимального контраста
 
     // Блокнот
-    override val noteBookBackground: Color = Color(0x991B5E20), // Глубокий, плотный темно-зеленый (цвет ядовитого стекла)
-    override val noteBookBorder: Color = Color(0x9900E676),     // Ярко-зеленый светящийся контур
+    override val noteBookBackground: Color = Color(0xCC0B140F), 
+    override val noteBookBorder: Color = Color(0x8000FF87),
     val iconMicro: DrawableResource = Res.drawable.ic_micro_neon, // Оставлено как есть
     val iconDel: DrawableResource = Res.drawable.ic_del_notebook_neon, // Оставлено как есть
 
