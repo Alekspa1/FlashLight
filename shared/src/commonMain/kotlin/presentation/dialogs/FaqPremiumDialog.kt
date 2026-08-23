@@ -51,7 +51,6 @@ fun FaqPremiumDialog(
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp), // Отступ самого окна от краев экрана
             shape = RoundedCornerShape(28.dp), // Стандартное скругление диалогов Material 3
-            color = theme.backgroundColor      // Фон из вашей кастомной темы
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth(),
