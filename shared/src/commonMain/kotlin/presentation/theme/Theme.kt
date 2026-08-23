@@ -328,16 +328,16 @@ data class ThemePoison (
     // Список дел
     override val tintAlarmOn: Color = Color(0xFF00FF87),        // Токсично-зеленый светящийся активный будильник
     override val tintAlarmOff: Color = Color(0xFF455A64),       // Тусклый металлическо-серый для выключенного
-    override val textDesc: Color = Color(0xFF90A4AE),           // Серый с зеленым отливом для описания
+    override val textDesc: Color = Color(0xFFA7FFEB),          // Серый с зеленым отливом для описания
 
 
-    override val cardItemBorderAlarm: Color = Color(0xB300FF87), // Ядовито-зеленый бордюр
-    override val cardItemBorderTrue: Color = Color(0xB300E676),  // Чистый зеленый бордюр
-    override val cardItemBorderFalse: Color = Color(0xB3FF1744), // Кислотно-красный бордюр для контраста ошибок
+    override val cardItemBorderAlarm: Color = Color(0xFF00FF87), // Ядовито-зеленый для важных/активных
+    override val cardItemBorderTrue: Color = Color(0xFF00E676),  // Насыщенный зеленый для выполненных
+    override val cardItemBorderFalse: Color = Color(0xFFFF1744), // Насыщенный красный для просроченных/отмененных
 
-    override val cardItemAlarm: Color = Color(0x80121D15),       // Очень темный, полупрозрачный болотистый фон карточки
-    override val cardItemTrue: Color = Color(0x4D00C853),        // Полупрозрачный зеленый фон выполненной задачи
-    override val cardItemFalse: Color = Color(0x4DD50000),       // Полупрозрачный красный фон отмененной задачи
+    override val cardItemAlarm: Color = Color(0xDA0B140F),
+    override val cardItemTrue: Color = Color(0xDA0A1A0E),
+    override val cardItemFalse: Color = Color(0xDA1A0A0A),
 
     override val textAlarm: Color = Color(0xFF00FF87),           // Светящийся зеленый текст времени
     override val chekBoxOff: ImageVector = Icons.Default.CheckBoxOutlineBlank,
@@ -361,8 +361,8 @@ data class ThemePoison (
     override val backgroundDialog: Color = Color(0xFF1A231F),    // Очень темный графитово-зеленый цвет для окон
     override val backgroundStart: DrawableResource = Res.drawable.background_poison, // Оставлено как есть
     override val backgroundDrawer: DrawableResource = Res.drawable.background_drawer_neon, // Оставлено как есть
-    override val borderCardMenuItem: Color = Color(0x9900FF87),  // Рамка меню светится зеленым
-    override val cardMenuItem: Color = Color(0x65213229),        // Фон меню цвета старого темного чугуна
+    override val borderCardMenuItem: Color = Color(0x8000FF87),  
+    override val cardMenuItem: Color = Color(0xE6121D15),         // Фон меню цвета старого темного чугуна
     override val colorCalendarDaySelect: Color = Color.Black     // Черный текст внутри ярко-зеленого круга выделения
 ) : Theme {
     @Composable
