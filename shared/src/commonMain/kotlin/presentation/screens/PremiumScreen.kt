@@ -72,6 +72,8 @@ import io.github.vinceglb.filekit.core.PickerType
 import presentation.dialogs.parsePlatformUri
 import kotlin.time.Clock
 import presentation.dialogs.FaqPremiumDialog
+import flashlight.shared.generated.resources.Res
+import flashlight.shared.generated.resources.ic_sort_faq
 
 @Composable
 fun PremiumScreen(
@@ -99,16 +101,30 @@ fun PremiumScreen(
     )
     }
 
-    when(isOpenDialogPremiumInfo){
-    ADVERTISING_TURN_OFF-> { FaqPremiumDialog(text = "Полностью убирает рекламу из приложения" ,theme = theme){isOpenDialogPremiumInfo = ""} }
-    SORT_USER -> { FaqPremiumDialog(text = "Позволяет сортировать дела как вы этого захотите(добавить картинку)" ,theme = theme){isOpenDialogPremiumInfo = ""} }
-    CALENDAR_TURN_ON -> { FaqPremiumDialog(text = "Позволяет видеть ваши дела с утановленным временем в календаре(добавить картинку)" ,theme = theme){isOpenDialogPremiumInfo = ""} }
-    REPEAT_ALARM_ON -> { FaqPremiumDialog(text = "Позволяет создавать напоминания каждый день/неделю/месяц/год" ,theme = theme){isOpenDialogPremiumInfo = ""} }
-    CREATE_MY_LIST_CATEGORY -> { FaqPremiumDialog(text = "Позволяет создавать свои собственные списки дел" ,theme = theme){isOpenDialogPremiumInfo = ""} }
-    DONATE -> { FaqPremiumDialog(text = "Вы поддержите разработчика материально:)" ,theme = theme){isOpenDialogPremiumInfo = ""} }
-    CREATE_SUB_ITEMS -> { FaqPremiumDialog(text = "Позволяет создавать подзадачи" ,theme = theme){isOpenDialogPremiumInfo = ""} }
-    else -> {}   
+when(isOpenDialogPremiumInfo) {
+    ADVERTISING_TURN_OFF -> { 
+        FaqPremiumDialog(text = "Полное отключение рекламы в приложении", theme = theme) { isOpenDialogPremiumInfo = "" } 
     }
+    SORT_USER -> { 
+        FaqPremiumDialog(text = "Настраивайте порядок задач под себя — перетаскивайте и группируйте как удобно",image = Res.drawable.ic_sort_faq, theme = theme) { isOpenDialogPremiumInfo = "" } 
+    }
+    CALENDAR_TURN_ON -> { 
+        FaqPremiumDialog(text = "Наглядный календарь для контроля всех задач по времени", theme = theme) { isOpenDialogPremiumInfo = "" } 
+    }
+    REPEAT_ALARM_ON -> { 
+        FaqPremiumDialog(text = "Повторяющиеся напоминания: каждый день, неделю, месяц или год", theme = theme) { isOpenDialogPremiumInfo = "" } 
+    }
+    CREATE_MY_LIST_CATEGORY -> { 
+        FaqPremiumDialog(text = "Создание собственных списков и категорий для ваших дел", theme = theme) { isOpenDialogPremiumInfo = "" } 
+    }
+    DONATE -> { 
+        FaqPremiumDialog(text = "Прямая поддержка разработчика для развития проекта :)", theme = theme) { isOpenDialogPremiumInfo = "" } 
+    }
+    CREATE_SUB_ITEMS -> { 
+        FaqPremiumDialog(text = "Создание подзадач для разбиения крупных целей на шаги", theme = theme) { isOpenDialogPremiumInfo = "" } 
+    }
+    else -> {}   
+}
 
 
 
