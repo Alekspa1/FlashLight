@@ -65,6 +65,8 @@ import presentation.theme.ThemeZabor
 import kotlin.time.Clock
 import kotlin.time.Instant
 import data.room.model.SubItem
+import androidx.compose.material3.Surface
+
 
 @Composable
 fun Calendar(
@@ -87,15 +89,7 @@ fun Calendar(
         onClickSubItem = onClickSubItem,
         onAddItem = onAddItem,
         message = {message-> viewModel.sendMessage(message) })
-    
-    // CalendarContent(
-    //     listItems = listItems,
-    //     selectedFileUri = {uri-> viewModel.getUri(uri)},
-    //     theme = viewModel.themeState,
-    //     size = viewModel.sizeState,
-    //     onClick = onClick,
-    //     onAddItem = onAddItem,
-    //     message = {message-> viewModel.sendMessage(message) })
+
 
 }
 
@@ -157,6 +151,13 @@ fun CalendarContent(
         ) {
 
             item {
+                Surface(
+                color = theme.noteBookBackground,
+                border = BorderStroke(1.dp, theme.noteBookBorder),
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier.padding(16.dp)
+                ) {
+                
                     HorizontalCalendar(
                         modifier = Modifier.fillMaxWidth(),
                         state = state,
@@ -233,6 +234,7 @@ fun CalendarContent(
                             }
                         }
                     )
+            }
 
                 }
             if (selectedDateTasks.isEmpty()) {
@@ -264,18 +266,6 @@ fun CalendarContent(
                         onClick = onClick,
                         onClickSubItem = onClickSubItem,
                     )
-
-
-                    // CardItem(
-                    //     item = item.item,
-                    //     listSubItems = item.subItems,
-                    //     selectedFileUri = selectedFileUri(item.item.uri),
-                    //     theme = theme, 
-                    //     size = size,
-                    //     onSubDragDropped = {listSubItems->onSubDragDropped(listSubItems) },
-                    //     onClick = onClick,
-                    //     onClickSubItem = onClickSubItem
-                    // )
                          
             }
 
