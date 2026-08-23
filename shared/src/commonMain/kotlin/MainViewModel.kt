@@ -15,6 +15,7 @@ import CommonConst.THEME_FUTURE
 import CommonConst.THEME_ZABOR
 import CommonConst.THEME_MRAMOR
 import CommonConst.THEME_GROZA
+import CommonConst.THEME_POISON
 import CommonConst.TIME
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -68,6 +69,7 @@ import presentation.theme.ThemeNeon
 import presentation.theme.ThemeZabor
 import presentation.theme.ThemeStorm
 import presentation.theme.ThemeMarble
+import presentation.theme.ThemePoison
 
 import kotlin.time.Clock
 
@@ -303,6 +305,7 @@ fun openDialogByTaskId(taskId: Int) {
             THEME_ZABOR -> ThemeZabor()
             THEME_MRAMOR -> ThemeMarble()
             THEME_GROZA -> ThemeStorm()
+            THEME_POISON -> ThemePoison()
             else -> ThemeNeon()
         }
     )
@@ -326,6 +329,7 @@ fun openDialogByTaskId(taskId: Int) {
     THEME_ZABOR ->  themeState = ThemeZabor() 
     THEME_MRAMOR -> themeState = ThemeMarble()
     THEME_GROZA -> themeState = ThemeStorm()
+    THEME_POISON -> themeState = ThemePoison()
     
     }
     }
