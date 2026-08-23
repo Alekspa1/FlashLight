@@ -66,7 +66,8 @@ import kotlin.time.Clock
 import kotlin.time.Instant
 import data.room.model.SubItem
 import androidx.compose.material3.Surface
-
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.shape.RoundedCornerShape
 
 @Composable
 fun Calendar(
