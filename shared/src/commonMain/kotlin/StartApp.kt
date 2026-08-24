@@ -122,7 +122,7 @@ MaterialTheme(
             onSurfaceVariant = theme.tintAlarmOn 
         )
         // ГРУППА СВЕТЛЫХ ТЕМ
-        is ThemeMarble, is ThemeWooden -> lightColorScheme(
+        is ThemeMarble, is ThemeZabor -> lightColorScheme(
             primary = theme.textColor,
             surface = theme.backgroundDialog,
             onSurface = theme.textColor,
