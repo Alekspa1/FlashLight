@@ -386,7 +386,7 @@ data class ThemeVolcanic (
     val iconDel: DrawableResource = Res.drawable.ic_del_notebook_neon, 
 
     // Список дел
-    override val tintAlarmOn: Color = Color(0xFFFF6D00),        // Активный будильник горит цветом раскаленной лавы
+    override val tintAlarmOff: Color = Color(0xFF90A4AE),       // Активный будильник горит цветом раскаленной лавы
     override val tintAlarmOff: Color = Color(0xFF423E4A),       // Потухший уголь (выключен)
     override val textDesc: Color = Color(0xFF9E9A9F),           // Дымчато-серый пепельный для описания задач
 
@@ -395,14 +395,15 @@ data class ThemeVolcanic (
     override val cardItemBorderTrue: Color = Color(0xFF00E676),  // Чистый зеленый бордюр
     override val cardItemBorderFalse: Color = Color(0xFFFF1744), // Чистый красный бордюр
 
-    override val cardItemAlarm: Color = Color(0xDA0B0A0D),       // Глубокий угольно-черный фон карточки (85% плотности)
+    override val cardItemAlarm: Color = Color(0xDA0B0A0D),       // Глубокий угольный
+    override val cardItemFalse: Color = Color(0xDA1A0B0B), 
     override val cardItemTrue: Color = Color(0x4D00E676),        
-    override val cardItemFalse: Color = Color(0x4DFF1744),       
+  
 
     override val textAlarm: Color = Color(0xFFFF6D00),           // Огненный текст времени
     override val chekBoxOff: ImageVector = Icons.Default.CheckBoxOutlineBlank,
     override val chekBoxOn: ImageVector = Icons.Default.CheckBox,
-    override val chekBoxTint: Color = Color(0xFFFF6D00),         // Чекбокс светится оранжевым пламенем
+    override val chekBoxTint: Color = Color(0xFFFFFFFF),        // Чекбокс светится оранжевым пламенем
 
     override val iconImage: ImageVector = Icons.Default.Image,
     override val iconAdd: ImageVector = Icons.Default.AddCircleOutline,
