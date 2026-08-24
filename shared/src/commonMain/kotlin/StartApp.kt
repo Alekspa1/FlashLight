@@ -110,28 +110,24 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
     val navController = rememberNavController()
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    MaterialTheme(
+MaterialTheme(
     colorScheme = when (theme) {
-        is ThemeNeon -> darkColorScheme(
+        // ГРУППА ТЕМНЫХ ТЕМ
+        is ThemePoison, is ThemeStorm, is ThemeNeon -> darkColorScheme(
             primary = theme.textColor,
-            surface = theme.backgroundDialog, // Базовый фон системных окон
+            surface = theme.backgroundDialog,
+            onSurface = theme.textColor,
+            // Для DatePicker: фон окна и дни недели
+            surfaceContainerHigh = theme.backgroundDialog, 
+            onSurfaceVariant = theme.tintAlarmOn 
+        )
+        // ГРУППА СВЕТЛЫХ ТЕМ
+        is ThemeMarble, is ThemeWooden -> lightColorScheme(
+            primary = theme.textColor,
+            surface = theme.backgroundDialog,
+            onSurface = theme.textColor,
             surfaceContainerHigh = theme.backgroundDialog,
-            onSurface = theme.textColor // Цвет текста в системных окнах
-        )
-        is ThemeStorm -> darkColorScheme(
-            primary = theme.textColor,
-            surface = theme.backgroundDialog, // Для грозовой — темный серый/фиолетовый
-            onSurface = theme.textColor
-        )
-        is ThemePoison -> darkColorScheme(
-            primary = theme.textColor,
-            surface = theme.backgroundDialog, // Для ядовитой — темный болотный
-            onSurface = theme.textColor
-        )
-        is ThemeMarble -> lightColorScheme(
-            primary = theme.textColor,
-            surface = theme.backgroundDialog, // Для мраморной — чистый белый
-            onSurface = theme.textColor
+            onSurfaceVariant = theme.textDesc
         )
         else -> lightColorScheme(primary = theme.textColor)
     }
