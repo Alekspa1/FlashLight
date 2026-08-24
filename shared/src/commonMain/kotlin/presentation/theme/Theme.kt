@@ -387,7 +387,7 @@ data class ThemeVolcanic (
 
     // Список дел
     override val tintAlarmOff: Color = Color(0xFF90A4AE),       // Активный будильник горит цветом раскаленной лавы
-    override val tintAlarmOff: Color = Color(0xFF423E4A),       // Потухший уголь (выключен)
+    override val tintAlarmOn: Color = Color(0xFFFF6D00),       // Потухший уголь (выключен)
     override val textDesc: Color = Color(0xFF9E9A9F),           // Дымчато-серый пепельный для описания задач
 
 
