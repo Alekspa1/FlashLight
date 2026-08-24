@@ -204,52 +204,52 @@ data class ThemeZabor (
 
 
 data class ThemeStorm (
-    override val textColor: Color = Color(0xFFF5F5FA),           // Чистый ледяной белый для отличной читаемости
+    override val textColor: Color = Color(0xFFF3E5F5),           // Мягкий лавандово-белый для идеальной читаемости на темном небе
 
     // Блокнот (Календарь)
-    override val noteBookBackground: Color = Color(0xDA0B0E14), // Плотный грозовой антрацит (черный с синим отливом)
-    override val noteBookBorder: Color = Color(0xFFB388FF),     // Неоново-пурпурный контур в цвет светящегося леса
+    override val noteBookBackground: Color = Color(0xDC1A1528), // Плотный темно-черничный цвет грозового неба (86% плотности)
+    override val noteBookBorder: Color = Color(0xFFCE93D8),     // Электрический лавандово-фиолетовый контур
     val iconMicro: DrawableResource = Res.drawable.ic_micro_neon, 
     val iconDel: DrawableResource = Res.drawable.ic_del_notebook_neon, 
 
     // Список дел
-    override val tintAlarmOn: Color = Color(0xFF80DEEA),        // Включенный будильник цвета холодной голубой молнии
-    override val tintAlarmOff: Color = Color(0xFF454B54),       // Грозовая туча (выключен)
-    override val textDesc: Color = Color(0xFFB0BEC5),           // Дымчато-серый для описания задач
+    override val tintAlarmOn: Color = Color(0xFFB3E5FF),        // Активный будильник цвета лавандово-голубого свечения молнии
+    override val tintAlarmOff: Color = Color(0xFF4A4458),       // Потухшая грозовая туча (выключен)
+    override val textDesc: Color = Color(0xFF9FA8DA),           // Стальной сине-серый для описания задач
 
 
-    override val cardItemBorderAlarm: Color = Color(0xFFE040FB), // Яркий пурпурный бордюр для важных задач (в цвет леса)
+    override val cardItemBorderAlarm: Color = Color(0xFFE1BEE7), // Светло-лавандовый бордюр для важных задач
     override val cardItemBorderTrue: Color = Color(0xFF00E676),  // Чистый зеленый бордюр
     override val cardItemBorderFalse: Color = Color(0xFFFF1744), // Чистый красный бордюр
 
-    override val cardItemAlarm: Color = Color(0xDA0D1117),       // Глубокий темный фон карточки (85% плотности)
+    override val cardItemAlarm: Color = Color(0xDA120E1C),       // Глубокий темный черничный фон карточки (85% плотности)
     override val cardItemTrue: Color = Color(0x4D00E676),        
     override val cardItemFalse: Color = Color(0x4DFF1744),       
 
-    override val textAlarm: Color = Color(0xFF80DEEA),           // Голубой текст времени (цвет молнии)
+    override val textAlarm: Color = Color(0xFFB3E5FF),           // Лавандово-голубой текст времени
     override val chekBoxOff: ImageVector = Icons.Default.CheckBoxOutlineBlank,
     override val chekBoxOn: ImageVector = Icons.Default.CheckBox,
-    override val chekBoxTint: Color = Color(0xFFE040FB),         // Пурпурный светящийся чекбокс
+    override val chekBoxTint: Color = Color(0xFFCE93D8),         // Фиолетовый светящийся чекбокс
 
     override val iconImage: ImageVector = Icons.Default.Image,
     override val iconAdd: ImageVector = Icons.Default.AddCircleOutline,
-    override val iconAddTint: Color = Color(0xFF80DEEA),         // Кнопка добавления светится голубой молнией
+    override val iconAddTint: Color = Color(0xFFB3E5FF),         // Кнопка добавления светится стальным лавандово-голубым
     override val iconDelItem: ImageVector = Icons.Default.Delete,
     override val iconDelTint: Color = Color.White,
     override val iconTint: Color = Color.White,
     override val iconDrawerEveryday: ImageVector = Icons.AutoMirrored.Filled.Assignment,
     override val iconDrawerShare: ImageVector = Icons.Default.GroupAdd,
     override val iconDrawerPremium: ImageVector = Icons.Default.WorkspacePremium,
-    override val tintPremiumOn: Color = Color(0xFFE040FB),       // Пурпурная корона премиума
+    override val tintPremiumOn: Color = Color(0xFFCE93D8),       // Неоново-фиолетовая корона премиума
     override val tintPremiumOff: Color = Color.White,
     override val iconDrawerUpdateOff: ImageVector = Icons.Default.SystemUpdate,
     override val iconDrawerUpdateOn: ImageVector = Icons.Default.Upgrade,
     override val iconDrawerSettigs: ImageVector = Icons.Default.Settings,
-    override val backgroundDialog: Color = Color(0xFF0D1117),    // Чернильно-черный фон системных диалогов
+    override val backgroundDialog: Color = Color(0xFF120E1C),    // Темно-фиолетовый фон системных окон и диалогов
     override val backgroundStart: DrawableResource = Res.drawable.background_groza, 
     override val backgroundDrawer: DrawableResource = Res.drawable.background_drawer_neon, 
-    override val borderCardMenuItem: Color = Color(0x8080DEEA),  // Рамка меню цвета молнии
-    override val cardMenuItem: Color = Color(0xE60D1117),        // Плотный фон пунктов меню
+    override val borderCardMenuItem: Color = Color(0x80B3E5FF),  // Рамка меню стального цвета
+    override val cardMenuItem: Color = Color(0xE61A1528),        // Плотные карточки настроек
     override val colorCalendarDaySelect: Color = Color.Black     
 ) : Theme {
     @Composable
