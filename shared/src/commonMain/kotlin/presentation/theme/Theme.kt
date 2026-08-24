@@ -25,6 +25,7 @@ import flashlight.shared.generated.resources.background_drawer_neon
 import flashlight.shared.generated.resources.background_neon
 import flashlight.shared.generated.resources.background_poison
 import flashlight.shared.generated.resources.background_zabor
+import flashlight.shared.generated.resources.background_groza
 import flashlight.shared.generated.resources.ic_del_notebook_neon
 import flashlight.shared.generated.resources.ic_micro_neon
 import org.jetbrains.compose.resources.DrawableResource
