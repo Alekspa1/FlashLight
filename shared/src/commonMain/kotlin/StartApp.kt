@@ -135,7 +135,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
         )
         else -> lightColorScheme(primary = theme.textColor)
     }
-)
+){
 
     // MaterialTheme(
     //     colorScheme = if (viewModel.themeState == ThemeNeon()) darkColorScheme(
