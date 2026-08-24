@@ -112,16 +112,25 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
 
 MaterialTheme(
     colorScheme = when (theme) {
-        // ГРУППА ТЕМНЫХ ТЕМ
-        is ThemePoison, is ThemeStorm, is ThemeNeon -> darkColorScheme(
+        // Оставляем Неоновую и Ядовитую вместе — у них акценты совпадают
+        is ThemePoison, is ThemeNeon -> darkColorScheme(
             primary = theme.textColor,
             surface = theme.backgroundDialog,
             onSurface = theme.textColor,
-            // Для DatePicker: фон окна и дни недели
             surfaceContainerHigh = theme.backgroundDialog, 
             onSurfaceVariant = theme.tintAlarmOn 
         )
-        // ГРУППА СВЕТЛЫХ ТЕМ
+        
+        // ВЫДЕЛЯЕМ ГРОЗОВУЮ отдельно, чтобы добавить шикарный пурпурный акцент для дней недели!
+        is ThemeStorm -> darkColorScheme(
+            primary = theme.textColor, // или Color(0xFF80DEEA) для цвета молнии
+            surface = theme.backgroundDialog,
+            onSurface = theme.textColor,
+            surfaceContainerHigh = theme.backgroundDialog, 
+            onSurfaceVariant = Color(0xFFE040FB) // Тот самый неоново-пурпурный цвет светящегося леса!
+        )
+        
+        // ГРУППА СВЕТЛЫХ ТЕМ (Мраморная и Деревянная)
         is ThemeMarble, is ThemeZabor -> lightColorScheme(
             primary = theme.textColor,
             surface = theme.backgroundDialog,
