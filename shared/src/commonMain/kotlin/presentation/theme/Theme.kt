@@ -16,7 +16,7 @@ import androidx.compose.material.icons.filled.Update
 import androidx.compose.material.icons.filled.Upgrade
 import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color*
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -235,7 +235,7 @@ data class ThemeStorm (
     override val iconAdd: ImageVector = Icons.Default.AddCircleOutline,
     override val iconAddTint: Color = Color(0xFF80DEEA),         // Кнопка добавления светится голубой молнией
     override val iconDelItem: ImageVector = Icons.Default.Delete,
-    override val iconDelTint: Color.White,
+    override val iconDelTint: Color = Color.White,
     override val iconTint: Color = Color.White,
     override val iconDrawerEveryday: ImageVector = Icons.AutoMirrored.Filled.Assignment,
     override val iconDrawerShare: ImageVector = Icons.Default.GroupAdd,
