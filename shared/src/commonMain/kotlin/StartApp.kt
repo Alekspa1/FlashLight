@@ -95,6 +95,11 @@ import presentation.theme.SizeNormal
 import presentation.theme.Theme
 import presentation.theme.ThemeNeon
 import presentation.theme.ThemeZabor
+
+import presentation.theme.ThemeStorm
+import presentation.theme.ThemeMarble
+import presentation.theme.ThemePoison
+
 import kotlin.time.Clock
 
 @Composable
@@ -106,18 +111,45 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
     val lifecycleOwner = LocalLifecycleOwner.current
 
     MaterialTheme(
-        colorScheme = if (viewModel.themeState == ThemeNeon()) darkColorScheme(
+    colorScheme = when (theme) {
+        is ThemeNeon -> darkColorScheme(
             primary = theme.textColor,
+            surface = theme.backgroundDialog, // Базовый фон системных окон
             surfaceContainerHigh = theme.backgroundDialog,
-            primaryContainer = Color(0xFF616161),
-            onPrimaryContainer = theme.textColor,
-            surfaceContainerHighest = Color(0xFF616161),
-            onSurfaceVariant = theme.textColor
-
-        ) else lightColorScheme(
-            primary = theme.textColor
+            onSurface = theme.textColor // Цвет текста в системных окнах
         )
-    ) {
+        is ThemeStorm -> darkColorScheme(
+            primary = theme.textColor,
+            surface = theme.backgroundDialog, // Для грозовой — темный серый/фиолетовый
+            onSurface = theme.textColor
+        )
+        is ThemePoison -> darkColorScheme(
+            primary = theme.textColor,
+            surface = theme.backgroundDialog, // Для ядовитой — темный болотный
+            onSurface = theme.textColor
+        )
+        is ThemeMarble -> lightColorScheme(
+            primary = theme.textColor,
+            surface = theme.backgroundDialog, // Для мраморной — чистый белый
+            onSurface = theme.textColor
+        )
+        else -> lightColorScheme(primary = theme.textColor)
+    }
+)
+
+    // MaterialTheme(
+    //     colorScheme = if (viewModel.themeState == ThemeNeon()) darkColorScheme(
+    //         primary = theme.textColor,
+    //         surfaceContainerHigh = theme.backgroundDialog,
+    //         primaryContainer = Color(0xFF616161),
+    //         onPrimaryContainer = theme.textColor,
+    //         surfaceContainerHighest = Color(0xFF616161),
+    //         onSurfaceVariant = theme.textColor
+
+    //     ) else lightColorScheme(
+    //         primary = theme.textColor
+    //     )
+    // ) {
 
         val categories by viewModel.categories.collectAsStateWithLifecycle()
         val updateState by viewModel.updateState.collectAsStateWithLifecycle()
