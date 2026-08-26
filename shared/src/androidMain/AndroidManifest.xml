@@ -87,7 +87,6 @@
         <!-- <activity
             android:launchMode="singleTask"
             android:name="presentation.MainActivity"
-            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|density|uiMode"
             android:exported="true"
             android:screenOrientation="portrait">
 
