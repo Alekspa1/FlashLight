@@ -60,7 +60,6 @@
     android:name="presentation.MainActivity"
     android:exported="true"
     android:screenOrientation="portrait">
-
     <!-- ФИЛЬТР №1: Только для обычного запуска приложения с иконки смартфона -->
     <intent-filter>
         <action android:name="android.intent.action.MAIN" />

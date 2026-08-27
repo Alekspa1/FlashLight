@@ -21,7 +21,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Ловим данные при холодном старте приложения
         handleSharedIntent(intent)
         handleNotificationIntent(intent)
         permissionImp.initLauncher(this@MainActivity)
@@ -86,12 +85,6 @@ class MainActivity : ComponentActivity() {
                     mainViewModel.openDialogWithSharedData(text = null, imageUri = uri.toString())
                 }
             }
-            // type.startsWith("image/") -> {
-            //     val imageUri: Uri? = intent.getParcelableExtra(Intent.EXTRA_STREAM)
-            //     if (imageUri != null) {
-            //         mainViewModel.openDialogWithSharedData(text = null, imageUri = imageUri.toString())
-            //     }
-            // }
         }
     }
 

@@ -46,6 +46,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -104,12 +105,24 @@ import kotlin.time.Clock
 
 @Composable
 fun StartApp(viewModel: MainViewModel = koinViewModel()) {
+    val recomposeCount = remember { mutableStateOf(0) }
+
+    SideEffect {
+        recomposeCount.value++
+        println("START_APP_LOG: Функция StartApp вызвана снова! Номер вызова: ${recomposeCount.value}")
+    }
     val theme = viewModel.themeState
     val size = viewModel.sizeState
     val premiumState by viewModel.premiumState.collectAsStateWithLifecycle()
     val navController = rememberNavController()
-    val lifecycleOwner = LocalLifecycleOwner.current
 
+
+//    LaunchedEffect(navController) {
+//        navController.currentBackStack.collect { backStack ->
+//            val routes = backStack.map { it.destination.route }.filterNotNull()
+//            println("NAV_LOG: Текущий стек изменен: $routes")
+//        }
+//    }
 MaterialTheme(
     colorScheme = when (theme) {
         // Оставляем Неоновую и Ядовитую вместе — у них акценты совпадают
@@ -212,7 +225,11 @@ MaterialTheme(
                     onCancel = { viewModel.showDialog = DialogState() })
             }
         }
+
+    LaunchedEffect(Unit){
         viewModel.updateAlarm()
+    }
+
 
 
 
@@ -251,10 +268,7 @@ MaterialTheme(
                 exitTransition = { androidx.compose.animation.ExitTransition.None },
                 popEnterTransition = { androidx.compose.animation.EnterTransition.None }
             ) {
-                println("main")
-
                 val lifecycleOwner = LocalLifecycleOwner.current
-
                 LaunchedEffect(lifecycleOwner.lifecycle) {
                     // repeatOnLifecycle автоматически отменит корутину (и Ktor-запрос),
                     // когда приложение свернется, и перезапустит её, когда оно откроется.

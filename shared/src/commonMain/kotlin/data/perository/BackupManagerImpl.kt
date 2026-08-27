@@ -43,7 +43,6 @@ class BackupManagerImpl(
 
                 // 2. Выгружаем данные из блокнота и Room
                 val notebookText = sharedPrefRepository.loadTextNoteBook()
-                println(notebookText)
                 val list1 = db.CourseDao().getAllListCategoryNotFlow()
                 val list2 = db.CourseDao().getAllItemsNotFlow()
                 val list3 = db.CourseDao().getAllSubItemsNotFlow()

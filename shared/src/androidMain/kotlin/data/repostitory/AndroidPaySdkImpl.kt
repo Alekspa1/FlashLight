@@ -175,7 +175,6 @@ class AndroidPaySdkImpl(private val pref: SharedPrefRepository, private val cont
        return Result.success(hasActivePremiumInStore)
 
     } catch (throwable: Throwable) {
-        // Сюда прилетит ошибка, ТОЛЬКО если упал новый актуальный Pay SDK или вообще нет интернета
         Result.failure(throwable)
     }
     } else return Result.failure(Exception("Не авторизован"))
@@ -194,7 +193,7 @@ class AndroidPaySdkImpl(private val pref: SharedPrefRepository, private val cont
             }
         }
     }.addOnFailureListener { throwable ->
-       continuation.resumeWithException(throwable)
+            continuation.resume(false)
     }
 
        
