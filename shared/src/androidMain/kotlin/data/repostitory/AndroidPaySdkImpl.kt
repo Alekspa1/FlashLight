@@ -128,7 +128,7 @@ class AndroidPaySdkImpl(private val pref: SharedPrefRepository, private val cont
     }
 
     override suspend fun isChekedSubcrition(): Result<Boolean> {
-       // if(isAuthorizationInRustore()){
+        if(isAuthorizationInRustore()){
     return try {
         val billingClient = RuStoreBillingClientFactory.create(
             context = context,
@@ -177,44 +177,32 @@ class AndroidPaySdkImpl(private val pref: SharedPrefRepository, private val cont
     } catch (throwable: Throwable) {
         Result.failure(throwable)
     }
-   // } else return Result.failure(Exception("Не авторизован"))
+    } else return Result.failure(Exception("Не авторизован"))
 
 }
 
-   // suspend fun isAuthorizationInRustore() : Boolean = suspendCancellableCoroutine { continuation ->
-   //  RuStorePayClient.instance.getUserInteractor().getUserAuthorizationStatus()
-   //  .addOnSuccessListener { result ->
-   //      when (result) {
-   //          UserAuthorizationStatus.AUTHORIZED -> {
-   //              if(continuation.isActive) continuation.resume(true)
-   //          }
- 
-   //          UserAuthorizationStatus.UNAUTHORIZED -> {
-   //              if(continuation.isActive) continuation.resume(false)
-   //          }
-   //      }
-   //  }.addOnFailureListener { throwable ->  if(continuation.isActive) continuation.resume(false)}
-
-       
-   //  }
-
-  override fun checkAuthorizationInRustore (onResult: (Boolean) -> Unit) {
+   suspend fun isAuthorizationInRustore() : Boolean = suspendCancellableCoroutine { continuation ->
     RuStorePayClient.instance.getUserInteractor().getUserAuthorizationStatus()
-        .addOnSuccessListener { result ->
-            when (result) {
-                UserAuthorizationStatus.AUTHORIZED -> {
-                    onResult(true) // Юзер авторизован, можно проверять подписку!
-                }
-                UserAuthorizationStatus.UNAUTHORIZED -> {
-                    onResult(false) // Не авторизован — никаких проверок и боттом-шитов!
-                }
+    .addOnSuccessListener { result ->
+        when (result) {
+            UserAuthorizationStatus.AUTHORIZED -> {
+                Toast.makeText(context, "Авторизован", Toast.LENGTH_SHORT).show()
+                if(continuation.isActive) continuation.resume(true)
+            }
+ 
+            UserAuthorizationStatus.UNAUTHORIZED -> {
+                Toast.makeText(context, "Не авторизован", Toast.LENGTH_SHORT).show()
+                if(continuation.isActive) continuation.resume(false)
             }
         }
-        .addOnFailureListener { throwable ->
-            // Если RuStore удален или произошла системная ошибка
-            onResult(false) 
-        }
-}
+    }.addOnFailureListener { throwable ->  
+        Toast.makeText(context, "Ошибка", Toast.LENGTH_SHORT).show()
+        if(continuation.isActive) continuation.resume(false)
+    }
+
+       
+    }
+
 
 //    private suspend fun getNewPurchases(): List<Purchase> = suspendCancellableCoroutine { continuation ->
 //    RuStorePayClient.instance.getPurchaseInteractor().getPurchases()
