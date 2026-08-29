@@ -128,7 +128,7 @@ class AndroidPaySdkImpl(private val pref: SharedPrefRepository, private val cont
     }
 
     override suspend fun isChekedSubcrition(): Result<Boolean> {
-        if(isAuthorizationInRustore()){
+       // if(isAuthorizationInRustore()){
     return try {
         val billingClient = RuStoreBillingClientFactory.create(
             context = context,
@@ -177,7 +177,7 @@ class AndroidPaySdkImpl(private val pref: SharedPrefRepository, private val cont
     } catch (throwable: Throwable) {
         Result.failure(throwable)
     }
-    } else return Result.failure(Exception("Не авторизован"))
+   // } else return Result.failure(Exception("Не авторизован"))
 
 }
 
