@@ -198,7 +198,7 @@ class AndroidPaySdkImpl(private val pref: SharedPrefRepository, private val cont
        
    //  }
 
-   fun checkAuthorizationInRustore (onResult: (Boolean) -> Unit) {
+  override fun checkAuthorizationInRustore (onResult: (Boolean) -> Unit) {
     RuStorePayClient.instance.getUserInteractor().getUserAuthorizationStatus()
         .addOnSuccessListener { result ->
             when (result) {
