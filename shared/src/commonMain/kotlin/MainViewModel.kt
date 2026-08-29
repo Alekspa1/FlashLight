@@ -253,27 +253,52 @@ fun openDialogByTaskId(taskId: Int) {
 
     }
 
-     fun isCheckPremiumWithBuy() {
+    //  fun isCheckPremiumWithBuy() {
+    //     viewModelScope.launch {
+    //         paySdk.isChekedSubcrition()
+    //             .onSuccess { result->
+    //                 val isLocalPremiumActive = getPremium()
+
+    //                 if (result != isLocalPremiumActive) {
+    //                     if (result) {
+    //                         sendMessage("PREMIUM версия была восстановлена")
+    //                     } else {
+    //                         sendMessage("PREMIUM версия была отключена")
+    //                     }
+    //                 }
+    //                 savePremium(result)
+    //             }
+
+
+
+
+    //     }
+    // }
+
+    fun isCheckPremiumWithBuy() {
+    // 1. Сначала дергаем бесшумный колбэк авторизации
+    paySdk.checkAuthorizationInRustore { isAuthorized ->
+        
+        // КРИТИЧЕСКИЙ МОМЕНТ: Если юзер разлогинился — выходим! 
+        // Проверки не запускаются, боттом-шит не лезет, навигация не уничтожается.
+        if (!isAuthorized) {
+            return@checkAuthorizationInRustore 
+        }
+
+        // 2. И только если ИСТИНА (юзер авторизован) — запускаем корутину проверки покупок
         viewModelScope.launch {
             paySdk.isChekedSubcrition()
-                .onSuccess { result->
+                .onSuccess { result ->
                     val isLocalPremiumActive = getPremium()
-
                     if (result != isLocalPremiumActive) {
-                        if (result) {
-                            sendMessage("PREMIUM версия была восстановлена")
-                        } else {
-                            sendMessage("PREMIUM версия была отключена")
-                        }
+                        if (result) sendMessage("PREMIUM версия была восстановлена")
+                        else sendMessage("PREMIUM версия была отключена")
                     }
                     savePremium(result)
                 }
-
-
-
-
         }
     }
+}
 
     private fun isUpdateApp() {
         viewModelScope.launch(Dispatchers.IO) {
