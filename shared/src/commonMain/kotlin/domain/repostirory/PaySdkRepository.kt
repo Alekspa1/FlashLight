@@ -8,6 +8,5 @@ interface PaySdkRepository {
     suspend fun byProduct(productId: String) : Result<Boolean>
 
     suspend fun isChekedSubcrition() : Result<Boolean>
-    fun checkAuthorizationInRustore (onResult: (Boolean) -> Unit)
 
 }
