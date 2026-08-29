@@ -126,7 +126,6 @@ class MainViewModel(
         loadSounds()
         isUpdateApp()
         loadProduct()
-       isCheckPremiumWithBuy()
     }
 
 private val _sharedIntentEvent = Channel<Pair<String?, String?>>(Channel.BUFFERED)
@@ -232,7 +231,6 @@ fun openDialogByTaskId(taskId: Int) {
              .onSuccess {listProduct ->
                  _productState.value = listProduct
              }
-            // .onFailure { sendMessage("Оплата временна недоступна")}
              .onFailure { _productState.value = emptyList<ProductCommon>()}
         }
     }
@@ -255,7 +253,7 @@ fun openDialogByTaskId(taskId: Int) {
 
     }
 
-    private fun isCheckPremiumWithBuy() {
+     fun isCheckPremiumWithBuy() {
         viewModelScope.launch {
             paySdk.isChekedSubcrition()
                 .onSuccess { result->
@@ -270,7 +268,7 @@ fun openDialogByTaskId(taskId: Int) {
                     }
                     savePremium(result)
                 }
-                .onFailure {  }
+
 
 
 

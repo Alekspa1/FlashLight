@@ -88,11 +88,6 @@ val appModule = module {
             }
 
             install(Logging) {
-                logger = object : Logger {
-                    override fun log(message: String) {
-                        println("Logger in DiCommon: $message")
-                    }
-                }
                 level = LogLevel.BODY // На этапе теста BODY — супер, в логах будет виден весь JSON от ТГ
             }
 

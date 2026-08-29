@@ -10,6 +10,7 @@ import MainViewModel
 import android.content.Intent
 import android.net.Uri
 import data.repostitory.AndroidPlatformFilePickerImpl
+import presentation.screens.PremiumScreen
 
 
 class MainActivity : ComponentActivity() {
@@ -21,10 +22,12 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        println("LOG_NAV: onCreate вызвана! savedInstanceState пустой? ${savedInstanceState == null}")
         handleSharedIntent(intent)
         handleNotificationIntent(intent)
         permissionImp.initLauncher(this@MainActivity)
         filePickerImp.initLauncher(this@MainActivity)
+        mainViewModel.isCheckPremiumWithBuy()
         setContent {
             StartApp()
         }
@@ -32,7 +35,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        // Ловим данные, если приложение уже было открыто в фоне
+        println("LOG_NAV: onNewIntent вызвана! Action: ${intent.action}")
         handleSharedIntent(intent)
         handleNotificationIntent(intent)
     }
@@ -89,59 +92,3 @@ class MainActivity : ComponentActivity() {
     }
 
 }
-
-// class MainActivity : ComponentActivity() {
-
-//     val permissionImp: AndroidPermissionImpl by inject()
-//      private val mainViewModel: MainViewModel by inject()
-     
-//     override fun onCreate(savedInstanceState: Bundle?) {
-//         super.onCreate(savedInstanceState)
-
-//          handleSharedIntent(intent)
-         
-//         permissionImp.initLauncher(this@MainActivity)
-//         setContent {
-//             StartApp()
-//         }
-
-
-
-//     }
-
-//         override fun onNewIntent(intent: Intent) {
-//         super.onNewIntent(intent)
-//         handleSharedIntent(intent)
-//     }
-
-//     override fun onDestroy() {
-//         super.onDestroy()
-//         permissionImp.destroyLaunch()
-//     }
-
-//         private fun handleSharedIntent(intent: Intent?) {
-//         if (intent == null || intent.action != Intent.ACTION_SEND) return
-        
-//         val type = intent.type ?: return
-
-//         when {
-//             // Если поделились текстом
-//             type.startsWith("text/") -> {
-//                 val sharedText = intent.getStringExtra(Intent.EXTRA_TEXT)
-//                 if (!sharedText.isNullOrBlank()) {
-//                     mainViewModel.openDialogWithSharedData(text = sharedText, imageUri = null)
-//                 }
-//             }
-//             // Если поделились картинкой
-//             type.startsWith("image/") -> {
-//                 // Извлекаем Uri картинки из системного потока
-//                 val imageUri: Uri? = intent.getParcelableExtra(Intent.EXTRA_STREAM)
-//                 if (imageUri != null) {
-//                     mainViewModel.openDialogWithSharedData(text = null, imageUri = imageUri.toString())
-//                 }
-//             }
-//         }
-//     }
-
-
-// }

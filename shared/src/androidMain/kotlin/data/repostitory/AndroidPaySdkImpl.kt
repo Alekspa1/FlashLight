@@ -178,6 +178,7 @@ class AndroidPaySdkImpl(private val pref: SharedPrefRepository, private val cont
         Result.failure(throwable)
     }
     } else return Result.failure(Exception("Не авторизован"))
+
 }
 
    suspend fun isAuthorizationInRustore() : Boolean = suspendCancellableCoroutine { continuation ->
@@ -185,105 +186,61 @@ class AndroidPaySdkImpl(private val pref: SharedPrefRepository, private val cont
     .addOnSuccessListener { result ->
         when (result) {
             UserAuthorizationStatus.AUTHORIZED -> {
-                 continuation.resume(true)
+                if(continuation.isActive) continuation.resume(true)
             }
  
             UserAuthorizationStatus.UNAUTHORIZED -> {
-                continuation.resume(false)
+                if(continuation.isActive) continuation.resume(false)
             }
         }
-    }.addOnFailureListener { throwable ->
-            continuation.resume(false)
-    }
+    }.addOnFailureListener { throwable ->  if(continuation.isActive) continuation.resume(false)}
 
        
     }
 
+//    private suspend fun getNewPurchases(): List<Purchase> = suspendCancellableCoroutine { continuation ->
+//    RuStorePayClient.instance.getPurchaseInteractor().getPurchases()
+//        .addOnSuccessListener { purchases -> continuation.resume(purchases) }
+//        //.addOnFailureListener { throwable -> continuation.resumeWithException(throwable) }
+//}
+//
+//
+//private suspend fun getOldPurchases(billingClient: RuStoreBillingClient): List<ru.rustore.sdk.billingclient.model.purchase.Purchase> = suspendCancellableCoroutine { continuation ->
+//    billingClient.purchases.getPurchases()
+//        .addOnSuccessListener { purchases -> continuation.resume(purchases) }
+//        //.addOnFailureListener { throwable -> continuation.resumeWithException(throwable) }
+//}
+
     private suspend fun getNewPurchases(): List<Purchase> = suspendCancellableCoroutine { continuation ->
-    RuStorePayClient.instance.getPurchaseInteractor().getPurchases()
-        .addOnSuccessListener { purchases -> continuation.resume(purchases) }
-        .addOnFailureListener { throwable -> continuation.resumeWithException(throwable) }
-}
+        RuStorePayClient.instance.getPurchaseInteractor().getPurchases()
+            .addOnSuccessListener { purchases ->
+                // Жесткая проверка: если корутину уже отменили при сворачивании, игнорируем ответ!
+                if (continuation.isActive) {
+                    continuation.resume(purchases)
+                }
+            }
+            .addOnFailureListener { throwable ->
+                if (continuation.isActive) {
+                    continuation.resumeWithException(throwable)
+                }
+            }
+    }
 
+    private suspend fun getOldPurchases(billingClient: RuStoreBillingClient): List<ru.rustore.sdk.billingclient.model.purchase.Purchase> = suspendCancellableCoroutine { continuation ->
+        billingClient.purchases.getPurchases()
+            .addOnSuccessListener { purchases ->
+                // Точно такая же защита для старого SDK
+                if (continuation.isActive) {
+                    continuation.resume(purchases)
+                }
+            }
+            .addOnFailureListener { throwable ->
+                if (continuation.isActive) {
+                    continuation.resumeWithException(throwable)
+                }
+            }
+    }
 
-private suspend fun getOldPurchases(billingClient: RuStoreBillingClient): List<ru.rustore.sdk.billingclient.model.purchase.Purchase> = suspendCancellableCoroutine { continuation ->
-    billingClient.purchases.getPurchases()
-        .addOnSuccessListener { purchases -> continuation.resume(purchases) }
-        .addOnFailureListener { throwable -> continuation.resumeWithException(throwable) }
-}
-
-   // override  suspend fun isChekedSubcrition() : Result<Boolean>  = suspendCancellableCoroutine { continuation ->
-
-   //      val billingClient = RuStoreBillingClientFactory.create(
-   //          context = context,
-   //          consoleApplicationId = "2063541058",
-   //          deeplinkScheme = "flashlight"
-   //      )
-
-   //      RuStorePayClient.instance.getPurchaseInteractor().getPurchases()
-   //          .addOnSuccessListener { purchases: List<Purchase> ->
-
-   //              val staseList = purchases.map { it.status }
-
-   //              val hasActivePremiumInStore = staseList.contains(ProductPurchaseStatus.CONFIRMED) ||
-   //                      staseList.contains(SubscriptionPurchaseStatus.ACTIVE)
-
-   //              CoroutineScope(continuation.context).launch {
-
-   //                  getListShopingProductsOld(billingClient)
-   //                      .onSuccess {resut->
-   //                          if (resut) {
-   //                              if (continuation.isActive) continuation.resume(Result.success(true))
-   //                              return@launch
-   //                          } else {
-   //                              // КЕЙС 1: Если в RuStore пусто (или подписка просрочена), а локально премиум ВКЛЮЧЕН -> ОТКЛЮЧАЕМ
-   //                              if ((purchases.isEmpty() || !hasActivePremiumInStore) && pref.getPremium()) {
-   //                                  if (continuation.isActive) continuation.resume(Result.success(false))
-   //                                  return@launch // Выходим, чтобы не пойти в код ниже
-   //                              }
-
-   //                              // КЕЙС 2: Если в RuStore есть активный премиум, но на устройстве он ВЫКЛЮЧЕН -> ВОССТАНАВЛИВАЕМ
-   //                              if (hasActivePremiumInStore && !pref.getPremium()) {
-   //                                  //  ToastFun(context, "PREMIUM версия была восстановлена")
-   //                                  if (continuation.isActive) continuation.resume(Result.success(true))
-   //                                  return@launch
-   //                              }
-
-   //                              if (continuation.isActive) {
-   //                                  continuation.resume(Result.success(hasActivePremiumInStore))
-   //                              }
-   //                          }
-   //                      }
-   //                      .onFailure {throwable-> continuation.resume(Result.failure(throwable)) }
-
-   //              }
-   //          }
-   //          .addOnFailureListener { throwable ->
-   //              if (continuation.isActive) {
-   //                  continuation.resume(Result.failure(throwable))
-   //              }
-   //          }
-
-
-   //          }
-   //  suspend fun getListShopingProductsOld(billingClient: RuStoreBillingClient) : Result<Boolean> = suspendCancellableCoroutine { continuation ->
-   //      val purchasesUseCase = billingClient.purchases
-   //      purchasesUseCase.getPurchases()
-   //          .addOnSuccessListener { purchases: List<ru.rustore.sdk.billingclient.model.purchase.Purchase> ->
-   //              val staseList = purchases.map { it.purchaseState }
-
-   //              if (staseList.isNotEmpty() && staseList.contains(PurchaseState.CONFIRMED)) {
-   //                  if (continuation.isActive) continuation.resume(Result.success(true))
-   //              } else {
-   //                  if (continuation.isActive) continuation.resume(Result.success(false))
-   //              }
-   //          }
-   //          .addOnFailureListener {throwable ->
-   //              // Обязательно добавляем слушатель ошибки, чтобы при сбое сети корутина тоже отпускала поток!
-   //              if (continuation.isActive) continuation.resume(Result.failure(throwable))
-
-   //          }
-   //  }
     }
 
 

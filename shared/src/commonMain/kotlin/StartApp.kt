@@ -227,6 +227,7 @@ MaterialTheme(
         }
 
     LaunchedEffect(Unit){
+
         viewModel.updateAlarm()
     }
 
