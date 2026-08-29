@@ -126,60 +126,114 @@ class AndroidPaySdkImpl(private val pref: SharedPrefRepository, private val cont
                 }
         }
     }
-
-    override suspend fun isChekedSubcrition(): Result<Boolean> {
-        if(isAuthorizationInRustore()){
+override suspend fun isChekedSubcrition(): Result<Boolean> {
     return try {
+        // Мы НЕ вызываем проверку авторизации, которая штормит баннеры!
+        
         val billingClient = RuStoreBillingClientFactory.create(
             context = context,
             consoleApplicationId = "2063541058",
             deeplinkScheme = "flashlight"
         )
 
-        // 1. Запрашиваем покупки из нового SDK 
-        val newPurchases = getNewPurchases()
+        // 1. Запрашиваем новые покупки. 
+        // Если юзер разлогинен, этот метод ТИХО (без баннеров) упадет в ошибку!
+        val newPurchases = try {
+            getNewPurchases() 
+        } catch (e: Exception) {
+            // Перехватываем ошибку отсутствия авторизации абсолютно бесшумно
+            emptyList() 
+        }
+
         val newStatuses = newPurchases.map { it.status }
         val hasActivePremiumInStore = newStatuses.contains(ProductPurchaseStatus.CONFIRMED) || 
                                       newStatuses.contains(SubscriptionPurchaseStatus.ACTIVE)
 
-        // 2. Запрашиваем покупки из старого SDK (ОБЕРНУЛИ В ЛОКАЛЬНЫЙ TRY-CATCH)
+        // 2. Запрашиваем старые покупки (тоже тихо в try-catch)
         val oldPurchases = try {
             getOldPurchases(billingClient)
         } catch (e: Exception) {
-            // Если старый SDK упал — бог с ним, считаем, что там пусто, 
-            // но не ломаем работу нового SDK!
             emptyList() 
         }
         
         val oldStatuses = oldPurchases.map { it.purchaseState }
         val hasOldPremium = oldStatuses.contains(PurchaseState.CONFIRMED)
 
-        // 3. Твои кейсы синхронизации (работают как часы)
         if (hasOldPremium) {
             return Result.success(true)
         }
 
         val isLocalPremiumActive = pref.getPremium()
 
-        // КЕЙС 1: Если в RuStore пусто, а локально премиум включен -> ОТКЛЮЧАЕМ
+        // КЕЙС 1: Если юзер разлогинился, в списках будет пусто (newPurchases.isEmpty() == true).
+        // Если локально премиум был включен, код тихо зайдет сюда и вернет false!
         if ((newPurchases.isEmpty() || !hasActivePremiumInStore) && isLocalPremiumActive) {
-            return Result.success(false)
+            return Result.success(false) // Премиум бесшумно отключится, никаких баннеров!
         }
 
-        // КЕЙС 2: Если в RuStore есть активный премиум, но локально выключен -> ВОССТАНАВЛИВАЕМ
         if (hasActivePremiumInStore && !isLocalPremiumActive) {
             return Result.success(true)
         }
 
-        // Финальный дефолтный кейс
        return Result.success(hasActivePremiumInStore)
 
     } catch (throwable: Throwable) {
         Result.failure(throwable)
     }
-    } else return Result.failure(Exception("Не авторизован"))
-
 }
+//     override suspend fun isChekedSubcrition(): Result<Boolean> {
+//         if(isAuthorizationInRustore()){
+//     return try {
+//         val billingClient = RuStoreBillingClientFactory.create(
+//             context = context,
+//             consoleApplicationId = "2063541058",
+//             deeplinkScheme = "flashlight"
+//         )
+
+//         // 1. Запрашиваем покупки из нового SDK 
+//         val newPurchases = getNewPurchases()
+//         val newStatuses = newPurchases.map { it.status }
+//         val hasActivePremiumInStore = newStatuses.contains(ProductPurchaseStatus.CONFIRMED) || 
+//                                       newStatuses.contains(SubscriptionPurchaseStatus.ACTIVE)
+
+//         // 2. Запрашиваем покупки из старого SDK (ОБЕРНУЛИ В ЛОКАЛЬНЫЙ TRY-CATCH)
+//         val oldPurchases = try {
+//             getOldPurchases(billingClient)
+//         } catch (e: Exception) {
+//             // Если старый SDK упал — бог с ним, считаем, что там пусто, 
+//             // но не ломаем работу нового SDK!
+//             emptyList() 
+//         }
+        
+//         val oldStatuses = oldPurchases.map { it.purchaseState }
+//         val hasOldPremium = oldStatuses.contains(PurchaseState.CONFIRMED)
+
+//         // 3. Твои кейсы синхронизации (работают как часы)
+//         if (hasOldPremium) {
+//             return Result.success(true)
+//         }
+
+//         val isLocalPremiumActive = pref.getPremium()
+
+//         // КЕЙС 1: Если в RuStore пусто, а локально премиум включен -> ОТКЛЮЧАЕМ
+//         if ((newPurchases.isEmpty() || !hasActivePremiumInStore) && isLocalPremiumActive) {
+//             return Result.success(false)
+//         }
+
+//         // КЕЙС 2: Если в RuStore есть активный премиум, но локально выключен -> ВОССТАНАВЛИВАЕМ
+//         if (hasActivePremiumInStore && !isLocalPremiumActive) {
+//             return Result.success(true)
+//         }
+
+//         // Финальный дефолтный кейс
+//        return Result.success(hasActivePremiumInStore)
+
+//     } catch (throwable: Throwable) {
+//         Result.failure(throwable)
+//     }
+//     } else return Result.failure(Exception("Не авторизован"))
+
+// }
 
    suspend fun isAuthorizationInRustore() : Boolean = suspendCancellableCoroutine { continuation ->
     RuStorePayClient.instance.getUserInteractor().getUserAuthorizationStatus()
