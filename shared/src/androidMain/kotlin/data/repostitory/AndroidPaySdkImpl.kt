@@ -181,22 +181,40 @@ class AndroidPaySdkImpl(private val pref: SharedPrefRepository, private val cont
 
 }
 
-   suspend fun isAuthorizationInRustore() : Boolean = suspendCancellableCoroutine { continuation ->
-    RuStorePayClient.instance.getUserInteractor().getUserAuthorizationStatus()
-    .addOnSuccessListener { result ->
-        when (result) {
-            UserAuthorizationStatus.AUTHORIZED -> {
-                if(continuation.isActive) continuation.resume(true)
-            }
+   // suspend fun isAuthorizationInRustore() : Boolean = suspendCancellableCoroutine { continuation ->
+   //  RuStorePayClient.instance.getUserInteractor().getUserAuthorizationStatus()
+   //  .addOnSuccessListener { result ->
+   //      when (result) {
+   //          UserAuthorizationStatus.AUTHORIZED -> {
+   //              if(continuation.isActive) continuation.resume(true)
+   //          }
  
-            UserAuthorizationStatus.UNAUTHORIZED -> {
-                if(continuation.isActive) continuation.resume(false)
-            }
-        }
-    }.addOnFailureListener { throwable ->  if(continuation.isActive) continuation.resume(false)}
+   //          UserAuthorizationStatus.UNAUTHORIZED -> {
+   //              if(continuation.isActive) continuation.resume(false)
+   //          }
+   //      }
+   //  }.addOnFailureListener { throwable ->  if(continuation.isActive) continuation.resume(false)}
 
        
-    }
+   //  }
+
+   fun checkAuthorizationInRustore (onResult: (Boolean) -> Unit) {
+    RuStorePayClient.instance.getUserInteractor().getUserAuthorizationStatus()
+        .addOnSuccessListener { result ->
+            when (result) {
+                UserAuthorizationStatus.AUTHORIZED -> {
+                    onResult(true) // Юзер авторизован, можно проверять подписку!
+                }
+                UserAuthorizationStatus.UNAUTHORIZED -> {
+                    onResult(false) // Не авторизован — никаких проверок и боттом-шитов!
+                }
+            }
+        }
+        .addOnFailureListener { throwable ->
+            // Если RuStore удален или произошла системная ошибка
+            onResult(false) 
+        }
+}
 
 //    private suspend fun getNewPurchases(): List<Purchase> = suspendCancellableCoroutine { continuation ->
 //    RuStorePayClient.instance.getPurchaseInteractor().getPurchases()
