@@ -22,7 +22,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        println("LOG_NAV: onCreate вызвана! savedInstanceState пустой? ${savedInstanceState == null}")
         handleSharedIntent(intent)
         handleNotificationIntent(intent)
         permissionImp.initLauncher(this@MainActivity)
@@ -35,7 +34,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        println("LOG_NAV: onNewIntent вызвана! Action: ${intent.action}")
         handleSharedIntent(intent)
         handleNotificationIntent(intent)
     }
