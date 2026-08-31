@@ -126,7 +126,7 @@ class MainViewModel(
         loadSounds()
         isUpdateApp()
         loadProduct()
-        isCheckPremiumWithBuy()
+       // isCheckPremiumWithBuy()
     }
 
 private val _sharedIntentEvent = Channel<Pair<String?, String?>>(Channel.BUFFERED)

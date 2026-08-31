@@ -26,6 +26,7 @@ class MainActivity : ComponentActivity() {
         handleNotificationIntent(intent)
         permissionImp.initLauncher(this@MainActivity)
         filePickerImp.initLauncher(this@MainActivity)
+        mainViewModel.isCheckPremiumWithBuy()
         setContent {
             StartApp()
         }
