@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -148,26 +149,26 @@ fun Notebook(viewModel: MainViewModel,pageIndex: Int){
 
             Row(modifier = Modifier.fillMaxWidth()) {
                 Box(modifier = Modifier.fillMaxWidth().padding(8.dp)){
-                    IconButton(modifier = Modifier.size(50.dp).align(Alignment.Center),
-                        onClick = { },
-                    ) {
-                        Image(
-                            painter = theme.iconMicro(),
-                            contentDescription = null,
-                            modifier = Modifier.fillMaxSize()
-
-
+                        IconButton(
+                            modifier = Modifier.size(50.dp).align(Alignment.Center),
+                            onClick = { },
+                        ) {
+                            Icon(
+                                imageVector = theme.iconMicro,
+                                contentDescription = null,
+                                modifier = Modifier.fillMaxSize(),
+                                tint = theme.iconAddTint
                             )
-                    }
+                        }
+
                     IconButton(modifier = Modifier.size(50.dp).align(Alignment.CenterEnd),
                         onClick = {openDialog = true},
                     ){
-                        Image(
-                            painter = theme.iconDel(),
+                        Icon(
+                            imageVector = theme.iconDel,
                             contentDescription = null,
                             modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
-
+                            tint = theme.iconDelTint
                         )
                     }
                 }

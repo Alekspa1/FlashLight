@@ -61,13 +61,13 @@ import presentation.theme.Size
 import presentation.theme.SizeNormal
 import presentation.theme.Theme
 import presentation.theme.ThemeNeon
-import presentation.theme.ThemeZabor
 import kotlin.time.Clock
 import kotlin.time.Instant
 import data.room.model.SubItem
 import androidx.compose.material3.Surface
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.shape.RoundedCornerShape
+import presentation.other.CardItem
 
 @Composable
 fun Calendar(
@@ -153,7 +153,7 @@ fun CalendarContent(
 
             item {
                 Surface(
-                color = theme.noteBookBackground,
+                color = theme.backgroundCalendar,
                 border = BorderStroke(1.dp, theme.noteBookBorder),
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier.padding(16.dp)
@@ -256,17 +256,17 @@ fun CalendarContent(
                 }
             } else items(selectedDateTasks) { item ->
 
-                
-                    CardItem(
-                        item = item.item,
-                        listSubItems = item.subItems,
-                        selectedFileUri = selectedFileUri(item.item.uri),
-                        theme = theme, 
-                        size = size,
-                        onSubDragDropped = onSubDragDropped,
-                        onClick = onClick,
-                        onClickSubItem = onClickSubItem,
-                    )
+
+                CardItem(
+                    item = item.item,
+                    listSubItems = item.subItems,
+                    selectedFileUri = selectedFileUri(item.item.uri),
+                    theme = theme,
+                    size = size,
+                    onSubDragDropped = onSubDragDropped,
+                    onClick = onClick,
+                    onClickSubItem = onClickSubItem,
+                )
                          
             }
 
@@ -422,8 +422,8 @@ fun Month.displayText(): String {
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun PrevCalendar(){
-    CalendarContent(theme = ThemeZabor())
+    CalendarContent(theme = ThemeNeon())
 }

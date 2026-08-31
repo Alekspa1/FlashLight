@@ -1,11 +1,4 @@
-package presentation.screens
-
-
-// ВОССТАНОВИЛИ: Полный набор библиотек времени для твоих методов расчета дат внизу файла
-
-// ВОССТАНОВИЛИ: Все до единой константы алармов, которые ругались в логе компиляции
-
-// Данные и темы проекта
+package presentation.other
 
 
 import CommonConst.ALARM
@@ -24,6 +17,8 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -44,7 +39,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Card
@@ -58,14 +52,12 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Rect
@@ -77,7 +69,9 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
@@ -90,12 +84,17 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.daysUntil
 import kotlinx.datetime.number
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.painterResource
 import presentation.theme.Size
 import presentation.theme.SizeNormal
 import presentation.theme.Theme
 import presentation.theme.ThemeNeon
+import presentation.theme.ThemePoison
+import presentation.theme.ThemeVolcanic
+import presentation.theme.ThemeZabor
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
+import kotlin.time.Clock
 
 
 @Composable
@@ -113,38 +112,11 @@ fun CardItem(
     var isExpanded by remember { mutableStateOf(false) }
     var currentSnapshotList by remember { mutableStateOf(listSubItems) }
 
-
-
-
-
     val cardShape =  if (isExpanded && (currentSnapshotList.isNotEmpty() || selectedFileUri.isNotEmpty())) {
                 RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp, bottomStart = 0.dp, bottomEnd = 0.dp)
             } else {
                 RoundedCornerShape(15.dp)
             }
-
-//    val cardMiddleShape = if (isExpanded) {
-//        when {
-//            // 1. Есть и фото, и подзадачи -> зажата между ними, все углы прямые (0.dp)
-//            selectedFileUri.isNotEmpty() && currentSnapshotList.isNotEmpty() ->
-//                RoundedCornerShape(0.dp)
-//
-//            // 2. Есть только фото (подзадач нет) -> средняя карта стала НИЖНЕЙ, скругляем НИЗ
-//            selectedFileUri.isNotEmpty() ->
-//                RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomStart = 15.dp, bottomEnd = 15.dp)
-//
-//            // 3. Фото нет, но есть подзадачи -> средняя карта стала ВЕРХНЕЙ, скругляем ВЕРХ
-//            currentSnapshotList.isNotEmpty() ->
-//                RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp, bottomStart = 0.dp, bottomEnd = 0.dp)
-//
-//            // 4. ОШИБОЧНЫЙ ХВОСТ: Фото нет И подзадач нет, но кнопка раскрытия нажата (isExpanded == true)
-//            // В этом случае средняя карточка осталась совершенно одна! Она должна скруглить ВСЕ углы (15.dp)
-//            else ->
-//                RoundedCornerShape(15.dp)
-//        }
-//    } else {
-//        RoundedCornerShape(15.dp)
-//    }
 
     val menuCardShape = if (isExpanded) {
                 RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomStart = 15.dp, bottomEnd = 15.dp)
@@ -180,83 +152,6 @@ fun CardItem(
     )
 
     Column(modifier = Modifier.fillMaxWidth()) {
-
-//        AnimatedVisibility(
-//            visible = isExpanded,
-//            enter = expandVertically() + fadeIn(),
-//            exit = shrinkVertically() + fadeOut()
-//        ) {
-//            if (selectedFileUri.isNotEmpty() && isExpanded) {
-//                Card(
-//                    modifier = Modifier
-//                        .padding(start = 48.dp, end = 48.dp)
-//                        .clip(cardShape)
-//                        .then(
-//                            if (isExpanded) {
-//                                // Если раскрыта: обводка по трем сторонам без низа
-//                                Modifier.borderThreeSidesRounded(
-//                                    strokeWidth = 2.dp,
-//                                    color = if (item.change) theme.cardItemBorderTrue
-//                                    else if (item.changeAlarm) theme.cardItemBorderAlarm
-//                                    else theme.cardItemBorderFalse,
-//                                    cornerRadius = 15.dp,
-//                                    openSide = "BOTTOM_OPEN"
-//                                )
-//                            } else {
-//                                Modifier.border(
-//                                    2.dp,
-//                                    if (item.change) theme.cardItemBorderTrue else if (item.changeAlarm) theme.cardItemBorderAlarm else theme.cardItemBorderFalse,
-//                                    RoundedCornerShape(15.dp)
-//                                )
-//                            }
-//                        )
-//                        .clickable { onClick(item, CHANGE_ITEM) }
-//                        .then(dragModifier),
-//                    shape = cardShape,
-//                    colors = CardDefaults.cardColors(
-//                        containerColor = if (item.change) theme.cardItemTrue else if (item.changeAlarm) theme.cardItemAlarm else theme.cardItemFalse
-//                    ),
-//                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-//                ) {
-//                    Box(
-//                        modifier = Modifier
-//                            .fillMaxWidth()
-//                            .height(75.dp)
-//                            .padding(start = 2.dp, top = 2.dp, end = 2.dp)
-//                            .clip(
-//                                RoundedCornerShape(
-//                                    topStart = 13.dp,
-//                                    topEnd = 13.dp,
-//                                    bottomStart = 0.dp,
-//                                    bottomEnd = 0.dp
-//                                )
-//                            )
-//                            .clickable { onClick(item, IMAGE) }
-//                    ) {
-//                        // 1. Задний размытый фон
-////                        AsyncImage(
-////                            model = selectedFileUri,
-////                            contentDescription = null,
-////                            modifier = Modifier
-////                                .fillMaxSize()
-////                                .blur(radius = 15.dp), // Эффект размытия
-////                            contentScale = ContentScale.Crop // Заполняет весь контейнер
-////                        )
-//
-//                        // 2. Передний план (оригинальное фото без искажений)
-//                        AsyncImage(
-//                            model = selectedFileUri,
-//                            contentDescription = "Фото",
-//                            modifier = Modifier
-//                                .fillMaxSize()
-//                               // .clip(RoundedCornerShape(12.dp)),
-//                            ,contentScale = ContentScale.Crop // Картинка помещается целиком без обрезки
-//                        )
-//                    }
-//                }
-//
-//            }
-//        }
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -531,7 +426,7 @@ fun CardItem(
                                             color = if (subItem.change) theme.textDesc else theme.textColor,
                                             fontSize = size.textDesc,
                                             style = if (subItem.change) {
-                                                val currentStyle: androidx.compose.ui.text.TextStyle =
+                                                val currentStyle: TextStyle =
                                                     LocalTextStyle.current
                                                 currentStyle.copy(textDecoration = TextDecoration.LineThrough)
                                             } else {
@@ -607,14 +502,14 @@ private fun getFormattedDate(millis: Long): String {
 
     // Вместо Clock.System используем обертку ClockSystem из kotlinx-datetime,
     // которая возвращает совместимый тип даты
-    val currentMillis = kotlin.time.Clock.System.now().toEpochMilliseconds()
+    val currentMillis = Clock.System.now().toEpochMilliseconds()
 
 // 2. Переводим их в дату через проверенный kotlinx.datetime.Instant
     val today: LocalDate =
-        kotlinx.datetime.Instant.fromEpochMilliseconds(currentMillis).toLocalDateTime(tz).date
+        Instant.fromEpochMilliseconds(currentMillis).toLocalDateTime(tz).date
 
     // Явно создаем целевую дату через правильный пакет
-    val targetDate = kotlinx.datetime.Instant.fromEpochMilliseconds(millis).toLocalDateTime(tz).date
+    val targetDate = Instant.fromEpochMilliseconds(millis).toLocalDateTime(tz).date
 
     val daysDiff = today.daysUntil(targetDate)
 
@@ -736,4 +631,42 @@ fun Modifier.borderThreeSidesRounded(
         )
     )
 }
+
+
+@Preview
+@Composable
+fun PrevCardNeon(){
+    CardItem(item = Item(name = "Test",), theme = ThemeNeon())
+}
+
+@Preview
+@Composable
+fun PrevCardZabor(){
+    CardItem(item = Item(name = "Test",), theme = ThemeZabor())
+}
+
+@Preview
+@Composable
+fun PrevCardVolcanic(){
+    CardItem(item = Item(name = "Test",), theme = ThemeVolcanic())
+}
+
+@Preview
+@Composable
+fun PrevCardPoison(){
+    Box(){
+        Image(
+            painter = painterResource(ThemePoison().backgroundStart),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.FillBounds
+        )
+    }
+    CardItem(item = Item(name = "Test", changeAlarm = true), theme = ThemePoison())
+}
+
+
+
+
+
 

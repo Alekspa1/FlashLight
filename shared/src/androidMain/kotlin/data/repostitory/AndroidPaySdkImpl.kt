@@ -144,21 +144,18 @@ class AndroidPaySdkImpl(private val pref: SharedPrefRepository, private val cont
                                        newStatuses.contains(SubscriptionPurchaseStatus.ACTIVE)
 
          // 2. Запрашиваем покупки из старого SDK (ОБЕРНУЛИ В ЛОКАЛЬНЫЙ TRY-CATCH)
-         val oldPurchases = try {
-             getOldPurchases(billingClient)
-         } catch (e: Exception) {
-             println(e.message.toString())
-             emptyList()
-         }
-         println(oldPurchases.joinToString())
-        
-         val oldStatuses = oldPurchases.map { it.purchaseState }
-         val hasOldPremium = oldStatuses.contains(PurchaseState.CONFIRMED)
-
-         // 3. Твои кейсы синхронизации (работают как часы)
-         if (hasOldPremium) {
-             return Result.success(true)
-         }
+//         val oldPurchases = try {
+//             getOldPurchases(billingClient)
+//         } catch (e: Exception) {
+//             emptyList()
+//         }
+//         val oldStatuses = oldPurchases.map { it.purchaseState }
+//         val hasOldPremium = oldStatuses.contains(PurchaseState.CONFIRMED)
+//
+//         // 3. Твои кейсы синхронизации (работают как часы)
+//         if (hasOldPremium) {
+//             return Result.success(true)
+//         }
          val isLocalPremiumActive = pref.getPremium()
 
          // КЕЙС 1: Если в RuStore пусто, а локально премиум включен -> ОТКЛЮЧАЕМ
@@ -177,7 +174,7 @@ class AndroidPaySdkImpl(private val pref: SharedPrefRepository, private val cont
      } catch (throwable: Throwable) {
          Result.failure(throwable)
      }
-    // } else return Result.failure(Exception("Не авторизован"))
+     //} else return Result.failure(Exception("Не авторизован"))
 
  }
 
@@ -222,6 +219,9 @@ class AndroidPaySdkImpl(private val pref: SharedPrefRepository, private val cont
         RuStorePayClient.instance.getPurchaseInteractor().getPurchases()
             .addOnSuccessListener { purchases ->
                 if (continuation.isActive) {
+                    purchases.forEach { purchase ->
+                        println(purchase.toString())
+                    }
                     continuation.resume(purchases)
                 } else continuation.resume(emptyList())
             }
@@ -231,26 +231,21 @@ class AndroidPaySdkImpl(private val pref: SharedPrefRepository, private val cont
             }
     }
 
-    private suspend fun getOldPurchases(billingClient: RuStoreBillingClient): List<ru.rustore.sdk.billingclient.model.purchase.Purchase> = suspendCancellableCoroutine { continuation ->
-        billingClient.purchases.getPurchases()
-            .addOnSuccessListener { purchases ->
-                println("Метод запущен")
-                // Точно такая же защита для старого SDK
-                if (continuation.isActive) {
-                    continuation.resume(purchases)
-                    println(purchases.toString())
-                    println(purchases.joinToString())
-                    purchases.forEach { purchase ->
-                        println(purchase.toString())
-                    }
-                } else continuation.resume(emptyList())
-            }
-            .addOnFailureListener { throwable ->
-                if (continuation.isActive) {
-                    continuation.resume(emptyList())
-                }
-            }
-    }
+//    private suspend fun getOldPurchases(billingClient: RuStoreBillingClient): List<ru.rustore.sdk.billingclient.model.purchase.Purchase> = suspendCancellableCoroutine { continuation ->
+//        billingClient.purchases.getPurchases()
+//            .addOnSuccessListener { purchases ->
+//                println("Метод запущен")
+//                // Точно такая же защита для старого SDK
+//                if (continuation.isActive) {
+//                    continuation.resume(purchases)
+//                } else continuation.resume(emptyList())
+//            }
+//            .addOnFailureListener { throwable ->
+//                if (continuation.isActive) {
+//                    continuation.resume(emptyList())
+//                }
+//            }
+//    }
 
     }
 

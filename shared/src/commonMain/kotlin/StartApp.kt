@@ -99,59 +99,60 @@ import presentation.theme.ThemeZabor
 
 import presentation.theme.ThemeStorm
 import presentation.theme.ThemeMarble
+import presentation.theme.ThemePlatinum
 import presentation.theme.ThemePoison
+import presentation.theme.ThemeVolcanic
 
 import kotlin.time.Clock
 
 @Composable
 fun StartApp(viewModel: MainViewModel = koinViewModel()) {
-    val recomposeCount = remember { mutableStateOf(0) }
 
-    SideEffect {
-        recomposeCount.value++
-        println("START_APP_LOG: Функция StartApp вызвана снова! Номер вызова: ${recomposeCount.value}")
-    }
+
     val theme = viewModel.themeState
     val size = viewModel.sizeState
     val premiumState by viewModel.premiumState.collectAsStateWithLifecycle()
     val navController = rememberNavController()
 
-
-//    LaunchedEffect(navController) {
-//        navController.currentBackStack.collect { backStack ->
-//            val routes = backStack.map { it.destination.route }.filterNotNull()
-//            println("NAV_LOG: Текущий стек изменен: $routes")
-//        }
-//    }
 MaterialTheme(
     colorScheme = when (theme) {
         // Оставляем Неоновую и Ядовитую вместе — у них акценты совпадают
-        is ThemePoison, is ThemeNeon -> darkColorScheme(
-            primary = theme.textColor,
-            surface = theme.backgroundDialog,
-            onSurface = theme.textColor,
-            surfaceContainerHigh = theme.backgroundDialog, 
-            onSurfaceVariant = theme.tintAlarmOn 
+        is ThemePoison, is ThemeNeon, is ThemeVolcanic -> darkColorScheme(
+//            primary = theme.textColor, // основной цвет
+//            surface = theme.backgroundDialog,
+//            onSurface = theme.textColor,
+//            surfaceContainerHigh = theme.backgroundDialog,
+//            onSurfaceVariant = theme.tintAlarmOn
+
+
+            primary = theme.textColor, // основной цвет
+            surfaceContainerHigh = theme.backgroundDialog,
+            primaryContainer = Color(0xFF616161), // цвет в диалоге выбора времени часы(если выделены)
+            onPrimaryContainer = theme.textColor,
+            surfaceContainerHighest = Color(0xFF616161), // цвет в диалоге выбора времени минуты(если не выделены)
+            onSurfaceVariant = theme.textColor,
+
+            //surface = Color.Green,
+            //onSurface = Color.Yellow,
+
+
         )
-        
-        // ВЫДЕЛЯЕМ ГРОЗОВУЮ отдельно, чтобы добавить шикарный пурпурный акцент для дней недели!
+
         is ThemeStorm -> darkColorScheme(
-            primary = theme.textColor, // или Color(0xFF80DEEA) для цвета молнии
+            primary = theme.textColor,
             surface = theme.backgroundDialog,
             onSurface = theme.textColor,
             surfaceContainerHigh = theme.backgroundDialog, 
             onSurfaceVariant = Color(0xFFE040FB) // Тот самый неоново-пурпурный цвет светящегося леса!
         )
-        
-        // ГРУППА СВЕТЛЫХ ТЕМ (Мраморная и Деревянная)
-        is ThemeMarble, is ThemeZabor -> lightColorScheme(
+
+        is ThemeMarble, is ThemeZabor, is ThemePlatinum -> lightColorScheme(
             primary = theme.textColor,
             surface = theme.backgroundDialog,
             onSurface = theme.textColor,
             surfaceContainerHigh = theme.backgroundDialog,
             onSurfaceVariant = theme.textDesc
         )
-        else -> lightColorScheme(primary = theme.textColor)
     }
 ){
 
@@ -227,7 +228,6 @@ MaterialTheme(
         }
 
     LaunchedEffect(Unit){
-
         viewModel.updateAlarm()
     }
 
@@ -324,7 +324,7 @@ MaterialTheme(
                 exitTransition = { androidx.compose.animation.ExitTransition.None },
                 popEnterTransition = { androidx.compose.animation.EnterTransition.None }
             ) {
-                    println("settings")
+
                     SettingsScreen(
                         theme = viewModel.themeState,
                         size = viewModel.sizeState,

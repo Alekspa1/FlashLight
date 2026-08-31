@@ -154,7 +154,7 @@ when(isOpenDialogPremiumInfo) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Назад",
-                        tint = theme.iconDelTint
+                        tint = theme.iconTint
                     )
                 }
 

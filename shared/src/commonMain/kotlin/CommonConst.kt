@@ -77,7 +77,7 @@ object CommonConst {
     const val THEME_FUTURE = "Неоновая"
     const val THEME_ZABOR = "Деревянная"
     const val THEME_MRAMOR = "Мраморная"
-    const val THEME_GROZA = "Штормовая"
+    const val THEME_GROZA = "Грозовая"
     const val THEME_POISON = "Ядовитая"
     const val THEME_PLATINA = "Платиновая"
     const val THEME_VULCAN = "Вулканическая"

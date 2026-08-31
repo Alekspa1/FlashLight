@@ -195,7 +195,7 @@ fun SettingsScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack, // Или ваша иконка ic_menu
                             contentDescription = "Меню",
-                            tint = theme.iconDelTint
+                            tint = theme.iconTint
                         )
                     }
 

@@ -25,7 +25,7 @@ import presentation.theme.ThemeNeon
 import presentation.theme.Size
 import presentation.theme.SizeNormal
 import androidx.compose.ui.graphics.graphicsLayer
-import presentation.screens.CardItem
+import presentation.other.CardItem
 // ИМПОРТЫ СТАБИЛЬНОЙ БИБЛИОТЕКИ CALVIN REORDERABLE
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
@@ -147,15 +147,17 @@ fun ListToDo(
         // Блок нижних кнопок (остался без изменений)
         Row(modifier = Modifier.fillMaxWidth()) {
             Box(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-                IconButton(
-                    modifier = Modifier.size(50.dp).align(Alignment.Center),
-                    onClick = { },
-                ) {
-                    Image(
-                        painter = theme.iconMicro(),
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxSize()
-                    )
+
+                    IconButton(
+                        modifier = Modifier.size(50.dp).align(Alignment.Center),
+                        onClick = {  },
+                    ) {
+                        Icon(
+                            imageVector = theme.iconMicro,
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(),
+                            tint = theme.iconAddTint
+                        )
                 }
                 IconButton(
                     modifier = Modifier.size(50.dp).align(Alignment.CenterEnd),
@@ -168,146 +170,11 @@ fun ListToDo(
                         tint = theme.iconAddTint
                     )
                 }
-            }
+
         }
     }
 }
-
-// @Composable
-// fun ListToDo(
-//     list: List<ItemWithSubItems>, // Принимаем связку с подзадачами
-//     selectedFileUri: (String) -> String = { _ -> "" },
-//     theme: Theme = ThemeNeon(),
-//     size: Size = SizeNormal(),
-//     isDragDropEnabled: Boolean = true,
-//     onClick: (Item, Int) -> Unit = { _, _ -> },
-//     onAddItem: () -> Unit = {},
-//     // Возвращаем назад чистый List<Item> для твоей ViewModel, как ты и просил!
-//     onDragDropped: (List<Item>) -> Unit = {}, 
-//     onSubDragDropped: (List<SubItem>) -> Unit = {},
-//     category: String = "Тест"
-// ) {
-//     val listState = rememberLazyListState()
-//     val haptic = LocalHapticFeedback.current
-
-//     // Вытаскиваем только дела для работы Drag-and-Drop, чтобы ничего не ломать
-//     val itemsOnly = remember(list) { list.map { it.item } }
-//     var currentSnapshotList by remember { mutableStateOf<List<Item>>(itemsOnly) }
-
-//     LaunchedEffect(list) {
-//         if (currentSnapshotList != itemsOnly) {
-//             currentSnapshotList = itemsOnly
-//         }
-//     }
-
-//     val reorderableState = rememberReorderableLazyListState(
-//         lazyListState = listState,
-//         onMove = { from, to ->
-//             if (from.index == 0 || to.index == 0) return@rememberReorderableLazyListState
-//             val fromIdx = from.index - 1
-//             val toIdx = to.index - 1
-//             if (fromIdx in currentSnapshotList.indices && toIdx in currentSnapshotList.indices) {
-//                 val updatedList = currentSnapshotList.toMutableList().apply { add(toIdx, removeAt(fromIdx)) }
-//                 currentSnapshotList = updatedList
-//             }
-//         }
-//     )
-
-//     Column(modifier = Modifier.fillMaxSize()) {
-//         LazyColumn(
-//             state = listState,
-//             modifier = Modifier.fillMaxWidth().weight(1f),
-//             verticalArrangement = Arrangement.spacedBy(5.dp),
-//         ) {
-//             val categoryName = category
-//             item(key = categoryName) {
-//                 Box(modifier = Modifier.fillMaxWidth()) {
-//                     Text(
-//                         text = categoryName,
-//                         color = theme.textColor,
-//                         fontSize = size.textMenu,
-//                         fontWeight = FontWeight.Bold,
-//                         modifier = Modifier.align(Alignment.Center)
-//                     )
-//                 }
-//             }
-
-//             itemsIndexed(
-//                 items = currentSnapshotList,
-//                 key = { _, item -> item.id } // Ключ работает по ID дела, всё чётко
-//             ) { index, item ->
-                
-//                 // Находим подзадачи для текущей карточки из исходного списка на лету
-//                 val subItems = list.find { it.item.id == item.id }?.subItems ?: emptyList()
-
-//                 ReorderableItem(
-//                     state = reorderableState,
-//                     key = item.id
-//                 ) { isDragging ->
-//                     val draggableHandle = Modifier.longPressDraggableHandle(
-//                         enabled = isDragDropEnabled,
-//                         onDragStarted = { haptic.performHapticFeedback(HapticFeedbackType.LongPress) },
-//                         onDragStopped = {
-//                             val listWithUpdatedSort = currentSnapshotList.mapIndexed { idx, listItem -> 
-//                                 listItem.copy(sort = idx) 
-//                             }
-//                             currentSnapshotList = listWithUpdatedSort
-//                             onDragDropped(listWithUpdatedSort) // Возвращаем чистый List<Item> во ViewModel
-//                         }
-//                     )
-
-//                     Box(
-//                         modifier = Modifier
-//                             .fillMaxWidth()
-//                             .animateItem()
-//                             .graphicsLayer { alpha = if (isDragging) 0.5f else 1f }
-//                     ) {
-//                         CardItem(
-//                             item = item,
-//                             listSubItems = subItems, // Передаем найденные подзадачи!
-//                             selectedFileUri = selectedFileUri(item.uri),
-//                             theme = theme,
-//                             dragModifier = draggableHandle,
-//                             size = size,
-//                             onClick = { returnedItem, action ->
-//                                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-//                                 onClick(returnedItem, action)
-//                             },
-//                             //onSubDragDropped = {list-> onSubDragDropped(list)}
-//                         )
-//                     }
-//                 }
-//             }
-//         }
-
-//         // Блок нижних кнопок (Микрофон и Плюс)
-//         Row(modifier = Modifier.fillMaxWidth()) {
-//             Box(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-//                 IconButton(
-//                     modifier = Modifier.size(50.dp).align(Alignment.Center),
-//                     onClick = { },
-//                 ) {
-//                     Image(
-//                         painter = theme.iconMicro(),
-//                         contentDescription = null,
-//                         modifier = Modifier.fillMaxSize()
-//                     )
-//                 }
-//                 IconButton(
-//                     modifier = Modifier.size(50.dp).align(Alignment.CenterEnd),
-//                     onClick = { onAddItem() },
-//                 ) {
-//                     Icon(
-//                         imageVector = theme.iconAdd,
-//                         contentDescription = null,
-//                         modifier = Modifier.fillMaxSize(),
-//                         tint = theme.iconAddTint
-//                     )
-//                 }
-//             }
-//         }
-//     }
-// }
+}
 
 
 // @Preview(showBackground = true)
