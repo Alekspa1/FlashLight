@@ -27,7 +27,6 @@ import flashlight.shared.generated.resources.background_poison
 import flashlight.shared.generated.resources.background_vulcan
 import flashlight.shared.generated.resources.background_zabor
 import flashlight.shared.generated.resources.background_drawer_vulcan
-import flashlight.shared.generated.resources.img
 import org.jetbrains.compose.resources.DrawableResource
 
 
