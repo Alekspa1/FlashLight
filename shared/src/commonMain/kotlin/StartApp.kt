@@ -178,16 +178,17 @@ MaterialTheme(
         val snackbarHostState = remember { SnackbarHostState() }
         val productList by viewModel.productState.collectAsStateWithLifecycle()
 
-        LaunchedEffect(Unit) {
+    LaunchedEffect(Unit) {
+        // 1. Запускаем сбор тостов в отдельной фоновой корутине
+        launch {
             viewModel.toast.collect { message ->
                 snackbarHostState.showSnackbar(message)
             }
         }
 
-                LaunchedEffect(Unit) {
+        // 2. Запускаем сбор интентов в отдельной фоновой корутине
+        launch {
             viewModel.sharedIntentEvent.collect { (text, imageUri) ->
-                // Событие вычитывается из буфера строго тогда, когда UI готов.
-                // Выставляем нужный статус диалога — теперь Compose его не сотрет!
                 viewModel.showDialog = DialogState(
                     isWho = INSERT_DIALOG_ITEM,
                     calendar = false,
@@ -201,6 +202,14 @@ MaterialTheme(
                 )
             }
         }
+
+        // 3. Вызываем обычный метод обновления будильника
+        viewModel.updateAlarm()
+
+        // 4. Финальный аккорд: граф создан, подписки активны, диалог готов к показу.
+        // Стреляем колбэком на Android-сторону для запуска фальшивой Activity!
+
+    }
         when (viewModel.showDialog.isWho) {
             DELETE_DIALOG_CATEGORY -> {
                 DeleteDialog(theme = theme) { result ->
@@ -227,9 +236,7 @@ MaterialTheme(
             }
         }
 
-    LaunchedEffect(Unit){
-        viewModel.updateAlarm()
-    }
+
 
 
 

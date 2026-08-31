@@ -129,16 +129,20 @@ class AndroidPaySdkImpl(private val pref: SharedPrefRepository, private val cont
     }
 
      override suspend fun isChekedSubcrition(): Result<Boolean> {
-        // if(isAuthorizationInRustore()){
+         if(isAuthorizationInRustore()){
      return try {
-         val billingClient = RuStoreBillingClientFactory.create(
-             context = context,
-             consoleApplicationId = "2063541058",
-             deeplinkScheme = "flashlight"
-         )
+//         val billingClient = RuStoreBillingClientFactory.create(
+//             context = context,
+//             consoleApplicationId = "2063541058",
+//             deeplinkScheme = "flashlight"
+//         )
 
-         // 1. Запрашиваем покупки из нового SDK
+
          val newPurchases = getNewPurchases()
+
+
+
+
          val newStatuses = newPurchases.map { it.status }
          val hasActivePremiumInStore = newStatuses.contains(ProductPurchaseStatus.CONFIRMED) ||
                                        newStatuses.contains(SubscriptionPurchaseStatus.ACTIVE)
@@ -174,7 +178,7 @@ class AndroidPaySdkImpl(private val pref: SharedPrefRepository, private val cont
      } catch (throwable: Throwable) {
          Result.failure(throwable)
      }
-     //} else return Result.failure(Exception("Не авторизован"))
+     } else return Result.failure(Exception("Не авторизован"))
 
  }
 
@@ -184,18 +188,15 @@ class AndroidPaySdkImpl(private val pref: SharedPrefRepository, private val cont
           when (result) {
               UserAuthorizationStatus.AUTHORIZED -> {
                   if(continuation.isActive) continuation.resume(true)
-                  println("Авторизован")
               }
 
  
             UserAuthorizationStatus.UNAUTHORIZED -> {
                 if(continuation.isActive) continuation.resume(false)
-                println("Не авторизован")
             }
         }
     }.addOnFailureListener { throwable ->
         if(continuation.isActive) continuation.resume(false)
-            println("Ошибка")
     }
 
        
@@ -219,15 +220,12 @@ class AndroidPaySdkImpl(private val pref: SharedPrefRepository, private val cont
         RuStorePayClient.instance.getPurchaseInteractor().getPurchases()
             .addOnSuccessListener { purchases ->
                 if (continuation.isActive) {
-                    purchases.forEach { purchase ->
-                        println(purchase.toString())
-                    }
                     continuation.resume(purchases)
-                } else continuation.resume(emptyList())
+                }
             }
             .addOnFailureListener { throwable ->
-
-                continuation.resume(emptyList())
+                println("Код в ошибке тут")
+                println(throwable.message.toString())
             }
     }
 

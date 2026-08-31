@@ -83,6 +83,12 @@
     </intent-filter>
 </activity>
 
+        <activity
+            android:name="presentation.WarmupActivity"
+            android:theme="@style/Theme.WarmupSolid"
+            android:exported="false"
+            android:launchMode="singleTop" />
+
         <!-- <activity
             android:launchMode="singleTask"
             android:name="presentation.MainActivity"

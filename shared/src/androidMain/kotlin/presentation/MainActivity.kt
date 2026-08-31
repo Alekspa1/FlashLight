@@ -7,9 +7,16 @@ import androidx.activity.compose.setContent
 import data.repostitory.AndroidPermissionImpl
 import org.koin.android.ext.android.inject
 import MainViewModel
+import android.app.AlertDialog
+import android.app.Dialog
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.runtime.LaunchedEffect
 import data.repostitory.AndroidPlatformFilePickerImpl
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import presentation.screens.PremiumScreen
 
 
@@ -26,10 +33,29 @@ class MainActivity : ComponentActivity() {
         handleNotificationIntent(intent)
         permissionImp.initLauncher(this@MainActivity)
         filePickerImp.initLauncher(this@MainActivity)
-        mainViewModel.isCheckPremiumWithBuy()
+        if (savedInstanceState == null) {
+            val intent = Intent(this@MainActivity, WarmupActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            this@MainActivity.startActivity(intent)
+
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                this@MainActivity.overrideActivityTransition(OVERRIDE_TRANSITION_OPEN, 0, 0)
+            } else {
+                @Suppress("DEPRECATION")
+                this@MainActivity.overridePendingTransition(0, 0)
+            }
+
         setContent {
+
             StartApp()
+
+            } // Тяжелый граф инициализируется спокойно
         }
+
+
+
+
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -87,6 +113,21 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        println("onStop")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        println("onPause")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        println("onResume")
     }
 
 }
