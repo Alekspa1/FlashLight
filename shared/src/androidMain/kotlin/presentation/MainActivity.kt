@@ -45,16 +45,11 @@ class MainActivity : ComponentActivity() {
                 @Suppress("DEPRECATION")
                 this@MainActivity.overridePendingTransition(0, 0)
             }
-
-        setContent {
-
-            StartApp()
-
-            } // Тяжелый граф инициализируется спокойно
         }
-
-
-
+        val isColdStart = savedInstanceState == null
+        setContent {
+            StartApp(isColdStart =  isColdStart)
+        }
 
     }
 
@@ -113,21 +108,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-    }
-
-    override fun onStop() {
-        super.onStop()
-        println("onStop")
-    }
-
-    override fun onPause() {
-        super.onPause()
-        println("onPause")
-    }
-
-    override fun onResume() {
-        super.onResume()
-        println("onResume")
     }
 
 }

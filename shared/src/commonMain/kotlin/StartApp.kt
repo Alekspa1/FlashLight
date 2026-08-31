@@ -91,6 +91,7 @@ import presentation.dialogs.parsePlatformUri
 import presentation.screens.Faq
 import presentation.screens.PremiumScreen
 import presentation.screens.SettingsScreen
+import presentation.screens.SplashScreen
 import presentation.theme.Size
 import presentation.theme.SizeNormal
 import presentation.theme.Theme
@@ -106,34 +107,25 @@ import presentation.theme.ThemeVolcanic
 import kotlin.time.Clock
 
 @Composable
-fun StartApp(viewModel: MainViewModel = koinViewModel()) {
+fun StartApp(viewModel: MainViewModel = koinViewModel(),isColdStart: Boolean = false) {
 
 
     val theme = viewModel.themeState
     val size = viewModel.sizeState
     val premiumState by viewModel.premiumState.collectAsStateWithLifecycle()
     val navController = rememberNavController()
+    var showSplash by remember { mutableStateOf(isColdStart) }
 
 MaterialTheme(
     colorScheme = when (theme) {
         // Оставляем Неоновую и Ядовитую вместе — у них акценты совпадают
         is ThemePoison, is ThemeNeon, is ThemeVolcanic -> darkColorScheme(
-//            primary = theme.textColor, // основной цвет
-//            surface = theme.backgroundDialog,
-//            onSurface = theme.textColor,
-//            surfaceContainerHigh = theme.backgroundDialog,
-//            onSurfaceVariant = theme.tintAlarmOn
-
-
             primary = theme.textColor, // основной цвет
             surfaceContainerHigh = theme.backgroundDialog,
             primaryContainer = Color(0xFF616161), // цвет в диалоге выбора времени часы(если выделены)
             onPrimaryContainer = theme.textColor,
             surfaceContainerHighest = Color(0xFF616161), // цвет в диалоге выбора времени минуты(если не выделены)
             onSurfaceVariant = theme.textColor,
-
-            //surface = Color.Green,
-            //onSurface = Color.Yellow,
 
 
         )
@@ -155,20 +147,6 @@ MaterialTheme(
         )
     }
 ){
-
-    // MaterialTheme(
-    //     colorScheme = if (viewModel.themeState == ThemeNeon()) darkColorScheme(
-    //         primary = theme.textColor,
-    //         surfaceContainerHigh = theme.backgroundDialog,
-    //         primaryContainer = Color(0xFF616161),
-    //         onPrimaryContainer = theme.textColor,
-    //         surfaceContainerHighest = Color(0xFF616161),
-    //         onSurfaceVariant = theme.textColor
-
-    //     ) else lightColorScheme(
-    //         primary = theme.textColor
-    //     )
-    // ) {
 
         val categories by viewModel.categories.collectAsStateWithLifecycle()
         val updateState by viewModel.updateState.collectAsStateWithLifecycle()
@@ -203,11 +181,8 @@ MaterialTheme(
             }
         }
 
-        // 3. Вызываем обычный метод обновления будильника
         viewModel.updateAlarm()
 
-        // 4. Финальный аккорд: граф создан, подписки активны, диалог готов к показу.
-        // Стреляем колбэком на Android-сторону для запуска фальшивой Activity!
 
     }
         when (viewModel.showDialog.isWho) {
@@ -276,50 +251,57 @@ MaterialTheme(
                 exitTransition = { androidx.compose.animation.ExitTransition.None },
                 popEnterTransition = { androidx.compose.animation.EnterTransition.None }
             ) {
-                val lifecycleOwner = LocalLifecycleOwner.current
-                LaunchedEffect(lifecycleOwner.lifecycle) {
-                    // repeatOnLifecycle автоматически отменит корутину (и Ktor-запрос),
-                    // когда приложение свернется, и перезапустит её, когда оно откроется.
-                    lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                        viewModel.telegramTasksFlow.collect() // Просто триггерим сбор данных
-                    }
-                }
-                StartAppContent( 
-                    isCommonMode = isCommonMode, 
-                    onToggleCommonMode = { isCommonMode = !isCommonMode }, 
-                    categories = categories, 
-                    toastEvents = {message -> viewModel.sendMessage(message) },
-                    updateCategory = { category -> viewModel.updateCategory(category) }, 
-                    openPager = { onOpenDrawer, pagerState -> MainPager(innerPadding, viewModel, onOpenDrawer, pagerState) }, 
-                    drawerState = drawerState, 
-                    theme = viewModel.themeState, 
-                    size = viewModel.sizeState, 
-                    premium = premiumState, 
-                    update = updateState, 
-                    onClick = { click -> 
-                        when (click) { 
-                            PREMIUM_CLICK -> { navController.navigate("premium_screen") } 
-                            UPGRATE_CLICK -> {} 
-                            SETTINGS_CLICK -> {
-                                navController.navigate("settings_screen")
 
+//                val lifecycleOwner = LocalLifecycleOwner.current
+//                LaunchedEffect(lifecycleOwner.lifecycle) {
+//                    lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+//                        viewModel.telegramTasksFlow.collect() // Просто триггерим сбор данных
+//                    }
+//                }
+
+                    Box(modifier = Modifier.fillMaxSize()){
+                        StartAppContent(
+                            isCommonMode = isCommonMode,
+                            onToggleCommonMode = { isCommonMode = !isCommonMode },
+                            categories = categories,
+                            toastEvents = {message -> viewModel.sendMessage(message) },
+                            updateCategory = { category -> viewModel.updateCategory(category) },
+                            openPager = { onOpenDrawer, pagerState -> MainPager(innerPadding, viewModel, onOpenDrawer, pagerState) },
+                            drawerState = drawerState,
+                            theme = viewModel.themeState,
+                            size = viewModel.sizeState,
+                            premium = premiumState,
+                            update = updateState,
+                            onClick = { click ->
+                                when (click) {
+                                    PREMIUM_CLICK -> { navController.navigate("premium_screen") }
+                                    UPGRATE_CLICK -> {}
+                                    SETTINGS_CLICK -> {
+                                        navController.navigate("settings_screen")
+
+                                    }
+                                    SHARED_ClICK -> { viewModel.sendMessage("Общие дела появяться в следующих обновлениях") }
+                                }
+                            },
+                            onClickCategory = { listCategory, action ->
+                                when (action) {
+                                    INSERT_DIALOG_CATEGORY -> {
+                                        if (premiumState) {
+                                            viewModel.showDialog = DialogState(INSERT_DIALOG_CATEGORY, category = listCategory)
+                                        } else viewModel.sendMessage("Категории доступны в PREMIUM версии")
+                                    }
+                                    DELETE_DIALOG_CATEGORY -> {
+                                        viewModel.showDialog = DialogState(DELETE_DIALOG_CATEGORY, category = listCategory)
+                                    }
+                                }
                             }
-                            SHARED_ClICK -> { viewModel.sendMessage("Общие дела появяться в следующих обновлениях") } 
-                        } 
-                    }, 
-                    onClickCategory = { listCategory, action -> 
-                        when (action) { 
-                            INSERT_DIALOG_CATEGORY -> { 
-                                if (premiumState) { 
-                                    viewModel.showDialog = DialogState(INSERT_DIALOG_CATEGORY, category = listCategory) 
-                                } else viewModel.sendMessage("Категории доступны в PREMIUM версии") 
-                            } 
-                            DELETE_DIALOG_CATEGORY -> { 
-                                viewModel.showDialog = DialogState(DELETE_DIALOG_CATEGORY, category = listCategory) 
-                            } 
-                        } 
-                    } 
-                )
+                        )
+                        if (showSplash) {
+                            SplashScreen(onAnimationDone = { showSplash = false })
+                        }
+
+
+                    }
             } 
 
             // ЭКРАН №2: Настройки

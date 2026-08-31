@@ -153,89 +153,121 @@ fun AddOrChangeItemDialog(
     AlertDialog(
         onDismissRequest = { onCancel() },
 
-        title = { Text("Сфокусироваться") },
+        title = { Text(text = if(!isExpanded)"Сфокусироваться" else stateTextName) },
 
         text = {
 
             Column(
                 modifier = Modifier.fillMaxWidth()
                     .verticalScroll(rememberScrollState()),
-
                 ) {
+                AnimatedVisibility(
+                    visible = !isExpanded,
+                    enter = expandVertically() + fadeIn(),
+                    exit = shrinkVertically() + fadeOut()
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp)
+                    ){
+                    // Поле Название
+                    OutlinedTextField(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .then(if (item == null) Modifier.focusRequester(focusRequester) else Modifier),
+                        value = stateTextName,
+                        onValueChange = { stateTextName = it },
+                        shape = RoundedCornerShape(10.dp),
+                        label = { Text(text = "Название") },
+                    )
 
+                    // Поле Описание
+                    OutlinedTextField(
+                        modifier = Modifier.fillMaxWidth(),
+                        value = stateTextDecs,
+                        onValueChange = { stateTextDecs = it },
+                        shape = RoundedCornerShape(10.dp),
+                        label = { Text("Описание") },
+                    )
+                }
+                }
 
-                // Поле Название
-                OutlinedTextField(
+                Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .then(if (item == null) Modifier.focusRequester(focusRequester) else Modifier),
-                    value = stateTextName,
-                    onValueChange = { stateTextName = it },
-                    shape = RoundedCornerShape(10.dp),
-                    label = { Text(text = "Название") },
-                )
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    // Row теперь кликабелен сам по себе и сжимается под контент
+                    Row(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp)) // Чтобы эффект нажатия не вылезал за границы
+                            .clickable { isExpanded = !isExpanded }
+                            .padding(
+                                horizontal = 12.dp,
+                                vertical = 8.dp
+                            ), // Внутренние отступы самой кнопки
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.End
+                    ) {
 
-                // Поле Описание
-                OutlinedTextField(
-                    modifier = Modifier.fillMaxWidth(),
-                    value = stateTextDecs,
-                    onValueChange = { stateTextDecs = it },
-                    shape = RoundedCornerShape(10.dp),
-                    label = { Text("Описание") },
-                )
+                        Text(
+                            text = if (!isExpanded) "Больше параметров" else "Меньше параметров",
+                            fontSize = 15.sp,
+                            color = theme.textColor // Твой серый цвет из темы
+                        )
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
+                    }
+                }
 
+
+                AnimatedVisibility(
+                    visible = isExpanded,
+                    enter = expandVertically() + fadeIn(),
+                    exit = shrinkVertically() + fadeOut()
+                ) {
 
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 8.dp)
-//        .border(
-//            width = 1.dp,
-//            color = theme.cardItemBorderFalse,
-//            shape = RoundedCornerShape(10.dp)
-//        )
                 ) {
                     // Внешний Box занимает всю ширину, чтобы прижать кнопку вправо
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        contentAlignment = Alignment.CenterEnd
-                    ) {
-                        // Row теперь кликабелен сам по себе и сжимается под контент
-                        Row(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(8.dp)) // Чтобы эффект нажатия не вылезал за границы
-                                .clickable { isExpanded = !isExpanded }
-                                .padding(
-                                    horizontal = 12.dp,
-                                    vertical = 8.dp
-                                ), // Внутренние отступы самой кнопки
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.End
-                        ) {
+//                    Box(
+//                        modifier = Modifier
+//                            .fillMaxWidth(),
+//                        contentAlignment = Alignment.CenterEnd
+//                    ) {
+//                        // Row теперь кликабелен сам по себе и сжимается под контент
+//                        Row(
+//                            modifier = Modifier
+//                                .clip(RoundedCornerShape(8.dp)) // Чтобы эффект нажатия не вылезал за границы
+//                                .clickable { isExpanded = !isExpanded }
+//                                .padding(
+//                                    horizontal = 12.dp,
+//                                    vertical = 8.dp
+//                                ), // Внутренние отступы самой кнопки
+//                            verticalAlignment = Alignment.CenterVertically,
+//                            horizontalArrangement = Arrangement.End
+//                        ) {
+//
+//                            Text(
+//                                text = if (!isExpanded) "Раскрыть " else "Скрыть ",
+//                                fontSize = 15.sp,
+//                                color = theme.textDesc // Твой серый цвет из темы
+//                            )
+//
+//                            Text(
+//                                text = "подзадачи",
+//                                fontSize = 15.sp,
+//                                color = theme.textColor,
+//                                modifier = Modifier.padding(end = 8.dp)
+//                            )
+//                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
+//                        }
+//                    }
 
-                            Text(
-                                text = if (!isExpanded) "Раскрыть " else "Скрыть ",
-                                fontSize = 15.sp,
-                                color = theme.textDesc // Твой серый цвет из темы
-                            )
 
-                            Text(
-                                text = "подзадачи",
-                                fontSize = 15.sp,
-                                color = theme.textColor,
-                                modifier = Modifier.padding(end = 8.dp)
-                            )
-                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
-                        }
-                    }
-
-                    // Выпадающее содержимое (остается без изменений)
-                    AnimatedVisibility(
-                        visible = isExpanded,
-                        enter = expandVertically() + fadeIn(),
-                        exit = shrinkVertically() + fadeOut()
-                    ) {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -413,8 +445,9 @@ fun AddOrChangeItemDialog(
                                 }
                             }
                         }
-                    }
-                }
+
+
+
                 HorizontalDivider(
                     thickness = 1.dp,
                     color = theme.textColor.copy(alpha = 0.15f),
@@ -494,6 +527,8 @@ fun AddOrChangeItemDialog(
                     modifier = Modifier.padding(horizontal = 16.dp) // Исправили 's' на 'z'
                 )
 
+            }
+            }
             }
         },
 
