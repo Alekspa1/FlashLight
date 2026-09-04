@@ -222,3 +222,112 @@ expect fun unzipDirectory(sourceZipFile: String, targetDir: String)
 
 expect fun writeZipToPlatformFile(sourceFilePath: String, targetPlatformFile: PlatformFile): Boolean
 expect fun readZipFromPlatformFile(sourcePlatformFile: PlatformFile, targetFilePath: String): Boolean
+
+
+// override suspend fun loadDb(sourcePlatformFile: PlatformFile): Boolean {
+//     return withContext(Dispatchers.IO) {
+//         val internalPath = pathProvider.getInternalAppPath()
+//         val tempZipFile = "$internalPath/temp_import.zip".toPath()
+//         val unpackDir = "$internalPath/temp_unpacked".toPath()
+//         val stagedImagesDir = "$internalPath/temp_restored_images".toPath()
+//         val currentImagesDir = "$internalPath/images".toPath()
+//         val dao = db.CourseDao()
+//         val now = currentTime()
+
+//         try {
+//             // Чистим мусор перед стартом
+//             fileSystem.delete(tempZipFile, mustExist = false)
+//             fileSystem.deleteRecursively(unpackDir)
+//             fileSystem.deleteRecursively(stagedImagesDir)
+
+//             // 1. Копируем архив из платформенного файла во временный zip
+//             val copied = readZipFromPlatformFile(sourcePlatformFile, tempZipFile.toString())
+//             if (!copied) return@withContext false
+
+//             // 2. Распаковываем архив
+//             unzipDirectory(tempZipFile.toString(), unpackDir.toString())
+
+//             // 3. Читаем json
+//             val jsonFile = unpackDir / "backup_data.json"
+//             if (!fileSystem.exists(jsonFile)) return@withContext false
+
+//             val jsonString = fileSystem.read(jsonFile) { readUtf8() }
+//             val container = json.decodeFromString<AppJsonBackup>(jsonString)
+
+//             // 4. Сохраняем список старых alarm до перезаписи БД
+//             val oldAlarms = dao.getUpdateItemRestartPhone(now)
+
+//             // 5. Готовим новые картинки во временную папку
+//             val newImagesDir = unpackDir / "images"
+//             if (fileSystem.exists(newImagesDir)) {
+//                 fileSystem.createDirectories(stagedImagesDir)
+//                 fileSystem.list(newImagesDir).forEach { imageFile ->
+//                     fileSystem.copy(imageFile, stagedImagesDir / imageFile.name)
+//                 }
+//             }
+
+//             // 6. Восстанавливаем БД атомарно
+//             db.withTransaction {
+//                 // если у тебя каскад настроен, порядок не критичен,
+//                 // но так безопаснее
+//                 dao.deleteAllSubItems()
+//                 dao.deleteAllItems()
+//                 dao.deleteAllCategorys()
+
+//                 dao.insertCategorys(container.listCategorys)
+//                 dao.insertItems(container.listItems)
+//                 dao.insertSubItems(container.listSubItems)
+//             }
+
+//             // 7. Восстанавливаем notebook
+//             sharedPrefRepository.saveTextNoteBook(container.notebookText)
+
+//             // 8. Меняем картинки только после успешного восстановления БД
+//             if (fileSystem.exists(currentImagesDir)) {
+//                 fileSystem.deleteRecursively(currentImagesDir)
+//             }
+//             fileSystem.createDirectories(currentImagesDir)
+
+//             if (fileSystem.exists(stagedImagesDir)) {
+//                 fileSystem.list(stagedImagesDir).forEach { imageFile ->
+//                     fileSystem.copy(imageFile, currentImagesDir / imageFile.name)
+//                 }
+//             }
+
+//             // 9. Пересоздаём alarm
+//             oldAlarms.forEach { item ->
+//                 alarm.deleteAlarm(item.id)
+//             }
+
+//             val newAlarms = dao.getUpdateItemRestartPhone(now)
+//             newAlarms.forEach { item ->
+//                 alarm.createAlarm(item)
+//             }
+
+//             true
+//         } catch (e: Exception) {
+//             e.printStackTrace()
+//             false
+//         } finally {
+//             fileSystem.deleteRecursively(unpackDir)
+//             fileSystem.deleteRecursively(stagedImagesDir)
+//             fileSystem.delete(tempZipFile, mustExist = false)
+//         }
+//     }
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
