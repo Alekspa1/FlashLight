@@ -111,10 +111,12 @@ val appModule = module {
 
     single<BackupManagerRepository> { BackupManagerImpl(
         get(),
-       //sharedPrefRepository = get(),
         get(),
         get(),
-        get()) }
+        get(),
+        alarm = get()
+    )
+    }
 
 }
 

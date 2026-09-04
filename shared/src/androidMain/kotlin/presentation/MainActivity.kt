@@ -46,9 +46,9 @@ class MainActivity : ComponentActivity() {
                 this@MainActivity.overridePendingTransition(0, 0)
             }
         }
-        val isColdStart = savedInstanceState == null
+
         setContent {
-            StartApp(isColdStart =  isColdStart)
+            StartApp()
         }
 
     }

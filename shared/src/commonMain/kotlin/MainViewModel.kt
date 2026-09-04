@@ -105,15 +105,16 @@ class MainViewModel(
 
     var stateTextNotebook by mutableStateOf(pref.loadTextNoteBook())
     var showDialog by  mutableStateOf(DialogState())
+
+    var firstStart by mutableStateOf(true)
+
     private var _toast = MutableSharedFlow<String>()
     var toast = _toast.asSharedFlow()
 
     private val _isBackupLoading = MutableStateFlow(false)
     val isBackupLoading: StateFlow<Boolean> = _isBackupLoading.asStateFlow()
 
-     private val _premiumState = MutableStateFlow(pref.getPremium())
-
-    //private val _premiumState = MutableStateFlow(true)
+    private val _premiumState = MutableStateFlow(pref.getPremium())
     val premiumState = _premiumState.asStateFlow()
 
     private val _updateState = MutableStateFlow(false)
@@ -450,39 +451,6 @@ fun openDialogByTaskId(taskId: Int) {
             initialValue = emptyList()
         )
 
-//val sortedItemsFlow: StateFlow<List<ItemWithSubItems>> = combine(
-//    db.getAll(),
-//    db.getAllSubItems(),
-//    sortType,
-//    categoryItemFlow
-//) { itemsList, allSubItems, sort, currentCategory ->
-//    val filteredList = itemsList.filter { it.category == currentCategory }
-//
-//    val sortedList = if (sort == SORT_STANDART) {
-//        filteredList.sortedWith(
-//            compareBy<Item> { if (it.changeAlarm) 0 else 1 }
-//                .thenBy { if (it.change) 1 else 0 }
-//                .thenBy { it.alarmTime }
-//                .thenBy { it.sort }
-//        )
-//    } else {
-//        filteredList.sortedBy { it.sort }
-//    }
-//
-//    sortedList.map { item ->
-//        ItemWithSubItems(
-//            item = item,
-//            subItems = allSubItems.filter { it.idTask == item.id }.sortedBy { it.sort }
-//        )
-//    }
-//}.flowOn(Dispatchers.Default)
-//    .stateIn(
-//        scope = viewModelScope,
-//        started = SharingStarted.WhileSubscribed(5000),
-//        initialValue = emptyList()
-//    )
-
-
             fun updateItemsOrder(newList: List<Item>) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
@@ -496,7 +464,6 @@ fun openDialogByTaskId(taskId: Int) {
         fun updateSubItemsOrder(newList: List<SubItem>) {
     viewModelScope.launch(Dispatchers.IO) {
         try {
-            // Room запишет обновленные индексы sort для подзадач в одну транзакцию
             db.insertSubItems(newList) 
         } catch (e: Exception) {
             e.printStackTrace()
@@ -563,48 +530,6 @@ fun openDialogByTaskId(taskId: Int) {
         }
     }
 
-
-    // fun insertItem(
-    //     item: Item,
-    //     subItems: List<SubItem>,
-    //     alarm: Boolean = false,
-    //     calendar: Boolean
-    // ) {
-    //     viewModelScope.launch(Dispatchers.IO) {
-    //         val finalItem = if (item.id == 0) {
-    //             val currentMinSort = db.getItemWithMinSort()?.sort ?: 0
-    //             item.copy(sort = currentMinSort - 1)
-    //         } else {
-    //             item
-    //         }
-
-    //         // 1. Сохраняем дело и получаем его реальный ID
-    //         val insertedId = db.insertItem(finalItem).toInt()
-
-    //         // 2. ЕСЛИ ЭТО РЕДАКТИРОВАНИЕ (item.id != 0), чистим старые подзадачи дела в БД
-    //         if (item.id != 0) {
-    //             db.deleteAllSubItemsForTask(item.id)
-    //         }
-
-    //         // 3. Перепривязываем подзадачи к ID дела (для новых дел это будет insertedId)
-    //         val updatedSubItems = subItems.map { subItem ->
-    //             // Важно: обнуляем id самой подзадачи, так как мы пишем их заново как новые строки
-    //             subItem.copy(id = 0, idTask = insertedId)
-    //         }
-
-    //         // 4. Записываем финальный список подзадач из диалога
-    //         db.insertSubItems(updatedSubItems)
-
-    //         withContext(Dispatchers.Main) {
-    //             if (alarm) {
-    //                 val savedItem = finalItem.copy(id = insertedId)
-    //                 permission(NOTIFICATION, savedItem, calendar)
-    //             } else {
-    //                 showDialog = DialogState()
-    //             }
-    //         }
-    //     }
-    // }
     fun deleteItem(item: Item){
         viewModelScope.launch(Dispatchers.IO) {
             db.delete(item)
@@ -731,7 +656,7 @@ fun openDialogByTaskId(taskId: Int) {
     }
 
     private suspend fun listItem(calendaZero: Long): List<Item> {
-        return db.getUpdateItemRestartPhone(calendaZero).filter { it.changeAlarm }
+        return db.getUpdateItemRestartPhone(calendaZero)
     }
 
     fun updateAlarm() {

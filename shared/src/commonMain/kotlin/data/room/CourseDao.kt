@@ -34,7 +34,7 @@ interface CourseDao {
     @Query("UPDATE Item SET category = :newName WHERE category = :oldName")
     suspend fun updateAllitemInCategory(newName: String, oldName: String)
 
-    @Query("SELECT * FROM Item WHERE alarmTime > :time ")
+    @Query("SELECT * FROM Item WHERE alarmTime > :time and changeAlarm = 1 ")
     suspend fun getUpdateItemRestartPhone(time: Long): List<Item>
 
     @Query("SELECT * FROM Item")

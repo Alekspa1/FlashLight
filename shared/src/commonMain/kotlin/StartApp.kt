@@ -107,15 +107,14 @@ import presentation.theme.ThemeVolcanic
 import kotlin.time.Clock
 
 @Composable
-fun StartApp(viewModel: MainViewModel = koinViewModel(),isColdStart: Boolean = false) {
+fun StartApp(viewModel: MainViewModel = koinViewModel()) {
 
 
     val theme = viewModel.themeState
     val size = viewModel.sizeState
     val premiumState by viewModel.premiumState.collectAsStateWithLifecycle()
     val navController = rememberNavController()
-    var showSplash by remember { mutableStateOf(isColdStart) }
-
+    val firstStart = viewModel.firstStart
 MaterialTheme(
     colorScheme = when (theme) {
         // Оставляем Неоновую и Ядовитую вместе — у них акценты совпадают
@@ -296,8 +295,8 @@ MaterialTheme(
                                 }
                             }
                         )
-                        if (showSplash) {
-                            SplashScreen(onAnimationDone = { showSplash = false })
+                        if (firstStart) {
+                            SplashScreen(onAnimationDone = { viewModel.firstStart = false })
                         }
 
 

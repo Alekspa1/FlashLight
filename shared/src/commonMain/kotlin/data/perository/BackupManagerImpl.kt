@@ -1,6 +1,5 @@
 package data.perository
 
-import data.room.CourseDao
 import data.room.myDataBase
 import domain.model.AppJsonBackup
 import domain.repostirory.BackupManagerRepository
@@ -16,13 +15,16 @@ import okio.FileSystem
 import okio.Path.Companion.toPath
 import okio.SYSTEM
 import androidx.room.useWriterConnection
+import domain.repostirory.AlarmRepository
+import kotlin.time.Clock
 
 class BackupManagerImpl(
     private val db: myDataBase,                             // Прямая ссылка на вашу Room БД
     private val sharedPrefRepository: SharedPrefRepository, // Репозиторий блокнота
     private val pathProvider: PathProviderRepostitory,      // Провайдер путей
     private val imageRepository: SaveDeleteImageRepositpry, // Репозиторий картинок
-    private val fileSystem: FileSystem = FileSystem.SYSTEM
+    private val fileSystem: FileSystem = FileSystem.SYSTEM,
+    private val alarm: AlarmRepository,
 ) : BackupManagerRepository {
 
     private val json = Json { prettyPrint = true; ignoreUnknownKeys = true }
@@ -151,11 +153,14 @@ class BackupManagerImpl(
                 val jsonString = fileSystem.read(jsonFile) { readUtf8() }
                 val container = json.decodeFromString<AppJsonBackup>(jsonString)
 
-                // 4. СИНХРОННО восстанавливаем текст блокнота
-
+                val listAlarmTrueOld = db.CourseDao().getUpdateItemRestartPhone(currentTime())
+                listAlarmTrueOld.forEach { item ->
+                    alarm.deleteAlarm(item.id)
+                }
 
                 // 5. Записываем новые данные в ОДНОЙ транзакции Room
                 db.useWriterConnection {
+
                     db.CourseDao().deleteAllCategorys()
                     db.CourseDao().deleteAllItems()
                     db.CourseDao().deleteAllSubItems()
@@ -164,8 +169,14 @@ class BackupManagerImpl(
                     db.CourseDao().insertItems(container.listItems)
                     db.CourseDao().insertSubItems(container.listSubItems)
                 }
+
+                val listAlarmTrueNew = db.CourseDao().getUpdateItemRestartPhone(currentTime())
+
+                listAlarmTrueNew.forEach { item ->
+                    alarm.createAlarm(item)
+                }
+
                 sharedPrefRepository.saveTextNoteBook(container.notebookText)
-                println(container.notebookText)
 
                 // 6. Очищаем старую папку картинок перед накатом новых
                 val currentImagesDir = "$internalPath/images".toPath()
@@ -197,6 +208,13 @@ class BackupManagerImpl(
             }
         }
     }
+}
+
+private fun currentTime():Long {
+    val nowInstant = Clock.System.now()
+    val currentMillis: Long = nowInstant.toEpochMilliseconds()
+    return currentMillis
+
 }
 
 expect fun zipDirectory(sourceDir: String, targetZipFile: String)
