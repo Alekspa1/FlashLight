@@ -31,6 +31,6 @@ class WarmupActivity : AppCompatActivity() {
                 @Suppress("DEPRECATION")
                 overridePendingTransition(0, 0)
             }
-        }, 350)
+        }, 500)
     }
 }
