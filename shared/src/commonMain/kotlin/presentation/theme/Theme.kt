@@ -193,12 +193,12 @@ data class ThemeStorm(
     override val textDesc: Color = Color(0xFFB3C8FF),           // Светло‑голубой для описаний (как отсвет молнии)
 
     override val cardItemBorderAlarm: Color = Color(0xFF7B21FF),
-    override val cardItemBorderTrue: Color = Color(0x807B21FF),
-    override val cardItemBorderFalse: Color = Color(0x99555555),
+    override val cardItemBorderTrue: Color = Color(0x8000FF87),
+    override val cardItemBorderFalse: Color = Color(0x99D50000),
 
     override val cardItemAlarm: Color = Color(0xEC1A1A28),      // Тёмно‑фиолетовый фон карточки с тревожным оттенком
-    override val cardItemTrue: Color = Color(0xEC1A1A28),
-    override val cardItemFalse: Color = Color(0xF21A1A28),
+    override val cardItemTrue: Color = Color(0xEC09140E),
+    override val cardItemFalse: Color = Color(0xF23D0101),
 
     override val textAlarm: Color = Color(0xFFFFD700),          // Золотой для времени — как вспышка перед разрядом (альтернатива: оставить белым)
     override val chekBoxOff: ImageVector = Icons.Default.CheckBoxOutlineBlank,
