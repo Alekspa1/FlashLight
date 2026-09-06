@@ -220,8 +220,8 @@ data class ThemeStorm(
     override val iconDrawerUpdateOn: ImageVector = Icons.Default.Upgrade,
     override val iconDrawerSettigs: ImageVector = Icons.Default.Settings,
     override val backgroundDialog: Color = Color(0xFF12121E),   // Тёмный фон для диалогов
-    override val backgroundStart: DrawableResource = Res.drawable.background_storm, // Твой фон с молнией
-    override val backgroundDrawer: DrawableResource = Res.drawable.background_drawer_storm,
+    override val backgroundStart: DrawableResource = Res.drawable.background_groza, // Твой фон с молнией
+    override val backgroundDrawer: DrawableResource = Res.drawable.background_groza,
     override val borderCardMenuItem: Color = Color(0x807B21FF),
     override val cardMenuItem: Color = Color(0xE61A1A28),        // Тёмно‑фиолетовый фон пунктов меню
     override val colorCalendarDaySelect: Color = Color(0xFF7B21FF), // Фиолетовый для выбранного дня
