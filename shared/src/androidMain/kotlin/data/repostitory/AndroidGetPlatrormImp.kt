@@ -14,6 +14,8 @@ import domain.repostirory.GetPlatrormRepository
 import ru.rustore.sdk.appupdate.manager.factory.RuStoreAppUpdateManagerFactory
 import ru.rustore.sdk.appupdate.model.UpdateAvailability
 import kotlin.collections.set
+import android.content.Intent
+import CommonConst.RUSTORE
 
 class AndroidGetPlatrormImp(private val contentResolver: ContentResolver,private val context: Context) : GetPlatrormRepository {
 
@@ -89,4 +91,9 @@ class AndroidGetPlatrormImp(private val contentResolver: ContentResolver,private
         }
 
     }
+  override  fun openUpdateApp() = startActivity(Intent(Intent.ACTION_VIEW, RUSTORE.toUri()))
+
+
+
+    
 }
