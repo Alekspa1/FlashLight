@@ -716,6 +716,9 @@ fun openDialogByTaskId(taskId: Int) {
     }
 
 
+    fun openUpdateApp() = platform.openUpdateApp()
+
+
 
 
     private fun currentTime():Long {
