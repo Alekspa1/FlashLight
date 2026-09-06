@@ -205,6 +205,7 @@ MaterialTheme(
                     onSave = { listCategory, name ->
                         if (listCategory == null) viewModel.insertCategory(name)
                         else viewModel.upgrateListCategory(listCategory, name)
+                        viewModel.updateCategory(name)
                         viewModel.showDialog = DialogState()
                     },
                     onCancel = { viewModel.showDialog = DialogState() })
@@ -275,7 +276,7 @@ MaterialTheme(
                             onClick = { click ->
                                 when (click) {
                                     PREMIUM_CLICK -> { navController.navigate("premium_screen") }
-                                    UPGRATE_CLICK -> {}
+                                    UPGRATE_CLICK -> {viewModel.openUpdateApp()}
                                     SETTINGS_CLICK -> {
                                         navController.navigate("settings_screen")
 
