@@ -29,8 +29,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        handleSharedIntent(intent)
-        handleNotificationIntent(intent)
+
         permissionImp.initLauncher(this@MainActivity)
         filePickerImp.initLauncher(this@MainActivity)
         if (savedInstanceState == null) {
@@ -46,11 +45,11 @@ class MainActivity : ComponentActivity() {
                 this@MainActivity.overridePendingTransition(0, 0)
             }
         }
-
         setContent {
             StartApp()
         }
-
+        handleSharedIntent(intent)
+        handleNotificationIntent(intent)
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -58,6 +57,7 @@ class MainActivity : ComponentActivity() {
         handleSharedIntent(intent)
         handleNotificationIntent(intent)
     }
+
 
     override fun onDestroy() {
         super.onDestroy()

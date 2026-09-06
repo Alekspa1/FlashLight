@@ -1,6 +1,7 @@
 import CommonConst.DELETE_DIALOG_CATEGORY
 import CommonConst.INSERT_DIALOG_CATEGORY
 import CommonConst.INSERT_DIALOG_ITEM
+import CommonConst.PLATFORM_ANDROID
 import CommonConst.PREMIUM_CLICK
 import CommonConst.SETTINGS_CLICK
 import CommonConst.SHARED_ClICK
@@ -295,7 +296,7 @@ MaterialTheme(
                                 }
                             }
                         )
-                        if (firstStart) {
+                        if (firstStart && viewModel.getPlatform != PLATFORM_ANDROID) {
                             SplashScreen(onAnimationDone = { viewModel.firstStart = false })
                         }
 

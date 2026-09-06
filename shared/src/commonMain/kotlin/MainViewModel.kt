@@ -585,7 +585,6 @@ fun openDialogByTaskId(taskId: Int) {
             val isChekedPermission = permission.isChekedPermission(permissionName)
 
             if (isChekedPermission) {
-                println(isChekedPermission)
 
                 when (permissionName) {
                     // Для батареи диалоги не нужны — просто уведомляем пользователя, что всё уже работает

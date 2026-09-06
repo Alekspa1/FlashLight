@@ -4,6 +4,7 @@ import CommonConst.ALARM_SETTINGS
 import CommonConst.APP_SETTINGS
 import CommonConst.BATTERY_OPTIMIZATION
 import CommonConst.DONATE
+import CommonConst.PLATFORM_ANDROID
 import CommonConst.SIZE_LARGE
 import CommonConst.SIZE_SETTINGS
 import CommonConst.SIZE_SMALL
@@ -244,7 +245,7 @@ fun SettingsScreen(
                         else viewModel.sendMessage("Доступно в PREMIUM версии")
 
                     }
-                    if (viewModel.getPlatform == "Android") {
+                    if (viewModel.getPlatform == PLATFORM_ANDROID) {
                         SettingItem(
                             "Звук будильника",
                             theme,
@@ -283,7 +284,7 @@ fun SettingsScreen(
                         theme.borderCardMenuItem
                     ) { uriHandler.openUri(DONATE) }
 
-                    if (viewModel.getPlatform == "Android") {
+                    if (viewModel.getPlatform == PLATFORM_ANDROID) {
                         // --- СЕКЦИЯ 2: РАЗРЕШЕНИЯ (tv_settings_permissions) ---
                         Text(
                             text = "Разрешения",

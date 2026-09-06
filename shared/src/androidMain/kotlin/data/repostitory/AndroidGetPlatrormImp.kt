@@ -1,5 +1,6 @@
 package data.repostitory
 
+import CommonConst.PLATFORM_ANDROID
 import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Context
@@ -16,7 +17,7 @@ import kotlin.collections.set
 
 class AndroidGetPlatrormImp(private val contentResolver: ContentResolver,private val context: Context) : GetPlatrormRepository {
 
-    override fun getPlatform(): String = "Android"
+    override fun getPlatform(): String = PLATFORM_ANDROID
 
     override suspend fun getAllSound(): Map<String, String> {
         // Инициализируем LinkedHashMap, чтобы сохранить порядок сортировки из SQL-запроса

@@ -1,6 +1,7 @@
 package data.perository
 
 import CommonConst.KEY_NOTE_BOOK
+import CommonConst.PLATFORM_DESKTOP
 import CommonConst.PREMIUM_KEY
 
 import com.russhwolf.settings.Settings
@@ -10,7 +11,7 @@ import domain.repostirory.SharedPrefRepository
 class MultiplatrormSettings(private val settings: Settings, private val platform : GetPlatrormRepository) : SharedPrefRepository{
 
   
-  private val greetings = if(platform.getPlatform() == "Desktop") "Приветсвую дорогой друг"
+  private val greetings = if(platform.getPlatform() == PLATFORM_DESKTOP) "Приветсвую дорогой друг"
     else
 
         "Дорогие пользователи! ❤️\n\nИз-за агрессивных систем энергосбережения на " +

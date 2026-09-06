@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
 import data.room.model.Item
 import data.room.model.ListCategory
@@ -72,6 +73,21 @@ interface CourseDao {
 
     @Query("DELETE FROM Item")
     suspend fun deleteAllItems()
+
+    @Transaction
+    suspend fun restoreBackup(
+        categories: List<ListCategory>,
+        items: List<Item>,
+        subItems: List<SubItem>
+    ) {
+        deleteAllSubItems()
+        deleteAllItems()
+        deleteAllCategorys()
+
+        insertCategorys(categories)
+        insertItems(items)
+        insertSubItems(subItems)
+    }
 
 
     //MENU

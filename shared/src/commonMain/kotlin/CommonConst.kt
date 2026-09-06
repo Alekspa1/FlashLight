@@ -60,12 +60,10 @@ object CommonConst {
     val ONE_YEAR = "premium_version_podpiska_one_year_flash_light"
     val FOREVER = "premium_version_flash_light"
 
-//    val PURCHASE_LIST: List<ProductId> = listOf(
-//        FOREVER,
-//        ONE_MONTH,
-//        SIX_MONTH,
-//        ONE_YEAR,
-//    )
+    const val PLATFORM_ANDROID = "PLATFORM_ANDROID"
+    const val PLATFORM_DESKTOP = "PLATFORM_DESKTOP"
+    const val PLATFORM_IOS = "PLATFORM_IOS"
+
     const val NOT_AUTHORIZED = "RuStore User Not Authorized"
    // const val DONATE = "https://www.tinkoff.ru/rm/r_yDLrspQXuU.pghPicassj/iZZa112656"
     const val DONATE = "https://finance.ozon.ru/apps/sbp/ozonbankpay/019fc89f-c6be-7de0-87cd-7942f34670ad"

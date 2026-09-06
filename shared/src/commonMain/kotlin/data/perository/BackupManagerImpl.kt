@@ -128,86 +128,174 @@ class BackupManagerImpl(
     // ==========================================
     // ИМПОРТ (ВОССТАНОВЛЕНИЕ)
     // ==========================================
-    override suspend fun loadDb(sourcePlatformFile: PlatformFile): Boolean {
-        return withContext(Dispatchers.IO) {
-            val internalPath = pathProvider.getInternalAppPath()
-            val tempZipFile = "$internalPath/temp_import.zip".toPath()
-            val unpackDir = "$internalPath/temp_unpacked".toPath()
+//    override suspend fun loadDb(sourcePlatformFile: PlatformFile): Boolean {
+//        return withContext(Dispatchers.IO) {
+//            val internalPath = pathProvider.getInternalAppPath()
+//            val tempZipFile = "$internalPath/temp_import.zip".toPath()
+//            val unpackDir = "$internalPath/temp_unpacked".toPath()
+//
+//            try {
+//                // ВОТ СЮДА В САМОЕ НАЧАЛО ВСТАВЛЯЕМ ЧТЕНИЕ ЧЕРЕЗ EXPECT-ФУНКЦИЮ!
+//                fileSystem.delete(tempZipFile, mustExist = false)
+//
+//                // Нативно выкачиваем файл из шторки во внутренний кэш приложения
+//                val copied = readZipFromPlatformFile(sourcePlatformFile, tempZipFile.toString())
+//                if (!copied) return@withContext false
+//
+//                // 2. Распаковываем этот ZIP
+//                fileSystem.deleteRecursively(unpackDir)
+//                unzipDirectory(tempZipFile.toString(), unpackDir.toString())
+//
+//                // 3. Находим и читаем наш общий файл backup_data.json
+//                val jsonFile = unpackDir / "backup_data.json"
+//                if (!fileSystem.exists(jsonFile)) return@withContext false
+//
+//                val jsonString = fileSystem.read(jsonFile) { readUtf8() }
+//                val container = json.decodeFromString<AppJsonBackup>(jsonString)
+//
+//                val listAlarmTrueOld = db.CourseDao().getUpdateItemRestartPhone(currentTime())
+//                listAlarmTrueOld.forEach { item ->
+//                    alarm.deleteAlarm(item.id)
+//                }
+//
+//                // 5. Записываем новые данные в ОДНОЙ транзакции Room
+//                db.useWriterConnection {
+//
+//                    db.CourseDao().deleteAllCategorys()
+//                    db.CourseDao().deleteAllItems()
+//                    db.CourseDao().deleteAllSubItems()
+//
+//                    db.CourseDao().insertCategorys(container.listCategorys)
+//                    db.CourseDao().insertItems(container.listItems)
+//                    db.CourseDao().insertSubItems(container.listSubItems)
+//                }
+//
+//                val listAlarmTrueNew = db.CourseDao().getUpdateItemRestartPhone(currentTime())
+//
+//                listAlarmTrueNew.forEach { item ->
+//                    alarm.createAlarm(item)
+//                }
+//
+//                sharedPrefRepository.saveTextNoteBook(container.notebookText)
+//
+//                // 6. Очищаем старую папку картинок перед накатом новых
+//                val currentImagesDir = "$internalPath/images".toPath()
+//                val newImagesDir = unpackDir / "images"
+//
+//                if (fileSystem.exists(currentImagesDir)) {
+//                    fileSystem.list(currentImagesDir).forEach { file ->
+//                        imageRepository.delete(file.name)
+//                    }
+//                }
+//
+//                // 7. Переносим новые картинки в постоянную папку
+//                if (fileSystem.exists(newImagesDir)) {
+//                    fileSystem.createDirectories(currentImagesDir)
+//                    fileSystem.list(newImagesDir).forEach { file ->
+//                        fileSystem.copy(file, currentImagesDir / file.name)
+//                    }
+//                }
+//
+//                // Полностью очищаем временные файлы
+//                fileSystem.deleteRecursively(unpackDir)
+//                fileSystem.delete(tempZipFile, mustExist = false)
+//                true
+//            } catch (e: Exception) {
+//                e.printStackTrace()
+//                fileSystem.deleteRecursively(unpackDir)
+//                fileSystem.delete(tempZipFile, mustExist = false)
+//                false
+//            }
+//        }
+//    }
 
-            try {
-                // ВОТ СЮДА В САМОЕ НАЧАЛО ВСТАВЛЯЕМ ЧТЕНИЕ ЧЕРЕЗ EXPECT-ФУНКЦИЮ!
-                fileSystem.delete(tempZipFile, mustExist = false)
+     override suspend fun loadDb(sourcePlatformFile: PlatformFile): Boolean {
+     return withContext(Dispatchers.IO) {
+         val internalPath = pathProvider.getInternalAppPath()
+         val tempZipFile = "$internalPath/temp_import.zip".toPath()
+         val unpackDir = "$internalPath/temp_unpacked".toPath()
+         val stagedImagesDir = "$internalPath/temp_restored_images".toPath()
+         val currentImagesDir = "$internalPath/images".toPath()
+         val dao = db.CourseDao()
+         val now = currentTime()
 
-                // Нативно выкачиваем файл из шторки во внутренний кэш приложения
-                val copied = readZipFromPlatformFile(sourcePlatformFile, tempZipFile.toString())
-                if (!copied) return@withContext false
+         try {
+             // Чистим мусор перед стартом
+             fileSystem.delete(tempZipFile, mustExist = false)
+             fileSystem.deleteRecursively(unpackDir)
+             fileSystem.deleteRecursively(stagedImagesDir)
 
-                // 2. Распаковываем этот ZIP
-                fileSystem.deleteRecursively(unpackDir)
-                unzipDirectory(tempZipFile.toString(), unpackDir.toString())
+             // 1. Копируем архив из платформенного файла во временный zip
+             val copied = readZipFromPlatformFile(sourcePlatformFile, tempZipFile.toString())
+             if (!copied) return@withContext false
 
-                // 3. Находим и читаем наш общий файл backup_data.json
-                val jsonFile = unpackDir / "backup_data.json"
-                if (!fileSystem.exists(jsonFile)) return@withContext false
+             // 2. Распаковываем архив
+             unzipDirectory(tempZipFile.toString(), unpackDir.toString())
 
-                val jsonString = fileSystem.read(jsonFile) { readUtf8() }
-                val container = json.decodeFromString<AppJsonBackup>(jsonString)
+             // 3. Читаем json
+             val jsonFile = unpackDir / "backup_data.json"
+             if (!fileSystem.exists(jsonFile)) return@withContext false
 
-                val listAlarmTrueOld = db.CourseDao().getUpdateItemRestartPhone(currentTime())
-                listAlarmTrueOld.forEach { item ->
-                    alarm.deleteAlarm(item.id)
-                }
+             val jsonString = fileSystem.read(jsonFile) { readUtf8() }
+             val container = json.decodeFromString<AppJsonBackup>(jsonString)
 
-                // 5. Записываем новые данные в ОДНОЙ транзакции Room
-                db.useWriterConnection {
+             // 4. Сохраняем список старых alarm до перезаписи БД
+             val oldAlarms = dao.getUpdateItemRestartPhone(now)
 
-                    db.CourseDao().deleteAllCategorys()
-                    db.CourseDao().deleteAllItems()
-                    db.CourseDao().deleteAllSubItems()
+             // 5. Готовим новые картинки во временную папку
+             val newImagesDir = unpackDir / "images"
+             if (fileSystem.exists(newImagesDir)) {
+                 fileSystem.createDirectories(stagedImagesDir)
+                 fileSystem.list(newImagesDir).forEach { imageFile ->
+                     fileSystem.copy(imageFile, stagedImagesDir / imageFile.name)
+                 }
+             }
 
-                    db.CourseDao().insertCategorys(container.listCategorys)
-                    db.CourseDao().insertItems(container.listItems)
-                    db.CourseDao().insertSubItems(container.listSubItems)
-                }
+             // 6. Восстанавливаем БД атомарно
+             dao.restoreBackup(
+                 container.listCategorys,
+                 container.listItems,
+                 container.listSubItems
+             )
 
-                val listAlarmTrueNew = db.CourseDao().getUpdateItemRestartPhone(currentTime())
+             // 7. Восстанавливаем notebook
+             sharedPrefRepository.saveTextNoteBook(container.notebookText)
 
-                listAlarmTrueNew.forEach { item ->
-                    alarm.createAlarm(item)
-                }
+             // 8. Меняем картинки только после успешного восстановления БД
+             if (fileSystem.exists(currentImagesDir)) {
+                 fileSystem.deleteRecursively(currentImagesDir)
+             }
+             fileSystem.createDirectories(currentImagesDir)
 
-                sharedPrefRepository.saveTextNoteBook(container.notebookText)
+             if (fileSystem.exists(stagedImagesDir)) {
+                 fileSystem.list(stagedImagesDir).forEach { imageFile ->
+                     fileSystem.copy(imageFile, currentImagesDir / imageFile.name)
+                 }
+             }
 
-                // 6. Очищаем старую папку картинок перед накатом новых
-                val currentImagesDir = "$internalPath/images".toPath()
-                val newImagesDir = unpackDir / "images"
+             // 9. Пересоздаём alarm
+             oldAlarms.forEach { item ->
+                 alarm.deleteAlarm(item.id)
+             }
 
-                if (fileSystem.exists(currentImagesDir)) {
-                    fileSystem.list(currentImagesDir).forEach { file ->
-                        imageRepository.delete(file.name)
-                    }
-                }
+             val newAlarms = dao.getUpdateItemRestartPhone(now)
+             newAlarms.forEach { item ->
+                 alarm.createAlarm(item)
+             }
 
-                // 7. Переносим новые картинки в постоянную папку
-                if (fileSystem.exists(newImagesDir)) {
-                    fileSystem.createDirectories(currentImagesDir)
-                    fileSystem.list(newImagesDir).forEach { file ->
-                        fileSystem.copy(file, currentImagesDir / file.name)
-                    }
-                }
+             true
+         } catch (e: Exception) {
+             e.printStackTrace()
+             false
+         } finally {
+             fileSystem.deleteRecursively(unpackDir)
+             fileSystem.deleteRecursively(stagedImagesDir)
+             fileSystem.delete(tempZipFile, mustExist = false)
+         }
+     }
+ }
 
-                // Полностью очищаем временные файлы
-                fileSystem.deleteRecursively(unpackDir)
-                fileSystem.delete(tempZipFile, mustExist = false)
-                true
-            } catch (e: Exception) {
-                e.printStackTrace()
-                fileSystem.deleteRecursively(unpackDir)
-                fileSystem.delete(tempZipFile, mustExist = false)
-                false
-            }
-        }
-    }
+
 }
 
 private fun currentTime():Long {
