@@ -716,7 +716,9 @@ fun openDialogByTaskId(taskId: Int) {
     }
 
 
-    fun openUpdateApp() = platform.openUpdateApp()
+    fun openUpdateApp(){
+    platform.openUpdateApp(){errorMessage-> sendMessage(errorMessage) }    
+    }  
 
 
 
