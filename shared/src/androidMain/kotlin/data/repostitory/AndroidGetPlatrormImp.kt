@@ -16,6 +16,7 @@ import ru.rustore.sdk.appupdate.model.UpdateAvailability
 import kotlin.collections.set
 import android.content.Intent
 import CommonConst.RUSTORE
+import androidx.core.net.toUri
 
 class AndroidGetPlatrormImp(private val contentResolver: ContentResolver,private val context: Context) : GetPlatrormRepository {
 
@@ -91,7 +92,20 @@ class AndroidGetPlatrormImp(private val contentResolver: ContentResolver,private
         }
 
     }
-  override  fun openUpdateApp() = startActivity(Intent(Intent.ACTION_VIEW, RUSTORE.toUri()))
+  override  fun openUpdateApp(errorMessage: (String) -> Unit){
+      try{
+        val intent = Intent(Intent.ACTION_VIEW, RUSTORE.toUri()).apply{
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)   
+      }
+      context.startActivity(intent)    
+      }
+      catch(e: Exception){
+      errorMessage("Не удалось открыть RUSTORE")    
+      }
+
+  }
+    
+    
 
 
 
