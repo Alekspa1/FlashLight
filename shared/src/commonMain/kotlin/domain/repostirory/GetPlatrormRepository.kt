@@ -5,5 +5,5 @@ interface GetPlatrormRepository {
     fun getPlatform() : String
     suspend fun getAllSound () : Map<String, String>
     fun updateApp(result : (Boolean) -> Unit)
-    fun openUpdateApp()
+    fun openUpdateApp(errorMessage: (String) -> Unit)
 }
