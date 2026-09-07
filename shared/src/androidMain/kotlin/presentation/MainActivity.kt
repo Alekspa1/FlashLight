@@ -32,19 +32,19 @@ class MainActivity : ComponentActivity() {
 
         permissionImp.initLauncher(this@MainActivity)
         filePickerImp.initLauncher(this@MainActivity)
-        // if (savedInstanceState == null) {
-        //     val intent = Intent(this@MainActivity, WarmupActivity::class.java).apply {
-        //         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        //     }
-        //     this@MainActivity.startActivity(intent)
+        if (savedInstanceState == null) {
+            val intent = Intent(this@MainActivity, WarmupActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            this@MainActivity.startActivity(intent)
 
-        //     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-        //         this@MainActivity.overrideActivityTransition(OVERRIDE_TRANSITION_OPEN, 0, 0)
-        //     } else {
-        //         @Suppress("DEPRECATION")
-        //         this@MainActivity.overridePendingTransition(0, 0)
-        //     }
-        // }
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                this@MainActivity.overrideActivityTransition(OVERRIDE_TRANSITION_OPEN, 0, 0)
+            } else {
+                @Suppress("DEPRECATION")
+                this@MainActivity.overridePendingTransition(0, 0)
+            }
+        }
         setContent {
             StartApp()
         }
