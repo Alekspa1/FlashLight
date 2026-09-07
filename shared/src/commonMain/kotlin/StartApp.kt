@@ -175,12 +175,6 @@ MaterialTheme(
 
         viewModel.updateAlarm()
 
-        launch{
-            delay(5000)
-            viewModel.isCheckPremiumWithBuy()
-        }
-
-
     }
         when (viewModel.showDialog.isWho) {
             DELETE_DIALOG_CATEGORY -> {
