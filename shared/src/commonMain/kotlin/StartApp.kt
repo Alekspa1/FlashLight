@@ -119,7 +119,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
 MaterialTheme(
     colorScheme = when (theme) {
         // Оставляем Неоновую и Ядовитую вместе — у них акценты совпадают
-        is ThemePoison, is ThemeNeon, is ThemeVolcanic -> darkColorScheme(
+        is ThemePoison, is ThemeNeon, is ThemeVolcanic, is ThemeStorm -> darkColorScheme(
             primary = theme.textColor, // основной цвет
             surfaceContainerHigh = theme.backgroundDialog,
             primaryContainer = Color(0xFF616161), // цвет в диалоге выбора времени часы(если выделены)
@@ -128,14 +128,6 @@ MaterialTheme(
             onSurfaceVariant = theme.textColor,
 
 
-        )
-
-        is ThemeStorm -> darkColorScheme(
-            primary = theme.textColor,
-            surface = theme.backgroundDialog,
-            onSurface = theme.textColor,
-            surfaceContainerHigh = theme.backgroundDialog, 
-            onSurfaceVariant = Color(0xFFE040FB) // Тот самый неоново-пурпурный цвет светящегося леса!
         )
 
         is ThemeMarble, is ThemeZabor, is ThemePlatinum -> lightColorScheme(
