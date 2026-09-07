@@ -127,7 +127,7 @@ class MainViewModel(
         loadSounds()
         isUpdateApp()
         loadProduct()
-        isCheckPremiumWithBuy()
+        //isCheckPremiumWithBuy()
 
     }
 
